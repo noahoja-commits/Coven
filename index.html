@@ -6,6 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#0A0A0A" />
     <title>Coven</title>
+    <!-- TEMP: mobile debug console + error display. Remove after debugging. -->
+    <script>
+      window.addEventListener('error', function(e) {
+        var div = document.createElement('div');
+        div.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#5B0F1A;color:#F5F1E8;padding:12px;font:12px/1.4 monospace;z-index:99999;white-space:pre-wrap;word-break:break-word;';
+        div.textContent = 'ERROR: ' + (e.message || 'unknown') + '\n@ ' + (e.filename || '') + ':' + (e.lineno || '?') + '\n\n' + (e.error && e.error.stack ? e.error.stack : '');
+        document.body.appendChild(div);
+      });
+      window.addEventListener('unhandledrejection', function(e) {
+        var div = document.createElement('div');
+        div.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#5B0F1A;color:#F5F1E8;padding:12px;font:12px/1.4 monospace;z-index:99999;white-space:pre-wrap;word-break:break-word;';
+        div.textContent = 'PROMISE REJECTION: ' + (e.reason && e.reason.message ? e.reason.message : e.reason);
+        document.body.appendChild(div);
+      });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
   </head>
   <body class="bg-black">
     <div id="root"></div>
