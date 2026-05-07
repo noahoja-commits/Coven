@@ -1,0 +1,33 @@
+export const MAP_PINS = [
+  { id: 'm1', kind: 'party', x: 32, y: 28, name: 'SPECTRES vol. IV', meta: 'sat 11pm · 184 going' },
+  { id: 'm2', kind: 'gig', x: 58, y: 22, name: 'Funeral Mass III', meta: 'sun 9pm · 92 going' },
+  { id: 'm3', kind: 'smoke', x: 44, y: 48, name: 'Roof @ Wyckoff', meta: 'rotation tonight · 8pm' },
+  { id: 'm4', kind: 'bar', x: 71, y: 55, name: 'The Coffin Club', meta: 'open till 4am' },
+  { id: 'm5', kind: 'fashion', x: 22, y: 62, name: 'Vermillion Vintage', meta: 'new drop sat 2pm' },
+  { id: 'm6', kind: 'party', x: 65, y: 75, name: 'CATHEDRAL', meta: 'fri 11pm · 312 going' },
+  { id: 'm7', kind: 'smoke', x: 78, y: 38, name: 'Maria Hernandez Pk', meta: '4 there now' },
+  { id: 'm8', kind: 'gig', x: 38, y: 80, name: 'velvet hours', meta: 'sat 10pm · 128 going' },
+  { id: 'm9',  kind: 'prayer', x: 52, y: 42, name: 'St. John the Divine', meta: 'open · vespers 6pm' },
+  { id: 'm10', kind: 'prayer', x: 28, y: 70, name: 'Old St. Patrick\u2019s', meta: 'mass 8am · candles always' },
+  { id: 'm11', kind: 'prayer', x: 82, y: 28, name: 'Green-Wood Chapel', meta: 'gates close at dusk' },
+  { id: 'm12', kind: 'ritual', x: 18, y: 35, name: 'Prospect grove', meta: 'new moon circle · sat 9pm' },
+  { id: 'm13', kind: 'ritual', x: 60, y: 60, name: 'Crescent Hill', meta: 'open · bring an offering' },
+  { id: 'm14', kind: 'ritual', x: 88, y: 70, name: 'Rooftop circle, Bushwick', meta: 'fri midnight · 7 invited' },
+  { id: 'm15', kind: 'shop', x: 48, y: 18, name: 'Cathedral Co.', meta: 'goth menswear · open' },
+  { id: 'm16', kind: 'shop', x: 25, y: 55, name: 'Procell Vintage', meta: 'archive · by appt' },
+  { id: 'm17', kind: 'tattoo', x: 70, y: 65, name: 'Black Iris Tattoo', meta: 'blackwork · booking open' },
+  { id: 'm18', kind: 'tattoo', x: 35, y: 38, name: 'Bone & Ink Studio', meta: 'occult · walk-ins fri' },
+];
+
+export const PIN_KIND = {
+  party:   { label: 'party',   color: '#8B0000', emoji: '◈' },
+  gig:     { label: 'show',    color: '#7B2CBF', emoji: '♪' },
+  smoke:   { label: 'smoke',   color: '#6B6B6B', emoji: '∽' },
+  bar:     { label: 'bar',     color: '#B45309', emoji: '◐' },
+  fashion: { label: 'fits',    color: '#A8A29E', emoji: '✕' },
+  prayer:  { label: 'prayer',  color: '#C9A961', emoji: '✟' },
+  ritual:  { label: 'ritual',  color: '#6B0F8C', emoji: '⛧' },
+  shop:    { label: 'shop',    color: '#7B5C3A', emoji: '☩' },
+  tattoo:  { label: 'tattoo',  color: '#3A6B5C', emoji: '✽' },
+  festival: { label: 'fest',   color: '#C9A961', emoji: '✦' },
+};

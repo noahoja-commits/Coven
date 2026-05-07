@@ -1,0 +1,57 @@
+import { Plus, MessageCircle, Bell } from 'lucide-react';
+import { F } from '../../styles/fonts';
+
+export function Header({ tab, onDMs, onCompose, onLibrary, onNotifications, communityName, unreadNotifications = 0, parchment = false }) {
+  const titles = {
+    home: null,
+    communities: null,
+    map: 'PROXIMITY',
+    events: null,
+    profile: null,
+    fashion: null,
+  };
+
+  const textColor = parchment ? 'text-[#2A1808]' : 'text-[#F5F1E8]';
+  const accentColor = parchment ? 'text-[#5B0F1A]' : 'text-[#A8A29E]';
+  const bgColor = parchment ? 'bg-[#EDE0C2]/85' : 'bg-[#0A0A0A]/85';
+  const borderColor = parchment ? 'border-[#5B0F1A]/20' : 'border-[#1A1A1A]';
+
+  return (
+    <div className={`absolute top-0 inset-x-0 z-20 ${bgColor} backdrop-blur-md border-b ${borderColor}`}>
+      <div className="px-4 h-[60px] flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {communityName ? (
+            <span className={`${textColor} text-base`} style={F.display}>{communityName}</span>
+          ) : tab === 'home' ? (
+            <button onClick={onLibrary}
+              className={`${textColor} text-3xl leading-none hover:text-[#C9A961] transition-colors`}
+              style={F.brand} title="The Coven">Coven</button>
+          ) : (
+            <button onClick={onLibrary}
+              className={`${textColor} text-base tracking-[0.3em] hover:text-[#C9A961] transition-colors`}
+              style={F.display}>
+              {(titles[tab] || tab.toUpperCase())}
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-3">
+          {tab === 'home' && (
+            <button onClick={onCompose} className={`${accentColor} hover:text-[#F5F1E8]`}><Plus size={20} /></button>
+          )}
+          <button onClick={onNotifications} className={`${accentColor} hover:text-[#F5F1E8] relative`}>
+            <Bell size={18} />
+            {unreadNotifications > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-0.5 rounded-full bg-[#8B0000] text-[#F5F1E8] text-[8px] flex items-center justify-center" style={F.mono}>
+                {unreadNotifications > 9 ? '9+' : unreadNotifications}
+              </span>
+            )}
+          </button>
+          <button onClick={onDMs} className={`${accentColor} hover:text-[#F5F1E8] relative`}>
+            <MessageCircle size={20} />
+            <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#8B0000]" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
