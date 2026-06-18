@@ -11,6 +11,7 @@ import { fetchActiveStories, postStory as dbPostStory, deleteStory } from './lib
 import { fetchListings, createListing } from './lib/db/listings';
 import { fetchPayoutStatus, startPayoutSetup } from './lib/db/payouts';
 import { listCrews, createCrew as dbCreateCrew, joinCrew as dbJoinCrew } from './lib/db/crews';
+import { fetchProfileState, saveProfileState } from './lib/db/profileState';
 import { FONT_HREF, F } from './styles/fonts';
 import { Header } from './components/shared/Header';
 import { BottomNav } from './components/shared/BottomNav';
@@ -67,7 +68,7 @@ import { NOTIFICATIONS } from './data/notifications';
 import { CommentsOverlay } from './components/feed/CommentsOverlay';
 import { QuoteModal } from './components/feed/QuoteModal';
 import { VespersArchiveModal } from './components/feed/VespersArchiveModal';
-import { DEFAULT_PROFILE, GRAVES, ANNIVERSARIES, DEFAULT_TRACKERS, TRACKER_CATEGORIES } from './data/profile';
+import { DEFAULT_PROFILE, ANNIVERSARIES, TRACKER_CATEGORIES } from './data/profile';
 
 export default function App() {
   // === AUTH ===
@@ -107,7 +108,7 @@ export default function App() {
 
   const [profile, setProfile] = useState(null); // mapped from the Supabase profile row
   const [tonightStatus, setTonightStatus] = useLocalStorage('tonightStatus', { text: DEFAULT_PROFILE.status, setAt: Date.now(), expiresAt: Date.now() + 1000 * 60 * 60 * 12 });
-  const [trackers, setTrackers] = useLocalStorage('trackers', DEFAULT_TRACKERS);
+  const [trackers, setTrackers] = useState({}); // Supabase-backed (profile_state)
   const [notifications, setNotifications] = useLocalStorage('notifications', NOTIFICATIONS);
   const [settings, setSettings] = useLocalStorage('settings', DEFAULT_SETTINGS);
 
@@ -126,8 +127,8 @@ export default function App() {
   const [ticketSuccess, setTicketSuccess] = useState(false);
   const [payoutStatus, setPayoutStatus] = useState({ hasAccount: false, enabled: false });
   const [bookmarks, setBookmarks] = useLocalStorage('bookmarks', {});
-  const [graves, setGraves] = useLocalStorage('graves', GRAVES);
-  const [sigils, setSigils] = useLocalStorage('sigils', []);
+  const [graves, setGraves] = useState([]); // Supabase-backed (profile_state)
+  const [sigils, setSigils] = useState([]); // Supabase-backed (profile_state)
   const [following, setFollowing] = useState({}); // {handle: ts}, backed by follows table
   const [stories, setStories] = useState([]);
   const [listings, setListings] = useState([]);
@@ -140,7 +141,7 @@ export default function App() {
   const [postCandles, setPostCandles] = useLocalStorage('postCandles', {});
   const [nowPlaying, setNowPlaying] = useLocalStorage('nowPlaying', null);
   const [activityLog, setActivityLog] = useLocalStorage('activityLog', []);
-  const [reflections, setReflections] = useLocalStorage('reflections', []);
+  const [reflections, setReflections] = useState([]); // Supabase-backed (profile_state)
   const [mutedKeywords, setMutedKeywords] = useLocalStorage('mutedKeywords', []);
   const [hiddenPosts, setHiddenPosts] = useLocalStorage('hiddenPosts', {});
   const [ritual, setRitual] = useLocalStorage('ritual', { streak: 0, lastDay: null });
@@ -232,6 +233,13 @@ export default function App() {
     fetchListings(meId).then(l => { if (active) setListings(l); }).catch(() => {});
     fetchPayoutStatus(meId).then(p => { if (active) setPayoutStatus(p); }).catch(() => {});
     listCrews().then(c => { if (active) setCrews(c); }).catch(() => {});
+    fetchProfileState().then(s => {
+      if (!active) return;
+      if (s.graves) setGraves(s.graves);
+      if (s.trackers) setTrackers(s.trackers);
+      if (s.sigils) setSigils(s.sigils);
+      if (s.reflections) setReflections(s.reflections);
+    }).catch(() => {});
     return () => { active = false; };
   }, [meId, dbProfile]);
 
@@ -299,24 +307,26 @@ export default function App() {
   }, [activePostComments, meId]);
 
   // === HANDLERS ===
+  // Persist a profile-depth blob (graves/trackers/sigils/reflections) for the logged-in user.
+  const persistState = (key, value) => { if (meId) saveProfileState(meId, key, value).catch(() => {}); };
+
   const updateTracker = (catId, action) => {
     const cat = TRACKER_CATEGORIES.find(c => c.id === catId);
     if (!cat) return;
-    setTrackers(prev => {
-      const next = { ...prev };
-      if (action === 'log' || action === 'add') {
-        if (cat.mode === 'streak') {
-          next[catId] = { ...(next[catId] || { public: cat.defaultPublic }), streakStart: Date.now() };
-        } else {
-          next[catId] = { ...(next[catId] || { public: cat.defaultPublic }), lastAt: Date.now() };
-        }
-      } else if (action === 'togglePublic') {
-        if (next[catId]) next[catId] = { ...next[catId], public: !next[catId].public };
-      } else if (action === 'remove') {
-        delete next[catId];
+    const next = { ...trackers };
+    if (action === 'log' || action === 'add') {
+      if (cat.mode === 'streak') {
+        next[catId] = { ...(next[catId] || { public: cat.defaultPublic }), streakStart: Date.now() };
+      } else {
+        next[catId] = { ...(next[catId] || { public: cat.defaultPublic }), lastAt: Date.now() };
       }
-      return next;
-    });
+    } else if (action === 'togglePublic') {
+      if (next[catId]) next[catId] = { ...next[catId], public: !next[catId].public };
+    } else if (action === 'remove') {
+      delete next[catId];
+    }
+    setTrackers(next);
+    persistState('trackers', next);
   };
 
   const markAllNotifsRead = () => setNotifications(n => n.map(x => ({ ...x, read: true })));
@@ -577,15 +587,19 @@ export default function App() {
   };
 
   const lightCandle = (graveId) => {
-    setGraves(prev => prev.map(g => g.id === graveId
+    const next = graves.map(g => g.id === graveId
       ? { ...g, candleLitAt: Date.now(), flowers: (g.flowers || 0) + 1, addedFlowers: [meHandle, ...(g.addedFlowers || [])] }
       : g
-    ));
+    );
+    setGraves(next);
+    persistState('graves', next);
     addNotification({ kind: 'candle', avatar: '🕯', text: `you lit a candle` });
   };
 
   const saveSigil = (sigil) => {
-    setSigils(prev => [{ id: `s${Date.now()}`, ...sigil, sealedAt: Date.now() }, ...prev]);
+    const next = [{ id: `s${Date.now()}`, ...sigil, sealedAt: Date.now() }, ...sigils];
+    setSigils(next);
+    persistState('sigils', next);
     logActivity({ kind: 'sigil', glyph: '⛧', label: 'sealed a sigil', detail: sigil.intention });
   };
 
@@ -690,7 +704,9 @@ export default function App() {
   };
 
   const addGrave = (grave) => {
-    setGraves(prev => [{ id: `g${Date.now()}`, flowers: 0, addedFlowers: [], visibility: 'friends', ...grave }, ...prev]);
+    const next = [{ id: `g${Date.now()}`, flowers: 0, addedFlowers: [], visibility: 'friends', ...grave }, ...graves];
+    setGraves(next);
+    persistState('graves', next);
   };
 
   const addAnniversary = (anniv) => {
@@ -767,10 +783,14 @@ export default function App() {
   };
 
   const addReflection = (body) => {
-    setReflections(prev => [{ id: `rf${Date.now()}`, body, at: Date.now() }, ...prev]);
+    const next = [{ id: `rf${Date.now()}`, body, at: Date.now() }, ...reflections];
+    setReflections(next);
+    persistState('reflections', next);
   };
   const removeReflection = (id) => {
-    setReflections(prev => prev.filter(r => r.id !== id));
+    const next = reflections.filter(r => r.id !== id);
+    setReflections(next);
+    persistState('reflections', next);
   };
 
   const togglePostCandle = (postId) => {
