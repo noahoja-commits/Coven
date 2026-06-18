@@ -17,7 +17,7 @@ export function BottomNav({ tab, onChange, parchment = false }) {
   const inactiveColor = parchment ? 'text-[#8B6B4A]' : 'text-[#6B6B6B]';
 
   return (
-    <div className={`absolute bottom-0 inset-x-0 z-20 ${bgColor} backdrop-blur-md border-t ${borderColor}`}>
+    <div className={`absolute bottom-0 inset-x-0 z-20 safe-pb ${bgColor} backdrop-blur-md border-t ${borderColor}`}>
       <div className="grid grid-cols-6 h-[68px]">
         {items.map(it => {
           const Icon = it.icon;

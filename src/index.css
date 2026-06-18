@@ -11,6 +11,13 @@ html, body, #root {
   -webkit-tap-highlight-color: transparent;
 }
 
+html {
+  /* App-like touch: no double-tap zoom, no 300ms delay, no text inflation */
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 html, body {
   height: 100%;
 }
@@ -25,6 +32,43 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Native feel: nothing selects or shows the iOS callout / drag-to-save like a web page */
+#root {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+img, svg {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+/* …but real text input must still select/edit, and tagged reading content stays selectable */
+input, textarea, [contenteditable], .selectable, .selectable * {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
+/* Stop iOS from zooming the viewport when a field is focused (any control < 16px triggers it) */
+input, textarea, select {
+  font-size: 16px;
+}
+
+/* Tactile press feedback on every control — transform only, so no layout shift */
+button, [role="button"], a {
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.08s ease, opacity 0.08s ease;
+}
+button:active, [role="button"]:active {
+  transform: scale(0.97);
+}
+
+/* Momentum scrolling that doesn't chain into the page behind it */
+.app-scroll, .overflow-y-auto, .overflow-auto, .overflow-y-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
 @media (max-width: 640px) {
   .phone-frame {
     min-height: 100vh;
@@ -35,6 +79,14 @@ html, body {
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }
+
+/* Safe areas — keep the fixed chrome and the content it frames clear of the
+   notch/status bar (top) and the home indicator (bottom). env() is 0 in a
+   normal browser, so these are no-ops until installed/standalone. */
+.top-\[60px\]    { top: calc(60px + env(safe-area-inset-top)); }
+.bottom-\[68px\] { bottom: calc(68px + env(safe-area-inset-bottom)); }
+.safe-pt { padding-top: env(safe-area-inset-top); }
+.safe-pb { padding-bottom: env(safe-area-inset-bottom); }
 
 /* Animations */
 @keyframes flutter {

@@ -23,6 +23,7 @@ import { ChatThread } from './components/shared/ChatThread';
 import { ComposeOverlay } from './components/shared/ComposeOverlay';
 import { NotificationsPanel } from './components/shared/NotificationsPanel';
 import { GrainOverlay } from './components/shared/Visuals';
+import { InstallPrompt } from './components/shared/InstallPrompt';
 
 import { HomeScreen } from './components/feed/HomeScreen';
 import { CommunitiesScreen, CommunityDetail } from './components/communities/CommunitiesScreen';
@@ -1079,6 +1080,8 @@ export default function App() {
       </div>
 
       <BottomNav tab={tab} onChange={(t) => { setTab(t); setCommunity(null); }} parchment={settings.parchmentMode} />
+
+      <InstallPrompt />
 
       {/* Overlays */}
       {showDMs && !activeConversation && (

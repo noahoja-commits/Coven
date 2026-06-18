@@ -17,7 +17,7 @@ export function Header({ tab, onDMs, onCompose, onLibrary, onNotifications, onSe
   const borderColor = parchment ? 'border-[#5B0F1A]/20' : 'border-[#1A1A1A]';
 
   return (
-    <div className={`absolute top-0 inset-x-0 z-20 ${bgColor} backdrop-blur-md border-b ${borderColor}`}>
+    <div className={`absolute top-0 inset-x-0 z-20 safe-pt ${bgColor} backdrop-blur-md border-b ${borderColor}`}>
       <div className="px-4 h-[60px] flex items-center justify-between">
         <div className="flex items-center gap-2">
           {communityName ? (
