@@ -39,7 +39,7 @@ function Row({ label, desc, children }) {
   );
 }
 
-export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOnboarding, mutedKeywords = [], onSetMutedKeywords }) {
+export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOnboarding, mutedKeywords = [], onSetMutedKeywords, payoutStatus, onSetupPayouts }) {
   const set = (key, value) => onChange({ ...settings, [key]: value });
   const addKeyword = (e) => {
     e.preventDefault();
@@ -156,6 +156,27 @@ export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOn
               </Row>
             );
           })}
+        </Section>
+
+        <Section title="get paid">
+          <div className="px-4 py-3">
+            {payoutStatus?.enabled ? (
+              <div className="flex items-start gap-2">
+                <span className="text-[#C9A961] text-sm mt-0.5">✓</span>
+                <p className="text-[#A8A29E] text-sm" style={F.serif}>payouts active — ticket sales for your rites deposit to your bank automatically (you keep the rest after the platform fee).</p>
+              </div>
+            ) : (
+              <>
+                <p className="text-[10px] text-[#6B6B6B] mb-2" style={F.serif}>
+                  {payoutStatus?.hasAccount ? 'finish onboarding to start receiving ticket money.' : 'connect a bank to sell tickets and get paid automatically when people buy.'}
+                </p>
+                <button onClick={onSetupPayouts}
+                  className="px-3 py-1.5 text-[10px] uppercase tracking-wider bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] transition-colors" style={F.ui}>
+                  {payoutStatus?.hasAccount ? 'finish payout setup' : 'set up payouts'}
+                </button>
+              </>
+            )}
+          </div>
         </Section>
 
         <Section title="account">

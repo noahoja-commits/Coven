@@ -49,6 +49,13 @@ export default async function handler(req, res) {
       }, { onConflict: 'stripe_session_id' });
       if (error) { res.status(500).json({ error: error.message }); return; }
     }
+  } else if (event.type === 'account.updated') {
+    // A venue's Connect onboarding progressed — sync their payout readiness.
+    const acct = event.data.object;
+    const enabled = !!(acct.charges_enabled && acct.payouts_enabled);
+    await supa.from('payout_accounts')
+      .update({ payouts_enabled: enabled, updated_at: new Date().toISOString() })
+      .eq('stripe_account_id', acct.id);
   }
 
   res.status(200).json({ received: true });

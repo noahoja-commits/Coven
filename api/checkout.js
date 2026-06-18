@@ -16,7 +16,7 @@ export default async function handler(req, res) {
 
     const { data: ev, error } = await supa
       .from('events')
-      .select('id,name,ticketed,price_cents,currency,capacity')
+      .select('id,name,ticketed,price_cents,currency,capacity,host_id')
       .eq('id', eventId)
       .single();
     if (error) {
@@ -34,8 +34,13 @@ export default async function handler(req, res) {
       if ((count || 0) >= ev.capacity) { res.status(409).json({ error: 'sold out' }); return; }
     }
 
+    // If the host has connected a payout account, split the payment to them
+    // and keep the platform fee. Otherwise the platform collects (manual settle).
+    const { data: payout } = await supa.from('payout_accounts')
+      .select('stripe_account_id, payouts_enabled').eq('user_id', ev.host_id).maybeSingle();
+
     const origin = req.headers.origin || `https://${req.headers.host}`;
-    const session = await stripe.checkout.sessions.create({
+    const sessionParams = {
       mode: 'payment',
       line_items: [{
         quantity: 1,
@@ -48,7 +53,19 @@ export default async function handler(req, res) {
       metadata: { event_id: ev.id, buyer_id: buyerId || '' },
       success_url: `${origin}/?ticket=success&event=${ev.id}`,
       cancel_url: `${origin}/?ticket=cancel`,
-    });
+    };
+
+    if (payout?.payouts_enabled && payout.stripe_account_id) {
+      const pct = parseFloat(process.env.PLATFORM_FEE_PERCENT || '5');
+      const flat = parseInt(process.env.PLATFORM_FEE_FLAT_CENTS || '0', 10);
+      const fee = Math.min(ev.price_cents, Math.round(ev.price_cents * (pct / 100)) + flat);
+      sessionParams.payment_intent_data = {
+        application_fee_amount: fee,
+        transfer_data: { destination: payout.stripe_account_id },
+      };
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
     res.status(200).json({ url: session.url });
   } catch (e) {
     res.status(500).json({ error: e.message });

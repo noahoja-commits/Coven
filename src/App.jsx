@@ -9,6 +9,7 @@ import { fetchFollowing, followUser, unfollowUser, followSystemAccounts } from '
 import { fetchConversations, getOrCreateDM, createGroup, fetchMessages as fetchDMMessages, sendDM, markRead as dmMarkRead, setBuried as dmSetBuried, subscribeDMs } from './lib/db/dm';
 import { fetchActiveStories, postStory as dbPostStory, deleteStory } from './lib/db/stories';
 import { fetchListings, createListing } from './lib/db/listings';
+import { fetchPayoutStatus, startPayoutSetup } from './lib/db/payouts';
 import { FONT_HREF, F } from './styles/fonts';
 import { Header } from './components/shared/Header';
 import { BottomNav } from './components/shared/BottomNav';
@@ -124,6 +125,7 @@ export default function App() {
   const [activeEventAttendees, setActiveEventAttendees] = useState([]);
   const [ticketManagerEvent, setTicketManagerEvent] = useState(null);
   const [ticketSuccess, setTicketSuccess] = useState(false);
+  const [payoutStatus, setPayoutStatus] = useState({ hasAccount: false, enabled: false });
   const [bookmarks, setBookmarks] = useLocalStorage('bookmarks', {});
   const [graves, setGraves] = useLocalStorage('graves', GRAVES);
   const [sigils, setSigils] = useLocalStorage('sigils', []);
@@ -229,6 +231,7 @@ export default function App() {
     fetchConversations().then(c => { if (active) setConversations(c); }).catch(() => {});
     fetchActiveStories(meId).then(s => { if (active) setStories(s); }).catch(() => {});
     fetchListings(meId).then(l => { if (active) setListings(l); }).catch(() => {});
+    fetchPayoutStatus(meId).then(p => { if (active) setPayoutStatus(p); }).catch(() => {});
     return () => { active = false; };
   }, [meId, dbProfile]);
 
@@ -247,11 +250,12 @@ export default function App() {
     return unsub;
   }, [meId, dbProfile]);
 
-  // Returning from Stripe Checkout: confirm + refresh sold counts (webhook is async).
+  // Returning from Stripe (ticket checkout or Connect onboarding) — webhooks are async.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const t = params.get('ticket');
-    if (!t) return;
+    const connect = params.get('connect');
+    if (!t && !connect) return;
     history.replaceState(null, '', window.location.pathname);
     if (t === 'success') {
       setTicketSuccess(true);
@@ -259,7 +263,19 @@ export default function App() {
         fetchEvents(meId).then(({ events, rsvp }) => { setEvents(events); setEventRsvp(rsvp); }).catch(() => {});
       }, 2500);
     }
+    if (connect === 'done' && meId) {
+      const poll = (n) => fetchPayoutStatus(meId).then(p => {
+        setPayoutStatus(p);
+        if (!p.enabled && n > 0) setTimeout(() => poll(n - 1), 2500);
+      }).catch(() => {});
+      setTimeout(() => poll(3), 1500);
+    }
   }, [meId]);
+
+  const setupPayouts = () => {
+    if (!meId) return;
+    startPayoutSetup(meId).catch(e => addNotification({ kind: 'event', avatar: '✖', text: `payout setup unavailable — ${e.message}` }));
+  };
 
   // Load an event's attendees when its detail opens.
   useEffect(() => {
@@ -1201,6 +1217,8 @@ export default function App() {
           onLogout={() => { setShowSettings(false); signOut(); }}
           mutedKeywords={mutedKeywords}
           onSetMutedKeywords={setMutedKeywords}
+          payoutStatus={payoutStatus}
+          onSetupPayouts={setupPayouts}
         />
       )}
 
