@@ -4,8 +4,8 @@ import { useAuth } from './auth/AuthProvider';
 import { isSupabaseConfigured } from './lib/supabase';
 import { SignInScreen } from './components/auth/SignInScreen';
 import { fetchFeed, createPost, deletePost as dbDeletePost, togglePostReaction, fetchComments, createComment } from './lib/db/posts';
-import { insertProfile, updateProfile, getSystemAccountIds, getProfileStats, getProfileByHandle } from './lib/db/profiles';
-import { fetchFollowing, followUser, unfollowUser, followSystemAccounts } from './lib/db/social';
+import { insertProfile, updateProfile, getProfileStats, getProfileByHandle } from './lib/db/profiles';
+import { fetchFollowing, followUser, unfollowUser } from './lib/db/social';
 import { fetchConversations, getOrCreateDM, createGroup, fetchMessages as fetchDMMessages, sendDM, markRead as dmMarkRead, setBuried as dmSetBuried, subscribeDMs } from './lib/db/dm';
 import { fetchActiveStories, postStory as dbPostStory, deleteStory } from './lib/db/stories';
 import { fetchListings, createListing } from './lib/db/listings';
@@ -67,13 +67,11 @@ import { OnboardingFlow } from './components/onboarding/OnboardingFlow';
 import { SettingsScreen, DEFAULT_SETTINGS } from './components/settings/SettingsScreen';
 
 import { COMMUNITIES } from './data/communities';
-import { POSTS, CONVERSATIONS, MESSAGES } from './data/posts';
 import { fetchEvents, createEvent, toggleEventRsvp as dbToggleRsvp, fetchEventAttendees } from './lib/db/events';
-import { NOTIFICATIONS } from './data/notifications';
 import { CommentsOverlay } from './components/feed/CommentsOverlay';
 import { QuoteModal } from './components/feed/QuoteModal';
 import { VespersArchiveModal } from './components/feed/VespersArchiveModal';
-import { DEFAULT_PROFILE, ANNIVERSARIES, TRACKER_CATEGORIES } from './data/profile';
+import { TRACKER_CATEGORIES } from './data/profile';
 
 export default function App() {
   // === AUTH ===
@@ -112,9 +110,9 @@ export default function App() {
   const [activePostComments, setActivePostComments] = useState(null);
 
   const [profile, setProfile] = useState(null); // mapped from the Supabase profile row
-  const [tonightStatus, setTonightStatus] = useLocalStorage('tonightStatus', { text: DEFAULT_PROFILE.status, setAt: Date.now(), expiresAt: Date.now() + 1000 * 60 * 60 * 12 });
+  const [tonightStatus, setTonightStatus] = useLocalStorage('tonightStatus', { text: '', setAt: Date.now(), expiresAt: Date.now() + 1000 * 60 * 60 * 12 });
   const [trackers, setTrackers] = useState({}); // Supabase-backed (profile_state)
-  const [notifications, setNotifications] = useLocalStorage('notifications', NOTIFICATIONS);
+  const [notifications, setNotifications] = useLocalStorage('notifications', []);
   const [settings, setSettings] = useLocalStorage('settings', DEFAULT_SETTINGS);
 
   // Live content state (Supabase-backed)
@@ -144,7 +142,7 @@ export default function App() {
   const [crews, setCrews] = useState([]); // public crew directory (group conversations)
   const [crewBusy, setCrewBusy] = useState({}); // {convId: true} while joining
   const [muted, setMuted] = useLocalStorage('muted', {});
-  const [anniversaries, setAnniversaries] = useLocalStorage('anniversaries', ANNIVERSARIES);
+  const [anniversaries, setAnniversaries] = useLocalStorage('anniversaries', []);
   const [cardHistory, setCardHistory] = useLocalStorage('cardHistory', {});
   const [marginalia, setMarginalia] = useLocalStorage('marginalia', {});
   const [postCandles, setPostCandles] = useLocalStorage('postCandles', {});
@@ -858,10 +856,6 @@ export default function App() {
       if (e?.code === '23505') throw new Error('handle taken');
       throw e;
     }
-    try {
-      const sys = await getSystemAccountIds();
-      await followSystemAccounts(userId, sys);
-    } catch { /* non-fatal */ }
     await refreshProfile();
   };
 
@@ -987,9 +981,6 @@ export default function App() {
       }
       return (
         <MapScreen
-          events={events}
-          rsvp={eventRsvp}
-          onToggleRsvp={toggleEventRsvp}
           tonightStatus={tonightStatus}
           onOpenTonightStatus={() => setShowTonightModal(true)}
           festivalEvent={festivalEvent && exitedFestivalId === festivalEvent.id ? festivalEvent : null}
@@ -1278,6 +1269,7 @@ export default function App() {
       {showSearch && (
         <SearchOverlay
           posts={posts}
+          events={events}
           onClose={() => setShowSearch(false)}
           onOpenPost={(id) => { setActivePostComments(id); setShowSearch(false); }}
           onOpenUser={(handle) => { setActiveUserHandle(handle); setShowSearch(false); }}
@@ -1356,6 +1348,7 @@ export default function App() {
       )}
       {activePortal === 'souls' && (
         <SoulsOverlay
+          meId={meId}
           following={following}
           onClose={() => setActivePortal('menu')}
           onOpenUser={(h) => { setActivePortal(null); setActiveUserHandle(h); }}

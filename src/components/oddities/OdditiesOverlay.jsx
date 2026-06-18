@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { X, Search, Plus, Bell, Star, MapPin } from 'lucide-react';
+import { X, Search, Plus, Bell, MapPin } from 'lucide-react';
 import { F } from '../../styles/fonts';
-import { ODDITIES, ODDITY_CATEGORIES, ODDITY_PALETTES, CONDITION_LABELS, WANTED_POSTS, TATTOO_ARTISTS, SHOPS } from '../../data/oddities';
+import { ODDITY_CATEGORIES, ODDITY_PALETTES, CONDITION_LABELS, SHOPS } from '../../data/oddities';
 
 function OddityImage({ shape, palette, small = false }) {
   const p = ODDITY_PALETTES[palette] || ODDITY_PALETTES.black;
@@ -107,23 +107,8 @@ function WantedTab() {
   return (
     <div className="px-4 pb-12">
       <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-3" style={F.scriptureSC}>· what the coven is seeking ·</div>
-      <div className="space-y-2">
-        {WANTED_POSTS.map(w => (
-          <div key={w.id} className="border border-[#2A2A2A] bg-[#0F0F0F] p-3">
-            <div className="flex items-baseline justify-between gap-2 mb-1.5">
-              <h4 className="text-[#F5F1E8] text-sm" style={F.serif}>{w.title}</h4>
-              <span className="text-[10px] text-[#6B6B6B]" style={F.mono}>{w.posted}</span>
-            </div>
-            <p className="text-[#A8A29E] text-xs leading-snug mb-2" style={F.serif}>{w.description}</p>
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-xs">{w.avatar}</div>
-              <span className="text-[10px] text-[#A8A29E]" style={F.ui}>{w.user}</span>
-              {w.budget && <span className="ml-auto text-[10px] text-[#A89968]" style={F.mono}>up to ${w.budget}</span>}
-            </div>
-          </div>
-        ))}
-      </div>
-      <button className="mt-4 w-full py-2.5 border border-dashed border-[#3F3F3F] text-[#A8A29E] text-xs uppercase tracking-wider hover:border-[#5B0F1A] hover:text-[#F5F1E8]" style={F.ui}>+ post a wanted</button>
+      <div className="py-12 text-center text-[#6B6B6B] text-xs italic" style={F.serif}>no one is seeking anything yet.</div>
+      <button className="mt-2 w-full py-2.5 border border-dashed border-[#3F3F3F] text-[#A8A29E] text-xs uppercase tracking-wider hover:border-[#5B0F1A] hover:text-[#F5F1E8]" style={F.ui}>+ post a wanted</button>
     </div>
   );
 }
@@ -132,32 +117,7 @@ function ParlourTab() {
   return (
     <div className="px-4 pb-12">
       <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-3" style={F.scriptureSC}>· the parlour ·</div>
-      <div className="space-y-2">
-        {TATTOO_ARTISTS.map(a => (
-          <div key={a.id} className="border border-[#2A2A2A] bg-[#0F0F0F] p-3">
-            <div className="flex items-start gap-3">
-              <div className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-lg shrink-0">{a.avatar}</div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-baseline justify-between gap-2 mb-0.5">
-                  <h4 className="text-[#F5F1E8] text-base" style={F.display}>{a.name}</h4>
-                  {a.badge && <span className="text-[9px] uppercase tracking-wider text-[#A89968] flex items-center gap-0.5" style={F.ui}>✓ {a.badge}</span>}
-                </div>
-                <div className="flex items-center gap-2 text-[10px] text-[#A89968] mb-1">
-                  <Star size={10} className="fill-[#A89968]" /><span style={F.mono}>{a.rating}</span><span>·</span><span style={F.ui}>{a.reviews} reviews</span>
-                </div>
-                <div className="text-[10px] text-[#6B6B6B] uppercase tracking-wider mb-1" style={F.ui}>{a.location}</div>
-                <p className="text-[#A8A29E] text-xs leading-snug mb-2" style={F.serif}>{a.bio}</p>
-                <div className="flex flex-wrap gap-1">
-                  {a.style.map(s => (
-                    <span key={s} className="text-[9px] px-1.5 py-0.5 border border-[#2A2A2A] text-[#A8A29E] uppercase tracking-wider" style={F.ui}>{s}</span>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <button className="mt-3 w-full py-2 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] text-[10px] uppercase tracking-wider" style={F.ui}>view portfolio · book</button>
-          </div>
-        ))}
-      </div>
+      <div className="py-12 text-center text-[#6B6B6B] text-xs italic" style={F.serif}>no artists have set up shop yet.</div>
     </div>
   );
 }

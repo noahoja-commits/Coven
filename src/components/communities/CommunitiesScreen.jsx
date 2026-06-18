@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Search, ChevronLeft, Bell, X } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { COMMUNITIES } from '../../data/communities';
-import { POSTS } from '../../data/posts';
 import { PostImage } from '../shared/Visuals';
 import { formatK } from '../../data/helpers';
 
@@ -92,7 +91,7 @@ export function CommunitiesScreen({ onOpenCommunity, membership = {}, onToggleMe
 
 export function CommunityDetail({ id, onBack, posts: postsProp, isMember, onToggleMembership }) {
   const c = COMMUNITIES.find(x => x.id === id);
-  const source = postsProp || POSTS;
+  const source = postsProp || [];
   const posts = source.filter(p => p.community === id || id === 'general');
   if (!c) return null;
   return (

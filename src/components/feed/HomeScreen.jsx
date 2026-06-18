@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { MessageCircle, MoreHorizontal, Eye, Bookmark, Trash2, Flame, EyeOff, Repeat, Pin } from 'lucide-react';
 import { F } from '../../styles/fonts';
-import { TONIGHT_OUT } from '../../data/users';
 import { Reaction } from '../shared/Reaction';
 import { PostImage } from '../shared/Visuals';
 import { getDailyCard } from '../../data/tarot';
@@ -204,32 +203,6 @@ export function HomeScreen({
             ))}
           </div>
         </div>
-      )}
-
-      {/* Out tonight */}
-      {!ghostOn && (
-      <div className="px-4 pt-3 pb-3 border-b border-[#1A1A1A]">
-        <div className="flex items-baseline justify-between mb-2">
-          <span className="text-[10px] uppercase tracking-[0.25em] text-[#8B0000]" style={F.ui}>· out tonight ·</span>
-          <span className="text-[10px] text-[#6B6B6B]" style={F.mono}>{TONIGHT_OUT.length}</span>
-        </div>
-        <div className="space-y-1.5">
-          {TONIGHT_OUT.slice(0, 4).map(p => (
-            <button key={p.handle} onClick={() => onOpenUser && onOpenUser(p.handle, p.avatar)}
-              className="w-full flex items-start gap-2.5 py-1 text-left hover:bg-[#0F0F0F] -mx-2 px-2 transition-colors">
-              <div className="w-7 h-7 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-xs shrink-0">{p.avatar}</div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-[#F5F1E8] text-xs" style={F.ui}>{p.handle}</span>
-                  <span className="text-[9px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>{p.neighborhood}</span>
-                </div>
-                <p className="text-[#A8A29E] text-xs italic truncate" style={F.serif}>"{p.status}"</p>
-              </div>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#8B0000] animate-pulse mt-1.5 shrink-0" />
-            </button>
-          ))}
-        </div>
-      </div>
       )}
 
       {/* Tonight status banner if set — clickable to edit */}

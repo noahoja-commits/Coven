@@ -1,14 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Search, X } from 'lucide-react';
 import { F } from '../../styles/fonts';
-import { USERS } from '../../data/users';
+import { fetchProfiles } from '../../lib/db/profiles';
 
-export function SoulsOverlay({ following = {}, onClose, onOpenUser }) {
+export function SoulsOverlay({ meId, following = {}, onClose, onOpenUser }) {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
+  const [allUsers, setAllUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const q = query.trim().toLowerCase();
 
-  const allUsers = Object.values(USERS);
+  useEffect(() => {
+    let on = true;
+    fetchProfiles({ excludeId: meId })
+      .then(rows => { if (on) { setAllUsers(rows.map(r => ({ ...r, tags: r.tags || [] }))); setLoading(false); } })
+      .catch(() => { if (on) setLoading(false); });
+    return () => { on = false; };
+  }, [meId]);
+
   const filtered = allUsers.filter(u => {
     if (filter === 'following' && !following[u.handle]) return false;
     if (!q) return true;
@@ -48,9 +57,11 @@ export function SoulsOverlay({ following = {}, onClose, onOpenUser }) {
           ))}
         </div>
 
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12 text-[#A89968]/40 text-sm italic" style={F.scripture}>· gathering souls ·</div>
+        ) : filtered.length === 0 ? (
           <div className="text-center py-12 text-[#A89968]/40 text-sm italic" style={F.scripture}>
-            · no souls match ·
+            {allUsers.length === 0 ? '· you are the first soul here ·' : '· no souls match ·'}
           </div>
         ) : (
           <div className="space-y-1">

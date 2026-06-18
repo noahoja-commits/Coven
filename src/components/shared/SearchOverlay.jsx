@@ -2,16 +2,27 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { X, Search, Hash, Calendar, BookOpen } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { COMMUNITIES } from '../../data/communities';
-import { EVENTS } from '../../data/events';
 import { CODEX } from '../../data/codex';
 import { TEXTS } from '../../data/library';
-import { USERS } from '../../data/users';
+import { searchProfiles } from '../../lib/db/profiles';
 
-export function SearchOverlay({ posts = [], onClose, onOpenPost, onOpenUser, onOpenCommunity, onOpenEvent, onOpenCodex, onOpenLibrary }) {
+export function SearchOverlay({ posts = [], events = [], onClose, onOpenPost, onOpenUser, onOpenCommunity, onOpenEvent, onOpenCodex, onOpenLibrary }) {
   const [q, setQ] = useState('');
+  const [userResults, setUserResults] = useState([]);
   const inputRef = useRef(null);
 
   useEffect(() => { inputRef.current?.focus(); }, []);
+
+  // Real people search is async — debounce it lightly.
+  useEffect(() => {
+    const query = q.trim();
+    if (!query) { setUserResults([]); return; }
+    let on = true;
+    const t = setTimeout(() => {
+      searchProfiles(query).then(rows => { if (on) setUserResults(rows); }).catch(() => { if (on) setUserResults([]); });
+    }, 180);
+    return () => { on = false; clearTimeout(t); };
+  }, [q]);
 
   const results = useMemo(() => {
     const query = q.trim().toLowerCase();
@@ -20,16 +31,15 @@ export function SearchOverlay({ posts = [], onClose, onOpenPost, onOpenUser, onO
     const matches = (s) => (s || '').toLowerCase().includes(query);
 
     return {
-      users: Object.values(USERS).filter(u => matches(u.handle) || matches(u.bio) || u.tags.some(t => matches(t))).slice(0, 6),
       posts: posts.filter(p => matches(p.body) || matches(p.user) || matches(p.community)).slice(0, 8),
       scenes: COMMUNITIES.filter(c => matches(c.name) || matches(c.desc)).slice(0, 6),
-      events: EVENTS.filter(e => matches(e.name) || matches(e.venue) || matches(e.neighborhood) || e.tags.some(t => matches(t))).slice(0, 6),
+      events: (events || []).filter(e => matches(e.name) || matches(e.venue) || matches(e.neighborhood) || (e.tags || []).some(t => matches(t))).slice(0, 6),
       codex: (CODEX || []).filter(c => matches(c.term) || matches(c.def)).slice(0, 6),
       library: (TEXTS || []).filter(t => matches(t.title) || matches(t.author)).slice(0, 6),
     };
-  }, [q, posts]);
+  }, [q, posts, events]);
 
-  const totalCount = results ? Object.values(results).reduce((s, arr) => s + arr.length, 0) : 0;
+  const totalCount = (results ? Object.values(results).reduce((s, arr) => s + arr.length, 0) : 0) + userResults.length;
 
   return (
     <div className="absolute inset-0 z-40 bg-[#0A0A0A] animate-slide-in-right flex flex-col">
@@ -67,10 +77,10 @@ export function SearchOverlay({ posts = [], onClose, onOpenPost, onOpenUser, onO
           </div>
         )}
 
-        {results && results.users.length > 0 && (
+        {userResults.length > 0 && (
           <Section title="souls">
-            {results.users.map(u => (
-              <button key={u.handle} onClick={() => { onOpenUser && onOpenUser(u.handle); onClose(); }}
+            {userResults.map(u => (
+              <button key={u.id} onClick={() => { onOpenUser && onOpenUser(u.handle); onClose(); }}
                 className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-[#0F0F0F] text-left">
                 <div className="w-9 h-9 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-base shrink-0">{u.avatar}</div>
                 <div className="flex-1 min-w-0">

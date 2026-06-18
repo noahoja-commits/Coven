@@ -1,23 +1,30 @@
+import { useState, useEffect } from 'react';
 import { ArrowLeft, MessageCircle, UserPlus, UserCheck, VolumeX, Volume2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
-import { getUser, getUserTrackers } from '../../data/users';
+import { getProfileByHandle, getProfileStats } from '../../lib/db/profiles';
 import { Reaction } from '../shared/Reaction';
 import { PostImage } from '../shared/Visuals';
 
 export function UserProfileOverlay({ handle, posts = [], isFollowing, isMuted, onToggleFollow, onToggleMute, onWhisper, onClose, onOpenComments, onReact }) {
-  const user = getUser(handle);
+  const [profile, setProfile] = useState(null);
+  const [stats, setStats] = useState({ followers: 0, following: 0, posts: 0 });
+  const [loading, setLoading] = useState(true);
   const theirPosts = posts.filter(p => p.user === handle);
-  const trackers = getUserTrackers(handle);
 
-  const formatTracker = (t) => {
-    if (t.streak) {
-      const days = Math.floor(t.hoursAgo / 24);
-      return `${days}d streak`;
-    }
-    if (t.hoursAgo < 1) return 'just now';
-    if (t.hoursAgo < 24) return `${t.hoursAgo}h ago`;
-    return `${Math.floor(t.hoursAgo / 24)}d ago`;
-  };
+  useEffect(() => {
+    let on = true;
+    setLoading(true);
+    getProfileByHandle(handle).then(p => {
+      if (!on) return;
+      setProfile(p);
+      setLoading(false);
+      if (p?.id) getProfileStats(p.id).then(s => { if (on) setStats(s); }).catch(() => {});
+    }).catch(() => { if (on) setLoading(false); });
+    return () => { on = false; };
+  }, [handle]);
+
+  // Real profile, or a minimal stand-in so the overlay still renders by handle.
+  const user = profile || { handle, avatar: '✦', bio: '', tags: [], pronouns: '' };
 
   return (
     <div className="absolute inset-0 z-40 bg-[#0A0A0A] animate-slide-in-right overflow-y-auto pb-12">
@@ -54,9 +61,9 @@ export function UserProfileOverlay({ handle, posts = [], isFollowing, isMuted, o
         </div>
 
         <div className="relative flex items-center gap-5 mt-4 pt-4 border-t border-[#1A1A1A]">
-          <div><span className="text-[#F5F1E8] text-base block leading-none" style={F.mono}>{theirPosts.length}</span><span className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>posts</span></div>
-          <div><span className="text-[#F5F1E8] text-base block leading-none" style={F.mono}>{user.followers}</span><span className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>followers</span></div>
-          <div><span className="text-[#F5F1E8] text-base block leading-none" style={F.mono}>{user.following}</span><span className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>following</span></div>
+          <div><span className="text-[#F5F1E8] text-base block leading-none" style={F.mono}>{stats.posts}</span><span className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>posts</span></div>
+          <div><span className="text-[#F5F1E8] text-base block leading-none" style={F.mono}>{stats.followers}</span><span className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>followers</span></div>
+          <div><span className="text-[#F5F1E8] text-base block leading-none" style={F.mono}>{stats.following}</span><span className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>following</span></div>
         </div>
 
         <div className="relative grid grid-cols-3 gap-2 mt-4">
@@ -77,22 +84,6 @@ export function UserProfileOverlay({ handle, posts = [], isFollowing, isMuted, o
           </button>
         </div>
       </div>
-
-      {/* Public log */}
-      {trackers.length > 0 && (
-        <div className="px-4 py-3 border-b border-[#1A1A1A]">
-          <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-2" style={F.scriptureSC}>· the log ·</div>
-          <div className="flex flex-wrap gap-1.5">
-            {trackers.map(t => (
-              <div key={t.id} className="flex items-center gap-1.5 px-2 py-1 border border-[#2A2A2A] bg-[#0F0F0F]">
-                <span className="text-[#A89968]">{t.glyph}</span>
-                <span className="text-[#F5F1E8] text-[11px]" style={F.ui}>{t.label}</span>
-                <span className="text-[#6B6B6B] text-[10px]" style={F.mono}>· {formatTracker(t)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Posts */}
       <div className="divide-y divide-[#1A1A1A]">
