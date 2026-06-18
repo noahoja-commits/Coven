@@ -19,7 +19,12 @@ export default async function handler(req, res) {
       .select('id,name,ticketed,price_cents,currency,capacity')
       .eq('id', eventId)
       .single();
-    if (error || !ev) { res.status(404).json({ error: 'event not found' }); return; }
+    if (error) {
+      console.error('checkout: supabase query error', { code: error.code, message: error.message, hint: error.hint });
+      res.status(502).json({ error: 'db_error', detail: error.message });
+      return;
+    }
+    if (!ev) { res.status(404).json({ error: 'event not found' }); return; }
     if (!ev.ticketed || ev.price_cents <= 0) { res.status(400).json({ error: 'not a paid event' }); return; }
 
     if (ev.capacity != null) {
