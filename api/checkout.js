@@ -56,7 +56,7 @@ export default async function handler(req, res) {
     };
 
     if (payout?.payouts_enabled && payout.stripe_account_id) {
-      const pct = parseFloat(process.env.PLATFORM_FEE_PERCENT || '5');
+      const pct = parseFloat(process.env.PLATFORM_FEE_PERCENT || '10');
       const flat = parseInt(process.env.PLATFORM_FEE_FLAT_CENTS || '0', 10);
       const fee = Math.min(ev.price_cents, Math.round(ev.price_cents * (pct / 100)) + flat);
       sessionParams.payment_intent_data = {
