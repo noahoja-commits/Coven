@@ -23,14 +23,23 @@ function readRawBody(req) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') { res.status(405).end(); return; }
 
-  let event;
-  try {
-    const raw = await readRawBody(req);
-    event = stripe.webhooks.constructEvent(
-      raw, req.headers['stripe-signature'], process.env.STRIPE_WEBHOOK_SECRET,
-    );
-  } catch (e) {
-    res.status(400).send(`Webhook Error: ${e.message}`);
+  // STRIPE_WEBHOOK_SECRET may hold several comma-separated signing secrets — one
+  // per Stripe event destination. We use two: the "Your account" destination
+  // (checkout.session.completed → tickets) and the "Connected accounts"
+  // destination (account.updated → venue payout readiness). Each has its own
+  // secret, so try them in turn until one verifies.
+  const secrets = (process.env.STRIPE_WEBHOOK_SECRET || '')
+    .split(',').map(s => s.trim()).filter(Boolean);
+
+  let event, lastErr;
+  const raw = await readRawBody(req);
+  const sig = req.headers['stripe-signature'];
+  for (const secret of secrets) {
+    try { event = stripe.webhooks.constructEvent(raw, sig, secret); break; }
+    catch (e) { lastErr = e; }
+  }
+  if (!event) {
+    res.status(400).send(`Webhook Error: ${lastErr ? lastErr.message : 'no signing secret configured'}`);
     return;
   }
 
