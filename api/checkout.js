@@ -20,8 +20,8 @@ export default async function handler(req, res) {
       .eq('id', eventId)
       .single();
     if (error) {
-      console.error('checkout: supabase query error', { code: error.code, message: error.message, hint: error.hint });
-      res.status(502).json({ error: 'db_error', detail: error.message });
+      console.error('checkout: supabase query error', { code: error.code, message: error.message });
+      res.status(502).json({ error: 'database unavailable' });
       return;
     }
     if (!ev) { res.status(404).json({ error: 'event not found' }); return; }
