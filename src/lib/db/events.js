@@ -34,6 +34,8 @@ function hydrateEvent(row, myRsvpSet, myId) {
     currency: row.currency || 'usd',
     capacity: row.capacity ?? null,
     sold: row.sold || 0,
+    starts_at: row.starts_at || null,
+    ends_at: row.ends_at || null,
   };
 }
 

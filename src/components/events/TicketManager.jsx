@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Check, Loader2 } from 'lucide-react';
+import { ArrowLeft, Check, Loader2, Map } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { fetchEventTickets, checkInTicket } from '../../lib/db/tickets';
 
-export function TicketManager({ event, onClose }) {
+export function TicketManager({ event, onClose, onEditVenueMap }) {
   const [tickets, setTickets] = useState(null);
 
   useEffect(() => {
@@ -39,6 +39,12 @@ export function TicketManager({ event, onClose }) {
           <div><div className="text-[#C9A961] text-xl" style={F.mono}>{money(revenue)}</div><div className="text-[9px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>gross</div></div>
           <div><div className="text-[#F5F1E8] text-xl" style={F.mono}>{checkedIn}</div><div className="text-[9px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>checked in</div></div>
         </div>
+        {onEditVenueMap && (
+          <button onClick={onEditVenueMap}
+            className="mt-3 w-full py-2 border border-[#2A2A2A] text-[#A8A29E] text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:border-[#5B0F1A] hover:text-[#F5F1E8] transition-colors" style={F.ui}>
+            <Map size={13} /> festival mode · venue map
+          </button>
+        )}
       </div>
 
       {tickets === null ? (

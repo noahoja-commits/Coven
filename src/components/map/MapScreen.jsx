@@ -4,7 +4,7 @@ import { F } from '../../styles/fonts';
 import { MAP_PINS, PIN_KIND } from '../../data/map';
 import { EVENTS } from '../../data/events';
 
-export function MapScreen({ events = EVENTS, rsvp = {}, onToggleRsvp, tonightStatus, onOpenTonightStatus }) {
+export function MapScreen({ events = EVENTS, rsvp = {}, onToggleRsvp, tonightStatus, onOpenTonightStatus, festivalEvent = null, onEnterFestival }) {
   const [active, setActive] = useState(null);
   const [filter, setFilter] = useState('all');
   const filtered = filter === 'all' ? MAP_PINS : MAP_PINS.filter(p => p.kind === filter);
@@ -14,6 +14,12 @@ export function MapScreen({ events = EVENTS, rsvp = {}, onToggleRsvp, tonightSta
 
   return (
     <div className="absolute inset-0 top-[60px] bottom-[68px]">
+      {festivalEvent && (
+        <button onClick={onEnterFestival}
+          className="absolute top-2 left-1/2 -translate-x-1/2 z-30 px-4 py-2 bg-[#8B0000]/90 border border-[#C9A961] text-[#F5F1E8] text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 shadow-xl animate-pulse-slow" style={F.ui}>
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#C9A961]" /> {festivalEvent.name} · enter venue map
+        </button>
+      )}
       <div className="absolute inset-0 overflow-hidden bg-[#070708]">
         <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice">
           <defs>

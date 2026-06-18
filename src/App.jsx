@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useAuth } from './auth/AuthProvider';
 import { isSupabaseConfigured } from './lib/supabase';
@@ -12,6 +12,9 @@ import { fetchListings, createListing } from './lib/db/listings';
 import { fetchPayoutStatus, startPayoutSetup } from './lib/db/payouts';
 import { listCrews, createCrew as dbCreateCrew, joinCrew as dbJoinCrew } from './lib/db/crews';
 import { fetchProfileState, saveProfileState } from './lib/db/profileState';
+import { fetchMyTicketEventIds } from './lib/db/festival';
+import { FestivalMap } from './components/festival/FestivalMap';
+import { VenueMapEditor } from './components/festival/VenueMapEditor';
 import { FONT_HREF, F } from './styles/fonts';
 import { Header } from './components/shared/Header';
 import { BottomNav } from './components/shared/BottomNav';
@@ -124,6 +127,10 @@ export default function App() {
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [activeEventAttendees, setActiveEventAttendees] = useState([]);
   const [ticketManagerEvent, setTicketManagerEvent] = useState(null);
+  const [venueEditorEvent, setVenueEditorEvent] = useState(null);
+  const [myTicketEventIds, setMyTicketEventIds] = useState([]);
+  const [exitedFestivalId, setExitedFestivalId] = useState(null);
+  const [festTick, setFestTick] = useState(0);
   const [ticketSuccess, setTicketSuccess] = useState(false);
   const [payoutStatus, setPayoutStatus] = useState({ hasAccount: false, enabled: false });
   const [bookmarks, setBookmarks] = useLocalStorage('bookmarks', {});
@@ -233,6 +240,7 @@ export default function App() {
     fetchListings(meId).then(l => { if (active) setListings(l); }).catch(() => {});
     fetchPayoutStatus(meId).then(p => { if (active) setPayoutStatus(p); }).catch(() => {});
     listCrews().then(c => { if (active) setCrews(c); }).catch(() => {});
+    fetchMyTicketEventIds().then(ids => { if (active) setMyTicketEventIds(ids); }).catch(() => {});
     fetchProfileState().then(s => {
       if (!active) return;
       if (s.graves) setGraves(s.graves);
@@ -334,6 +342,20 @@ export default function App() {
   const addNotification = (n) => setNotifications(prev => [{ id: `n${Date.now()}`, read: false, time: 'just now', ...n }, ...prev]);
   const unreadNotifs = notifications.filter(n => !n.read).length;
   const unreadDMs = conversations.reduce((s, c) => s + (c.buried ? 0 : (c.unread || 0)), 0);
+
+  // Festival mode: the soonest event the user holds a ticket to, from 30 min before doors until it ends.
+  useEffect(() => { const t = setInterval(() => setFestTick(x => x + 1), 60000); return () => clearInterval(t); }, []);
+  const festivalEvent = useMemo(() => {
+    void festTick; // recompute each minute
+    const now = Date.now();
+    const held = new Set(myTicketEventIds);
+    return events.find(e => {
+      if (!held.has(e.id) || !e.starts_at) return false;
+      const s = new Date(e.starts_at).getTime();
+      const end = e.ends_at ? new Date(e.ends_at).getTime() : s + 6 * 3600 * 1000;
+      return now >= s - 30 * 60 * 1000 && now <= end;
+    }) || null;
+  }, [events, myTicketEventIds, festTick]);
 
   // === CONTENT HANDLERS ===
   const meHandle = profile?.name || 'you';
@@ -955,15 +977,22 @@ export default function App() {
         onToggleMembership={toggleCommunityMembership}
       />
     );
-    if (tab === 'map') return (
-      <MapScreen
-        events={events}
-        rsvp={eventRsvp}
-        onToggleRsvp={toggleEventRsvp}
-        tonightStatus={tonightStatus}
-        onOpenTonightStatus={() => setShowTonightModal(true)}
-      />
-    );
+    if (tab === 'map') {
+      if (festivalEvent && exitedFestivalId !== festivalEvent.id) {
+        return <FestivalMap event={festivalEvent} onExit={() => setExitedFestivalId(festivalEvent.id)} />;
+      }
+      return (
+        <MapScreen
+          events={events}
+          rsvp={eventRsvp}
+          onToggleRsvp={toggleEventRsvp}
+          tonightStatus={tonightStatus}
+          onOpenTonightStatus={() => setShowTonightModal(true)}
+          festivalEvent={festivalEvent && exitedFestivalId === festivalEvent.id ? festivalEvent : null}
+          onEnterFestival={() => setExitedFestivalId(null)}
+        />
+      );
+    }
     if (tab === 'events') return (
       <EventsScreen events={events} rsvp={eventRsvp} onToggleRsvp={toggleEventRsvp} onOpenEvent={(id) => setActiveEvent(id)} onCreateEvent={() => setShowCreateEvent(true)} />
     );
@@ -1184,7 +1213,19 @@ export default function App() {
         <CreateEventModal onCreate={addEvent} onClose={() => setShowCreateEvent(false)} />
       )}
       {ticketManagerEvent && (
-        <TicketManager event={ticketManagerEvent} onClose={() => setTicketManagerEvent(null)} />
+        <TicketManager
+          event={ticketManagerEvent}
+          onClose={() => setTicketManagerEvent(null)}
+          onEditVenueMap={() => { const ev = ticketManagerEvent; setTicketManagerEvent(null); setVenueEditorEvent(ev); }}
+        />
+      )}
+      {venueEditorEvent && (
+        <VenueMapEditor
+          event={venueEditorEvent}
+          me={{ id: meId }}
+          onClose={() => setVenueEditorEvent(null)}
+          onSaved={() => { fetchEvents(meId).then(({ events: ev }) => setEvents(ev)).catch(() => {}); }}
+        />
       )}
       {ticketSuccess && (
         <div className="absolute inset-0 z-[60] bg-black/80 flex items-center justify-center p-8" onClick={() => setTicketSuccess(false)}>
