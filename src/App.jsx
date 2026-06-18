@@ -9,7 +9,7 @@ import { fetchFollowing, followUser, unfollowUser, followSystemAccounts } from '
 import { fetchConversations, getOrCreateDM, createGroup, fetchMessages as fetchDMMessages, sendDM, markRead as dmMarkRead, setBuried as dmSetBuried, subscribeDMs } from './lib/db/dm';
 import { fetchActiveStories, postStory as dbPostStory, deleteStory } from './lib/db/stories';
 import { fetchListings, createListing } from './lib/db/listings';
-import { fetchPayoutStatus, startPayoutSetup } from './lib/db/payouts';
+import { fetchPayoutStatus, startPayoutSetup, refreshPayoutStatus } from './lib/db/payouts';
 import { listCrews, createCrew as dbCreateCrew, joinCrew as dbJoinCrew } from './lib/db/crews';
 import { fetchProfileState, saveProfileState } from './lib/db/profileState';
 import { fetchMyTicketEventIds } from './lib/db/festival';
@@ -282,11 +282,13 @@ export default function App() {
       }, 2500);
     }
     if (connect === 'done' && meId) {
-      const poll = (n) => fetchPayoutStatus(meId).then(p => {
+      // Pull status straight from Stripe for an instant update; retry a couple
+      // times in case the account is still settling, falling back to the DB read.
+      const refresh = (n) => refreshPayoutStatus(meId).then(p => {
         setPayoutStatus(p);
-        if (!p.enabled && n > 0) setTimeout(() => poll(n - 1), 2500);
-      }).catch(() => {});
-      setTimeout(() => poll(3), 1500);
+        if (!p.enabled && n > 0) setTimeout(() => refresh(n - 1), 2500);
+      }).catch(() => fetchPayoutStatus(meId).then(setPayoutStatus).catch(() => {}));
+      refresh(3);
     }
   }, [meId]);
 
