@@ -71,10 +71,9 @@ function UserOddityCard({ item, onOpen }) {
   );
 }
 
-function MarketplaceTab({ onOpenOddity, onCompose, userOddities = [] }) {
+function MarketplaceTab({ onOpenOddity, onCompose, listings = [] }) {
   const [category, setCategory] = useState('all');
-  const filtered = category === 'all' ? ODDITIES : ODDITIES.filter(o => o.category === category);
-  const userFiltered = category === 'all' ? userOddities : userOddities.filter(o => o.category === category);
+  const filtered = category === 'all' ? listings : listings.filter(o => o.category === category);
   return (
     <>
       <div className="px-4 pb-3 flex gap-1.5 overflow-x-auto no-scrollbar">
@@ -85,10 +84,17 @@ function MarketplaceTab({ onOpenOddity, onCompose, userOddities = [] }) {
             style={F.ui}>{c.label}</button>
         ))}
       </div>
-      <div className="px-3 grid grid-cols-2 gap-2 pb-12">
-        {userFiltered.map(item => <UserOddityCard key={item.id} item={item} onOpen={onOpenOddity} />)}
-        {filtered.map(item => <OddityCard key={item.id} item={item} onOpen={onOpenOddity} />)}
-      </div>
+      {filtered.length === 0 ? (
+        <div className="px-4 py-16 text-center text-[#A89968]/70" style={F.serif}>
+          <div className="text-3xl mb-3">⚱</div>
+          <p className="text-sm">{listings.length === 0 ? 'no wares yet.' : `nothing in ${category}.`}</p>
+          <button onClick={onCompose} className="mt-3 text-[10px] uppercase tracking-[0.2em] text-[#C9A961] hover:text-[#F5F1E8] transition-colors" style={F.ui}>· list the first ·</button>
+        </div>
+      ) : (
+        <div className="px-3 grid grid-cols-2 gap-2 pb-12">
+          {filtered.map(item => <OddityCard key={item.id} item={item} onOpen={onOpenOddity} />)}
+        </div>
+      )}
       <button onClick={onCompose} className="fixed bottom-6 right-6 z-10 w-14 h-14 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] flex items-center justify-center shadow-xl"
         style={{ boxShadow: '0 0 24px rgba(91, 15, 26, 0.6)' }}>
         <Plus size={22} />
@@ -178,7 +184,7 @@ function ShopsTab() {
   );
 }
 
-export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, userOddities = [] }) {
+export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, listings = [] }) {
   const [tab, setTab] = useState('market');
   return (
     <div className="absolute inset-0 z-40 bg-[#0A0608] animate-fade-in">
@@ -214,7 +220,7 @@ export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, userOddities
               <h1 className="text-[#C9A961] text-2xl mb-1" style={F.scripture}>The Marketplace</h1>
               <p className="text-[#A89968]/80 text-[11px] italic" style={F.scripture}>"objects with stories, sold by those who held them."</p>
             </div>
-            <MarketplaceTab onOpenOddity={onOpenOddity} onCompose={onCompose} userOddities={userOddities} />
+            <MarketplaceTab onOpenOddity={onOpenOddity} onCompose={onCompose} listings={listings} />
           </>)}
           {tab === 'wanted' && <WantedTab />}
           {tab === 'parlour' && <ParlourTab />}

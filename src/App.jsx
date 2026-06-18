@@ -8,6 +8,7 @@ import { insertProfile, updateProfile, getSystemAccountIds, getProfileStats, get
 import { fetchFollowing, followUser, unfollowUser, followSystemAccounts } from './lib/db/social';
 import { fetchConversations, getOrCreateDM, createGroup, fetchMessages as fetchDMMessages, sendDM, markRead as dmMarkRead, setBuried as dmSetBuried, subscribeDMs } from './lib/db/dm';
 import { fetchActiveStories, postStory as dbPostStory, deleteStory } from './lib/db/stories';
+import { fetchListings, createListing } from './lib/db/listings';
 import { FONT_HREF, F } from './styles/fonts';
 import { Header } from './components/shared/Header';
 import { BottomNav } from './components/shared/BottomNav';
@@ -128,7 +129,7 @@ export default function App() {
   const [sigils, setSigils] = useLocalStorage('sigils', []);
   const [following, setFollowing] = useState({}); // {handle: ts}, backed by follows table
   const [stories, setStories] = useState([]);
-  const [userOddities, setUserOddities] = useLocalStorage('userOddities', []);
+  const [listings, setListings] = useState([]);
   const [crewMessages, setCrewMessages] = useLocalStorage('crewMessages', {});
   const [muted, setMuted] = useLocalStorage('muted', {});
   const [crewRequests, setCrewRequests] = useLocalStorage('crewRequests', {});
@@ -227,6 +228,7 @@ export default function App() {
     }).catch(() => {});
     fetchConversations().then(c => { if (active) setConversations(c); }).catch(() => {});
     fetchActiveStories(meId).then(s => { if (active) setStories(s); }).catch(() => {});
+    fetchListings(meId).then(l => { if (active) setListings(l); }).catch(() => {});
     return () => { active = false; };
   }, [meId, dbProfile]);
 
@@ -624,9 +626,12 @@ export default function App() {
     deleteStory(id).catch(() => {});
   };
 
-  const addOddity = (oddity) => {
-    const entry = { id: `o${Date.now()}`, ...oddity, seller: meHandle, sellerAvatar: meAvatar, postedAt: Date.now() };
-    setUserOddities(prev => [entry, ...prev]);
+  const addOddity = async (data) => {
+    if (!meId) return;
+    try {
+      const saved = await createListing(data, { id: meId, handle: meHandle, avatar: meAvatar });
+      setListings(prev => [saved, ...prev]);
+    } catch { /* ignore */ }
   };
 
   const sendCrewMessage = (crewId, body) => {
@@ -1268,11 +1273,16 @@ export default function App() {
           onClose={() => setActivePortal('menu')}
           onOpenOddity={(id) => setActiveOddity(id)}
           onCompose={() => setShowOddityCompose(true)}
-          userOddities={userOddities}
+          listings={listings}
         />
       )}
       {activeOddity && (
-        <OddityDetail id={activeOddity} onBack={() => setActiveOddity(null)} />
+        <OddityDetail
+          item={listings.find(l => l.id === activeOddity)}
+          onWhisper={(h) => { setActiveOddity(null); setActivePortal(null); openDMWithUser(h); }}
+          onOpenUser={(h) => { setActiveOddity(null); setActivePortal(null); if (h && h !== meHandle) setActiveUserHandle(h); }}
+          onBack={() => setActiveOddity(null)}
+        />
       )}
       {showOddityCompose && (
         <OddityCompose
