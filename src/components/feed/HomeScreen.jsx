@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { MessageCircle, MoreHorizontal, Eye, Bookmark, Trash2, Flame, EyeOff, Repeat, Pin } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { TONIGHT_OUT } from '../../data/users';
