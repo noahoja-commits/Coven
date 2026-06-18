@@ -1,0 +1,74 @@
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { getProfileById } from '../lib/db/profiles';
+
+const AuthCtx = createContext(null);
+export function useAuth() { return useContext(AuthCtx); }
+
+export function AuthProvider({ children }) {
+  const [session, setSession] = useState(null);
+  const [dbProfile, setDbProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const loadProfile = useCallback(async (uid) => {
+    if (!uid) { setDbProfile(null); return; }
+    try { setDbProfile(await getProfileById(uid)); }
+    catch { setDbProfile(null); }
+  }, []);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) { setLoading(false); return; }
+    let active = true;
+
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!active) return;
+      setSession(data.session);
+      await loadProfile(data.session?.user?.id);
+      // strip the magic-link token from the URL once parsed
+      if (window.location.hash.includes('access_token')) {
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+      setLoading(false);
+    })();
+
+    // Defer profile loads out of the auth callback (supabase-js warns against
+    // calling its own client synchronously inside onAuthStateChange).
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
+      setSession(sess);
+      setTimeout(() => { if (active) loadProfile(sess?.user?.id); }, 0);
+    });
+
+    return () => { active = false; sub.subscription.unsubscribe(); };
+  }, [loadProfile]);
+
+  const signInWithEmail = useCallback(
+    (email) => supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: window.location.origin },
+    }),
+    []
+  );
+
+  const signOut = useCallback(async () => {
+    await supabase.auth.signOut();
+    setDbProfile(null);
+  }, []);
+
+  const refreshProfile = useCallback(
+    () => loadProfile(session?.user?.id),
+    [loadProfile, session]
+  );
+
+  const value = {
+    configured: isSupabaseConfigured,
+    session,
+    userId: session?.user?.id || null,
+    dbProfile,
+    loading,
+    signInWithEmail,
+    signOut,
+    refreshProfile,
+  };
+  return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
+}

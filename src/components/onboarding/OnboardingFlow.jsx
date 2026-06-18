@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ChevronRight, ChevronLeft, Loader2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
+import { checkHandleAvailable } from '../../lib/db/profiles';
 
 const GLYPHS = ['🦇', '✟', '☠', '🌹', '🩸', '⚰', '✶', '⛧', '☩', '⚱', '✦', '⌬', '☾', '✽', '⚜'];
 const SCENES = [
@@ -23,18 +24,48 @@ export function OnboardingFlow({ onComplete }) {
   const [birthday, setBirthday] = useState('');
   const [scenes, setScenes] = useState([]);
   const [vibes, setVibes] = useState([]);
+  const [handleStatus, setHandleStatus] = useState('idle'); // idle|checking|free|taken
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const checkSeq = useRef(0);
   const totalSteps = 5;
+
+  // Debounced live handle-availability check.
+  useEffect(() => {
+    const h = handle.trim().toLowerCase();
+    if (h.length < 2) { setHandleStatus('idle'); return; }
+    setHandleStatus('checking');
+    const seq = ++checkSeq.current;
+    const t = setTimeout(async () => {
+      try {
+        const free = await checkHandleAvailable(h);
+        if (seq === checkSeq.current) setHandleStatus(free ? 'free' : 'taken');
+      } catch {
+        if (seq === checkSeq.current) setHandleStatus('idle');
+      }
+    }, 400);
+    return () => clearTimeout(t);
+  }, [handle]);
 
   const toggle = (arr, set, id) => set(arr.includes(id) ? arr.filter(x => x !== id) : [...arr, id]);
   const canAdvance = () => {
-    if (step === 1) return name.trim() && handle.trim();
+    if (step === 1) return name.trim() && handle.trim().length >= 2 && handleStatus !== 'taken' && handleStatus !== 'checking';
     if (step === 2) return scenes.length >= 1;
     if (step === 3) return city.trim() && birthday;
     return true;
   };
 
-  const finish = () => {
-    onComplete({ name: name.trim(), handle: handle.trim().toLowerCase().replace(/\s/g, '_'), glyph, city: city.trim(), birthday, scenes, vibes });
+  const finish = async () => {
+    if (submitting) return;
+    setSubmitting(true); setError('');
+    try {
+      await onComplete({ name: name.trim(), handle: handle.trim().toLowerCase().replace(/\s/g, '_'), glyph, city: city.trim(), birthday, scenes, vibes });
+    } catch (e) {
+      setError(e?.message === 'handle taken' ? 'that handle was just taken — pick another' : (e?.message || 'something went wrong'));
+      setHandleStatus('taken');
+      setSubmitting(false);
+      setStep(1);
+    }
   };
 
   return (
@@ -52,6 +83,8 @@ export function OnboardingFlow({ onComplete }) {
           <span key={i} className={`h-[2px] transition-all duration-500 ${i === step ? 'w-8 bg-[#8B0000]' : i < step ? 'w-4 bg-[#5B0F1A]' : 'w-4 bg-[#2A2A2A]'}`} />
         ))}
       </div>
+
+      {error && <div className="relative px-6 mt-3 text-center text-[11px] text-[#8B0000]" style={F.ui}>{error}</div>}
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-6 pt-8 pb-32">
@@ -88,6 +121,9 @@ export function OnboardingFlow({ onComplete }) {
                     className="flex-1 bg-transparent outline-none p-3 text-[#F5F1E8]"
                     style={F.mono} />
                 </div>
+                {handleStatus === 'checking' && <p className="text-[10px] text-[#6B6B6B] mt-1.5" style={F.ui}>checking…</p>}
+                {handleStatus === 'free' && <p className="text-[10px] text-[#C9A961] mt-1.5" style={F.ui}>@{handle} is yours</p>}
+                {handleStatus === 'taken' && <p className="text-[10px] text-[#8B0000] mt-1.5" style={F.ui}>@{handle} is already taken</p>}
               </div>
               <div>
                 <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2 block" style={F.scriptureSC}>· your sigil ·</label>
@@ -189,9 +225,9 @@ export function OnboardingFlow({ onComplete }) {
             {step === 0 ? 'enter' : 'continue'} <ChevronRight size={14} />
           </button>
         ) : (
-          <button onClick={finish}
-            className="ml-auto px-5 py-2.5 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] text-xs uppercase tracking-[0.2em]"
-            style={F.ui}>begin</button>
+          <button onClick={finish} disabled={submitting}
+            className="ml-auto px-5 py-2.5 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] text-xs uppercase tracking-[0.2em] disabled:opacity-40 flex items-center gap-2"
+            style={F.ui}>{submitting ? <><Loader2 size={14} className="animate-spin" /> entering</> : 'begin'}</button>
         )}
       </div>
     </div>

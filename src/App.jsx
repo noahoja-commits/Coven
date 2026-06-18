@@ -1,6 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import { FONT_HREF } from './styles/fonts';
+import { useAuth } from './auth/AuthProvider';
+import { isSupabaseConfigured } from './lib/supabase';
+import { SignInScreen } from './components/auth/SignInScreen';
+import { fetchFeed, createPost, deletePost as dbDeletePost, togglePostReaction, fetchComments, createComment } from './lib/db/posts';
+import { insertProfile, updateProfile, getSystemAccountIds, getProfileStats, getProfileByHandle } from './lib/db/profiles';
+import { fetchFollowing, followUser, unfollowUser, followSystemAccounts } from './lib/db/social';
+import { FONT_HREF, F } from './styles/fonts';
 import { Header } from './components/shared/Header';
 import { BottomNav } from './components/shared/BottomNav';
 import { DMsOverlay } from './components/shared/DMsOverlay';
@@ -57,6 +63,11 @@ import { VespersArchiveModal } from './components/feed/VespersArchiveModal';
 import { DEFAULT_PROFILE, GRAVES, ANNIVERSARIES, DEFAULT_TRACKERS, TRACKER_CATEGORIES } from './data/profile';
 
 export default function App() {
+  // === AUTH ===
+  const { loading: authLoading, session, userId, dbProfile, signOut, refreshProfile } = useAuth();
+  const meId = userId;
+  const followIdByHandle = useRef({});
+
   // === STATE ===
   const [tab, setTab] = useState('home');
   const [community, setCommunity] = useState(null);
@@ -88,20 +99,14 @@ export default function App() {
   const [showOddityCompose, setShowOddityCompose] = useState(false);
   const [activePostComments, setActivePostComments] = useState(null);
 
-  const [onboarded, setOnboarded] = useLocalStorage('onboarded', true);
-  const [profile, setProfile] = useLocalStorage('profile', DEFAULT_PROFILE);
+  const [profile, setProfile] = useState(null); // mapped from the Supabase profile row
   const [tonightStatus, setTonightStatus] = useLocalStorage('tonightStatus', { text: DEFAULT_PROFILE.status, setAt: Date.now(), expiresAt: Date.now() + 1000 * 60 * 60 * 12 });
   const [trackers, setTrackers] = useLocalStorage('trackers', DEFAULT_TRACKERS);
   const [notifications, setNotifications] = useLocalStorage('notifications', NOTIFICATIONS);
   const [settings, setSettings] = useLocalStorage('settings', DEFAULT_SETTINGS);
 
-  // Live content state
-  const [posts, setPosts] = useLocalStorage('posts', POSTS.map(p => ({
-    ...p,
-    myReactions: {},
-    baseCommentCount: typeof p.comments === 'number' ? p.comments : 0,
-    comments: [],
-  })));
+  // Live content state (Supabase-backed)
+  const [posts, setPosts] = useState([]);
   const [conversations, setConversations] = useLocalStorage('conversations', CONVERSATIONS);
   const [messages, setMessages] = useLocalStorage('messages', MESSAGES);
   const [communityMembership, setCommunityMembership] = useLocalStorage('communityMembership', { general: true, goth: true });
@@ -109,7 +114,7 @@ export default function App() {
   const [bookmarks, setBookmarks] = useLocalStorage('bookmarks', {});
   const [graves, setGraves] = useLocalStorage('graves', GRAVES);
   const [sigils, setSigils] = useLocalStorage('sigils', []);
-  const [following, setFollowing] = useLocalStorage('following', {});
+  const [following, setFollowing] = useState({}); // {handle: ts}, backed by follows table
   const [myStories, setMyStories] = useLocalStorage('myStories', []);
   const [userOddities, setUserOddities] = useLocalStorage('userOddities', []);
   const [crewMessages, setCrewMessages] = useLocalStorage('crewMessages', {});
@@ -169,6 +174,53 @@ export default function App() {
     return () => clearInterval(t);
   }, [tonightStatus]);
 
+  // Map the Supabase profile row -> the UI profile shape, then load real counts.
+  useEffect(() => {
+    if (!dbProfile) { setProfile(null); return; }
+    setProfile({
+      id: dbProfile.id,
+      name: dbProfile.handle,
+      avatar: dbProfile.avatar,
+      pronouns: dbProfile.pronouns || '',
+      bio: dbProfile.bio || '',
+      tags: dbProfile.tags || [],
+      scenes: dbProfile.scenes || [],
+      birthday: dbProfile.birthday || null,
+      city: dbProfile.city || '',
+      scene: dbProfile.city || '',
+      joinedScene: dbProfile.created_at,
+      followers: 0, following: 0, posts: 0,
+      status: null,
+    });
+    getProfileStats(dbProfile.id)
+      .then(s => setProfile(p => (p ? { ...p, ...s } : p)))
+      .catch(() => {});
+  }, [dbProfile]);
+
+  // Load the feed + follow graph once we have an identity.
+  useEffect(() => {
+    if (!meId || !dbProfile) return;
+    let active = true;
+    fetchFeed(meId).then(rows => { if (active) setPosts(rows); }).catch(() => {});
+    fetchFollowing(meId).then(({ map, idByHandle }) => {
+      if (!active) return;
+      setFollowing(map);
+      followIdByHandle.current = idByHandle;
+    }).catch(() => {});
+    return () => { active = false; };
+  }, [meId, dbProfile]);
+
+  // Lazy-load a thread's comments when it opens (base count -> 0 to avoid double-count).
+  useEffect(() => {
+    if (!activePostComments || String(activePostComments).startsWith('temp-')) return;
+    const pid = activePostComments;
+    let active = true;
+    fetchComments(pid, meId).then(list => {
+      if (active) setPosts(prev => prev.map(p => (p.id === pid ? { ...p, comments: list, baseCommentCount: 0 } : p)));
+    }).catch(() => {});
+    return () => { active = false; };
+  }, [activePostComments, meId]);
+
   // === HANDLERS ===
   const updateTracker = (catId, action) => {
     const cat = TRACKER_CATEGORIES.find(c => c.id === catId);
@@ -200,25 +252,32 @@ export default function App() {
   const meHandle = profile?.name || 'you';
   const meAvatar = profile?.avatar || '✟';
 
-  const addPost = ({ body, community, anonymous, poll }) => {
-    const id = `p${Date.now()}`;
-    const newPost = {
-      id, kind: poll ? 'poll' : 'text',
+  const addPost = async ({ body, community, anonymous, poll }) => {
+    if (!meId) return;
+    const tempId = `temp-${Date.now()}`;
+    const optimistic = {
+      id: tempId, kind: poll ? 'poll' : 'text',
       user: anonymous ? 'anonymous' : meHandle,
       avatar: anonymous ? '✟' : meAvatar,
       time: 'just now',
       community: community || 'general', body,
       reactions: { bat: 0, fire: 0, skull: 0, smoke: 0 }, comments: [], myReactions: {},
-      mine: true, anonymous: !!anonymous,
+      mine: !anonymous, anonymous: !!anonymous, baseCommentCount: 0, pending: true,
     };
     if (poll) {
-      newPost.poll = {
+      optimistic.poll = {
         options: poll.map((label, i) => ({ id: `po${i}`, label, votes: 0 })),
         myVote: null,
       };
     }
-    setPosts(prev => [newPost, ...prev]);
-    logActivity({ kind: 'post', glyph: anonymous ? '✟' : '✦', label: anonymous ? 'confessed' : 'posted', detail: body.length > 60 ? body.slice(0, 60) + '…' : body, postId: id });
+    setPosts(prev => [optimistic, ...prev]);
+    logActivity({ kind: 'post', glyph: anonymous ? '✟' : '✦', label: anonymous ? 'confessed' : 'posted', detail: body.length > 60 ? body.slice(0, 60) + '…' : body, postId: tempId });
+    try {
+      const saved = await createPost({ body, community, anonymous, poll }, { id: meId, handle: meHandle, avatar: meAvatar });
+      setPosts(prev => prev.map(p => (p.id === tempId ? saved : p)));
+    } catch (e) {
+      setPosts(prev => prev.filter(p => p.id !== tempId));
+    }
   };
 
   const voteOnPoll = (postId, optionId) => {
@@ -243,10 +302,9 @@ export default function App() {
     }));
   };
 
-  const reactToPost = (postId, kind) => {
+  const flipReaction = (postId, kind, wasMine) => {
     setPosts(prev => prev.map(p => {
       if (p.id !== postId) return p;
-      const wasMine = !!(p.myReactions && p.myReactions[kind]);
       return {
         ...p,
         reactions: { ...p.reactions, [kind]: Math.max(0, (p.reactions?.[kind] || 0) + (wasMine ? -1 : 1)) },
@@ -254,15 +312,25 @@ export default function App() {
       };
     }));
   };
+  const reactToPost = (postId, kind) => {
+    const current = posts.find(p => p.id === postId);
+    const wasMine = !!(current?.myReactions && current.myReactions[kind]);
+    flipReaction(postId, kind, wasMine);
+    if (meId && !String(postId).startsWith('temp-')) {
+      togglePostReaction(postId, kind, meId, wasMine).catch(() => flipReaction(postId, kind, !wasMine));
+    }
+  };
 
   const addComment = (postId, body, parentId = null) => {
-    setPosts(prev => prev.map(p => {
-      if (p.id !== postId) return p;
-      const newComment = { id: `cm${Date.now()}`, user: meHandle, avatar: meAvatar, body, time: 'just now', mine: true, parentId, reactions: { heart: 0, skull: 0 }, myReactions: {} };
-      return { ...p, comments: [...(p.comments || []), newComment] };
-    }));
+    if (!meId || String(postId).startsWith('temp-')) return;
+    const tempId = `tempc-${Date.now()}`;
+    const optimistic = { id: tempId, user: meHandle, avatar: meAvatar, body, time: 'just now', mine: true, parentId, reactions: { heart: 0, skull: 0 }, myReactions: {}, pending: true };
+    setPosts(prev => prev.map(p => (p.id === postId ? { ...p, comments: [...(p.comments || []), optimistic] } : p)));
     const target = posts.find(p => p.id === postId);
     logActivity({ kind: 'comment', glyph: '✎', label: `commented on ${target?.user || 'a post'}`, detail: body.length > 60 ? body.slice(0, 60) + '…' : body, postId });
+    createComment({ postId, body, parentId }, { id: meId, handle: meHandle, avatar: meAvatar })
+      .then(saved => setPosts(prev => prev.map(p => (p.id === postId ? { ...p, comments: (p.comments || []).map(c => (c.id === tempId ? saved : c)) } : p))))
+      .catch(() => setPosts(prev => prev.map(p => (p.id === postId ? { ...p, comments: (p.comments || []).filter(c => c.id !== tempId) } : p))));
   };
 
   const reactToComment = (postId, commentId, kind) => {
@@ -326,20 +394,27 @@ export default function App() {
 
   const deletePost = (postId) => {
     setPosts(prev => prev.filter(p => p.id !== postId));
+    if (meId && !String(postId).startsWith('temp-')) dbDeletePost(postId).catch(() => {});
   };
 
-  const repostPost = (originalId, commentary = '') => {
+  const repostPost = async (originalId, commentary = '') => {
     const original = posts.find(p => p.id === originalId);
-    if (!original) return;
-    const id = `p${Date.now()}`;
+    if (!original || !meId) return;
+    const quoted = { id: original.id, user: original.user, avatar: original.avatar, body: original.body, kind: original.kind, community: original.community };
+    const tempId = `temp-${Date.now()}`;
     setPosts(prev => [{
-      id, kind: 'repost', user: meHandle, avatar: meAvatar, time: 'just now',
+      id: tempId, kind: 'repost', user: meHandle, avatar: meAvatar, time: 'just now',
       community: original.community, body: commentary,
       reactions: { bat: 0, fire: 0, skull: 0, smoke: 0 }, comments: [], myReactions: {},
-      mine: true,
-      quoted: { id: original.id, user: original.user, avatar: original.avatar, body: original.body, kind: original.kind, community: original.community },
+      mine: true, baseCommentCount: 0, pending: true, quoted,
     }, ...prev]);
     logActivity({ kind: 'repost', glyph: '↻', label: `reposted ${original.user}`, detail: commentary || original.body?.slice(0, 60) });
+    try {
+      const saved = await createPost({ body: commentary, community: original.community, quoted, kind: 'repost' }, { id: meId, handle: meHandle, avatar: meAvatar });
+      setPosts(prev => prev.map(p => (p.id === tempId ? saved : p)));
+    } catch (e) {
+      setPosts(prev => prev.filter(p => p.id !== tempId));
+    }
   };
 
   const toggleBookmark = (postId) => {
@@ -404,9 +479,11 @@ export default function App() {
   };
 
   const toggleFollow = (handle) => {
+    if (!handle || handle === meHandle) return;
+    const wasFollowing = !!following[handle];
     setFollowing(prev => {
       const next = { ...prev };
-      if (next[handle]) delete next[handle];
+      if (wasFollowing) delete next[handle];
       else {
         next[handle] = Date.now();
         addNotification({ kind: 'follow', user: handle, avatar: '✦', text: `you followed ${handle}` });
@@ -414,6 +491,26 @@ export default function App() {
       }
       return next;
     });
+    if (!meId) return;
+    (async () => {
+      let followeeId = followIdByHandle.current[handle];
+      if (!followeeId) {
+        try { followeeId = (await getProfileByHandle(handle))?.id; } catch { followeeId = null; }
+        if (followeeId) followIdByHandle.current[handle] = followeeId;
+      }
+      if (!followeeId) return; // seed-only handle with no real account — local-only
+      try {
+        if (wasFollowing) await unfollowUser(meId, followeeId);
+        else await followUser(meId, followeeId);
+      } catch {
+        // revert on failure
+        setFollowing(prev => {
+          const next = { ...prev };
+          if (wasFollowing) next[handle] = Date.now(); else delete next[handle];
+          return next;
+        });
+      }
+    })();
   };
 
   const postStory = (story) => {
@@ -555,19 +652,71 @@ export default function App() {
     }
   };
 
-  const handleOnboard = (data) => {
-    setProfile(p => ({
-      ...p,
-      name: data.handle,
-      bio: data.vibes.length > 0 ? data.vibes.join(' · ') + ' · ' + data.city : data.city,
-      birthday: data.birthday || p.birthday,
-      tags: [...new Set(['goth', ...data.vibes.slice(0, 3)])],
-    }));
-    setOnboarded(true);
+  const handleOnboard = async (data) => {
+    if (!userId) return;
+    try {
+      await insertProfile({
+        id: userId,
+        handle: data.handle,
+        avatar: data.glyph || '✦',
+        city: data.city || '',
+        birthday: data.birthday || null,
+        tags: [...new Set(['goth', ...(data.vibes || []).slice(0, 3)])],
+        scenes: data.scenes || [],
+        bio: (data.vibes || []).length ? data.vibes.join(' · ') + ' · ' + data.city : (data.city || ''),
+      });
+    } catch (e) {
+      if (e?.code === '23505') throw new Error('handle taken');
+      throw e;
+    }
+    try {
+      const sys = await getSystemAccountIds();
+      await followSystemAccounts(userId, sys);
+    } catch { /* non-fatal */ }
+    await refreshProfile();
+  };
+
+  const saveProfile = async (next) => {
+    setProfile(next); // optimistic
+    if (!meId) return;
+    try {
+      await updateProfile(meId, {
+        handle: next.name,
+        avatar: next.avatar,
+        pronouns: next.pronouns || '',
+        bio: next.bio || '',
+        tags: next.tags || [],
+        city: next.city || next.scene || '',
+        birthday: next.birthday || null,
+      });
+      await refreshProfile();
+    } catch {
+      await refreshProfile(); // revert to server truth on failure (e.g. handle taken)
+    }
   };
 
   // === RENDER ===
-  if (!onboarded) {
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="phone-frame max-w-md mx-auto bg-[#0A0A0A] text-[#F5F1E8] flex items-center justify-center min-h-[100dvh] px-8 text-center">
+        <div>
+          <div className="text-[#C9A961] text-4xl mb-4" style={F.brand}>Coven</div>
+          <p className="text-[#A8A29E] text-sm" style={F.serif}>backend not configured — set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY, then reload.</p>
+        </div>
+      </div>
+    );
+  }
+  if (authLoading || (session && dbProfile && !profile)) {
+    return (
+      <div className="phone-frame max-w-md mx-auto bg-[#0A0A0A] text-[#C9A961] flex items-center justify-center min-h-[100dvh]">
+        <div className="text-5xl animate-pulse-slow" style={F.brand}>Coven</div>
+      </div>
+    );
+  }
+  if (!session) {
+    return <SignInScreen />;
+  }
+  if (!dbProfile) {
     return (
       <div className="phone-frame max-w-md mx-auto bg-black text-[#F5F1E8] relative overflow-hidden">
         <OnboardingFlow onComplete={handleOnboard} />
@@ -818,7 +967,7 @@ export default function App() {
       {showEditProfile && (
         <ProfileEditModal
           profile={profile}
-          onSave={setProfile}
+          onSave={saveProfile}
           onClose={() => setShowEditProfile(false)}
         />
       )}
@@ -919,8 +1068,7 @@ export default function App() {
           settings={settings}
           onChange={setSettings}
           onBack={() => setShowSettings(false)}
-          onLogout={() => { setOnboarded(false); setShowSettings(false); }}
-          onRerunOnboarding={() => { setOnboarded(false); setShowSettings(false); }}
+          onLogout={() => { setShowSettings(false); signOut(); }}
           mutedKeywords={mutedKeywords}
           onSetMutedKeywords={setMutedKeywords}
         />
