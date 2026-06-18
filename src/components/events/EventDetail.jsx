@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, MapPin, Calendar, Users, Share2 } from 'lucide-react';
+import { ArrowLeft, Check, MapPin, Calendar, Users, Share2, Ticket } from 'lucide-react';
 import { F } from '../../styles/fonts';
 
 const COVERS = {
@@ -7,7 +7,7 @@ const COVERS = {
   black: 'linear-gradient(135deg, #1F1F1F 0%, #0A0A0A 100%)',
 };
 
-export function EventDetail({ event, isGoing, onToggleRsvp, onBack, onOpenUser, attendees = [], meHandle }) {
+export function EventDetail({ event, isGoing, onToggleRsvp, onBack, onOpenUser, attendees = [], meHandle, onBuy, onManageTickets }) {
   if (!event) return null;
 
   const cover = COVERS[event.cover] || COVERS.red;
@@ -15,6 +15,9 @@ export function EventDetail({ event, isGoing, onToggleRsvp, onBack, onOpenUser, 
   const goingCount = (event.going || 0) + (isGoing ? 1 : 0);
   const shown = others.slice(0, 12);
   const overflow = Math.max(0, goingCount - shown.length - (isGoing ? 1 : 0));
+  const paid = event.ticketed && event.priceCents > 0;
+  const soldOut = paid && event.capacity != null && event.sold >= event.capacity;
+  const priceLabel = `$${(event.priceCents / 100) % 1 === 0 ? (event.priceCents / 100).toFixed(0) : (event.priceCents / 100).toFixed(2)}`;
 
   return (
     <div className="absolute inset-0 z-40 bg-[#0A0A0A] animate-slide-in-right overflow-y-auto pb-12">
@@ -107,13 +110,29 @@ export function EventDetail({ event, isGoing, onToggleRsvp, onBack, onOpenUser, 
         )}
       </div>
 
-      {/* RSVP CTA */}
+      {/* CTA */}
       <div className="px-4 pt-4 sticky bottom-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A] to-transparent pb-4">
-        <button onClick={() => onToggleRsvp && onToggleRsvp(event.id)}
-          className={`w-full py-3 text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-2 ${isGoing ? 'bg-[#5B0F1A] text-[#F5F1E8]' : 'bg-[#8B0000] text-[#F5F1E8] hover:bg-[#5B0F1A]'}`}
-          style={F.ui}>
-          {isGoing ? <><Check size={14} /> going</> : 'rsvp · i’m going'}
-        </button>
+        {paid ? (
+          event.mine ? (
+            <button onClick={() => onManageTickets && onManageTickets(event)}
+              className="w-full py-3 text-xs uppercase tracking-[0.3em] bg-[#5B0F1A] hover:bg-[#8B0000] text-[#F5F1E8] transition-colors flex items-center justify-center gap-2" style={F.ui}>
+              <Ticket size={14} /> {event.sold} sold · door list
+            </button>
+          ) : soldOut ? (
+            <button disabled className="w-full py-3 text-xs uppercase tracking-[0.3em] bg-[#1A1A1A] text-[#6B6B6B] cursor-not-allowed" style={F.ui}>sold out</button>
+          ) : (
+            <button onClick={() => onBuy && onBuy(event.id)}
+              className="w-full py-3 text-xs uppercase tracking-[0.3em] bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] transition-colors flex items-center justify-center gap-2" style={F.ui}>
+              <Ticket size={14} /> buy ticket · {priceLabel}
+            </button>
+          )
+        ) : (
+          <button onClick={() => onToggleRsvp && onToggleRsvp(event.id)}
+            className={`w-full py-3 text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-2 ${isGoing ? 'bg-[#5B0F1A] text-[#F5F1E8]' : 'bg-[#8B0000] text-[#F5F1E8] hover:bg-[#5B0F1A]'}`}
+            style={F.ui}>
+            {isGoing ? <><Check size={14} /> going</> : 'rsvp · i’m going'}
+          </button>
+        )}
       </div>
     </div>
   );

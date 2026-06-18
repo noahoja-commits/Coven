@@ -20,9 +20,13 @@ export function CreateEventModal({ onCreate, onClose }) {
   const [cover, setCover] = useState('red');
   const [tags, setTags] = useState('');
   const [description, setDescription] = useState('');
+  const [ticketed, setTicketed] = useState(false);
+  const [price, setPrice] = useState('');
+  const [capacity, setCapacity] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const valid = name.trim().length > 1;
+  const priceNum = parseFloat(price || '0');
+  const valid = name.trim().length > 1 && (!ticketed || priceNum > 0);
 
   const submit = async () => {
     if (!valid || saving) return;
@@ -37,6 +41,9 @@ export function CreateEventModal({ onCreate, onClose }) {
         cover,
         tags: tags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean).slice(0, 6),
         description: description.trim(),
+        ticketed,
+        priceCents: ticketed ? Math.round(priceNum * 100) : 0,
+        capacity: capacity ? parseInt(capacity, 10) : null,
       });
       onClose();
     } catch {
@@ -80,6 +87,31 @@ export function CreateEventModal({ onCreate, onClose }) {
           <div>
             <label className={label} style={F.scriptureSC}>· tags · (comma separated)</label>
             <input value={tags} onChange={e => setTags(e.target.value)} placeholder="darkwave, goth, 18+" className={field} style={F.serif} />
+          </div>
+
+          <div className="border border-[#2A2A2A] p-3 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[#F5F1E8] text-sm" style={F.serif}>Sell tickets</span>
+              <button type="button" onClick={() => setTicketed(v => !v)}
+                className={`relative w-10 h-5 rounded-full transition-colors ${ticketed ? 'bg-[#5B0F1A]' : 'bg-[#2A2A2A]'}`}>
+                <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-[#F5F1E8] transition-all ${ticketed ? 'left-5' : 'left-0.5'}`} />
+              </button>
+            </div>
+            {ticketed && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={label} style={F.scriptureSC}>· price (USD) ·</label>
+                  <div className="flex items-center bg-[#0A0A0A] border border-[#2A2A2A] focus-within:border-[#5B0F1A]">
+                    <span className="pl-2.5 text-[#6B6B6B]" style={F.mono}>$</span>
+                    <input type="number" min="0" step="1" value={price} onChange={e => setPrice(e.target.value)} placeholder="15" className="flex-1 bg-transparent outline-none p-2.5 text-[#F5F1E8] text-sm" style={F.serif} />
+                  </div>
+                </div>
+                <div>
+                  <label className={label} style={F.scriptureSC}>· capacity ·</label>
+                  <input type="number" min="1" value={capacity} onChange={e => setCapacity(e.target.value)} placeholder="∞" className={field} style={F.serif} />
+                </div>
+              </div>
+            )}
           </div>
           <div>
             <label className={label} style={F.scriptureSC}>· poster mood ·</label>

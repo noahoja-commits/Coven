@@ -29,6 +29,11 @@ function hydrateEvent(row, myRsvpSet, myId) {
     hostId: row.host_id,
     going: Math.max(0, (row.going || 0) - (isGoing ? 1 : 0)),
     mine: !!myId && row.host_id === myId,
+    ticketed: !!row.ticketed,
+    priceCents: row.price_cents || 0,
+    currency: row.currency || 'usd',
+    capacity: row.capacity ?? null,
+    sold: row.sold || 0,
   };
 }
 
@@ -62,6 +67,10 @@ export async function createEvent(data, host) {
     cover: data.cover || 'red',
     tags: data.tags || [],
     description: data.description || '',
+    ticketed: !!data.ticketed,
+    price_cents: data.ticketed ? (data.priceCents || 0) : 0,
+    currency: data.currency || 'usd',
+    capacity: data.capacity ?? null,
   };
   const { data: row, error } = await supabase.from('events').insert(insert).select().single();
   if (error) throw error;

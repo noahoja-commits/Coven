@@ -32,6 +32,8 @@ import { AddGraveModal } from './components/profile/AddGraveModal';
 import { AddAnniversaryModal } from './components/profile/AddAnniversaryModal';
 import { EventDetail } from './components/events/EventDetail';
 import { CreateEventModal } from './components/events/CreateEventModal';
+import { TicketManager } from './components/events/TicketManager';
+import { startCheckout } from './lib/db/tickets';
 import { NowPlayingModal } from './components/profile/NowPlayingModal';
 import { NewGroupDMModal } from './components/shared/NewGroupDMModal';
 import { ReflectionsModal } from './components/profile/ReflectionsModal';
@@ -115,6 +117,8 @@ export default function App() {
   const [events, setEvents] = useState([]);
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [activeEventAttendees, setActiveEventAttendees] = useState([]);
+  const [ticketManagerEvent, setTicketManagerEvent] = useState(null);
+  const [ticketSuccess, setTicketSuccess] = useState(false);
   const [bookmarks, setBookmarks] = useLocalStorage('bookmarks', {});
   const [graves, setGraves] = useLocalStorage('graves', GRAVES);
   const [sigils, setSigils] = useLocalStorage('sigils', []);
@@ -218,6 +222,20 @@ export default function App() {
     }).catch(() => {});
     return () => { active = false; };
   }, [meId, dbProfile]);
+
+  // Returning from Stripe Checkout: confirm + refresh sold counts (webhook is async).
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const t = params.get('ticket');
+    if (!t) return;
+    history.replaceState(null, '', window.location.pathname);
+    if (t === 'success') {
+      setTicketSuccess(true);
+      if (meId) setTimeout(() => {
+        fetchEvents(meId).then(({ events, rsvp }) => { setEvents(events); setEventRsvp(rsvp); }).catch(() => {});
+      }, 2500);
+    }
+  }, [meId]);
 
   // Load an event's attendees when its detail opens.
   useEffect(() => {
@@ -427,6 +445,13 @@ export default function App() {
     const saved = await createEvent(data, { id: meId, handle: meHandle, avatar: meAvatar });
     setEvents(prev => [saved, ...prev]);
     logActivity({ kind: 'event', glyph: '◈', label: 'hosted a rite', detail: data.name });
+  };
+
+  const buyTicket = (eventId) => {
+    if (!meId) return;
+    startCheckout(eventId, meId).catch(e => {
+      addNotification({ kind: 'event', avatar: '✖', text: `checkout unavailable — ${e.message}` });
+    });
   };
 
   const deletePost = (postId) => {
@@ -1055,12 +1080,27 @@ export default function App() {
           onToggleRsvp={toggleEventRsvp}
           attendees={activeEventAttendees}
           meHandle={meHandle}
+          onBuy={buyTicket}
+          onManageTickets={(ev) => setTicketManagerEvent(ev)}
           onOpenUser={(h) => { setActiveEvent(null); setActiveUserHandle(h); }}
           onBack={() => setActiveEvent(null)}
         />
       )}
       {showCreateEvent && (
         <CreateEventModal onCreate={addEvent} onClose={() => setShowCreateEvent(false)} />
+      )}
+      {ticketManagerEvent && (
+        <TicketManager event={ticketManagerEvent} onClose={() => setTicketManagerEvent(null)} />
+      )}
+      {ticketSuccess && (
+        <div className="absolute inset-0 z-[60] bg-black/80 flex items-center justify-center p-8" onClick={() => setTicketSuccess(false)}>
+          <div className="bg-[#0F0F0F] border border-[#2A2A2A] p-8 text-center max-w-xs" onClick={e => e.stopPropagation()}>
+            <div className="text-5xl mb-3">🎟</div>
+            <div className="text-[#C9A961] text-lg mb-1" style={F.display}>TICKET SECURED</div>
+            <p className="text-[#A8A29E] text-sm" style={F.serif}>your spot is held. see you in the dark.</p>
+            <button onClick={() => setTicketSuccess(false)} className="mt-5 text-[10px] uppercase tracking-[0.25em] text-[#6B6B6B] hover:text-[#A8A29E] transition-colors p-2" style={F.ui}>close</button>
+          </div>
+        </div>
       )}
       {showVespersArchive && (
         <VespersArchiveModal
