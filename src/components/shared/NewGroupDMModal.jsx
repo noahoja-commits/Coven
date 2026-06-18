@@ -1,16 +1,12 @@
 import { useState } from 'react';
 import { X, Users, Check } from 'lucide-react';
 import { F } from '../../styles/fonts';
-import { USERS } from '../../data/users';
 
-export function NewGroupDMModal({ following = {}, onCreate, onClose }) {
+export function NewGroupDMModal({ people = [], onCreate, onClose }) {
   const [name, setName] = useState('');
   const [selected, setSelected] = useState(new Set());
 
-  const followed = Object.keys(following);
-  const candidates = followed.length > 0
-    ? followed.map(h => USERS[h] || { handle: h, avatar: '✦' })
-    : Object.values(USERS);
+  const candidates = people;
 
   const toggle = (h) => setSelected(prev => {
     const next = new Set(prev);
@@ -47,8 +43,11 @@ export function NewGroupDMModal({ following = {}, onCreate, onClose }) {
         </div>
         <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-1">
           <div className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2" style={F.scriptureSC}>
-            · {followed.length === 0 ? 'add anyone' : 'who you follow'} · {selected.size} chosen ·
+            · who you follow · {selected.size} chosen ·
           </div>
+          {candidates.length === 0 && (
+            <div className="text-center py-8 text-[#6B6B6B] text-xs italic" style={F.serif}>· follow people first to gather a circle ·</div>
+          )}
           {candidates.map(u => {
             const isSel = selected.has(u.handle);
             return (

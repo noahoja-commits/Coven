@@ -6,6 +6,7 @@ import { SignInScreen } from './components/auth/SignInScreen';
 import { fetchFeed, createPost, deletePost as dbDeletePost, togglePostReaction, fetchComments, createComment } from './lib/db/posts';
 import { insertProfile, updateProfile, getSystemAccountIds, getProfileStats, getProfileByHandle } from './lib/db/profiles';
 import { fetchFollowing, followUser, unfollowUser, followSystemAccounts } from './lib/db/social';
+import { fetchConversations, getOrCreateDM, createGroup, fetchMessages as fetchDMMessages, sendDM, markRead as dmMarkRead, setBuried as dmSetBuried, subscribeDMs } from './lib/db/dm';
 import { FONT_HREF, F } from './styles/fonts';
 import { Header } from './components/shared/Header';
 import { BottomNav } from './components/shared/BottomNav';
@@ -110,8 +111,10 @@ export default function App() {
 
   // Live content state (Supabase-backed)
   const [posts, setPosts] = useState([]);
-  const [conversations, setConversations] = useLocalStorage('conversations', CONVERSATIONS);
-  const [messages, setMessages] = useLocalStorage('messages', MESSAGES);
+  const [conversations, setConversations] = useState([]);
+  const [messages, setMessages] = useState({});
+  const [followingPeople, setFollowingPeople] = useState([]);
+  const activeConversationRef = useRef(null);
   const [communityMembership, setCommunityMembership] = useLocalStorage('communityMembership', { general: true, goth: true });
   const [eventRsvp, setEventRsvp] = useState({});
   const [events, setEvents] = useState([]);
@@ -210,17 +213,34 @@ export default function App() {
     if (!meId || !dbProfile) return;
     let active = true;
     fetchFeed(meId).then(rows => { if (active) setPosts(rows); }).catch(() => {});
-    fetchFollowing(meId).then(({ map, idByHandle }) => {
+    fetchFollowing(meId).then(({ map, idByHandle, people }) => {
       if (!active) return;
       setFollowing(map);
       followIdByHandle.current = idByHandle;
+      setFollowingPeople(people || []);
     }).catch(() => {});
     fetchEvents(meId).then(({ events, rsvp }) => {
       if (!active) return;
       setEvents(events);
       setEventRsvp(rsvp);
     }).catch(() => {});
+    fetchConversations().then(c => { if (active) setConversations(c); }).catch(() => {});
     return () => { active = false; };
+  }, [meId, dbProfile]);
+
+  // Live DMs: keep the inbox + the open thread fresh as messages arrive.
+  useEffect(() => { activeConversationRef.current = activeConversation; }, [activeConversation]);
+  useEffect(() => {
+    if (!meId || !dbProfile) return;
+    const unsub = subscribeDMs((row) => {
+      fetchConversations().then(setConversations).catch(() => {});
+      const openId = activeConversationRef.current;
+      if (openId && row.conversation_id === openId) {
+        fetchDMMessages(openId, meId).then(msgs => setMessages(prev => ({ ...prev, [openId]: msgs }))).catch(() => {});
+        dmMarkRead(openId, meId).catch(() => {});
+      }
+    });
+    return unsub;
   }, [meId, dbProfile]);
 
   // Returning from Stripe Checkout: confirm + refresh sold counts (webhook is async).
@@ -391,23 +411,33 @@ export default function App() {
   };
 
   const sendMessage = (conversationId, body) => {
-    const now = new Date();
-    const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    const msg = { id: `m${Date.now()}`, from: 'me', body, time };
-    setMessages(prev => ({ ...prev, [conversationId]: [...(prev[conversationId] || []), msg] }));
+    if (!meId || !conversationId || String(conversationId).startsWith('temp-')) return;
+    const tempId = `tempm-${Date.now()}`;
+    const optimistic = { id: tempId, from: 'me', body, time: 'just now', pending: true };
+    setMessages(prev => ({ ...prev, [conversationId]: [...(prev[conversationId] || []), optimistic] }));
     setConversations(prev => prev.map(c =>
-      c.id === conversationId ? { ...c, last: body.length > 60 ? body.slice(0, 60) + '…' : body, time: 'just now', unread: 0 } : c
+      c.id === conversationId ? { ...c, last: body.length > 60 ? body.slice(0, 60) + '…' : body, time: 'just now' } : c
     ));
+    sendDM(conversationId, meId, body)
+      .then(saved => setMessages(prev => ({ ...prev, [conversationId]: (prev[conversationId] || []).map(m => m.id === tempId ? saved : m) })))
+      .catch(() => setMessages(prev => ({ ...prev, [conversationId]: (prev[conversationId] || []).filter(m => m.id !== tempId) })));
   };
 
   const openConversation = (id) => {
-    setConversations(prev => prev.map(c => c.id === id ? { ...c, unread: 0 } : c));
     setActiveConversation(id);
+    setConversations(prev => prev.map(c => c.id === id ? { ...c, unread: 0 } : c));
+    if (meId) {
+      fetchDMMessages(id, meId).then(msgs => setMessages(prev => ({ ...prev, [id]: msgs }))).catch(() => {});
+      dmMarkRead(id, meId).catch(() => {});
+    }
   };
 
   const buryConversation = (id) => {
-    setConversations(prev => prev.map(c => c.id === id ? { ...c, buried: !c.buried } : c));
+    const conv = conversations.find(c => c.id === id);
+    const next = !conv?.buried;
+    setConversations(prev => prev.map(c => c.id === id ? { ...c, buried: next } : c));
     if (activeConversation === id) setActiveConversation(null);
+    if (meId) dmSetBuried(id, meId, next).catch(() => {});
   };
 
   const toggleCommunityMembership = (id) => {
@@ -488,38 +518,42 @@ export default function App() {
     });
   };
 
-  const ensureConversationWith = (handle, avatar) => {
-    let conv = conversations.find(c => c.user === handle && !c.group);
-    if (!conv) {
-      const id = `c${Date.now()}`;
-      conv = { id, user: handle, avatar: avatar || '✦', last: '', time: 'now', unread: 0 };
-      setConversations(prev => [conv, ...prev]);
-      setMessages(prev => ({ ...prev, [id]: [] }));
-    }
-    return conv.id;
+  const resolveUserId = async (handle) => {
+    if (followIdByHandle.current[handle]) return followIdByHandle.current[handle];
+    try {
+      const p = await getProfileByHandle(handle);
+      if (p?.id) { followIdByHandle.current[handle] = p.id; return p.id; }
+    } catch { /* ignore */ }
+    return null;
   };
 
-  const openDMWithUser = (handle, avatar) => {
-    const id = ensureConversationWith(handle, avatar);
+  const openDMWithUser = async (handle) => {
+    if (!meId || !handle || handle === meHandle) return;
+    const otherId = await resolveUserId(handle);
+    if (!otherId) return;
+    const convId = await getOrCreateDM(otherId).catch(() => null);
+    if (!convId) return;
+    await fetchConversations().then(setConversations).catch(() => {});
     setShowDMs(false);
-    setActiveConversation(id);
+    openConversation(convId);
   };
 
-  const sendMessageToUser = (handle, body) => {
-    const id = ensureConversationWith(handle);
-    sendMessage(id, body);
+  const sendMessageToUser = async (handle, body) => {
+    if (!meId) return;
+    const otherId = await resolveUserId(handle);
+    if (!otherId) return;
+    const convId = await getOrCreateDM(otherId).catch(() => null);
+    if (convId) sendMessage(convId, body);
   };
 
-  const createGroupConversation = ({ name, members }) => {
-    const id = `c${Date.now()}`;
-    const conv = {
-      id, user: name, avatar: '✦', last: '',
-      time: 'now', unread: 0, group: true, members,
-    };
-    setConversations(prev => [conv, ...prev]);
-    setMessages(prev => ({ ...prev, [id]: [] }));
+  const createGroupConversation = async ({ name, members }) => {
+    if (!meId) return;
+    const ids = (await Promise.all((members || []).map(h => resolveUserId(h)))).filter(Boolean);
+    const convId = await createGroup(name, ids).catch(() => null);
+    if (!convId) return;
+    await fetchConversations().then(setConversations).catch(() => {});
     setShowDMs(false);
-    setActiveConversation(id);
+    openConversation(convId);
   };
 
   const lightCandle = (graveId) => {
@@ -960,7 +994,7 @@ export default function App() {
       )}
       {showNewGroup && (
         <NewGroupDMModal
-          following={following}
+          people={followingPeople}
           onCreate={createGroupConversation}
           onClose={() => setShowNewGroup(false)}
         />

@@ -11,16 +11,20 @@ export async function fetchFollowing(myId) {
   if (!ids.length) return { map: {}, idByHandle: {} };
 
   const { data: profs, error: pErr } = await supabase
-    .from('profiles').select('id, handle').in('id', ids);
+    .from('profiles').select('id, handle, avatar').in('id', ids);
   if (pErr) throw pErr;
-  const handleById = Object.fromEntries((profs || []).map(p => [p.id, p.handle]));
+  const byId = Object.fromEntries((profs || []).map(p => [p.id, p]));
 
-  const map = {}, idByHandle = {};
+  const map = {}, idByHandle = {}, people = [];
   (rows || []).forEach(r => {
-    const h = handleById[r.followee_id];
-    if (h) { map[h] = new Date(r.created_at).getTime(); idByHandle[h] = r.followee_id; }
+    const p = byId[r.followee_id];
+    if (p) {
+      map[p.handle] = new Date(r.created_at).getTime();
+      idByHandle[p.handle] = r.followee_id;
+      people.push({ id: p.id, handle: p.handle, avatar: p.avatar });
+    }
   });
-  return { map, idByHandle };
+  return { map, idByHandle, people };
 }
 
 export async function followUser(myId, followeeId) {
