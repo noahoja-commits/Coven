@@ -7,6 +7,7 @@ import { fetchFeed, createPost, deletePost as dbDeletePost, togglePostReaction, 
 import { insertProfile, updateProfile, getSystemAccountIds, getProfileStats, getProfileByHandle } from './lib/db/profiles';
 import { fetchFollowing, followUser, unfollowUser, followSystemAccounts } from './lib/db/social';
 import { fetchConversations, getOrCreateDM, createGroup, fetchMessages as fetchDMMessages, sendDM, markRead as dmMarkRead, setBuried as dmSetBuried, subscribeDMs } from './lib/db/dm';
+import { fetchActiveStories, postStory as dbPostStory, deleteStory } from './lib/db/stories';
 import { FONT_HREF, F } from './styles/fonts';
 import { Header } from './components/shared/Header';
 import { BottomNav } from './components/shared/BottomNav';
@@ -126,7 +127,7 @@ export default function App() {
   const [graves, setGraves] = useLocalStorage('graves', GRAVES);
   const [sigils, setSigils] = useLocalStorage('sigils', []);
   const [following, setFollowing] = useState({}); // {handle: ts}, backed by follows table
-  const [myStories, setMyStories] = useLocalStorage('myStories', []);
+  const [stories, setStories] = useState([]);
   const [userOddities, setUserOddities] = useLocalStorage('userOddities', []);
   const [crewMessages, setCrewMessages] = useLocalStorage('crewMessages', {});
   const [muted, setMuted] = useLocalStorage('muted', {});
@@ -225,6 +226,7 @@ export default function App() {
       setEventRsvp(rsvp);
     }).catch(() => {});
     fetchConversations().then(c => { if (active) setConversations(c); }).catch(() => {});
+    fetchActiveStories(meId).then(s => { if (active) setStories(s); }).catch(() => {});
     return () => { active = false; };
   }, [meId, dbProfile]);
 
@@ -609,9 +611,17 @@ export default function App() {
     })();
   };
 
-  const postStory = (story) => {
-    const entry = { id: `st${Date.now()}`, ...story, postedAt: Date.now(), expiresAt: Date.now() + 1000 * 60 * 60 * 24 };
-    setMyStories(prev => [entry, ...prev.filter(s => s.expiresAt > Date.now())]);
+  const postStory = async (story) => {
+    if (!meId) return;
+    try {
+      const saved = await dbPostStory(story, { id: meId, handle: meHandle, avatar: meAvatar });
+      setStories(prev => [...prev, saved]);
+    } catch { /* ignore */ }
+  };
+
+  const removeStory = (id) => {
+    setStories(prev => prev.filter(s => s.id !== id));
+    deleteStory(id).catch(() => {});
   };
 
   const addOddity = (oddity) => {
@@ -868,7 +878,7 @@ export default function App() {
         onVotePoll={voteOnPoll}
         onOpenStory={(i) => setActiveStoryIndex(i)}
         onCreateStory={() => setShowStoryComposer(true)}
-        myStories={myStories}
+        stories={stories}
         meHandle={meHandle}
         meAvatar={meAvatar}
         tonightStatus={tonightStatus}
@@ -1070,12 +1080,10 @@ export default function App() {
       )}
       {activeStoryIndex !== null && (
         <StoryViewer
+          stories={stories}
           startIndex={activeStoryIndex}
-          myStories={myStories}
-          meHandle={meHandle}
-          meAvatar={meAvatar}
           onReply={(authorHandle, body) => sendMessageToUser(authorHandle, body)}
-          onHighlight={highlightStory}
+          onDelete={removeStory}
           onClose={() => setActiveStoryIndex(null)}
         />
       )}

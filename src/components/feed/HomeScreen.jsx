@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { MessageCircle, MoreHorizontal, Eye, Bookmark, Trash2, Flame, EyeOff, Repeat, Pin } from 'lucide-react';
 import { F } from '../../styles/fonts';
-import { STORIES } from '../../data/posts';
 import { TONIGHT_OUT } from '../../data/users';
 import { Reaction } from '../shared/Reaction';
 import { PostImage } from '../shared/Visuals';
@@ -13,14 +12,22 @@ import { CODEX } from '../../data/codex';
 export function HomeScreen({
   posts, onReact, onOpenComments, onOpenCommunity, onOpenUser, onDeletePost, onHidePost, onQuotePost, onTogglePin, pinnedPostId, feedSort = 'latest', onSetFeedSort,
   bookmarks = {}, onToggleBookmark, postCandles = {}, onToggleCandle, onOpenEvent, onVotePoll,
-  onOpenStory, onCreateStory, myStories = [], meHandle = 'you', meAvatar = '🦇',
+  onOpenStory, onCreateStory, stories = [], meHandle = 'you', meAvatar = '🦇',
   tonightStatus, onOpenTonightStatus, onOpenTarot, onOpenEphemeris, onOpenLibrary, onOpenCodex, onOpenHashtag, onOpenVespersArchive,
   settings = {},
 }) {
   const tarotOn = settings.tarotEnabled !== false;
   const vespersOn = settings.vespersEnabled !== false;
   const ghostOn = !!settings.ghostMode;
-  const hasMyStory = myStories.some(s => s.expiresAt > Date.now());
+  const hasMyStory = stories.some(s => s.mine);
+  const storyGroups = useMemo(() => {
+    const seen = new Map();
+    stories.forEach((s, i) => {
+      if (s.mine || seen.has(s.user)) return;
+      seen.set(s.user, { user: s.user, avatar: s.avatar, firstIndex: i });
+    });
+    return [...seen.values()];
+  }, [stories]);
   const [openMenu, setOpenMenu] = useState(null);
   const [activeTag, setActiveTag] = useState(null);
 
@@ -162,29 +169,23 @@ export function HomeScreen({
       <div className="px-4 pt-3 pb-4 border-b border-[#1A1A1A]">
         <div className="text-[10px] text-[#6B6B6B] uppercase tracking-[0.2em] mb-3" style={F.ui}>· tonight ·</div>
         <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4">
-          {STORIES.map((s, i) => {
-            const isYou = s.self;
-            const showActive = isYou ? hasMyStory : s.live;
-            const handleTap = () => {
-              if (isYou && !hasMyStory) {
-                onCreateStory && onCreateStory();
-              } else {
-                onOpenStory && onOpenStory(i);
-              }
-            };
-            return (
-              <button key={i} onClick={handleTap}
-                className="flex flex-col items-center gap-1.5 shrink-0 focus:outline-none">
-                <div className={`relative w-14 h-14 rounded-full flex items-center justify-center text-xl
-                  ${showActive ? 'ring-2 ring-[#8B0000] ring-offset-2 ring-offset-[#0A0A0A] animate-pulse-slow' : ''}
-                  ${isYou && !hasMyStory ? 'bg-[#141414] border border-dashed border-[#3F3F3F] text-[#6B6B6B]' : 'bg-[#141414] border border-[#2A2A2A]'}`}>
-                  {isYou ? (hasMyStory ? meAvatar : '+') : s.avatar}
-                  {s.live && <span className="absolute -bottom-0.5 right-0 w-2.5 h-2.5 bg-[#8B0000] rounded-full ring-2 ring-[#0A0A0A]" />}
-                </div>
-                <span className="text-[10px] text-[#A8A29E] max-w-[60px] truncate" style={F.ui}>{isYou ? 'you' : s.user}</span>
-              </button>
-            );
-          })}
+          <button onClick={() => (hasMyStory ? onOpenStory && onOpenStory(stories.findIndex(s => s.mine)) : onCreateStory && onCreateStory())}
+            className="flex flex-col items-center gap-1.5 shrink-0 focus:outline-none">
+            <div className={`relative w-14 h-14 rounded-full flex items-center justify-center text-xl bg-[#141414]
+              ${hasMyStory ? 'ring-2 ring-[#8B0000] ring-offset-2 ring-offset-[#0A0A0A] animate-pulse-slow border border-[#2A2A2A]' : 'border border-dashed border-[#3F3F3F] text-[#6B6B6B]'}`}>
+              {hasMyStory ? meAvatar : '+'}
+            </div>
+            <span className="text-[10px] text-[#A8A29E] max-w-[60px] truncate" style={F.ui}>you</span>
+          </button>
+          {storyGroups.map(g => (
+            <button key={g.user} onClick={() => onOpenStory && onOpenStory(g.firstIndex)}
+              className="flex flex-col items-center gap-1.5 shrink-0 focus:outline-none">
+              <div className="relative w-14 h-14 rounded-full flex items-center justify-center text-xl bg-[#141414] border border-[#2A2A2A] ring-2 ring-[#8B0000] ring-offset-2 ring-offset-[#0A0A0A] animate-pulse-slow">
+                {g.avatar}
+              </div>
+              <span className="text-[10px] text-[#A8A29E] max-w-[60px] truncate" style={F.ui}>{g.user}</span>
+            </button>
+          ))}
         </div>
       </div>
 
