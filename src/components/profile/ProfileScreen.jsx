@@ -257,12 +257,12 @@ export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpda
       )}
 
       {/* Graves */}
-      {graves.length > 0 && (
-        <div className="mx-4 mb-4 border border-[#2A2A2A] bg-[#0F0F0F]">
-          <div className="px-3 py-2 border-b border-[#1A1A1A] flex items-center justify-between">
-            <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· in memoriam ·</span>
-            <button onClick={onAddGrave} className="text-[10px] uppercase tracking-wider text-[#A89968] hover:text-[#C9A961]" style={F.ui}>+ add</button>
-          </div>
+      <div className="mx-4 mb-4 border border-[#2A2A2A] bg-[#0F0F0F]">
+        <div className="px-3 py-2 border-b border-[#1A1A1A] flex items-center justify-between">
+          <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· in memoriam ·</span>
+          <button onClick={onAddGrave} className="text-[10px] uppercase tracking-wider text-[#A89968] hover:text-[#C9A961]" style={F.ui}>+ add</button>
+        </div>
+        {graves.length > 0 ? (
           <div className="divide-y divide-[#1A1A1A]">
             {graves.map(g => {
               const candleAge = g.candleLitAt ? Date.now() - g.candleLitAt : Infinity;
@@ -297,8 +297,12 @@ export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpda
               );
             })}
           </div>
-        </div>
-      )}
+        ) : (
+          <button onClick={onAddGrave} className="w-full px-3 py-5 text-center text-[#6B6B6B] text-xs italic hover:text-[#A8A29E] transition-colors" style={F.serif}>
+            lay your dead to rest — add a memorial
+          </button>
+        )}
+      </div>
 
       {/* Sigil journal */}
       {sigils.length > 0 && (

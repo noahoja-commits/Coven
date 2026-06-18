@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, lazy, Suspense } from 'react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useAuth } from './auth/AuthProvider';
 import { isSupabaseConfigured } from './lib/supabase';
@@ -47,8 +47,9 @@ import { NewGroupDMModal } from './components/shared/NewGroupDMModal';
 import { ReflectionsModal } from './components/profile/ReflectionsModal';
 
 import { CovenMenu } from './components/coven/CovenMenu';
-import { LibraryOverlay } from './components/library/LibraryOverlay';
-import { ReaderView } from './components/library/ReaderView';
+// Lazy — the Library carries the full text of every book; keep it out of the initial bundle.
+const LibraryOverlay = lazy(() => import('./components/library/LibraryOverlay').then(m => ({ default: m.LibraryOverlay })));
+const ReaderView = lazy(() => import('./components/library/ReaderView').then(m => ({ default: m.ReaderView })));
 import { OdditiesOverlay } from './components/oddities/OdditiesOverlay';
 import { OddityDetail } from './components/oddities/OddityDetail';
 import { OddityCompose } from './components/oddities/OddityCompose';
@@ -1301,22 +1302,26 @@ export default function App() {
           onOpen={(id) => setActivePortal(id)}
         />
       )}
-      {activePortal === 'library' && !activeText && (
-        <LibraryOverlay
-          onClose={() => setActivePortal('menu')}
-          onOpenText={(id) => setActiveText(id)}
-        />
-      )}
-      {activeText && (
-        <ReaderView
-          textId={activeText}
-          marginalia={marginalia[activeText] || []}
-          onAddMarginalia={(m) => addMarginalia(activeText, m)}
-          onRemoveMarginalia={(id) => removeMarginalia(activeText, id)}
-          meHandle={meHandle}
-          meAvatar={meAvatar}
-          onBack={() => setActiveText(null)}
-        />
+      {(activePortal === 'library' || activeText) && (
+        <Suspense fallback={<div className="absolute inset-0 z-50 bg-[#0A0A0A] flex items-center justify-center text-[#C9A961] text-2xl animate-pulse-slow" style={F.brand}>Coven</div>}>
+          {activePortal === 'library' && !activeText && (
+            <LibraryOverlay
+              onClose={() => setActivePortal('menu')}
+              onOpenText={(id) => setActiveText(id)}
+            />
+          )}
+          {activeText && (
+            <ReaderView
+              textId={activeText}
+              marginalia={marginalia[activeText] || []}
+              onAddMarginalia={(m) => addMarginalia(activeText, m)}
+              onRemoveMarginalia={(id) => removeMarginalia(activeText, id)}
+              meHandle={meHandle}
+              meAvatar={meAvatar}
+              onBack={() => setActiveText(null)}
+            />
+          )}
+        </Suspense>
       )}
       {activePortal === 'tarot' && (
         <TarotOverlay
