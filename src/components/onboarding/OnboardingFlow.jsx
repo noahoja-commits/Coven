@@ -87,7 +87,7 @@ export function OnboardingFlow({ onComplete }) {
       {error && <div className="relative px-6 mt-3 text-center text-[11px] text-[#8B0000]" style={F.ui}>{error}</div>}
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto px-6 pt-8 pb-32">
+      <div className="relative z-10 flex-1 overflow-y-auto px-6 pt-8 pb-32">
         {step === 0 && (
           <div className="flex flex-col items-center text-center max-w-xs mx-auto pt-12 animate-fade-in">
             <div className="text-[#A89968] text-[10px] uppercase tracking-[0.5em] mb-4" style={F.scriptureSC}>· welcome to ·</div>

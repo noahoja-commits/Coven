@@ -718,7 +718,7 @@ export default function App() {
   }
   if (!dbProfile) {
     return (
-      <div className="phone-frame max-w-md mx-auto bg-black text-[#F5F1E8] relative overflow-hidden">
+      <div className="phone-frame max-w-md mx-auto bg-black text-[#F5F1E8] relative overflow-hidden min-h-[100dvh]">
         <OnboardingFlow onComplete={handleOnboard} />
       </div>
     );
