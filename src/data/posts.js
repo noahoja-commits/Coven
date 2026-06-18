@@ -54,3 +54,46 @@ export const CONVERSATIONS = [
   { id: 'c6', user: 'cryptic.rose', avatar: '🌹', last: 'photo', time: '6h', unread: 0 },
   { id: 'c7', user: 'blackvelvet_99', avatar: '🩸', last: 'no but really tho', time: '1d', unread: 0 },
 ];
+
+// MESSAGES[conversationId] = [{ id, from, body, time }]
+// 'me' = current user. Otherwise from = handle.
+export const MESSAGES = {
+  c1: [
+    { id: 'm1', from: 'lilith_xiv', body: 'going to the crypt tonight. spectres vol IV', time: '11:42' },
+    { id: 'm2', from: 'me', body: 'wait fr? thought that was next week', time: '11:43' },
+    { id: 'm3', from: 'lilith_xiv', body: 'no tn. mortuary.dj is opening', time: '11:43' },
+    { id: 'm4', from: 'lilith_xiv', body: 'driving from bushwick around 10', time: '11:44' },
+    { id: 'm5', from: 'lilith_xiv', body: 'one seat. you in?', time: '11:44' },
+  ],
+  c2: [
+    { id: 'm1', from: 'me', body: 'where did you get that velvet jacket', time: '09:12' },
+    { id: 'm2', from: 'ash.in.october', body: 'salvation army on flatbush. $12', time: '09:15' },
+    { id: 'm3', from: 'ash.in.october', body: 'they had like three more in different sizes', time: '09:15' },
+    { id: 'm4', from: 'me', body: 'going tomorrow', time: '09:16' },
+    { id: 'm5', from: 'ash.in.october', body: 'sent you the link to the velvet shop', time: '09:46' },
+  ],
+  c3: [
+    { id: 'm1', from: 'mortis.kvlt', body: 'spectres tonight. who is rolling', time: '10:01' },
+    { id: 'm2', from: 'vesper.exe', body: 'me obviously', time: '10:02' },
+    { id: 'm3', from: 'cryptic.rose', body: 'i can drive 4', time: '10:04' },
+    { id: 'm4', from: 'blackvelvet_99', body: 'in', time: '10:05' },
+    { id: 'm5', from: 'mortis.kvlt', body: 'who is rolling', time: '10:37' },
+  ],
+  c4: [
+    { id: 'm1', from: 'vesper.exe', body: 'that makeup tutorial post was so real', time: '08:30' },
+    { id: 'm2', from: 'me', body: 'lmao i felt that one in my bones', time: '08:31' },
+    { id: 'm3', from: 'vesper.exe', body: 'lol fair', time: '08:31' },
+  ],
+  c5: [
+    { id: 'm1', from: 'me', body: 'yo any chance of +1 for tonight', time: '07:50' },
+    { id: 'm2', from: 'mortuary.dj', body: 'guestlist + 1 you got it', time: '07:55' },
+  ],
+  c6: [
+    { id: 'm1', from: 'cryptic.rose', body: 'photo', time: '05:10' },
+    { id: 'm2', from: 'cryptic.rose', body: '[photo: st. john the divine at dusk]', time: '05:10' },
+  ],
+  c7: [
+    { id: 'm1', from: 'me', body: 'drab majesty record is mid', time: 'yesterday' },
+    { id: 'm2', from: 'blackvelvet_99', body: 'no but really tho', time: 'yesterday' },
+  ],
+};

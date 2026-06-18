@@ -4,9 +4,13 @@ import { F } from '../../styles/fonts';
 const PORTALS = [
   { id: 'library', name: 'The Library', desc: 'sacred texts. shared marginalia. the dead speak.', glyph: '✟', tone: 'gold', enabled: true },
   { id: 'oddities', name: 'Oddities', desc: 'wares & curiosities. for sale, for trade, for keeping.', glyph: '⚱', tone: 'red', enabled: true },
-  { id: 'tarot', name: 'The Deck', desc: 'one card a day. the alchemystic woodcut.', glyph: '✦', tone: 'gold', enabled: false, soon: true },
-  { id: 'ephemeris', name: 'The Ephemeris', desc: 'moon, sun, stars. your chart. tonight\u2019s sky.', glyph: '☽', tone: 'silver', enabled: false, soon: true },
-  { id: 'codex', name: 'The Codex', desc: 'a dictionary. goth, occult, scene, sacred.', glyph: '⌬', tone: 'gold', enabled: false, soon: true },
+  { id: 'tarot', name: 'The Deck', desc: 'one card a day. the alchemystic woodcut.', glyph: '✦', tone: 'gold', enabled: true },
+  { id: 'ephemeris', name: 'The Ephemeris', desc: 'moon, sun, stars. tonight\u2019s sky.', glyph: '☽', tone: 'silver', enabled: true },
+  { id: 'codex', name: 'The Codex', desc: 'a dictionary. goth, occult, scene, sacred.', glyph: '⌬', tone: 'gold', enabled: true },
+  { id: 'sigils', name: 'Sigils', desc: 'give your intention a body. line, circle, sealed.', glyph: '⛧', tone: 'red', enabled: true },
+  { id: 'pendulum', name: 'The Pendulum', desc: 'ask once. yes, no, or ask again.', glyph: '◯', tone: 'silver', enabled: true },
+  { id: 'confessions', name: 'Confessions', desc: 'speak without your name. no replies.', glyph: '☩', tone: 'red', enabled: true },
+  { id: 'souls', name: 'Souls', desc: 'the directory. who is counted.', glyph: '☥', tone: 'silver', enabled: true },
 ];
 
 export function CovenMenu({ onClose, onOpen }) {

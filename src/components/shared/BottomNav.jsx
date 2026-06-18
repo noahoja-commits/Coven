@@ -1,4 +1,4 @@
-import { Hash, Users, MapPin, Calendar, User } from 'lucide-react';
+import { Hash, Users, MapPin, Calendar, User, Shirt } from 'lucide-react';
 import { F } from '../../styles/fonts';
 
 export function BottomNav({ tab, onChange, parchment = false }) {
@@ -7,6 +7,7 @@ export function BottomNav({ tab, onChange, parchment = false }) {
     { id: 'communities', label: 'scenes', icon: Users },
     { id: 'map', label: 'map', icon: MapPin },
     { id: 'events', label: 'rites', icon: Calendar },
+    { id: 'fits', label: 'fits', icon: Shirt },
     { id: 'profile', label: 'self', icon: User },
   ];
 
@@ -17,7 +18,7 @@ export function BottomNav({ tab, onChange, parchment = false }) {
 
   return (
     <div className={`absolute bottom-0 inset-x-0 z-20 ${bgColor} backdrop-blur-md border-t ${borderColor}`}>
-      <div className="grid grid-cols-5 h-[68px]">
+      <div className="grid grid-cols-6 h-[68px]">
         {items.map(it => {
           const Icon = it.icon;
           const active = tab === it.id;

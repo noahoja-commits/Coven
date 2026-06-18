@@ -3,17 +3,28 @@ import { X, Camera } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { ODDITY_CATEGORIES, CONDITION_LABELS } from '../../data/oddities';
 
-export function OddityCompose({ onClose }) {
+export function OddityCompose({ onClose, onCreate }) {
   const [step, setStep] = useState(1);
   const [data, setData] = useState({ title: '', price: '', priceMode: 'firm', condition: 'used', category: 'clothing', description: '', storyBehind: '' });
+
+  const advance = () => {
+    if (step < 3) { setStep(step + 1); return; }
+    if (!data.title.trim()) return;
+    onCreate && onCreate(data);
+    onClose && onClose();
+  };
+
+  const canAdvance = step !== 1 ? true : data.title.trim().length > 0;
 
   return (
     <div className="absolute inset-0 z-50 bg-[#0A0608] animate-fade-in flex flex-col">
       <div className="bg-black/60 backdrop-blur-md border-b border-[#5B0F1A]/40">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onClose} className="text-[#A89968]"><X size={20} /></button>
+          <button onClick={() => step > 1 ? setStep(step - 1) : onClose()} className="text-[#A89968]">
+            <X size={20} />
+          </button>
           <div className="text-[#C9A961] text-sm tracking-[0.3em]" style={F.scriptureSC}>LIST WARE — {step}/3</div>
-          <button disabled={step < 3} onClick={() => step < 3 ? setStep(step + 1) : onClose()}
+          <button disabled={!canAdvance} onClick={advance}
             className="text-[#F5F1E8] text-xs px-3 py-1.5 bg-[#5B0F1A] uppercase tracking-wider disabled:opacity-50" style={F.ui}>
             {step < 3 ? 'next' : 'list it'}
           </button>

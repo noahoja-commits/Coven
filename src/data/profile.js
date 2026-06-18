@@ -1,5 +1,6 @@
 export const DEFAULT_PROFILE = {
   name: 'spectre.eve',
+  avatar: '🦇',
   pronouns: 'she / they',
   bio: 'velvet & venom · brooklyn · soft for cathedrals & cheap red wine',
   tags: ['goth', 'raver', 'smoker', 'NYC'],

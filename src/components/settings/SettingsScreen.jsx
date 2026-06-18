@@ -39,8 +39,18 @@ function Row({ label, desc, children }) {
   );
 }
 
-export function SettingsScreen({ settings, onChange, onBack, onLogout }) {
+export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOnboarding, mutedKeywords = [], onSetMutedKeywords }) {
   const set = (key, value) => onChange({ ...settings, [key]: value });
+  const addKeyword = (e) => {
+    e.preventDefault();
+    const val = (e.target.elements.kw.value || '').trim().toLowerCase();
+    if (!val || mutedKeywords.includes(val)) return;
+    onSetMutedKeywords && onSetMutedKeywords([...mutedKeywords, val]);
+    e.target.reset();
+  };
+  const removeKeyword = (k) => {
+    onSetMutedKeywords && onSetMutedKeywords(mutedKeywords.filter(x => x !== k));
+  };
   return (
     <div className="absolute inset-0 z-50 bg-[#0A0A0A] animate-slide-in-right flex flex-col">
       <div className="bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A]">
@@ -101,6 +111,53 @@ export function SettingsScreen({ settings, onChange, onBack, onLogout }) {
           </Row>
         </Section>
 
+        <Section title="muted words">
+          <div className="px-4 py-3">
+            <p className="text-[10px] text-[#6B6B6B] mb-2" style={F.serif}>posts containing these words won't show in your feed.</p>
+            <form onSubmit={addKeyword} className="flex gap-2 mb-2">
+              <input name="kw" placeholder="word or phrase"
+                className="flex-1 bg-[#0A0A0A] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none px-2.5 py-1.5 text-[#F5F1E8] text-sm"
+                style={F.serif} />
+              <button type="submit"
+                className="px-3 py-1.5 text-[10px] uppercase tracking-wider bg-[#5B0F1A] text-[#F5F1E8]" style={F.ui}>mute</button>
+            </form>
+            {mutedKeywords.length === 0 ? (
+              <p className="text-[10px] text-[#6B6B6B] italic" style={F.serif}>· nothing muted ·</p>
+            ) : (
+              <div className="flex flex-wrap gap-1.5">
+                {mutedKeywords.map(k => (
+                  <button key={k} onClick={() => removeKeyword(k)}
+                    className="flex items-center gap-1 px-2 py-1 text-[11px] border border-[#5B0F1A]/40 bg-[#5B0F1A]/10 text-[#A8A29E] hover:text-[#F5F1E8] hover:bg-[#5B0F1A]/20"
+                    style={F.ui}>
+                    {k} <span className="text-[#8B0000]">×</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </Section>
+
+        <Section title="notifications">
+          {[
+            { id: 'reaction', label: 'Reactions' },
+            { id: 'reply', label: 'Replies & comments' },
+            { id: 'follow', label: 'Follows' },
+            { id: 'dm', label: 'Whispers' },
+            { id: 'event', label: 'Rites & events' },
+            { id: 'crew', label: 'Crews' },
+            { id: 'candle', label: 'Candles lit' },
+            { id: 'tonight', label: 'Tonight statuses' },
+            { id: 'vespers', label: 'Vespers passages' },
+          ].map(k => {
+            const on = (settings.notificationKinds || {})[k.id] !== false;
+            return (
+              <Row key={k.id} label={k.label}>
+                <Toggle on={on} onChange={v => set('notificationKinds', { ...(settings.notificationKinds || {}), [k.id]: v })} />
+              </Row>
+            );
+          })}
+        </Section>
+
         <Section title="account">
           <Row label="Edit profile">
             <span className="text-[#6B6B6B] text-sm">›</span>
@@ -116,7 +173,13 @@ export function SettingsScreen({ settings, onChange, onBack, onLogout }) {
           </Row>
         </Section>
 
-        <div className="px-4 mt-4">
+        <div className="px-4 mt-4 space-y-2">
+          {onRerunOnboarding && (
+            <button onClick={onRerunOnboarding}
+              className="w-full py-3 text-[#A89968] text-xs uppercase tracking-[0.25em] border border-[#2A2A2A] hover:border-[#A89968]" style={F.ui}>
+              re-do onboarding
+            </button>
+          )}
           <button onClick={onLogout} className="w-full py-3 text-[#5B0F1A] text-xs uppercase tracking-[0.25em] border border-[#2A2A2A] hover:border-[#5B0F1A]" style={F.ui}>
             sign out
           </button>

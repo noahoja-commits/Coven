@@ -1,7 +1,7 @@
-import { Plus, MessageCircle, Bell } from 'lucide-react';
+import { Plus, MessageCircle, Bell, Search } from 'lucide-react';
 import { F } from '../../styles/fonts';
 
-export function Header({ tab, onDMs, onCompose, onLibrary, onNotifications, communityName, unreadNotifications = 0, parchment = false }) {
+export function Header({ tab, onDMs, onCompose, onLibrary, onNotifications, onSearch, communityName, unreadNotifications = 0, unreadDMs = 0, parchment = false }) {
   const titles = {
     home: null,
     communities: null,
@@ -38,6 +38,7 @@ export function Header({ tab, onDMs, onCompose, onLibrary, onNotifications, comm
           {tab === 'home' && (
             <button onClick={onCompose} className={`${accentColor} hover:text-[#F5F1E8]`}><Plus size={20} /></button>
           )}
+          <button onClick={onSearch} className={`${accentColor} hover:text-[#F5F1E8]`} title="search"><Search size={18} /></button>
           <button onClick={onNotifications} className={`${accentColor} hover:text-[#F5F1E8] relative`}>
             <Bell size={18} />
             {unreadNotifications > 0 && (
@@ -48,7 +49,11 @@ export function Header({ tab, onDMs, onCompose, onLibrary, onNotifications, comm
           </button>
           <button onClick={onDMs} className={`${accentColor} hover:text-[#F5F1E8] relative`}>
             <MessageCircle size={20} />
-            <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#8B0000]" />
+            {unreadDMs > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-0.5 rounded-full bg-[#8B0000] text-[#F5F1E8] text-[8px] flex items-center justify-center" style={F.mono}>
+                {unreadDMs > 9 ? '9+' : unreadDMs}
+              </span>
+            )}
           </button>
         </div>
       </div>

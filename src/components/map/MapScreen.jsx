@@ -2,12 +2,15 @@ import { useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { MAP_PINS, PIN_KIND } from '../../data/map';
+import { EVENTS } from '../../data/events';
 
-export function MapScreen() {
+export function MapScreen({ events = EVENTS, rsvp = {}, onToggleRsvp, tonightStatus, onOpenTonightStatus }) {
   const [active, setActive] = useState(null);
   const [filter, setFilter] = useState('all');
   const filtered = filter === 'all' ? MAP_PINS : MAP_PINS.filter(p => p.kind === filter);
   const activePin = MAP_PINS.find(p => p.id === active);
+  // Find an event matching the active pin by name
+  const matchedEvent = activePin && events.find(e => e.name.toLowerCase() === activePin.name.toLowerCase());
 
   return (
     <div className="absolute inset-0 top-[60px] bottom-[68px]">
@@ -76,17 +79,24 @@ export function MapScreen() {
         ))}
       </div>
 
-      <button className="absolute bottom-4 right-4 w-12 h-12 bg-[#8B0000] text-[#F5F1E8] flex items-center justify-center shadow-xl"
-        style={{ boxShadow: '0 0 20px rgba(139,0,0,0.5)' }}>
+      <button onClick={onOpenTonightStatus}
+        className="absolute bottom-4 right-4 w-12 h-12 bg-[#8B0000] text-[#F5F1E8] flex items-center justify-center shadow-xl"
+        style={{ boxShadow: '0 0 20px rgba(139,0,0,0.5)' }}
+        title="drop your tonight pin">
         <Plus size={20} />
       </button>
 
-      <div className="absolute" style={{ left: '48%', top: '52%' }}>
+      <button onClick={onOpenTonightStatus} className="absolute" style={{ left: '48%', top: '52%' }}>
         <div className="relative -translate-x-1/2 -translate-y-1/2">
           <span className="absolute inset-0 -m-3 rounded-full bg-[#7B2CBF] opacity-30 animate-ping-slow" />
           <span className="relative block w-3 h-3 rounded-full bg-[#7B2CBF] ring-2 ring-[#0A0A0A]" />
+          {tonightStatus?.text && (
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 whitespace-nowrap px-2 py-0.5 bg-black/80 backdrop-blur-sm border border-[#7B2CBF]/40 text-[10px] text-[#F5F1E8]" style={F.ui}>
+              you · {tonightStatus.text.slice(0, 24)}
+            </div>
+          )}
         </div>
-      </div>
+      </button>
 
       {activePin && (
         <div className="absolute inset-x-0 bottom-0 bg-[#0F0F0F] border-t border-[#2A2A2A] p-4 animate-slide-up">
@@ -106,7 +116,13 @@ export function MapScreen() {
           </div>
           <div className="grid grid-cols-2 gap-2 mt-4">
             <button className="py-2 border border-[#3F3F3F] text-[#A8A29E] text-xs uppercase tracking-wider" style={F.ui}>directions</button>
-            <button className="py-2 bg-[#8B0000] text-[#F5F1E8] text-xs uppercase tracking-wider" style={F.ui}>i'm going</button>
+            <button
+              onClick={() => matchedEvent && onToggleRsvp && onToggleRsvp(matchedEvent.id)}
+              disabled={!matchedEvent}
+              className={`py-2 text-xs uppercase tracking-wider ${matchedEvent && rsvp[matchedEvent.id] ? 'bg-[#5B0F1A] text-[#F5F1E8]' : matchedEvent ? 'bg-[#8B0000] text-[#F5F1E8]' : 'bg-[#1A1A1A] text-[#6B6B6B]'}`}
+              style={F.ui}>
+              {matchedEvent && rsvp[matchedEvent.id] ? 'going ✓' : matchedEvent ? "i'm going" : 'pinned'}
+            </button>
           </div>
         </div>
       )}

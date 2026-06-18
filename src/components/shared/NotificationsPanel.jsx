@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Bell, Heart, MessageCircle, UserPlus, Calendar, ShoppingBag } from 'lucide-react';
+import { X, Bell, Heart, MessageCircle, UserPlus, Calendar, ShoppingBag, Trash2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { timeAgo } from '../../data/helpers';
 
@@ -16,7 +16,7 @@ const KIND_ICON = {
   vespers: { icon: Bell, color: '#C9A961' },
 };
 
-export function NotificationsPanel({ notifications, onClose, onMarkAllRead, onMarkRead }) {
+export function NotificationsPanel({ notifications, onClose, onMarkAllRead, onMarkRead, onTap, onClearAll }) {
   const [pressTimer, setPressTimer] = useState(null);
 
   const handlePressStart = () => {
@@ -56,6 +56,14 @@ export function NotificationsPanel({ notifications, onClose, onMarkAllRead, onMa
           long-press "{unread} new" to mark all read
         </div>
       )}
+      {notifications.length > 0 && (
+        <div className="px-4 py-2 border-b border-[#1A1A1A] flex items-center justify-end">
+          <button onClick={onClearAll}
+            className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#8B0000]" style={F.ui}>
+            <Trash2 size={10} /> clear all
+          </button>
+        </div>
+      )}
       <div className="flex-1 overflow-y-auto">
         {notifications.length === 0 ? (
           <div className="text-center pt-24 px-6">
@@ -69,7 +77,7 @@ export function NotificationsPanel({ notifications, onClose, onMarkAllRead, onMa
               const Icon = k.icon;
               return (
                 <button key={n.id}
-                  onClick={() => onMarkRead(n.id)}
+                  onClick={() => onTap ? onTap(n) : onMarkRead(n.id)}
                   className={`w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-[#0F0F0F] transition-colors ${!n.read ? 'bg-[#0F0506]' : ''}`}>
                   <div className="relative w-10 h-10 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-base shrink-0">
                     {n.avatar}

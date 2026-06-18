@@ -1,8 +1,19 @@
-import { Filter } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Check } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { EVENTS } from '../../data/events';
 
-export function EventsScreen() {
+export function EventsScreen({ rsvp = {}, onToggleRsvp, onOpenEvent }) {
+  // Collect every tag in the dataset for filter pills
+  const allTags = useMemo(() => {
+    const s = new Set();
+    EVENTS.forEach(e => e.tags.forEach(t => s.add(t)));
+    return ['all', ...Array.from(s)];
+  }, []);
+  const [activeTag, setActiveTag] = useState('all');
+
+  const filtered = activeTag === 'all' ? EVENTS : EVENTS.filter(e => e.tags.includes(activeTag));
+
   return (
     <div className="pb-24">
       <div className="px-4 pt-4 pb-3 flex items-end justify-between">
@@ -10,27 +21,34 @@ export function EventsScreen() {
           <h2 className="text-[#F5F1E8] text-2xl mb-1" style={F.display}>RITES</h2>
           <p className="text-[#A8A29E] text-sm" style={F.serif}>what's coming. who's going.</p>
         </div>
-        <button className="text-[#A8A29E]"><Filter size={16} /></button>
+        <span className="text-[10px] uppercase tracking-wider text-[#6B6B6B]" style={F.ui}>{filtered.length} listed</span>
       </div>
 
       <div className="px-4 pb-4 flex gap-1.5 overflow-x-auto no-scrollbar">
-        {['all', 'tonight', 'wknd', 'this wk', 'next wk'].map((t, i) => (
+        {allTags.map(t => (
           <button key={t}
-            className={`shrink-0 px-3 py-1.5 text-[10px] uppercase tracking-wider border
-              ${i === 0 ? 'bg-[#F5F1E8] text-[#0A0A0A] border-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A8A29E]'}`}
+            onClick={() => setActiveTag(t)}
+            className={`shrink-0 px-3 py-1.5 text-[10px] uppercase tracking-wider border transition-colors
+              ${activeTag === t ? 'bg-[#F5F1E8] text-[#0A0A0A] border-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#3F3F3F]'}`}
             style={F.ui}>{t}</button>
         ))}
       </div>
 
       <div className="px-4 space-y-3">
-        {EVENTS.map(e => {
+        {filtered.length === 0 && (
+          <div className="text-center py-8 text-[#6B6B6B] text-xs" style={F.mono}>
+            no rites for "{activeTag}"
+          </div>
+        )}
+        {filtered.map(e => {
           const cover = {
             red: 'linear-gradient(135deg, #5B0F1A 0%, #1A0408 70%, #0A0204 100%)',
             violet: 'linear-gradient(135deg, #2D0F3F 0%, #14081F 70%, #0A0410 100%)',
             black: 'linear-gradient(135deg, #1F1F1F 0%, #0A0A0A 100%)',
           }[e.cover];
           return (
-            <div key={e.id} className="border border-[#1F1F1F] overflow-hidden hover:border-[#3F3F3F] transition-colors">
+            <button key={e.id} onClick={() => onOpenEvent && onOpenEvent(e.id)}
+              className="block w-full text-left border border-[#1F1F1F] overflow-hidden hover:border-[#3F3F3F] transition-colors">
               <div className="relative h-32 overflow-hidden" style={{ background: cover }}>
                 <svg viewBox="0 0 200 60" className="absolute inset-0 w-full h-full opacity-30" preserveAspectRatio="xMidYMid slice">
                   <path d="M 0 60 L 30 30 L 50 45 L 80 15 L 110 35 L 140 10 L 170 30 L 200 20 L 200 60 Z" fill="rgba(0,0,0,0.6)" />
@@ -47,7 +65,7 @@ export function EventsScreen() {
                     <div className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>{e.neighborhood} · <span style={F.mono} className="text-xs">{e.time}</span></div>
                   </div>
                   <div className="text-right shrink-0">
-                    <div className="text-[#F5F1E8] text-base" style={F.mono}>{e.going}</div>
+                    <div className="text-[#F5F1E8] text-base" style={F.mono}>{e.going + (rsvp[e.id] ? 1 : 0)}</div>
                     <div className="text-[9px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>going</div>
                   </div>
                 </div>
@@ -56,8 +74,17 @@ export function EventsScreen() {
                     <span key={t} className="text-[10px] px-1.5 py-0.5 border border-[#2A2A2A] text-[#A8A29E] uppercase tracking-wider" style={F.ui}>{t}</span>
                   ))}
                 </div>
+                <span
+                  role="button"
+                  tabIndex={0}
+                  onClick={(ev) => { ev.stopPropagation(); onToggleRsvp && onToggleRsvp(e.id); }}
+                  onKeyDown={(ev) => { if (ev.key === 'Enter') { ev.stopPropagation(); onToggleRsvp && onToggleRsvp(e.id); } }}
+                  className={`mt-3 w-full py-2 text-[10px] uppercase tracking-wider border flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${rsvp[e.id] ? 'bg-[#8B0000]/20 border-[#8B0000] text-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#5B0F1A] hover:text-[#F5F1E8]'}`}
+                  style={F.ui}>
+                  {rsvp[e.id] ? <><Check size={12} /> going</> : 'rsvp'}
+                </span>
               </div>
-            </div>
+            </button>
           );
         })}
       </div>

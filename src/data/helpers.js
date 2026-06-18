@@ -2,6 +2,48 @@
 
 export const formatK = (n) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : `${n}`;
 
+export function todaysCodex(codex) {
+  if (!codex || codex.length === 0) return null;
+  const d = new Date();
+  const seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+  return codex[seed % codex.length];
+}
+
+function flattenTexts(texts) {
+  const flat = [];
+  for (const t of texts) {
+    for (const ch of t.chapters || []) {
+      for (const v of ch.verses || []) {
+        if (!v.text || v.text.length < 30) continue;
+        flat.push({ textId: t.id, textTitle: t.shortTitle, chapterTitle: ch.title, verse: v });
+      }
+    }
+  }
+  return flat;
+}
+
+export function vespersForDate(texts, date = new Date()) {
+  if (!texts || texts.length === 0) return null;
+  const seed = date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
+  const flat = flattenTexts(texts);
+  if (flat.length === 0) return null;
+  return { ...flat[seed % flat.length], dateKey: date.toISOString().slice(0, 10) };
+}
+
+export function todaysVespers(texts) {
+  return vespersForDate(texts, new Date());
+}
+
+export function pastVespers(texts, days = 7) {
+  const result = [];
+  for (let i = 1; i <= days; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    result.push(vespersForDate(texts, d));
+  }
+  return result;
+}
+
 // Format a "time ago" from a timestamp (ms)
 export function timeAgo(ts) {
   if (!ts) return '—';
@@ -39,6 +81,79 @@ export function moonPhase(date = new Date()) {
   if (phase < 0.6875) return { name: 'Waning Gibbous', glyph: '◒', illum: 0.75 };
   if (phase < 0.8125) return { name: 'Last Quarter', glyph: '◓', illum: 0.5 };
   return { name: 'Waning Crescent', glyph: '☾', illum: 0.25 };
+}
+
+// Approximate sunrise/sunset for NYC (lat 40.7, lon -74.0)
+// Returns { sunrise: "06:42", sunset: "20:14" } in local time
+export function sunTimes(date = new Date()) {
+  const lat = 40.7;
+  const lon = -74.0;
+  // Day of year
+  const start = new Date(date.getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((date - start) / (1000 * 60 * 60 * 24));
+  // Solar declination (radians)
+  const decl = 0.4093 * Math.sin((2 * Math.PI * (284 + dayOfYear)) / 365);
+  // Hour angle of sunrise/sunset
+  const latRad = (lat * Math.PI) / 180;
+  const cosH = -Math.tan(latRad) * Math.tan(decl);
+  const clampedCosH = Math.max(-1, Math.min(1, cosH));
+  const hourAngle = (Math.acos(clampedCosH) * 180) / Math.PI / 15; // hours
+  // Local solar noon ~ 12:00 - lon/15, plus DST handled by timezone offset already
+  const solarNoon = 12 - lon / 15;
+  const sunriseDecimal = solarNoon - hourAngle;
+  const sunsetDecimal = solarNoon + hourAngle;
+  // Adjust for the device timezone offset relative to UTC
+  // Our solarNoon is computed in UTC; convert back to local
+  const tzOffsetHours = -date.getTimezoneOffset() / 60;
+  const sunriseLocal = sunriseDecimal + tzOffsetHours;
+  const sunsetLocal = sunsetDecimal + tzOffsetHours;
+  const fmt = (t) => {
+    const t2 = ((t % 24) + 24) % 24;
+    const h = Math.floor(t2);
+    const m = Math.floor((t2 - h) * 60);
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  };
+  return { sunrise: fmt(sunriseLocal), sunset: fmt(sunsetLocal) };
+}
+
+// Detects dark-calendar events for a given date
+// Returns the strongest one (or null) — for the home banner
+export function darkDay(date = new Date()) {
+  const m = date.getMonth() + 1;
+  const d = date.getDate();
+  const dow = date.getDay(); // 0=sun
+
+  // Sabbats and special dates
+  const fixed = {
+    '1-1':   { label: 'a new year of shadows', glyph: '✦', tone: 'gold' },
+    '2-1':   { label: 'Imbolc · the first flame', glyph: '🕯', tone: 'gold' },
+    '2-2':   { label: 'Candlemas', glyph: '🕯', tone: 'gold' },
+    '2-14':  { label: 'St. Valentine — patron of love and the plague', glyph: '✟', tone: 'red' },
+    '3-15':  { label: 'beware the Ides', glyph: '☩', tone: 'red' },
+    '4-30':  { label: 'Walpurgisnacht', glyph: '⛧', tone: 'red' },
+    '5-1':   { label: 'Beltane', glyph: '✦', tone: 'gold' },
+    '6-21':  { label: 'Summer Solstice · the longest day', glyph: '☉', tone: 'gold' },
+    '6-23':  { label: "St. John's Eve", glyph: '✟', tone: 'gold' },
+    '8-1':   { label: 'Lammas · the bread is broken', glyph: '☩', tone: 'gold' },
+    '9-22':  { label: 'Autumn Equinox · the balance tips', glyph: '◐', tone: 'silver' },
+    '10-31': { label: 'Samhain · the veil is thinnest', glyph: '☠', tone: 'red' },
+    '11-1':  { label: "All Saints'", glyph: '✟', tone: 'gold' },
+    '11-2':  { label: "All Souls' · pray for the dead", glyph: '⚱', tone: 'gold' },
+    '12-21': { label: 'Winter Solstice · the longest night', glyph: '☽', tone: 'silver' },
+    '12-24': { label: 'Christmas Eve', glyph: '✟', tone: 'gold' },
+    '12-31': { label: "Hogmanay · year's end", glyph: '✦', tone: 'silver' },
+  };
+  if (fixed[`${m}-${d}`]) return fixed[`${m}-${d}`];
+
+  // Friday the 13th
+  if (d === 13 && dow === 5) return { label: 'Friday the 13th', glyph: '☠', tone: 'red' };
+
+  // Moon phase
+  const phase = moonPhase(date);
+  if (phase.name === 'Full Moon') return { label: `Full Moon · ${phase.name.toLowerCase()}`, glyph: '○', tone: 'silver' };
+  if (phase.name === 'New Moon')  return { label: 'New Moon · the dark', glyph: '●', tone: 'silver' };
+
+  return null;
 }
 
 // Approximate sun sign from a date string

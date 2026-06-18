@@ -1,11 +1,21 @@
-import { Search, ChevronLeft, Bell } from 'lucide-react';
+import { useState } from 'react';
+import { Search, ChevronLeft, Bell, X } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { COMMUNITIES } from '../../data/communities';
 import { POSTS } from '../../data/posts';
 import { PostImage } from '../shared/Visuals';
 import { formatK } from '../../data/helpers';
 
-export function CommunitiesScreen({ onOpenCommunity }) {
+export function CommunitiesScreen({ onOpenCommunity, membership = {}, onToggleMembership }) {
+  const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState('all'); // all | joined
+  const q = query.trim().toLowerCase();
+  const filtered = COMMUNITIES.filter(c => {
+    if (filter === 'joined' && !membership[c.id]) return false;
+    if (!q) return true;
+    return c.name.toLowerCase().includes(q) || (c.desc || '').toLowerCase().includes(q);
+  });
+
   return (
     <div className="pb-24">
       <div className="px-4 pt-4 pb-3">
@@ -16,36 +26,74 @@ export function CommunitiesScreen({ onOpenCommunity }) {
       <div className="px-4 pb-4">
         <div className="flex items-center gap-2 px-3 py-2.5 bg-[#141414] border border-[#1F1F1F]">
           <Search size={14} className="text-[#6B6B6B]" />
-          <input placeholder="search scenes" className="bg-transparent text-[#F5F1E8] text-sm outline-none flex-1 placeholder:text-[#6B6B6B]" style={F.ui} />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="search scenes"
+            className="bg-transparent text-[#F5F1E8] text-sm outline-none flex-1 placeholder:text-[#6B6B6B]"
+            style={F.ui}
+          />
+          {query && (
+            <button onClick={() => setQuery('')} className="text-[#6B6B6B] hover:text-[#A8A29E]" aria-label="clear">
+              <X size={12} />
+            </button>
+          )}
+        </div>
+        <div className="flex gap-1.5 mt-3">
+          {['all', 'joined'].map(f => (
+            <button key={f}
+              onClick={() => setFilter(f)}
+              className={`px-3 py-1 text-[10px] uppercase tracking-wider border transition-colors ${filter === f ? 'bg-[#F5F1E8] text-[#0A0A0A] border-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#3F3F3F]'}`}
+              style={F.ui}>
+              {f}
+            </button>
+          ))}
         </div>
       </div>
 
       <div className="divide-y divide-[#1A1A1A] border-t border-[#1A1A1A]">
-        {COMMUNITIES.map(c => (
-          <button key={c.id} onClick={() => onOpenCommunity(c.id)} className="w-full px-4 py-4 flex items-start gap-3 hover:bg-[#0F0F0F] transition-colors text-left">
-            <div className="w-12 h-12 bg-[#141414] border border-[#2A2A2A] flex items-center justify-center text-[#F5F1E8] text-xl shrink-0" style={F.display}>
-              {c.glyph}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-baseline justify-between gap-2 mb-0.5">
-                <h3 className="text-[#F5F1E8] text-base" style={F.display}>{c.name.toUpperCase()}</h3>
-                <span className="text-[10px] text-[#6B6B6B] shrink-0" style={F.mono}>active {c.active}</span>
+        {filtered.length === 0 && (
+          <div className="px-4 py-8 text-center text-[#6B6B6B] text-xs" style={F.mono}>
+            no scenes found
+          </div>
+        )}
+        {filtered.map(c => {
+          const joined = !!membership[c.id];
+          return (
+            <button key={c.id} onClick={() => onOpenCommunity(c.id)} className="w-full px-4 py-4 flex items-start gap-3 hover:bg-[#0F0F0F] transition-colors text-left">
+              <div className="w-12 h-12 bg-[#141414] border border-[#2A2A2A] flex items-center justify-center text-[#F5F1E8] text-xl shrink-0" style={F.display}>
+                {c.glyph}
               </div>
-              <p className="text-[#A8A29E] text-sm leading-snug mb-1.5" style={F.serif}>{c.desc}</p>
-              <div className="flex items-center gap-3 text-[10px] uppercase tracking-wider text-[#6B6B6B]" style={F.ui}>
-                <span><span style={F.mono} className="text-xs text-[#A8A29E]">{formatK(c.members)}</span> souls</span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline justify-between gap-2 mb-0.5">
+                  <h3 className="text-[#F5F1E8] text-base" style={F.display}>{c.name.toUpperCase()}</h3>
+                  <span className="text-[10px] text-[#6B6B6B] shrink-0" style={F.mono}>active {c.active}</span>
+                </div>
+                <p className="text-[#A8A29E] text-sm leading-snug mb-1.5" style={F.serif}>{c.desc}</p>
+                <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-wider text-[#6B6B6B]" style={F.ui}>
+                  <span><span style={F.mono} className="text-xs text-[#A8A29E]">{formatK(c.members + (joined ? 1 : 0))}</span> souls</span>
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => { e.stopPropagation(); onToggleMembership && onToggleMembership(c.id); }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); onToggleMembership && onToggleMembership(c.id); } }}
+                    className={`px-2 py-0.5 border cursor-pointer ${joined ? 'border-[#8B0000] text-[#F5F1E8] bg-[#8B0000]/15' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#5B0F1A]'}`}>
+                    {joined ? 'joined' : 'join'}
+                  </span>
+                </div>
               </div>
-            </div>
-          </button>
-        ))}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
 }
 
-export function CommunityDetail({ id, onBack }) {
+export function CommunityDetail({ id, onBack, posts: postsProp, isMember, onToggleMembership }) {
   const c = COMMUNITIES.find(x => x.id === id);
-  const posts = POSTS.filter(p => p.community === id || id === 'general');
+  const source = postsProp || POSTS;
+  const posts = source.filter(p => p.community === id || id === 'general');
   if (!c) return null;
   return (
     <div className="pb-24">
@@ -64,7 +112,11 @@ export function CommunityDetail({ id, onBack }) {
           </div>
         </div>
         <div className="relative flex items-center gap-3 mt-4">
-          <button className="flex-1 text-[#F5F1E8] text-xs py-2 border border-[#8B0000] bg-[#8B0000]/20 uppercase tracking-wider" style={F.ui}>joined</button>
+          <button onClick={onToggleMembership}
+            className={`flex-1 text-xs py-2 border uppercase tracking-wider transition-colors ${isMember ? 'text-[#F5F1E8] border-[#8B0000] bg-[#8B0000]/20 hover:bg-[#8B0000]/30' : 'text-[#A8A29E] border-[#2A2A2A] hover:border-[#5B0F1A] hover:text-[#F5F1E8]'}`}
+            style={F.ui}>
+            {isMember ? 'joined' : 'join'}
+          </button>
           <button className="px-4 text-[#A8A29E] text-xs py-2 border border-[#2A2A2A] uppercase tracking-wider" style={F.ui}><Bell size={13} /></button>
         </div>
         <div className="relative flex items-center gap-4 mt-4 text-[10px] uppercase tracking-wider text-[#6B6B6B]" style={F.ui}>
