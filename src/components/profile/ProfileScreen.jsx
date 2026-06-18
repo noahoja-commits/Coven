@@ -3,7 +3,6 @@ import { Settings, Pencil, Plus, Heart, MoreHorizontal, ChevronRight, Music, X }
 import { F } from '../../styles/fonts';
 import { TrackerGrid } from '../trackers/TrackerGrid';
 import { timeAgo, daysBetween, sunSign } from '../../data/helpers';
-import { CREWS } from '../../data/crews';
 import { ACHIEVEMENTS, earnedAchievements } from '../../data/achievements';
 
 const SHRINE_THEMES = {
@@ -14,7 +13,7 @@ const SHRINE_THEMES = {
   cathedral: 'linear-gradient(180deg, #1F0810 0%, transparent 100%)',
 };
 
-export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpdateTracker, onOpenTonightStatus, onOpenSettings, mementoMoriOn, settings, onEditProfile, onLightCandle, onOpenCrew, onBrowseCrews, onAddGrave, onAddAnniversary, onOpenNowPlaying, onOpenReflections, reflectionsCount = 0, nowPlaying, activityLog = [], sigils = [], bookmarks = [], onOpenComments, onOpenPost, ritual, ritualDoneToday, onPerformRitual, crystals = [], onToggleCrystal, pinnedPost, shrineTheme = 'oxblood', onSetShrineTheme, storyHighlights = [], onRemoveHighlight, achievementState = {} }) {
+export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpdateTracker, onOpenTonightStatus, onOpenSettings, mementoMoriOn, settings, onEditProfile, onLightCandle, crews = [], onOpenCrew, onBrowseCrews, onAddGrave, onAddAnniversary, onOpenNowPlaying, onOpenReflections, reflectionsCount = 0, nowPlaying, activityLog = [], sigils = [], bookmarks = [], onOpenComments, onOpenPost, ritual, ritualDoneToday, onPerformRitual, crystals = [], onToggleCrystal, pinnedPost, shrineTheme = 'oxblood', onSetShrineTheme, storyHighlights = [], onRemoveHighlight, achievementState = {} }) {
   const earned = earnedAchievements(achievementState);
   const earnedIds = new Set(earned.map(a => a.id));
   const [showThemePicker, setShowThemePicker] = useState(false);
@@ -336,32 +335,33 @@ export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpda
       )}
 
       {/* Crews */}
-      {CREWS.filter(c => c.isMember).length > 0 && (
-        <div className="mx-4 mb-4 border border-[#2A2A2A] bg-[#0F0F0F]">
-          <div className="px-3 py-2 border-b border-[#1A1A1A] flex items-center justify-between">
-            <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· your crews ·</span>
-            <button onClick={onBrowseCrews} className="text-[10px] uppercase tracking-wider text-[#A89968] hover:text-[#C9A961]" style={F.ui}>browse</button>
-          </div>
+      <div className="mx-4 mb-4 border border-[#2A2A2A] bg-[#0F0F0F]">
+        <div className="px-3 py-2 border-b border-[#1A1A1A] flex items-center justify-between">
+          <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· your crews ·</span>
+          <button onClick={onBrowseCrews} className="text-[10px] uppercase tracking-wider text-[#A89968] hover:text-[#C9A961]" style={F.ui}>browse</button>
+        </div>
+        {crews.length > 0 ? (
           <div className="divide-y divide-[#1A1A1A]">
-            {CREWS.filter(c => c.isMember).map(c => (
+            {crews.map(c => (
               <button key={c.id} onClick={() => onOpenCrew && onOpenCrew(c.id)}
                 className="w-full text-left px-3 py-3 flex items-start gap-3 hover:bg-[#0A0A0A] transition-colors">
                 <div className="w-10 h-10 shrink-0 border border-[#2A2A2A] flex items-center justify-center text-[#A89968] text-lg">{c.glyph}</div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline justify-between gap-2 mb-0.5">
                     <h4 className="text-[#F5F1E8] text-sm truncate" style={F.display}>{c.name}</h4>
-                    <span className="text-[10px] text-[#6B6B6B] shrink-0" style={F.mono}>{c.members}/{c.maxMembers}</span>
+                    <span className="text-[10px] text-[#6B6B6B] shrink-0" style={F.mono}>{c.members}</span>
                   </div>
-                  <p className="text-[#A8A29E] text-xs italic mb-1 leading-snug" style={F.serif}>{c.description}</p>
-                  {c.nextEvent && (
-                    <div className="text-[10px] text-[#5B0F1A] uppercase tracking-wider" style={F.ui}>→ {c.nextEvent}</div>
-                  )}
+                  {c.description && <p className="text-[#A8A29E] text-xs italic leading-snug" style={F.serif}>{c.description}</p>}
                 </div>
               </button>
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <button onClick={onBrowseCrews} className="w-full px-3 py-5 text-center text-[#6B6B6B] text-xs italic hover:text-[#A8A29E] transition-colors" style={F.serif}>
+            you haven't joined a circle yet — browse crews
+          </button>
+        )}
+      </div>
 
       {/* Anniversaries */}
       <div className="mx-4 mb-4 border border-[#2A2A2A] bg-[#0F0F0F]">

@@ -10,6 +10,7 @@ import { fetchConversations, getOrCreateDM, createGroup, fetchMessages as fetchD
 import { fetchActiveStories, postStory as dbPostStory, deleteStory } from './lib/db/stories';
 import { fetchListings, createListing } from './lib/db/listings';
 import { fetchPayoutStatus, startPayoutSetup } from './lib/db/payouts';
+import { listCrews, createCrew as dbCreateCrew, joinCrew as dbJoinCrew } from './lib/db/crews';
 import { FONT_HREF, F } from './styles/fonts';
 import { Header } from './components/shared/Header';
 import { BottomNav } from './components/shared/BottomNav';
@@ -30,7 +31,6 @@ import { UserProfileOverlay } from './components/profile/UserProfileOverlay';
 import { StoryViewer } from './components/feed/StoryViewer';
 import { StoryComposer } from './components/feed/StoryComposer';
 import { SearchOverlay } from './components/shared/SearchOverlay';
-import { CrewDetail } from './components/profile/CrewDetail';
 import { CrewBrowse } from './components/profile/CrewBrowse';
 import { AddGraveModal } from './components/profile/AddGraveModal';
 import { AddAnniversaryModal } from './components/profile/AddAnniversaryModal';
@@ -89,7 +89,6 @@ export default function App() {
   const [activeUserHandle, setActiveUserHandle] = useState(null);
   const [showStoryComposer, setShowStoryComposer] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
-  const [activeCrew, setActiveCrew] = useState(null);
   const [showCrewBrowse, setShowCrewBrowse] = useState(false);
   const [showAddGrave, setShowAddGrave] = useState(false);
   const [showAddAnniv, setShowAddAnniv] = useState(false);
@@ -132,9 +131,9 @@ export default function App() {
   const [following, setFollowing] = useState({}); // {handle: ts}, backed by follows table
   const [stories, setStories] = useState([]);
   const [listings, setListings] = useState([]);
-  const [crewMessages, setCrewMessages] = useLocalStorage('crewMessages', {});
+  const [crews, setCrews] = useState([]); // public crew directory (group conversations)
+  const [crewBusy, setCrewBusy] = useState({}); // {convId: true} while joining
   const [muted, setMuted] = useLocalStorage('muted', {});
-  const [crewRequests, setCrewRequests] = useLocalStorage('crewRequests', {});
   const [anniversaries, setAnniversaries] = useLocalStorage('anniversaries', ANNIVERSARIES);
   const [cardHistory, setCardHistory] = useLocalStorage('cardHistory', {});
   const [marginalia, setMarginalia] = useLocalStorage('marginalia', {});
@@ -232,6 +231,7 @@ export default function App() {
     fetchActiveStories(meId).then(s => { if (active) setStories(s); }).catch(() => {});
     fetchListings(meId).then(l => { if (active) setListings(l); }).catch(() => {});
     fetchPayoutStatus(meId).then(p => { if (active) setPayoutStatus(p); }).catch(() => {});
+    listCrews().then(c => { if (active) setCrews(c); }).catch(() => {});
     return () => { active = false; };
   }, [meId, dbProfile]);
 
@@ -650,13 +650,34 @@ export default function App() {
     } catch { /* ignore */ }
   };
 
-  const sendCrewMessage = (crewId, body) => {
-    const now = new Date();
-    const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    setCrewMessages(prev => ({
-      ...prev,
-      [crewId]: [...(prev[crewId] || []), { id: `cm${Date.now()}`, from: 'me', body, time }],
-    }));
+  const refreshCrews = () => listCrews().then(setCrews).catch(() => {});
+
+  // A crew is a public group conversation — opening it routes through the DM thread.
+  const joinCrewHandler = async (convId) => {
+    setCrewBusy(prev => ({ ...prev, [convId]: true }));
+    try {
+      await dbJoinCrew(convId);
+      const c = crews.find(x => x.id === convId);
+      addNotification({ kind: 'crew', avatar: c?.glyph || '✦', text: `you joined ${c?.name || 'a crew'}` });
+      logActivity({ kind: 'join', glyph: c?.glyph || '✦', label: `joined ${c?.name || 'a crew'}` });
+      await refreshCrews();
+      await fetchConversations().then(setConversations).catch(() => {});
+      setShowCrewBrowse(false);
+      openConversation(convId);
+    } catch { /* ignore */ }
+    finally { setCrewBusy(prev => { const n = { ...prev }; delete n[convId]; return n; }); }
+  };
+
+  const createCrewHandler = async ({ name, glyph, description }) => {
+    try {
+      const convId = await dbCreateCrew(name, glyph, description);
+      addNotification({ kind: 'crew', avatar: glyph || '✦', text: `you conjured ${name}` });
+      logActivity({ kind: 'join', glyph: glyph || '✦', label: `conjured ${name}` });
+      await refreshCrews();
+      await fetchConversations().then(setConversations).catch(() => {});
+      setShowCrewBrowse(false);
+      openConversation(convId);
+    } catch { /* ignore */ }
   };
 
   const toggleMute = (handle) => {
@@ -666,11 +687,6 @@ export default function App() {
       else next[handle] = Date.now();
       return next;
     });
-  };
-
-  const requestJoinCrew = (crewId) => {
-    setCrewRequests(prev => ({ ...prev, [crewId]: Date.now() }));
-    addNotification({ kind: 'crew', avatar: '✦', text: `you requested to join` });
   };
 
   const addGrave = (grave) => {
@@ -943,7 +959,8 @@ export default function App() {
         onOpenSettings={() => setShowSettings(true)}
         onEditProfile={() => setShowEditProfile(true)}
         onLightCandle={lightCandle}
-        onOpenCrew={(id) => setActiveCrew(id)}
+        crews={crews.filter(c => c.isMember)}
+        onOpenCrew={(id) => openConversation(id)}
         onBrowseCrews={() => setShowCrewBrowse(true)}
         onAddGrave={() => setShowAddGrave(true)}
         onAddAnniversary={() => setShowAddAnniv(true)}
@@ -1114,19 +1131,13 @@ export default function App() {
           onPost={(story) => { postStory(story); setShowStoryComposer(false); }}
         />
       )}
-      {activeCrew && (
-        <CrewDetail
-          crewId={activeCrew}
-          messages={crewMessages[activeCrew] || []}
-          onSend={(body) => sendCrewMessage(activeCrew, body)}
-          onBack={() => setActiveCrew(null)}
-        />
-      )}
       {showCrewBrowse && (
         <CrewBrowse
-          requests={crewRequests}
-          onRequest={requestJoinCrew}
-          onOpen={(id) => { setActiveCrew(id); setShowCrewBrowse(false); }}
+          crews={crews}
+          busy={crewBusy}
+          onJoin={joinCrewHandler}
+          onCreate={createCrewHandler}
+          onOpen={(id) => { setShowCrewBrowse(false); openConversation(id); }}
           onClose={() => setShowCrewBrowse(false)}
         />
       )}
