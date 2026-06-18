@@ -1,24 +1,36 @@
 import { useState } from 'react';
-import { Mail, Loader2 } from 'lucide-react';
+import { Mail, Lock, Loader2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { GrainOverlay } from '../shared/Visuals';
 import { useAuth } from '../../auth/AuthProvider';
 
 export function SignInScreen() {
-  const { signInWithEmail } = useAuth();
+  const { signInWithPassword, signUpWithPassword } = useAuth();
+  const [mode, setMode] = useState('in'); // 'in' | 'up'
   const [email, setEmail] = useState('');
-  const [status, setStatus] = useState('idle'); // idle | sending | sent | error
+  const [password, setPassword] = useState('');
+  const [status, setStatus] = useState('idle'); // idle | working | confirm
   const [error, setError] = useState('');
 
-  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const passOk = password.length >= 6;
+  const valid = emailOk && passOk;
+  const isUp = mode === 'up';
 
   const submit = async (e) => {
     e.preventDefault();
-    if (!valid || status === 'sending') return;
-    setStatus('sending'); setError('');
-    const { error } = await signInWithEmail(email.trim());
-    if (error) { setStatus('error'); setError(error.message || 'something went wrong'); }
-    else setStatus('sent');
+    if (!valid || status === 'working') return;
+    setStatus('working'); setError('');
+    const fn = isUp ? signUpWithPassword : signInWithPassword;
+    const { data, error } = await fn(email.trim(), password);
+    if (error) {
+      setStatus('idle');
+      setError(error.message || 'something went wrong');
+      return;
+    }
+    // Sign-up with email confirmation still ON returns a user but no session.
+    if (isUp && !data.session) { setStatus('confirm'); return; }
+    // Otherwise AuthProvider's onAuthStateChange takes over and the app advances.
   };
 
   return (
@@ -32,22 +44,25 @@ export function SignInScreen() {
         <div className="text-[#C9A961] text-6xl mb-3 leading-none" style={F.brand}>Coven</div>
         <p className="text-[#A8A29E] text-sm mb-12" style={F.serif}>a gathering place for the nocturnal</p>
 
-        {status === 'sent' ? (
+        {status === 'confirm' ? (
           <div className="animate-fade-in">
             <div className="text-4xl mb-4">✟</div>
-            <h2 className="text-[#F5F1E8] text-lg mb-2" style={F.display}>CHECK YOUR EMAIL</h2>
+            <h2 className="text-[#F5F1E8] text-lg mb-2" style={F.display}>CONFIRM YOUR EMAIL</h2>
             <p className="text-[#A8A29E] text-sm leading-relaxed" style={F.serif}>
-              a sigil-link is on its way to<br /><span className="text-[#C9A961]">{email.trim()}</span>.
-              <br />open it on this device to enter.
+              we sent a confirmation to<br /><span className="text-[#C9A961]">{email.trim()}</span>.
+              <br />confirm it, then come back and sign in.
             </p>
-            <button onClick={() => { setStatus('idle'); setEmail(''); }}
+            <button onClick={() => { setStatus('idle'); setMode('in'); }}
               className="mt-8 text-[10px] uppercase tracking-[0.25em] text-[#6B6B6B] hover:text-[#A8A29E] transition-colors p-2" style={F.ui}>
-              use a different email
+              back to sign in
             </button>
           </div>
         ) : (
           <form onSubmit={submit} className="w-full max-w-xs animate-fade-in">
-            <div className="text-[10px] uppercase tracking-[0.3em] text-[#A89968] mb-3" style={F.scriptureSC}>· enter ·</div>
+            <div className="text-[10px] uppercase tracking-[0.3em] text-[#A89968] mb-3" style={F.scriptureSC}>
+              · {isUp ? 'join the coven' : 'enter'} ·
+            </div>
+
             <div className="flex items-center gap-2 border border-[#2A2A2A] focus-within:border-[#5B0F1A] bg-[#0A0204] px-3 py-2.5 transition-colors">
               <Mail size={16} className="text-[#6B6B6B] shrink-0" />
               <input
@@ -57,17 +72,33 @@ export function SignInScreen() {
                 className="flex-1 bg-transparent outline-none text-[#F5F1E8] text-sm placeholder:text-[#4A4A4A]"
                 style={F.serif} />
             </div>
-            {status === 'error' && (
-              <p className="text-[#8B0000] text-[11px] mt-2" style={F.ui}>{error}</p>
+
+            <div className="flex items-center gap-2 border border-[#2A2A2A] focus-within:border-[#5B0F1A] bg-[#0A0204] px-3 py-2.5 mt-2 transition-colors">
+              <Lock size={16} className="text-[#6B6B6B] shrink-0" />
+              <input
+                type="password" autoComplete={isUp ? 'new-password' : 'current-password'}
+                value={password} onChange={e => setPassword(e.target.value)}
+                placeholder="password"
+                className="flex-1 bg-transparent outline-none text-[#F5F1E8] text-sm placeholder:text-[#4A4A4A]"
+                style={F.serif} />
+            </div>
+            {isUp && password.length > 0 && !passOk && (
+              <p className="text-[#6B6B6B] text-[10px] mt-1.5 text-left" style={F.ui}>at least 6 characters</p>
             )}
-            <button type="submit" disabled={!valid || status === 'sending'}
+            {error && <p className="text-[#8B0000] text-[11px] mt-2" style={F.ui}>{error}</p>}
+
+            <button type="submit" disabled={!valid || status === 'working'}
               className="w-full mt-4 py-3 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] text-xs uppercase tracking-[0.25em] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
               style={F.ui}>
-              {status === 'sending' ? <><Loader2 size={14} className="animate-spin" /> sending</> : 'send me a link'}
+              {status === 'working'
+                ? <><Loader2 size={14} className="animate-spin" /> {isUp ? 'creating' : 'entering'}</>
+                : (isUp ? 'create account' : 'enter')}
             </button>
-            <p className="text-[10px] text-[#6B6B6B] mt-4 leading-relaxed" style={F.serif}>
-              no password. we'll email you a one-time link to step inside.
-            </p>
+
+            <button type="button" onClick={() => { setMode(isUp ? 'in' : 'up'); setError(''); }}
+              className="mt-5 text-[10px] uppercase tracking-[0.2em] text-[#6B6B6B] hover:text-[#A8A29E] transition-colors p-2" style={F.ui}>
+              {isUp ? 'already have an account? sign in' : 'new here? create an account'}
+            </button>
           </form>
         )}
       </div>

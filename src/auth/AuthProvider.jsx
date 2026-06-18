@@ -42,11 +42,13 @@ export function AuthProvider({ children }) {
     return () => { active = false; sub.subscription.unsubscribe(); };
   }, [loadProfile]);
 
-  const signInWithEmail = useCallback(
-    (email) => supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.origin },
-    }),
+  const signInWithPassword = useCallback(
+    (email, password) => supabase.auth.signInWithPassword({ email, password }),
+    []
+  );
+
+  const signUpWithPassword = useCallback(
+    (email, password) => supabase.auth.signUp({ email, password }),
     []
   );
 
@@ -66,7 +68,8 @@ export function AuthProvider({ children }) {
     userId: session?.user?.id || null,
     dbProfile,
     loading,
-    signInWithEmail,
+    signInWithPassword,
+    signUpWithPassword,
     signOut,
     refreshProfile,
   };
