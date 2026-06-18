@@ -7,7 +7,7 @@ export function CrewBrowse({ requests = {}, onRequest, onOpen, onClose }) {
     <div className="absolute inset-0 z-40 bg-[#0A0A0A] animate-slide-in-right overflow-y-auto pb-12">
       <div className="sticky top-0 z-10 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A]">
         <div className="px-4 h-[60px] flex items-center gap-3">
-          <button onClick={onClose} className="text-[#A8A29E] -ml-1"><ArrowLeft size={20} /></button>
+          <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
           <div className="flex-1">
             <div className="text-[#F5F1E8] text-base tracking-[0.3em]" style={F.display}>CREWS</div>
             <div className="text-[10px] text-[#6B6B6B]" style={F.mono}>{CREWS.length} circles · find yours</div>

@@ -73,14 +73,14 @@ export function MapScreen({ events = EVENTS, rsvp = {}, onToggleRsvp, tonightSta
           { id: 'tattoo', label: 'tattoo' },
         ].map(t => (
           <button key={t.id} onClick={() => setFilter(t.id)}
-            className={`shrink-0 px-3 py-1.5 text-[10px] uppercase tracking-wider backdrop-blur-md transition-colors
-              ${filter === t.id ? 'bg-[#8B0000] text-[#F5F1E8] border border-[#8B0000]' : 'bg-black/60 text-[#A8A29E] border border-[#2A2A2A]'}`}
+            className={`shrink-0 px-3 py-1.5 text-[10px] uppercase tracking-wider border backdrop-blur-md transition-colors
+              ${filter === t.id ? 'bg-[#F5F1E8] text-[#0A0A0A] border-[#F5F1E8]' : 'bg-black/60 text-[#A8A29E] border-[#2A2A2A]'}`}
             style={F.ui}>{t.label}</button>
         ))}
       </div>
 
       <button onClick={onOpenTonightStatus}
-        className="absolute bottom-4 right-4 w-12 h-12 bg-[#8B0000] text-[#F5F1E8] flex items-center justify-center shadow-xl"
+        className="absolute bottom-4 right-4 w-12 h-12 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] flex items-center justify-center shadow-xl"
         style={{ boxShadow: '0 0 20px rgba(139,0,0,0.5)' }}
         title="drop your tonight pin">
         <Plus size={20} />
@@ -112,7 +112,7 @@ export function MapScreen({ events = EVENTS, rsvp = {}, onToggleRsvp, tonightSta
               <h3 className="text-[#F5F1E8] text-base leading-tight" style={F.display}>{activePin.name.toUpperCase()}</h3>
               <p className="text-[#A8A29E] text-xs mt-0.5" style={F.mono}>{activePin.meta}</p>
             </div>
-            <button onClick={() => setActive(null)} className="text-[#6B6B6B] -mt-1"><X size={16} /></button>
+            <button onClick={() => setActive(null)} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
           </div>
           <div className="grid grid-cols-2 gap-2 mt-4">
             <button className="py-2 border border-[#3F3F3F] text-[#A8A29E] text-xs uppercase tracking-wider" style={F.ui}>directions</button>

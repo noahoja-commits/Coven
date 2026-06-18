@@ -38,7 +38,7 @@ export function TonightStatusModal({ current, onSave, onClose }) {
             <span className="text-[10px] uppercase tracking-[0.25em] text-[#5B0F1A]" style={F.ui}>· tonight ·</span>
             <h3 className="text-[#F5F1E8] text-lg leading-none mt-1" style={F.display}>SET YOUR STATUS</h3>
           </div>
-          <button onClick={onClose} className="text-[#6B6B6B] hover:text-[#A8A29E]"><X size={18} /></button>
+          <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
         </div>
 
         <div className="p-4">
@@ -79,7 +79,7 @@ export function TonightStatusModal({ current, onSave, onClose }) {
             className="ml-auto px-4 py-2 text-[10px] uppercase tracking-wider border border-[#2A2A2A] text-[#A8A29E]"
             style={F.ui}>cancel</button>
           <button onClick={save} disabled={!text.trim()}
-            className="px-4 py-2 text-[10px] uppercase tracking-wider bg-[#5B0F1A] text-[#F5F1E8] disabled:opacity-30 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-[10px] uppercase tracking-wider bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] disabled:opacity-40 disabled:cursor-not-allowed"
             style={F.ui}>set status</button>
         </div>
       </div>

@@ -37,7 +37,7 @@ export function NewGroupDMModal({ following = {}, onCreate, onClose }) {
             </span>
             <h3 className="text-[#F5F1E8] text-lg leading-none mt-1" style={F.display}>WHISPER CIRCLE</h3>
           </div>
-          <button onClick={onClose} className="text-[#6B6B6B] hover:text-[#A8A29E]"><X size={18} /></button>
+          <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
         </div>
         <div className="p-4">
           <input value={name} onChange={e => setName(e.target.value.slice(0, 40))}
@@ -71,7 +71,7 @@ export function NewGroupDMModal({ following = {}, onCreate, onClose }) {
           <button onClick={onClose}
             className="ml-auto px-4 py-2 text-[10px] uppercase tracking-wider border border-[#2A2A2A] text-[#A8A29E]" style={F.ui}>cancel</button>
           <button onClick={submit} disabled={selected.size === 0}
-            className="px-4 py-2 text-[10px] uppercase tracking-wider bg-[#5B0F1A] text-[#F5F1E8] disabled:opacity-30" style={F.ui}>open whispers</button>
+            className="px-4 py-2 text-[10px] uppercase tracking-wider bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] disabled:opacity-40" style={F.ui}>open whispers</button>
         </div>
       </div>
     </div>

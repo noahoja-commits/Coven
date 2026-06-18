@@ -40,7 +40,7 @@ export function LibraryOverlay({ onClose, onOpenText }) {
         style={{ backgroundImage: 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><filter id=\'n\'><feTurbulence baseFrequency=\'0.85\'/></filter><rect width=\'200\' height=\'200\' filter=\'url(%23n)\'/></svg>")' }} />
       <div className="absolute top-0 inset-x-0 z-10 bg-black/60 backdrop-blur-md border-b border-[#5C3A1A]/40">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onClose} className="text-[#A89968] hover:text-[#C9A961]"><X size={20} /></button>
+          <button onClick={onClose} className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors"><X size={20} /></button>
           <div className="text-[#C9A961] text-base tracking-[0.3em]" style={F.scriptureSC}>THE LIBRARY</div>
           <BookOpen size={18} className="text-[#A89968]" />
         </div>

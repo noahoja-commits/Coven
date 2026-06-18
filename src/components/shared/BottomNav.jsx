@@ -24,13 +24,13 @@ export function BottomNav({ tab, onChange, parchment = false }) {
           const active = tab === it.id;
           return (
             <button key={it.id} onClick={() => onChange(it.id)}
-              className={`flex flex-col items-center justify-center gap-1 transition-colors ${active ? activeColor : inactiveColor}`}>
+              className={`relative flex flex-col items-center justify-center gap-1 transition-colors ${active ? activeColor : inactiveColor}`}>
               <div className="relative">
                 {active && <span className="absolute inset-0 -m-1.5 bg-[#8B0000]/20 blur-md rounded-full" />}
                 <Icon size={18} strokeWidth={active ? 1.75 : 1.25} className="relative" />
               </div>
               <span className="text-[9px] uppercase tracking-[0.18em]" style={F.ui}>{it.label}</span>
-              {active && <span className="absolute top-0 w-8 h-[1px] bg-[#8B0000]" />}
+              {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[1px] bg-[#8B0000]" />}
             </button>
           );
         })}

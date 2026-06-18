@@ -36,7 +36,7 @@ export function EventDetail({ eventId, isGoing, onToggleRsvp, onBack, onOpenUser
     <div className="absolute inset-0 z-40 bg-[#0A0A0A] animate-slide-in-right overflow-y-auto pb-12">
       <div className="sticky top-0 z-10 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A]">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onBack} className="text-[#A8A29E] -ml-1"><ArrowLeft size={20} /></button>
+          <button onClick={onBack} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
           <div className="text-[#F5F1E8] text-sm tracking-[0.25em]" style={F.display}>RITE</div>
           <button className="text-[#A8A29E]" title="share"><Share2 size={16} /></button>
         </div>

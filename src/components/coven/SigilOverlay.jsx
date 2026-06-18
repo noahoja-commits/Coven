@@ -112,9 +112,9 @@ export function SigilOverlay({ onClose, onSave }) {
 
       <div className="sticky top-0 z-10 bg-[#050204]/95 backdrop-blur-md border-b border-[#A89968]/15">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onClose} className="text-[#A89968] -ml-1"><ArrowLeft size={20} /></button>
+          <button onClick={onClose} className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
           <div className="text-[#C9A961] text-base tracking-[0.3em]" style={F.display}>SIGILS</div>
-          <button onClick={reset} className="text-[#A89968]" title="reset"><RotateCcw size={16} /></button>
+          <button onClick={reset} className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors" title="reset"><RotateCcw size={16} /></button>
         </div>
       </div>
 
@@ -158,7 +158,7 @@ export function SigilOverlay({ onClose, onSave }) {
             <button
               onClick={seal}
               disabled={letters.length < 2 || sealed}
-              className="flex-1 flex items-center justify-center gap-2 py-3 border border-[#A89968]/40 text-[#A89968] hover:border-[#C9A961] hover:text-[#C9A961] disabled:opacity-30 disabled:hover:border-[#A89968]/40 disabled:hover:text-[#A89968] text-xs uppercase tracking-[0.25em] transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 py-3 border border-[#A89968]/40 text-[#A89968] hover:border-[#C9A961] hover:text-[#C9A961] disabled:opacity-40 disabled:hover:border-[#A89968]/40 disabled:hover:text-[#A89968] text-xs uppercase tracking-[0.25em] transition-colors"
               style={F.ui}>
               <Lock size={13} /> {sealed ? 'sealed' : 'seal the sigil'}
             </button>

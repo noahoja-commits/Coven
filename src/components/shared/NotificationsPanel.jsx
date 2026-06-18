@@ -36,7 +36,7 @@ export function NotificationsPanel({ notifications, onClose, onMarkAllRead, onMa
     <div className="absolute inset-0 z-30 bg-[#0A0A0A] animate-slide-in-right flex flex-col">
       <div className="bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A]">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onClose} className="text-[#A8A29E]"><X size={20} /></button>
+          <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
           <div className="text-[#F5F1E8] text-base tracking-[0.3em]" style={F.display}>NOTIFICATIONS</div>
           <button
             onMouseDown={handlePressStart}

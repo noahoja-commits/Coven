@@ -24,7 +24,7 @@ export function CommunitiesScreen({ onOpenCommunity, membership = {}, onToggleMe
       </div>
 
       <div className="px-4 pb-4">
-        <div className="flex items-center gap-2 px-3 py-2.5 bg-[#141414] border border-[#1F1F1F]">
+        <div className="flex items-center gap-2 px-3 py-2.5 bg-[#141414] border border-[#2A2A2A]">
           <Search size={14} className="text-[#6B6B6B]" />
           <input
             value={query}
@@ -101,8 +101,8 @@ export function CommunityDetail({ id, onBack, posts: postsProp, isMember, onTogg
         <div className="absolute inset-0 opacity-20" style={{
           background: 'radial-gradient(ellipse at 50% 0%, #3B0A12 0%, transparent 60%)'
         }} />
-        <button onClick={onBack} className="relative flex items-center gap-1 text-[#A8A29E] mb-3 -ml-1 text-sm" style={F.ui}>
-          <ChevronLeft size={16} /> scenes
+        <button onClick={onBack} className="relative flex items-center gap-1 text-[#A8A29E] hover:text-[#F5F1E8] mb-3 p-2 -m-1 text-sm transition-colors" style={F.ui}>
+          <ChevronLeft size={20} /> scenes
         </button>
         <div className="relative flex items-center gap-3">
           <div className="w-14 h-14 bg-[#141414] border border-[#2A2A2A] flex items-center justify-center text-[#F5F1E8] text-2xl" style={F.display}>{c.glyph}</div>

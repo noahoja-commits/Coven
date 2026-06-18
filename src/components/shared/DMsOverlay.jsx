@@ -18,21 +18,21 @@ export function DMsOverlay({ conversations = [], onClose, onOpenConversation, on
     <div className="absolute inset-0 z-30 bg-[#0A0A0A] animate-slide-in-right">
       <div className="absolute top-0 inset-x-0 z-10 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A]">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onClose} className="text-[#A8A29E] -ml-1"><X size={20} /></button>
+          <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
           <div className="text-[#F5F1E8] text-base tracking-[0.3em]" style={F.display}>WHISPERS</div>
           <button
             onClick={onNewGroup}
-            className="text-[#A8A29E] hover:text-[#F5F1E8]"
+            className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"
             title="new whisper circle"
             aria-label="new whisper"
           >
-            <Edit3 size={18} />
+            <Edit3 size={20} />
           </button>
         </div>
       </div>
       <div className="pt-[60px] pb-24">
         <div className="px-4 py-3 border-b border-[#1A1A1A]">
-          <div className="flex items-center gap-2 px-3 py-2 bg-[#141414] border border-[#1F1F1F]">
+          <div className="flex items-center gap-2 px-3 py-2 bg-[#141414] border border-[#2A2A2A]">
             <Search size={14} className="text-[#6B6B6B]" />
             <input
               ref={searchRef}

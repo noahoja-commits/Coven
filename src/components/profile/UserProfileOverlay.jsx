@@ -24,7 +24,7 @@ export function UserProfileOverlay({ handle, posts = [], isFollowing, isMuted, o
       {/* Header */}
       <div className="sticky top-0 z-10 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A]">
         <div className="px-4 h-[60px] flex items-center gap-3">
-          <button onClick={onClose} className="text-[#A8A29E] -ml-1"><ArrowLeft size={20} /></button>
+          <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
           <div className="flex-1 min-w-0">
             <div className="text-[#F5F1E8] text-sm truncate" style={F.ui}>{user.handle}</div>
             <div className="text-[10px] text-[#6B6B6B]" style={F.mono}>{theirPosts.length} posts</div>

@@ -184,13 +184,13 @@ export function OnboardingFlow({ onComplete }) {
         ) : <span />}
         {step < totalSteps - 1 ? (
           <button onClick={() => setStep(step + 1)} disabled={!canAdvance()}
-            className="ml-auto px-5 py-2.5 bg-[#5B0F1A] text-[#F5F1E8] text-xs uppercase tracking-[0.2em] disabled:opacity-30 flex items-center gap-1.5"
+            className="ml-auto px-5 py-2.5 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] text-xs uppercase tracking-[0.2em] disabled:opacity-40 flex items-center gap-1.5"
             style={F.ui}>
             {step === 0 ? 'enter' : 'continue'} <ChevronRight size={14} />
           </button>
         ) : (
           <button onClick={finish}
-            className="ml-auto px-5 py-2.5 bg-[#5B0F1A] text-[#F5F1E8] text-xs uppercase tracking-[0.2em]"
+            className="ml-auto px-5 py-2.5 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] text-xs uppercase tracking-[0.2em]"
             style={F.ui}>begin</button>
         )}
       </div>

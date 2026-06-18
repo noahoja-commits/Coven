@@ -15,7 +15,7 @@ export function VespersArchiveModal({ onClose, onOpenLibrary }) {
             <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· archive ·</span>
             <h3 className="text-[#F5F1E8] text-lg leading-none mt-1" style={F.display}>VESPERS</h3>
           </div>
-          <button onClick={onClose} className="text-[#6B6B6B] hover:text-[#A8A29E]"><X size={18} /></button>
+          <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
         </div>
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {today && (

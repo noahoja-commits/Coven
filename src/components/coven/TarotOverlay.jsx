@@ -88,7 +88,7 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
 
       <div className="sticky top-0 z-10 bg-[#050204]/95 backdrop-blur-md border-b border-[#A89968]/15">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onClose} className="text-[#A89968] -ml-1"><ArrowLeft size={20} /></button>
+          <button onClick={onClose} className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
           <div className="text-[#C9A961] text-base tracking-[0.3em]" style={F.display}>THE DECK</div>
           <div className="flex items-center gap-3">
             <button onClick={() => setMode('history')} className={`text-[10px] uppercase tracking-wider ${mode === 'history' ? 'text-[#C9A961]' : 'text-[#A89968]'}`} style={F.ui} title="history">
@@ -220,7 +220,7 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
                 className="w-full bg-[#0A0204] border border-[#A89968]/30 focus:border-[#C9A961] outline-none p-3 text-[#F5F1E8] text-base italic resize-none"
                 style={F.scripture} />
               <button onClick={drawOracle} disabled={!oracleQ.trim()}
-                className="mt-3 w-full py-3 border border-[#A89968]/40 text-[#A89968] hover:border-[#C9A961] hover:text-[#C9A961] disabled:opacity-30 text-xs uppercase tracking-[0.3em]"
+                className="mt-3 w-full py-3 border border-[#A89968]/40 text-[#A89968] hover:border-[#C9A961] hover:text-[#C9A961] disabled:opacity-40 text-xs uppercase tracking-[0.3em]"
                 style={F.ui}>draw a card</button>
             </div>
           ) : (

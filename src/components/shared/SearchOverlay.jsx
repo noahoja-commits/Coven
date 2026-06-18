@@ -35,8 +35,8 @@ export function SearchOverlay({ posts = [], onClose, onOpenPost, onOpenUser, onO
     <div className="absolute inset-0 z-40 bg-[#0A0A0A] animate-slide-in-right flex flex-col">
       <div className="bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A]">
         <div className="px-4 h-[60px] flex items-center gap-3">
-          <button onClick={onClose} className="text-[#A8A29E]"><X size={20} /></button>
-          <div className="flex-1 flex items-center gap-2 bg-[#141414] border border-[#1F1F1F] px-3 py-2">
+          <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
+          <div className="flex-1 flex items-center gap-2 bg-[#141414] border border-[#2A2A2A] px-3 py-2">
             <Search size={14} className="text-[#6B6B6B]" />
             <input
               ref={inputRef}

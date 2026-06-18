@@ -39,7 +39,7 @@ export function CommentsOverlay({ post, onClose, onComment, onReact, onReactComm
       {/* Header */}
       <div className="bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A]">
         <div className="px-4 h-[60px] flex items-center gap-3">
-          <button onClick={onClose} className="text-[#A8A29E] -ml-1"><ArrowLeft size={20} /></button>
+          <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
           <div className="flex-1 min-w-0">
             <div className="text-[#F5F1E8] text-sm" style={F.display}>COMMENTS</div>
             <div className="text-[10px] text-[#6B6B6B]" style={F.mono}>{baseCount + comments.length} total</div>
@@ -123,7 +123,7 @@ export function CommentsOverlay({ post, onClose, onComment, onReact, onReactComm
           </div>
         )}
         <div className="flex items-end gap-2">
-          <div className="flex-1 bg-[#141414] border border-[#1F1F1F] rounded-2xl px-3 py-2">
+          <div className="flex-1 bg-[#141414] border border-[#2A2A2A] rounded-2xl px-3 py-2">
             <textarea
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
@@ -143,7 +143,7 @@ export function CommentsOverlay({ post, onClose, onComment, onReact, onReactComm
             onClick={send}
             disabled={!draft.trim()}
             className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center transition-colors ${
-              draft.trim() ? 'bg-[#8B0000] text-[#F5F1E8]' : 'bg-[#141414] border border-[#1F1F1F] text-[#6B6B6B]'
+              draft.trim() ? 'bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8]' : 'bg-[#141414] border border-[#2A2A2A] text-[#6B6B6B]'
             }`}
           >
             <Send size={15} />

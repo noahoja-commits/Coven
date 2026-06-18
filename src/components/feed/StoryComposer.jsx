@@ -26,7 +26,7 @@ export function StoryComposer({ onClose, onPost }) {
     <div className="fixed inset-0 z-[55] bg-black flex flex-col animate-fade-in">
       <div className="bg-black/60 backdrop-blur-md border-b border-white/10 z-10">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onClose} className="text-white/80"><X size={20} /></button>
+          <button onClick={onClose} className="text-white/80 hover:text-white p-2 -m-1 transition-colors"><X size={20} /></button>
           <div className="text-white text-sm tracking-[0.3em]" style={F.display}>YOUR STORY</div>
           <button onClick={submit} disabled={!caption.trim()}
             className={`text-white text-xs px-3 py-1.5 uppercase tracking-wider ${caption.trim() ? 'bg-[#8B0000]' : 'bg-white/10 opacity-50'}`}

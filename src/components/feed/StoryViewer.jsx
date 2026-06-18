@@ -94,7 +94,7 @@ export function StoryViewer({ startIndex = 0, myStories = [], meHandle = 'you', 
   if (glimpse.empty) {
     return (
       <div className="fixed inset-0 z-[60] bg-[#050204] flex flex-col items-center justify-center px-8">
-        <button onClick={onClose} className="absolute top-4 right-4 text-[#A8A29E]"><X size={22} /></button>
+        <button onClick={onClose} className="absolute top-4 right-4 text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={22} /></button>
         <div className="text-[#A89968]/60 text-[10px] uppercase tracking-[0.4em] mb-3" style={F.scriptureSC}>· your story ·</div>
         <div className="w-24 h-24 rounded-full border border-dashed border-[#3F3F3F] flex items-center justify-center text-[#6B6B6B] text-3xl mb-4">+</div>
         <p className="text-[#A8A29E] text-sm italic text-center max-w-xs" style={F.serif}>
@@ -129,7 +129,7 @@ export function StoryViewer({ startIndex = 0, myStories = [], meHandle = 'you', 
           <div className="text-white text-sm" style={F.ui}>{story.user}</div>
           <div className="text-[10px] text-white/60" style={F.mono}>{story.live ? 'live · just now' : '2h ago'}</div>
         </div>
-        <button onClick={onClose} className="text-white/80 hover:text-white"><X size={22} /></button>
+        <button onClick={onClose} className="text-white/80 hover:text-white p-2 -m-1 transition-colors"><X size={22} /></button>
       </div>
 
       {/* Tap zones */}

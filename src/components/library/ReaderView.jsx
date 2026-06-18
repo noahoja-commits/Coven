@@ -50,11 +50,11 @@ export function ReaderView({ textId, onBack, marginalia = [], onAddMarginalia, o
       }} />
       <div className="absolute top-0 inset-x-0 z-10 bg-[#EDE0C2]/85 backdrop-blur-sm border-b border-[#8B6B4A]/30">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onBack} className="text-[#5B0F1A] flex items-center gap-1 -ml-1" style={F.scriptureSC}>
-            <ChevronLeft size={18} /><span className="text-xs uppercase tracking-wider">Library</span>
+          <button onClick={onBack} className="text-[#5B0F1A] flex items-center gap-1 p-2 -m-1 transition-colors" style={F.scriptureSC}>
+            <ChevronLeft size={20} /><span className="text-xs uppercase tracking-wider">Library</span>
           </button>
           <div className="text-[#2A1808] text-sm tracking-[0.2em]" style={F.scriptureSC}>{text.shortTitle.toUpperCase()}</div>
-          <button className="text-[#5B0F1A]"><Bookmark size={16} /></button>
+          <button className="text-[#5B0F1A] p-2 -m-1 transition-colors"><Bookmark size={16} /></button>
         </div>
       </div>
       <div className="absolute inset-0 pt-[60px] overflow-y-auto">
@@ -120,7 +120,7 @@ export function ReaderView({ textId, onBack, marginalia = [], onAddMarginalia, o
                             <button onClick={() => setComposingFor(null)}
                               className="text-[10px] uppercase tracking-wider text-[#8B6B4A] hover:text-[#5B0F1A] px-2 py-1" style={F.scriptureSC}>cancel</button>
                             <button onClick={() => saveNote(verseKey)} disabled={!noteDraft.trim()}
-                              className="ml-auto text-[10px] uppercase tracking-wider bg-[#5B0F1A] text-[#EDE0C2] px-3 py-1 disabled:opacity-30" style={F.scriptureSC}>inscribe</button>
+                              className="ml-auto text-[10px] uppercase tracking-wider bg-[#5B0F1A] text-[#EDE0C2] px-3 py-1 disabled:opacity-40" style={F.scriptureSC}>inscribe</button>
                           </div>
                         </div>
                       )}

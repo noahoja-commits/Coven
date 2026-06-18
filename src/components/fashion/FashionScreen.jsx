@@ -8,7 +8,7 @@ function FashionTile({ item }) {
     violet: 'linear-gradient(135deg, #2D0F3F 0%, #14081F 70%, #0A0410 100%)',
   }[item.color];
   return (
-    <div className="relative w-full overflow-hidden border border-[#1F1F1F] hover:border-[#3F3F3F] transition-colors group cursor-pointer"
+    <div className="relative w-full overflow-hidden border border-[#2A2A2A] hover:border-[#3F3F3F] transition-colors group cursor-pointer"
       style={{ height: item.h, background: palette }}>
       <svg viewBox="0 0 100 140" className="absolute inset-0 w-full h-full opacity-60" preserveAspectRatio="xMidYMid slice">
         <path d="M 30 20 L 40 10 L 60 10 L 70 20 L 85 35 L 80 50 L 75 50 L 75 130 L 25 130 L 25 50 L 20 50 L 15 35 Z"

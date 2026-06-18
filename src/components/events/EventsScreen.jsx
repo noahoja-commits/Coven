@@ -47,8 +47,10 @@ export function EventsScreen({ rsvp = {}, onToggleRsvp, onOpenEvent }) {
             black: 'linear-gradient(135deg, #1F1F1F 0%, #0A0A0A 100%)',
           }[e.cover];
           return (
-            <button key={e.id} onClick={() => onOpenEvent && onOpenEvent(e.id)}
-              className="block w-full text-left border border-[#1F1F1F] overflow-hidden hover:border-[#3F3F3F] transition-colors">
+            <div key={e.id} role="button" tabIndex={0}
+              onClick={() => onOpenEvent && onOpenEvent(e.id)}
+              onKeyDown={(ev) => { if (ev.key === 'Enter') onOpenEvent && onOpenEvent(e.id); }}
+              className="block w-full text-left border border-[#2A2A2A] overflow-hidden hover:border-[#3F3F3F] transition-colors cursor-pointer">
               <div className="relative h-32 overflow-hidden" style={{ background: cover }}>
                 <svg viewBox="0 0 200 60" className="absolute inset-0 w-full h-full opacity-30" preserveAspectRatio="xMidYMid slice">
                   <path d="M 0 60 L 30 30 L 50 45 L 80 15 L 110 35 L 140 10 L 170 30 L 200 20 L 200 60 Z" fill="rgba(0,0,0,0.6)" />
@@ -74,17 +76,15 @@ export function EventsScreen({ rsvp = {}, onToggleRsvp, onOpenEvent }) {
                     <span key={t} className="text-[10px] px-1.5 py-0.5 border border-[#2A2A2A] text-[#A8A29E] uppercase tracking-wider" style={F.ui}>{t}</span>
                   ))}
                 </div>
-                <span
-                  role="button"
-                  tabIndex={0}
+                <button
+                  type="button"
                   onClick={(ev) => { ev.stopPropagation(); onToggleRsvp && onToggleRsvp(e.id); }}
-                  onKeyDown={(ev) => { if (ev.key === 'Enter') { ev.stopPropagation(); onToggleRsvp && onToggleRsvp(e.id); } }}
-                  className={`mt-3 w-full py-2 text-[10px] uppercase tracking-wider border flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${rsvp[e.id] ? 'bg-[#8B0000]/20 border-[#8B0000] text-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#5B0F1A] hover:text-[#F5F1E8]'}`}
+                  className={`mt-3 w-full py-2 text-[10px] uppercase tracking-wider border flex items-center justify-center gap-1.5 transition-colors ${rsvp[e.id] ? 'bg-[#8B0000]/20 border-[#8B0000] text-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#5B0F1A] hover:text-[#F5F1E8]'}`}
                   style={F.ui}>
                   {rsvp[e.id] ? <><Check size={12} /> going</> : 'rsvp'}
-                </span>
+                </button>
               </div>
-            </button>
+            </div>
           );
         })}
       </div>

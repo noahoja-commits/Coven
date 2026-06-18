@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, Pencil, Plus, Heart, MoreHorizontal, ChevronRight, Music } from 'lucide-react';
+import { Settings, Pencil, Plus, Heart, MoreHorizontal, ChevronRight, Music, X } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { TrackerGrid } from '../trackers/TrackerGrid';
 import { timeAgo, daysBetween, sunSign } from '../../data/helpers';
@@ -138,7 +138,7 @@ export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpda
                   <span className="text-[8px] text-white/70 text-center line-clamp-2" style={F.scripture}>{h.caption}</span>
                 </div>
                 <button onClick={() => onRemoveHighlight && onRemoveHighlight(h.id)}
-                  className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#0A0A0A] border border-[#2A2A2A] text-[#6B6B6B] hover:text-[#8B0000] text-xs opacity-0 group-hover:opacity-100">×</button>
+                  className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#0A0A0A] border border-[#2A2A2A] text-[#6B6B6B] hover:text-[#8B0000] text-xs opacity-0 group-hover:opacity-100 p-1 transition-colors">×</button>
               </div>
             ))}
           </div>
@@ -154,7 +154,7 @@ export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpda
                 <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· tint your shrine ·</span>
                 <h3 className="text-[#F5F1E8] text-lg leading-none mt-1" style={F.display}>THEME</h3>
               </div>
-              <button onClick={() => setShowThemePicker(false)} className="text-[#6B6B6B] hover:text-[#A8A29E] text-lg">×</button>
+              <button onClick={() => setShowThemePicker(false)} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
             </div>
             <div className="p-4 grid grid-cols-2 gap-2">
               {Object.keys(SHRINE_THEMES).map(name => (
@@ -540,7 +540,7 @@ function CrystalsBlock({ crystals, onToggleCrystal }) {
                 <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· choose up to 6 ·</span>
                 <h3 className="text-[#F5F1E8] text-lg leading-none mt-1" style={F.display}>STONES CARRIED</h3>
               </div>
-              <button onClick={() => setOpen(false)} className="text-[#6B6B6B] hover:text-[#A8A29E] text-lg">×</button>
+              <button onClick={() => setOpen(false)} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
             </div>
             <div className="p-4 grid grid-cols-2 gap-2">
               {CRYSTAL_OPTIONS.map(c => {

@@ -40,7 +40,7 @@ export function ConfessionsOverlay({ onClose, userConfessions = [] }) {
 
       <div className="sticky top-0 z-10 bg-[#050204]/95 backdrop-blur-md border-b border-[#7B2CBF]/20">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onClose} className="text-[#A89968] -ml-1"><ArrowLeft size={20} /></button>
+          <button onClick={onClose} className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
           <div className="text-[#C9A961] text-base tracking-[0.3em]" style={F.display}>CONFESSIONS</div>
           <span className="w-5" />
         </div>

@@ -30,10 +30,10 @@ export function ComposeOverlay({ onClose, onPost }) {
     <div className="absolute inset-0 z-30 bg-[#0A0A0A] flex flex-col animate-fade-in">
       <div className="bg-[#0A0A0A] border-b border-[#1A1A1A]">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onClose} className="text-[#A8A29E]"><X size={20} /></button>
+          <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
           <div className="text-[#F5F1E8] text-sm tracking-[0.25em]" style={F.display}>NEW POST</div>
           <button onClick={submit} disabled={!canPost}
-            className={`text-[#F5F1E8] text-xs px-3 py-1.5 uppercase tracking-wider transition-opacity ${canPost ? 'bg-[#8B0000]' : 'bg-[#3F0A12] opacity-50 cursor-not-allowed'}`}
+            className={`text-[#F5F1E8] text-xs px-3 py-1.5 uppercase tracking-wider transition-opacity ${canPost ? 'bg-[#8B0000] hover:bg-[#5B0F1A]' : 'bg-[#3F0A12] opacity-50 cursor-not-allowed'}`}
             style={F.ui}>post</button>
         </div>
       </div>

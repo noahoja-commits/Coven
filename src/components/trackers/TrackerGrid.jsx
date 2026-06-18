@@ -13,7 +13,7 @@ export function TrackerGrid({ trackers, onUpdate }) {
     : TRACKER_CATEGORIES.filter(c => trackers[c.id]);
 
   return (
-    <div className="border border-[#1F1F1F] bg-[#0F0F0F]">
+    <div className="border border-[#2A2A2A] bg-[#0F0F0F]">
       <div className="px-3 py-2 border-b border-[#1A1A1A] flex items-center justify-between">
         <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· the log ·</div>
         <button onClick={() => setEditing(!editing)} className="text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#A8A29E]" style={F.ui}>

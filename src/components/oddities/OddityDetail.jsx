@@ -14,12 +14,12 @@ export function OddityDetail({ id, onBack }) {
       <div className="absolute inset-0 overflow-y-auto pb-32">
         <div className="absolute top-0 inset-x-0 z-10 bg-black/60 backdrop-blur-md border-b border-[#5B0F1A]/40">
           <div className="px-4 h-[60px] flex items-center justify-between">
-            <button onClick={onBack} className="text-[#A89968] flex items-center gap-1 -ml-1" style={F.ui}>
-              <ChevronLeft size={18} /><span className="text-xs uppercase tracking-wider">oddities</span>
+            <button onClick={onBack} className="text-[#A89968] hover:text-[#C9A961] flex items-center gap-1 p-2 -m-1 transition-colors" style={F.ui}>
+              <ChevronLeft size={20} /><span className="text-xs uppercase tracking-wider">oddities</span>
             </button>
             <div className="flex items-center gap-3">
-              <button className="text-[#A89968]"><Heart size={18} /></button>
-              <button className="text-[#A89968]"><Share2 size={18} /></button>
+              <button className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors"><Heart size={18} /></button>
+              <button className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors"><Share2 size={18} /></button>
             </div>
           </div>
         </div>
@@ -81,7 +81,7 @@ export function OddityDetail({ id, onBack }) {
       <div className="absolute bottom-0 inset-x-0 z-20 bg-[#0A0608]/95 backdrop-blur-md border-t border-[#2A2A2A] p-3 grid grid-cols-3 gap-2">
         <button className="py-3 text-[#A89968] text-[10px] uppercase tracking-wider border border-[#2A2A2A]" style={F.ui}><MessageCircle size={14} className="inline mr-1" />message</button>
         <button className="py-3 text-[#A89968] text-[10px] uppercase tracking-wider border border-[#2A2A2A]" style={F.ui}>make offer</button>
-        <button className="py-3 bg-[#5B0F1A] text-[#F5F1E8] text-[10px] uppercase tracking-wider" style={F.ui}>buy now</button>
+        <button className="py-3 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] text-[10px] uppercase tracking-wider" style={F.ui}>buy now</button>
       </div>
     </div>
   );

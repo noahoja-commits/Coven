@@ -20,12 +20,12 @@ export function OddityCompose({ onClose, onCreate }) {
     <div className="absolute inset-0 z-50 bg-[#0A0608] animate-fade-in flex flex-col">
       <div className="bg-black/60 backdrop-blur-md border-b border-[#5B0F1A]/40">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={() => step > 1 ? setStep(step - 1) : onClose()} className="text-[#A89968]">
+          <button onClick={() => step > 1 ? setStep(step - 1) : onClose()} className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors">
             <X size={20} />
           </button>
           <div className="text-[#C9A961] text-sm tracking-[0.3em]" style={F.scriptureSC}>LIST WARE — {step}/3</div>
           <button disabled={!canAdvance} onClick={advance}
-            className="text-[#F5F1E8] text-xs px-3 py-1.5 bg-[#5B0F1A] uppercase tracking-wider disabled:opacity-50" style={F.ui}>
+            className="text-[#F5F1E8] text-xs px-3 py-1.5 bg-[#8B0000] hover:bg-[#5B0F1A] uppercase tracking-wider disabled:opacity-40" style={F.ui}>
             {step < 3 ? 'next' : 'list it'}
           </button>
         </div>

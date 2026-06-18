@@ -34,26 +34,30 @@ export function Header({ tab, onDMs, onCompose, onLibrary, onNotifications, onSe
             </button>
           )}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1">
           {tab === 'home' && (
-            <button onClick={onCompose} className={`${accentColor} hover:text-[#F5F1E8]`}><Plus size={20} /></button>
+            <button onClick={onCompose} className={`${accentColor} hover:text-[#F5F1E8] transition-colors p-2`} title="new post"><Plus size={20} /></button>
           )}
-          <button onClick={onSearch} className={`${accentColor} hover:text-[#F5F1E8]`} title="search"><Search size={18} /></button>
-          <button onClick={onNotifications} className={`${accentColor} hover:text-[#F5F1E8] relative`}>
-            <Bell size={18} />
-            {unreadNotifications > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-0.5 rounded-full bg-[#8B0000] text-[#F5F1E8] text-[8px] flex items-center justify-center" style={F.mono}>
-                {unreadNotifications > 9 ? '9+' : unreadNotifications}
-              </span>
-            )}
+          <button onClick={onSearch} className={`${accentColor} hover:text-[#F5F1E8] transition-colors p-2`} title="search"><Search size={18} /></button>
+          <button onClick={onNotifications} className={`${accentColor} hover:text-[#F5F1E8] transition-colors p-2`} title="notifications">
+            <span className="relative inline-flex">
+              <Bell size={18} />
+              {unreadNotifications > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[14px] h-[14px] px-0.5 rounded-full bg-[#8B0000] text-[#F5F1E8] text-[8px] flex items-center justify-center" style={F.mono}>
+                  {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                </span>
+              )}
+            </span>
           </button>
-          <button onClick={onDMs} className={`${accentColor} hover:text-[#F5F1E8] relative`}>
-            <MessageCircle size={20} />
-            {unreadDMs > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-0.5 rounded-full bg-[#8B0000] text-[#F5F1E8] text-[8px] flex items-center justify-center" style={F.mono}>
-                {unreadDMs > 9 ? '9+' : unreadDMs}
-              </span>
-            )}
+          <button onClick={onDMs} className={`${accentColor} hover:text-[#F5F1E8] transition-colors p-2`} title="whispers">
+            <span className="relative inline-flex">
+              <MessageCircle size={20} />
+              {unreadDMs > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[14px] h-[14px] px-0.5 rounded-full bg-[#8B0000] text-[#F5F1E8] text-[8px] flex items-center justify-center" style={F.mono}>
+                  {unreadDMs > 9 ? '9+' : unreadDMs}
+                </span>
+              )}
+            </span>
           </button>
         </div>
       </div>

@@ -55,7 +55,7 @@ export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOn
     <div className="absolute inset-0 z-50 bg-[#0A0A0A] animate-slide-in-right flex flex-col">
       <div className="bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A]">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onBack} className="text-[#A8A29E] flex items-center gap-1 -ml-1" style={F.ui}>
+          <button onClick={onBack} className="text-[#A8A29E] hover:text-[#F5F1E8] transition-colors flex items-center gap-1 -ml-1" style={F.ui}>
             <ChevronLeft size={18} /><span className="text-xs uppercase tracking-wider">back</span>
           </button>
           <div className="text-[#F5F1E8] text-base tracking-[0.3em]" style={F.display}>SETTINGS</div>
@@ -119,7 +119,7 @@ export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOn
                 className="flex-1 bg-[#0A0A0A] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none px-2.5 py-1.5 text-[#F5F1E8] text-sm"
                 style={F.serif} />
               <button type="submit"
-                className="px-3 py-1.5 text-[10px] uppercase tracking-wider bg-[#5B0F1A] text-[#F5F1E8]" style={F.ui}>mute</button>
+                className="px-3 py-1.5 text-[10px] uppercase tracking-wider bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8]" style={F.ui}>mute</button>
             </form>
             {mutedKeywords.length === 0 ? (
               <p className="text-[10px] text-[#6B6B6B] italic" style={F.serif}>· nothing muted ·</p>
@@ -159,18 +159,11 @@ export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOn
         </Section>
 
         <Section title="account">
-          <Row label="Edit profile">
-            <span className="text-[#6B6B6B] text-sm">›</span>
-          </Row>
-          <Row label="Privacy & blocked">
-            <span className="text-[#6B6B6B] text-sm">›</span>
-          </Row>
-          <Row label="Notifications">
-            <span className="text-[#6B6B6B] text-sm">›</span>
-          </Row>
-          <Row label="Help & feedback">
-            <span className="text-[#6B6B6B] text-sm">›</span>
-          </Row>
+          {['Edit profile', 'Privacy & blocked', 'Notifications', 'Help & feedback'].map(label => (
+            <Row key={label} label={label}>
+              <span className="text-[9px] uppercase tracking-[0.18em] text-[#3F3F3F]" style={F.ui}>soon</span>
+            </Row>
+          ))}
         </Section>
 
         <div className="px-4 mt-4 space-y-2">
@@ -186,7 +179,7 @@ export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOn
         </div>
 
         <div className="text-center mt-12 mb-8">
-          <div className="text-[#A89968] text-3xl mb-2" style={F.brand}>Coven</div>
+          <div className="text-[#C9A961] text-3xl mb-2" style={F.brand}>Coven</div>
           <div className="text-[10px] text-[#6B6B6B] uppercase tracking-[0.3em]" style={F.ui}>v0.1 · early ritual</div>
           <div className="text-[10px] text-[#3F3F3F] mt-1" style={F.scripture}>"made for the ones in the dark."</div>
         </div>

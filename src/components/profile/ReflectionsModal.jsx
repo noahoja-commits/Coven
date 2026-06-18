@@ -23,7 +23,7 @@ export function ReflectionsModal({ reflections = [], onAdd, onRemove, onClose })
             </span>
             <h3 className="text-[#F5F1E8] text-lg leading-none mt-1" style={F.display}>REFLECTIONS</h3>
           </div>
-          <button onClick={onClose} className="text-[#6B6B6B] hover:text-[#A8A29E]"><X size={18} /></button>
+          <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
         </div>
 
         <div className="p-4 border-b border-[#1A1A1A]">
@@ -35,7 +35,7 @@ export function ReflectionsModal({ reflections = [], onAdd, onRemove, onClose })
           <div className="flex items-center justify-between mt-2">
             <span className="text-[10px] text-[#6B6B6B]" style={F.mono}>{draft.length}/500</span>
             <button onClick={submit} disabled={!draft.trim()}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-wider ${draft.trim() ? 'bg-[#5B0F1A] text-[#F5F1E8]' : 'bg-[#1A1A1A] text-[#6B6B6B]'}`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-wider ${draft.trim() ? 'bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8]' : 'bg-[#1A1A1A] text-[#6B6B6B]'}`}
               style={F.ui}>
               <Send size={11} /> inscribe
             </button>
@@ -53,7 +53,7 @@ export function ReflectionsModal({ reflections = [], onAdd, onRemove, onClose })
                 <div key={r.id} className="px-4 py-3">
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-[10px] uppercase tracking-[0.2em] text-[#A89968]" style={F.scriptureSC}>· {timeAgo(r.at)} ago ·</span>
-                    <button onClick={() => onRemove && onRemove(r.id)} className="text-[#6B6B6B] hover:text-[#8B0000]"><Trash2 size={11} /></button>
+                    <button onClick={() => onRemove && onRemove(r.id)} className="text-[#6B6B6B] hover:text-[#8B0000] p-1 transition-colors"><Trash2 size={11} /></button>
                   </div>
                   <p className="text-[#F5F1E8] text-sm italic leading-relaxed whitespace-pre-wrap" style={F.scripture}>{r.body}</p>
                 </div>

@@ -35,7 +35,7 @@ function OddityImage({ shape, palette, small = false }) {
 function OddityCard({ item, onOpen }) {
   return (
     <button onClick={() => onOpen(item.id)} className="group text-left">
-      <div className="border border-[#1F1F1F] hover:border-[#5B0F1A]/50 transition-colors">
+      <div className="border border-[#2A2A2A] hover:border-[#5B0F1A]/50 transition-colors">
         <OddityImage shape={item.photo.shape} palette={item.photo.palette} />
         <div className="p-2.5 bg-[#0F0F0F]">
           <div className="flex items-baseline justify-between gap-2 mb-1">
@@ -89,7 +89,7 @@ function MarketplaceTab({ onOpenOddity, onCompose, userOddities = [] }) {
         {userFiltered.map(item => <UserOddityCard key={item.id} item={item} onOpen={onOpenOddity} />)}
         {filtered.map(item => <OddityCard key={item.id} item={item} onOpen={onOpenOddity} />)}
       </div>
-      <button onClick={onCompose} className="fixed bottom-6 right-6 z-10 w-14 h-14 bg-[#5B0F1A] text-[#F5F1E8] flex items-center justify-center shadow-xl"
+      <button onClick={onCompose} className="fixed bottom-6 right-6 z-10 w-14 h-14 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] flex items-center justify-center shadow-xl"
         style={{ boxShadow: '0 0 24px rgba(91, 15, 26, 0.6)' }}>
         <Plus size={22} />
       </button>
@@ -148,7 +148,7 @@ function ParlourTab() {
                 </div>
               </div>
             </div>
-            <button className="mt-3 w-full py-2 bg-[#5B0F1A] text-[#F5F1E8] text-[10px] uppercase tracking-wider" style={F.ui}>view portfolio · book</button>
+            <button className="mt-3 w-full py-2 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] text-[10px] uppercase tracking-wider" style={F.ui}>view portfolio · book</button>
           </div>
         ))}
       </div>
@@ -190,9 +190,9 @@ export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, userOddities
       <div className="relative h-full flex flex-col">
         <div className="bg-black/60 backdrop-blur-md border-b border-[#5B0F1A]/40">
           <div className="px-4 h-[60px] flex items-center justify-between">
-            <button onClick={onClose} className="text-[#A89968] hover:text-[#C9A961]"><X size={20} /></button>
+            <button onClick={onClose} className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors"><X size={20} /></button>
             <div className="text-[#C9A961] text-base tracking-[0.3em]" style={F.scriptureSC}>ODDITIES</div>
-            <button className="text-[#A89968]"><Search size={18} /></button>
+            <button className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors"><Search size={18} /></button>
           </div>
         </div>
         <div className="bg-black/40 border-b border-[#2A2A2A] flex">
