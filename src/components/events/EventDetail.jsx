@@ -1,22 +1,5 @@
 import { ArrowLeft, Check, MapPin, Calendar, Users, Share2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
-import { EVENTS } from '../../data/events';
-
-const ATTENDEE_POOL = [
-  { handle: 'lilith_xiv', avatar: '🦇' },
-  { handle: 'ash.in.october', avatar: '🕯' },
-  { handle: 'mortis.kvlt', avatar: '☠' },
-  { handle: 'vesper.exe', avatar: '✟' },
-  { handle: 'cryptic.rose', avatar: '🌹' },
-  { handle: 'blackvelvet_99', avatar: '🩸' },
-  { handle: 'parish.nyc', avatar: '☩' },
-];
-
-function eventAttendees(event) {
-  // Deterministic pool slice
-  const n = Math.min(event.going, ATTENDEE_POOL.length);
-  return ATTENDEE_POOL.slice(0, n);
-}
 
 const COVERS = {
   red: 'linear-gradient(135deg, #5B0F1A 0%, #1A0408 70%, #0A0204 100%)',
@@ -24,13 +7,14 @@ const COVERS = {
   black: 'linear-gradient(135deg, #1F1F1F 0%, #0A0A0A 100%)',
 };
 
-export function EventDetail({ eventId, isGoing, onToggleRsvp, onBack, onOpenUser }) {
-  const event = EVENTS.find(e => e.id === eventId);
+export function EventDetail({ event, isGoing, onToggleRsvp, onBack, onOpenUser, attendees = [], meHandle }) {
   if (!event) return null;
 
   const cover = COVERS[event.cover] || COVERS.red;
-  const attendees = eventAttendees(event);
-  const goingCount = event.going + (isGoing ? 1 : 0);
+  const others = attendees.filter(a => a.handle && a.handle !== meHandle);
+  const goingCount = (event.going || 0) + (isGoing ? 1 : 0);
+  const shown = others.slice(0, 12);
+  const overflow = Math.max(0, goingCount - shown.length - (isGoing ? 1 : 0));
 
   return (
     <div className="absolute inset-0 z-40 bg-[#0A0A0A] animate-slide-in-right overflow-y-auto pb-12">
@@ -38,7 +22,7 @@ export function EventDetail({ eventId, isGoing, onToggleRsvp, onBack, onOpenUser
         <div className="px-4 h-[60px] flex items-center justify-between">
           <button onClick={onBack} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
           <div className="text-[#F5F1E8] text-sm tracking-[0.25em]" style={F.display}>RITE</div>
-          <button className="text-[#A8A29E]" title="share"><Share2 size={16} /></button>
+          <span className="w-9" />
         </div>
       </div>
 
@@ -57,15 +41,19 @@ export function EventDetail({ eventId, isGoing, onToggleRsvp, onBack, onOpenUser
 
       {/* Meta */}
       <div className="px-4 py-4 space-y-2 border-b border-[#1A1A1A]">
-        <div className="flex items-center gap-2 text-sm">
-          <MapPin size={14} className="text-[#A89968]" />
-          <span className="text-[#F5F1E8]" style={F.serif}>{event.venue}</span>
-          <span className="text-[#6B6B6B]" style={F.ui}>· {event.neighborhood}</span>
-        </div>
-        <div className="flex items-center gap-2 text-sm">
-          <Calendar size={14} className="text-[#A89968]" />
-          <span className="text-[#A8A29E]" style={F.mono}>{event.time}</span>
-        </div>
+        {(event.venue || event.neighborhood) && (
+          <div className="flex items-center gap-2 text-sm">
+            <MapPin size={14} className="text-[#A89968]" />
+            {event.venue && <span className="text-[#F5F1E8]" style={F.serif}>{event.venue}</span>}
+            {event.neighborhood && <span className="text-[#6B6B6B]" style={F.ui}>· {event.neighborhood}</span>}
+          </div>
+        )}
+        {event.time && (
+          <div className="flex items-center gap-2 text-sm">
+            <Calendar size={14} className="text-[#A89968]" />
+            <span className="text-[#A8A29E]" style={F.mono}>{event.time}</span>
+          </div>
+        )}
         <div className="flex items-center gap-2 text-sm">
           <Users size={14} className="text-[#A89968]" />
           <span className="text-[#A8A29E]" style={F.mono}>{goingCount} going</span>
@@ -76,36 +64,47 @@ export function EventDetail({ eventId, isGoing, onToggleRsvp, onBack, onOpenUser
         </button>
       </div>
 
+      {/* Description */}
+      {event.description && (
+        <div className="px-4 py-4 border-b border-[#1A1A1A]">
+          <p className="text-[#A8A29E] text-sm leading-relaxed whitespace-pre-wrap" style={F.serif}>{event.description}</p>
+        </div>
+      )}
+
       {/* Tags */}
-      <div className="px-4 py-3 border-b border-[#1A1A1A] flex flex-wrap gap-1.5">
-        {event.tags.map(t => (
-          <span key={t} className="text-[10px] px-2 py-0.5 border border-[#2A2A2A] text-[#A8A29E] uppercase tracking-wider" style={F.ui}>{t}</span>
-        ))}
-      </div>
+      {event.tags.length > 0 && (
+        <div className="px-4 py-3 border-b border-[#1A1A1A] flex flex-wrap gap-1.5">
+          {event.tags.map(t => (
+            <span key={t} className="text-[10px] px-2 py-0.5 border border-[#2A2A2A] text-[#A8A29E] uppercase tracking-wider" style={F.ui}>{t}</span>
+          ))}
+        </div>
+      )}
 
       {/* Going list */}
       <div className="px-4 py-4 border-b border-[#1A1A1A]">
         <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-3" style={F.scriptureSC}>· souls going ·</div>
-        <div className="flex flex-wrap gap-2">
-          {isGoing && (
-            <div className="flex items-center gap-1.5 px-2 py-1 border border-[#8B0000] bg-[#8B0000]/15">
-              <div className="w-6 h-6 rounded-full bg-[#1A1A1A] flex items-center justify-center text-xs">⛧</div>
-              <span className="text-[#F5F1E8] text-xs" style={F.ui}>you</span>
-            </div>
-          )}
-          {attendees.map(a => (
-            <button key={a.handle} onClick={() => onOpenUser && onOpenUser(a.handle)}
-              className="flex items-center gap-1.5 px-2 py-1 border border-[#2A2A2A] hover:border-[#3F3F3F]">
-              <div className="w-6 h-6 rounded-full bg-[#1A1A1A] flex items-center justify-center text-xs">{a.avatar}</div>
-              <span className="text-[#A8A29E] text-xs" style={F.ui}>{a.handle}</span>
-            </button>
-          ))}
-          {event.going > attendees.length && (
-            <div className="flex items-center px-2 py-1 border border-[#2A2A2A] text-[#6B6B6B] text-xs" style={F.mono}>
-              +{event.going - attendees.length}
-            </div>
-          )}
-        </div>
+        {goingCount === 0 ? (
+          <p className="text-[#6B6B6B] text-xs italic" style={F.serif}>· no one yet — be the first ·</p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {isGoing && (
+              <div className="flex items-center gap-1.5 px-2 py-1 border border-[#8B0000] bg-[#8B0000]/15">
+                <div className="w-6 h-6 rounded-full bg-[#1A1A1A] flex items-center justify-center text-xs">⛧</div>
+                <span className="text-[#F5F1E8] text-xs" style={F.ui}>you</span>
+              </div>
+            )}
+            {shown.map(a => (
+              <button key={a.handle} onClick={() => onOpenUser && onOpenUser(a.handle)}
+                className="flex items-center gap-1.5 px-2 py-1 border border-[#2A2A2A] hover:border-[#3F3F3F]">
+                <div className="w-6 h-6 rounded-full bg-[#1A1A1A] flex items-center justify-center text-xs">{a.avatar}</div>
+                <span className="text-[#A8A29E] text-xs" style={F.ui}>{a.handle}</span>
+              </button>
+            ))}
+            {overflow > 0 && (
+              <div className="flex items-center px-2 py-1 border border-[#2A2A2A] text-[#6B6B6B] text-xs" style={F.mono}>+{overflow}</div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* RSVP CTA */}

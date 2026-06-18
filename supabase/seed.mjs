@@ -61,6 +61,31 @@ async function ensureSystemAccount(acct) {
   return id;
 }
 
+function daysFromNow(n) {
+  const d = new Date(); d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+const WELCOME_EVENTS = [
+  { host: 'lilith_xiv', name: 'Vespers vol. IV', venue: 'The Parish', neighborhood: 'Bushwick', city: 'Brooklyn', date: daysFromNow(5), time: '10PM', cover: 'red', tags: ['darkwave', 'goth', '18+'], description: 'a night of darkwave and candlelight. no flash. dress for the dark.' },
+  { host: 'mortis.kvlt', name: 'Basement Rite', venue: 'undisclosed', neighborhood: 'Bed-Stuy', city: 'Brooklyn', date: daysFromNow(9), time: '11PM', cover: 'black', tags: ['industrial', 'noise'], description: 'address by DM. bring cash. no phones on the floor.' },
+  { host: 'cryptic.rose', name: 'Cathedral Hours', venue: 'St. Agatha Hall', neighborhood: 'Morningside', city: 'NYC', date: daysFromNow(14), time: '9PM', cover: 'violet', tags: ['ambient', 'ritual'], description: 'ambient vespers under stained glass. seated. silent between sets.' },
+];
+
+async function seedEvents(ids) {
+  const { count } = await db.from('events').select('id', { count: 'exact', head: true });
+  if ((count || 0) > 0) { console.log('· events already present, skipping'); return; }
+  for (const e of WELCOME_EVENTS) {
+    const host_id = ids[e.host];
+    if (!host_id) continue;
+    const { error } = await db.from('events').insert({
+      host_id, name: e.name, venue: e.venue, neighborhood: e.neighborhood, city: e.city,
+      event_date: e.date, event_time: e.time, cover: e.cover, tags: e.tags, description: e.description,
+    });
+    if (error) throw new Error(`event ${e.name}: ${error.message}`);
+    console.log(`✓ event ${e.name}`);
+  }
+}
+
 async function main() {
   console.log('Seeding system accounts…');
   const ids = {};
@@ -86,6 +111,10 @@ async function main() {
       console.log(`✓ post by ${p.handle}`);
     }
   }
+
+  console.log('Seeding events…');
+  await seedEvents(ids).catch(e => { if (!/events.*does not exist|find the table/i.test(e.message)) throw e; console.log('· events table not found yet (apply 0002_events.sql first)'); });
+
   console.log('Done.');
 }
 

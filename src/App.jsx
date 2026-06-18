@@ -31,6 +31,7 @@ import { CrewBrowse } from './components/profile/CrewBrowse';
 import { AddGraveModal } from './components/profile/AddGraveModal';
 import { AddAnniversaryModal } from './components/profile/AddAnniversaryModal';
 import { EventDetail } from './components/events/EventDetail';
+import { CreateEventModal } from './components/events/CreateEventModal';
 import { NowPlayingModal } from './components/profile/NowPlayingModal';
 import { NewGroupDMModal } from './components/shared/NewGroupDMModal';
 import { ReflectionsModal } from './components/profile/ReflectionsModal';
@@ -55,7 +56,7 @@ import { SettingsScreen, DEFAULT_SETTINGS } from './components/settings/Settings
 
 import { COMMUNITIES } from './data/communities';
 import { POSTS, CONVERSATIONS, MESSAGES } from './data/posts';
-import { EVENTS } from './data/events';
+import { fetchEvents, createEvent, toggleEventRsvp as dbToggleRsvp, fetchEventAttendees } from './lib/db/events';
 import { NOTIFICATIONS } from './data/notifications';
 import { CommentsOverlay } from './components/feed/CommentsOverlay';
 import { QuoteModal } from './components/feed/QuoteModal';
@@ -110,7 +111,10 @@ export default function App() {
   const [conversations, setConversations] = useLocalStorage('conversations', CONVERSATIONS);
   const [messages, setMessages] = useLocalStorage('messages', MESSAGES);
   const [communityMembership, setCommunityMembership] = useLocalStorage('communityMembership', { general: true, goth: true });
-  const [eventRsvp, setEventRsvp] = useLocalStorage('eventRsvp', {});
+  const [eventRsvp, setEventRsvp] = useState({});
+  const [events, setEvents] = useState([]);
+  const [showCreateEvent, setShowCreateEvent] = useState(false);
+  const [activeEventAttendees, setActiveEventAttendees] = useState([]);
   const [bookmarks, setBookmarks] = useLocalStorage('bookmarks', {});
   const [graves, setGraves] = useLocalStorage('graves', GRAVES);
   const [sigils, setSigils] = useLocalStorage('sigils', []);
@@ -207,8 +211,23 @@ export default function App() {
       setFollowing(map);
       followIdByHandle.current = idByHandle;
     }).catch(() => {});
+    fetchEvents(meId).then(({ events, rsvp }) => {
+      if (!active) return;
+      setEvents(events);
+      setEventRsvp(rsvp);
+    }).catch(() => {});
     return () => { active = false; };
   }, [meId, dbProfile]);
+
+  // Load an event's attendees when its detail opens.
+  useEffect(() => {
+    if (!activeEvent) { setActiveEventAttendees([]); return; }
+    let active = true;
+    fetchEventAttendees(activeEvent)
+      .then(a => { if (active) setActiveEventAttendees(a.map(x => ({ handle: x.handle, avatar: x.avatar }))); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [activeEvent]);
 
   // Lazy-load a thread's comments when it opens (base count -> 0 to avoid double-count).
   useEffect(() => {
@@ -385,11 +404,29 @@ export default function App() {
 
   const toggleEventRsvp = (id) => {
     const wasGoing = !!eventRsvp[id];
-    setEventRsvp(prev => ({ ...prev, [id]: !wasGoing }));
+    setEventRsvp(prev => {
+      const next = { ...prev };
+      if (wasGoing) delete next[id]; else next[id] = true;
+      return next;
+    });
     if (!wasGoing) {
       addNotification({ kind: 'event', avatar: '◈', text: `you said you're going` });
       logActivity({ kind: 'rsvp', glyph: '◈', label: 'rsvp’d to a rite', detail: id });
     }
+    if (meId && !String(id).startsWith('temp-')) {
+      dbToggleRsvp(id, meId, wasGoing).catch(() => setEventRsvp(prev => {
+        const next = { ...prev };
+        if (wasGoing) next[id] = true; else delete next[id];
+        return next;
+      }));
+    }
+  };
+
+  const addEvent = async (data) => {
+    if (!meId) return;
+    const saved = await createEvent(data, { id: meId, handle: meHandle, avatar: meAvatar });
+    setEvents(prev => [saved, ...prev]);
+    logActivity({ kind: 'event', glyph: '◈', label: 'hosted a rite', detail: data.name });
   };
 
   const deletePost = (postId) => {
@@ -765,7 +802,7 @@ export default function App() {
           if (typeof ref === 'string') return setActiveEvent(ref);
           if (ref?.id) return setActiveEvent(ref.id);
           if (ref?.name) {
-            const found = EVENTS.find(e => e.name.toLowerCase() === ref.name.toLowerCase());
+            const found = events.find(e => e.name.toLowerCase() === ref.name.toLowerCase());
             if (found) setActiveEvent(found.id);
           }
         }}
@@ -794,6 +831,7 @@ export default function App() {
     );
     if (tab === 'map') return (
       <MapScreen
+        events={events}
         rsvp={eventRsvp}
         onToggleRsvp={toggleEventRsvp}
         tonightStatus={tonightStatus}
@@ -801,7 +839,7 @@ export default function App() {
       />
     );
     if (tab === 'events') return (
-      <EventsScreen rsvp={eventRsvp} onToggleRsvp={toggleEventRsvp} onOpenEvent={(id) => setActiveEvent(id)} />
+      <EventsScreen events={events} rsvp={eventRsvp} onToggleRsvp={toggleEventRsvp} onOpenEvent={(id) => setActiveEvent(id)} onCreateEvent={() => setShowCreateEvent(true)} />
     );
     if (tab === 'fits') return <FashionScreen />;
     if (tab === 'profile') return (
@@ -1012,12 +1050,17 @@ export default function App() {
       )}
       {activeEvent && (
         <EventDetail
-          eventId={activeEvent}
+          event={events.find(e => e.id === activeEvent)}
           isGoing={!!eventRsvp[activeEvent]}
           onToggleRsvp={toggleEventRsvp}
+          attendees={activeEventAttendees}
+          meHandle={meHandle}
           onOpenUser={(h) => { setActiveEvent(null); setActiveUserHandle(h); }}
           onBack={() => setActiveEvent(null)}
         />
+      )}
+      {showCreateEvent && (
+        <CreateEventModal onCreate={addEvent} onClose={() => setShowCreateEvent(false)} />
       )}
       {showVespersArchive && (
         <VespersArchiveModal

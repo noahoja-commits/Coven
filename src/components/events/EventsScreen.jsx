@@ -1,18 +1,16 @@
 import { useState, useMemo } from 'react';
-import { Check } from 'lucide-react';
+import { Check, Plus } from 'lucide-react';
 import { F } from '../../styles/fonts';
-import { EVENTS } from '../../data/events';
 
-export function EventsScreen({ rsvp = {}, onToggleRsvp, onOpenEvent }) {
-  // Collect every tag in the dataset for filter pills
+export function EventsScreen({ events = [], rsvp = {}, onToggleRsvp, onOpenEvent, onCreateEvent }) {
   const allTags = useMemo(() => {
     const s = new Set();
-    EVENTS.forEach(e => e.tags.forEach(t => s.add(t)));
+    events.forEach(e => (e.tags || []).forEach(t => s.add(t)));
     return ['all', ...Array.from(s)];
-  }, []);
+  }, [events]);
   const [activeTag, setActiveTag] = useState('all');
 
-  const filtered = activeTag === 'all' ? EVENTS : EVENTS.filter(e => e.tags.includes(activeTag));
+  const filtered = activeTag === 'all' ? events : events.filter(e => (e.tags || []).includes(activeTag));
 
   return (
     <div className="pb-24">
@@ -21,21 +19,33 @@ export function EventsScreen({ rsvp = {}, onToggleRsvp, onOpenEvent }) {
           <h2 className="text-[#F5F1E8] text-2xl mb-1" style={F.display}>RITES</h2>
           <p className="text-[#A8A29E] text-sm" style={F.serif}>what's coming. who's going.</p>
         </div>
-        <span className="text-[10px] uppercase tracking-wider text-[#6B6B6B]" style={F.ui}>{filtered.length} listed</span>
+        <button onClick={onCreateEvent}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-wider bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] transition-colors" style={F.ui}>
+          <Plus size={13} /> host
+        </button>
       </div>
 
-      <div className="px-4 pb-4 flex gap-1.5 overflow-x-auto no-scrollbar">
-        {allTags.map(t => (
-          <button key={t}
-            onClick={() => setActiveTag(t)}
-            className={`shrink-0 px-3 py-1.5 text-[10px] uppercase tracking-wider border transition-colors
-              ${activeTag === t ? 'bg-[#F5F1E8] text-[#0A0A0A] border-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#3F3F3F]'}`}
-            style={F.ui}>{t}</button>
-        ))}
-      </div>
+      {allTags.length > 1 && (
+        <div className="px-4 pb-4 flex gap-1.5 overflow-x-auto no-scrollbar">
+          {allTags.map(t => (
+            <button key={t}
+              onClick={() => setActiveTag(t)}
+              className={`shrink-0 px-3 py-1.5 text-[10px] uppercase tracking-wider border transition-colors
+                ${activeTag === t ? 'bg-[#F5F1E8] text-[#0A0A0A] border-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#3F3F3F]'}`}
+              style={F.ui}>{t}</button>
+          ))}
+        </div>
+      )}
 
       <div className="px-4 space-y-3">
-        {filtered.length === 0 && (
+        {events.length === 0 && (
+          <div className="text-center py-16 text-[#6B6B6B]" style={F.serif}>
+            <div className="text-3xl mb-3">◈</div>
+            <p className="text-sm">no rites yet.</p>
+            <button onClick={onCreateEvent} className="mt-3 text-[10px] uppercase tracking-[0.2em] text-[#A89968] hover:text-[#C9A961] transition-colors" style={F.ui}>· host the first one ·</button>
+          </div>
+        )}
+        {events.length > 0 && filtered.length === 0 && (
           <div className="text-center py-8 text-[#6B6B6B] text-xs" style={F.mono}>
             no rites for "{activeTag}"
           </div>
@@ -45,7 +55,7 @@ export function EventsScreen({ rsvp = {}, onToggleRsvp, onOpenEvent }) {
             red: 'linear-gradient(135deg, #5B0F1A 0%, #1A0408 70%, #0A0204 100%)',
             violet: 'linear-gradient(135deg, #2D0F3F 0%, #14081F 70%, #0A0410 100%)',
             black: 'linear-gradient(135deg, #1F1F1F 0%, #0A0A0A 100%)',
-          }[e.cover];
+          }[e.cover] || 'linear-gradient(135deg, #5B0F1A 0%, #1A0408 70%, #0A0204 100%)';
           return (
             <div key={e.id} role="button" tabIndex={0}
               onClick={() => onOpenEvent && onOpenEvent(e.id)}
@@ -63,8 +73,8 @@ export function EventsScreen({ rsvp = {}, onToggleRsvp, onOpenEvent }) {
               <div className="p-3 bg-[#0F0F0F]">
                 <div className="flex items-baseline justify-between gap-2">
                   <div className="min-w-0">
-                    <div className="text-[#F5F1E8] text-sm truncate" style={F.serif}>{e.venue}</div>
-                    <div className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>{e.neighborhood} · <span style={F.mono} className="text-xs">{e.time}</span></div>
+                    <div className="text-[#F5F1E8] text-sm truncate" style={F.serif}>{e.venue || e.host}</div>
+                    <div className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>{e.neighborhood}{e.neighborhood && e.time ? ' · ' : ''}<span style={F.mono} className="text-xs">{e.time}</span></div>
                   </div>
                   <div className="text-right shrink-0">
                     <div className="text-[#F5F1E8] text-base" style={F.mono}>{e.going + (rsvp[e.id] ? 1 : 0)}</div>
@@ -72,7 +82,7 @@ export function EventsScreen({ rsvp = {}, onToggleRsvp, onOpenEvent }) {
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
-                  {e.tags.map(t => (
+                  {(e.tags || []).map(t => (
                     <span key={t} className="text-[10px] px-1.5 py-0.5 border border-[#2A2A2A] text-[#A8A29E] uppercase tracking-wider" style={F.ui}>{t}</span>
                   ))}
                 </div>
