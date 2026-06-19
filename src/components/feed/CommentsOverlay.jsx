@@ -59,8 +59,8 @@ export function CommentsOverlay({ post, onClose, onComment, onReact, onReactComm
         <div className="px-4 py-4 border-b border-[#1A1A1A]">
           <div className="flex items-center gap-2.5 mb-2">
             <button onClick={() => !post.mine && onOpenUser && onOpenUser(post.user, post.avatar)}
-              className="w-9 h-9 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-base shrink-0">
-              {post.avatar}
+              className="w-9 h-9 rounded-full overflow-hidden bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-base shrink-0">
+              {post.avatarUrl ? <img src={post.avatarUrl} alt="" className="w-full h-full object-cover" /> : post.avatar}
             </button>
             <div className="flex-1 min-w-0">
               <button onClick={() => !post.mine && onOpenUser && onOpenUser(post.user, post.avatar)}
@@ -161,8 +161,8 @@ function CommentRow({ c, reply, onOpenUser, onReactComment, onReply }) {
   return (
     <div className="flex gap-2.5">
       <button onClick={() => !c.mine && onOpenUser && onOpenUser(c.user, c.avatar)}
-        className={`${reply ? 'w-6 h-6 text-xs' : 'w-8 h-8 text-sm'} rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center shrink-0`}>
-        {c.avatar}
+        className={`${reply ? 'w-6 h-6 text-xs' : 'w-8 h-8 text-sm'} rounded-full overflow-hidden bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center shrink-0`}>
+        {c.avatarUrl ? <img src={c.avatarUrl} alt="" className="w-full h-full object-cover" /> : c.avatar}
       </button>
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2">

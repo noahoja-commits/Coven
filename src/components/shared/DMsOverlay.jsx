@@ -73,8 +73,8 @@ export function DMsOverlay({ conversations = [], onClose, onOpenConversation, on
                 onClick={() => onOpenConversation?.(c.id)}
                 className="w-full px-4 py-3 flex items-center gap-3 hover:bg-[#0F0F0F] text-left"
               >
-                <div className="relative w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-lg shrink-0">
-                  {c.avatar}
+                <div className="relative w-12 h-12 rounded-full overflow-hidden bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-lg shrink-0">
+                  {c.avatarUrl ? <img src={c.avatarUrl} alt="" className="w-full h-full object-cover" /> : c.avatar}
                   {c.unread > 0 && <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-[#8B0000] text-[#F5F1E8] text-[9px] flex items-center justify-center" style={F.mono}>{c.unread}</span>}
                 </div>
                 <div className="flex-1 min-w-0">

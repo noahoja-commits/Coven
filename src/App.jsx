@@ -7,7 +7,7 @@ import { fetchFeed, createPost, deletePost as dbDeletePost, togglePostReaction, 
 import { insertProfile, updateProfile, getProfileStats, getProfileByHandle } from './lib/db/profiles';
 import { fetchFollowing, followUser, unfollowUser } from './lib/db/social';
 import { fetchConversations, getOrCreateDM, createGroup, fetchMessages as fetchDMMessages, sendDM, markRead as dmMarkRead, setBuried as dmSetBuried, subscribeDMs } from './lib/db/dm';
-import { fetchActiveStories, postStory as dbPostStory, deleteStory } from './lib/db/stories';
+import { fetchActiveStories, postStory as dbPostStory, deleteStory, reactToStory } from './lib/db/stories';
 import { fetchListings, createListing } from './lib/db/listings';
 import { fetchPayoutStatus, startPayoutSetup, refreshPayoutStatus } from './lib/db/payouts';
 import { listCrews, createCrew as dbCreateCrew, joinCrew as dbJoinCrew } from './lib/db/crews';
@@ -502,7 +502,7 @@ export default function App() {
     setPosts(prev => prev.map(p => (p.id === postId ? { ...p, comments: [...(p.comments || []), optimistic] } : p)));
     const target = posts.find(p => p.id === postId);
     logActivity({ kind: 'comment', glyph: '✎', label: `commented on ${target?.user || 'a post'}`, detail: body.length > 60 ? body.slice(0, 60) + '…' : body, postId });
-    createComment({ postId, body, parentId }, { id: meId, handle: meHandle, avatar: meAvatar })
+    createComment({ postId, body, parentId }, { id: meId, handle: meHandle, avatar: meAvatar, avatarUrl: meAvatarUrl })
       .then(saved => setPosts(prev => prev.map(p => (p.id === postId ? { ...p, comments: (p.comments || []).map(c => (c.id === tempId ? saved : c)) } : p))))
       .catch(() => setPosts(prev => prev.map(p => (p.id === postId ? { ...p, comments: (p.comments || []).filter(c => c.id !== tempId) } : p))));
   };
@@ -1237,6 +1237,7 @@ export default function App() {
           stories={stories}
           startIndex={activeStoryIndex}
           onReply={(authorHandle, body) => sendMessageToUser(authorHandle, body)}
+          onReactStory={(storyId, kind) => { if (meId) reactToStory(storyId, kind, meId).catch(() => {}); }}
           onDelete={removeStory}
           onClose={() => setActiveStoryIndex(null)}
         />

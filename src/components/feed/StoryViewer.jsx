@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, ChevronLeft, ChevronRight, Send, Trash2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
+import { fetchStoryReactors } from '../../lib/db/stories';
+
+const STORY_REACTIONS = ['🦇', '🔥', '💀', '🥀', '🕯'];
 
 const STORY_DURATION = 5000;
 
@@ -19,16 +22,32 @@ function ago(ts) {
   return `${Math.floor(m / 60)}h ago`;
 }
 
-export function StoryViewer({ stories = [], startIndex = 0, onReply, onDelete, onClose }) {
+export function StoryViewer({ stories = [], startIndex = 0, onReply, onReactStory, onDelete, onClose }) {
   const [index, setIndex] = useState(startIndex);
   const [reply, setReply] = useState('');
   const [progress, setProgress] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [myReactions, setMyReactions] = useState({}); // {storyId: kind}
+  const [reactors, setReactors] = useState([]);        // who reacted to my story
   const startRef = useRef(Date.now());
 
   const story = stories[index];
 
   useEffect(() => { setProgress(0); startRef.current = Date.now(); }, [index]);
+
+  // When viewing your own story, load who reacted to it.
+  useEffect(() => {
+    let on = true;
+    if (story?.mine && story?.id) fetchStoryReactors(story.id).then(r => { if (on) setReactors(r); }).catch(() => {});
+    else setReactors([]);
+    return () => { on = false; };
+  }, [story?.id, story?.mine]);
+
+  const react = (kind) => {
+    if (!story) return;
+    setMyReactions(m => ({ ...m, [story.id]: kind }));
+    onReactStory && onReactStory(story.id, kind);
+  };
 
   useEffect(() => {
     if (paused || !story) return;
@@ -105,15 +124,34 @@ export function StoryViewer({ stories = [], startIndex = 0, onReply, onDelete, o
 
       {/* Footer */}
       {story.mine ? (
-        <div className="absolute bottom-4 left-0 right-0 px-4 flex items-center gap-2 justify-center">
-          <p className="text-white/60 text-xs italic" style={F.serif}>disappears in {Math.max(0, Math.floor((story.expiresAt - Date.now()) / 3600000))}h</p>
-          <button onClick={() => { onDelete && onDelete(story.id); onClose && onClose(); }}
-            className="flex items-center gap-1 px-3 py-1 text-[10px] uppercase tracking-wider border border-white/30 text-white/80 hover:border-[#8B0000] hover:text-[#8B0000] transition-colors" style={F.ui}>
-            <Trash2 size={11} /> remove
-          </button>
+        <div className="absolute bottom-4 left-0 right-0 px-4 flex flex-col items-center gap-2">
+          {reactors.length > 0 && (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-black/50 backdrop-blur-sm border border-white/15 rounded-full max-w-full overflow-x-auto no-scrollbar">
+              <span className="text-[10px] text-white/60 uppercase tracking-wider shrink-0" style={F.ui}>{reactors.length} reacted</span>
+              {reactors.slice(0, 8).map(r => (
+                <span key={r.userId} className="text-base shrink-0" title={r.user}>{r.kind}</span>
+              ))}
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <p className="text-white/60 text-xs italic" style={F.serif}>disappears in {Math.max(0, Math.floor((story.expiresAt - Date.now()) / 3600000))}h</p>
+            <button onClick={() => { onDelete && onDelete(story.id); onClose && onClose(); }}
+              className="flex items-center gap-1 px-3 py-1 text-[10px] uppercase tracking-wider border border-white/30 text-white/80 hover:border-[#8B0000] hover:text-[#8B0000] transition-colors" style={F.ui}>
+              <Trash2 size={11} /> remove
+            </button>
+          </div>
         </div>
       ) : (
-        <div className="absolute bottom-4 left-0 right-0 px-4 flex items-center gap-2">
+        <div className="absolute bottom-4 left-0 right-0 px-4 flex flex-col gap-2">
+          <div className="flex items-center justify-center gap-3">
+            {STORY_REACTIONS.map(r => (
+              <button key={r} onClick={() => react(r)}
+                className={`text-2xl transition-transform ${myReactions[story.id] === r ? 'scale-150 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]' : 'opacity-70 hover:opacity-100 hover:scale-110'}`}>
+                {r}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
           <div className="flex-1 px-3 py-2 bg-black/40 backdrop-blur-sm border border-white/15 rounded-full">
             <input value={reply} onChange={(e) => setReply(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); sendReply(); } }}
@@ -124,6 +162,7 @@ export function StoryViewer({ stories = [], startIndex = 0, onReply, onDelete, o
             className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center ${reply.trim() ? 'bg-[#8B0000] hover:bg-[#5B0F1A] text-white' : 'bg-white/10 text-white/40'}`}>
             <Send size={14} />
           </button>
+          </div>
         </div>
       )}
     </div>

@@ -35,3 +35,17 @@ export async function deleteStory(id) {
   const { error } = await supabase.from('stories').delete().eq('id', id);
   if (error) throw error;
 }
+
+// Send (or change) your reaction to a story.
+export async function reactToStory(storyId, kind, userId) {
+  const { error } = await supabase.from('story_reactions')
+    .upsert({ story_id: storyId, user_id: userId, kind }, { onConflict: 'story_id,user_id' });
+  if (error) throw error;
+}
+
+// Reactions on a story (for the author to see who reacted).
+export async function fetchStoryReactors(storyId) {
+  const { data, error } = await supabase.rpc('story_reactors', { p_story_id: storyId });
+  if (error) throw error;
+  return (data || []).map(r => ({ userId: r.user_id, kind: r.kind, user: r.handle, avatar: r.avatar, avatarUrl: r.avatar_url || null }));
+}

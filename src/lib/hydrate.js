@@ -36,6 +36,7 @@ export function hydrateComment(row, myId) {
     id: row.id,
     user: row.handle,
     avatar: row.avatar,
+    avatarUrl: row.avatar_url || undefined,
     body: row.body,
     time: relativeTime(row.created_at),
     mine: !!myId && row.author_id === myId,

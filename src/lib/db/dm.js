@@ -9,6 +9,7 @@ export async function fetchConversations() {
     id: c.id,
     user: c.is_group ? (c.title || 'whisper circle') : (c.other_handle || 'someone'),
     avatar: c.is_group ? (c.glyph || '✦') : (c.other_avatar || '✦'),
+    avatarUrl: c.is_group ? null : (c.other_avatar_url || null),
     last: c.last_body || '',
     time: c.last_at ? relativeTime(c.last_at) : '',
     unread: c.unread || 0,

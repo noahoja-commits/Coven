@@ -35,8 +35,8 @@ export function ChatThread({ conversation, messages, onSend, onBack }) {
       <div className="bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A]">
         <div className="px-4 h-[60px] flex items-center gap-3">
           <button onClick={onBack} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
-          <div className="w-9 h-9 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-base shrink-0">
-            {conversation.avatar}
+          <div className="w-9 h-9 rounded-full overflow-hidden bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-base shrink-0">
+            {conversation.avatarUrl ? <img src={conversation.avatarUrl} alt="" className="w-full h-full object-cover" /> : conversation.avatar}
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-[#F5F1E8] text-sm truncate" style={F.ui}>{conversation.user}</div>

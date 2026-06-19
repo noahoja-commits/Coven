@@ -125,7 +125,7 @@ export async function createComment({ postId, body, parentId }, me) {
     .select().single();
   if (error) throw error;
   return {
-    id: data.id, user: me.handle, avatar: me.avatar, body: data.body,
+    id: data.id, user: me.handle, avatar: me.avatar, avatarUrl: me.avatarUrl || undefined, body: data.body,
     time: 'just now', mine: true, parentId: data.parent_id || null,
     reactions: { heart: 0, skull: 0 }, myReactions: {},
   };

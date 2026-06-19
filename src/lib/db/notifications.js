@@ -9,6 +9,7 @@ function text(n) {
     case 'react':   return `reacted ${REACT_EMOJI[n.reaction] || ''} to your post`;
     case 'comment': return n.body ? `commented: "${n.body}"` : 'commented on your post';
     case 'dm':      return n.body ? `whispered: "${n.body}"` : 'sent you a whisper';
+    case 'story_react': return `reacted ${n.reaction || ''} to your story`;
     default:        return 'did something';
   }
 }

@@ -6,6 +6,7 @@ import { timeAgo } from '../../data/helpers';
 const KIND_ICON = {
   reaction: { icon: Heart, color: '#8B0000' },
   react: { icon: Heart, color: '#8B0000' },
+  story_react: { icon: Heart, color: '#C9A961' },
   follow: { icon: UserPlus, color: '#7B2CBF' },
   dm: { icon: MessageCircle, color: '#A8A29E' },
   comment: { icon: MessageCircle, color: '#A89968' },
