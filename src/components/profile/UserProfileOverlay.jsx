@@ -26,6 +26,20 @@ export function UserProfileOverlay({ handle, posts = [], isFollowing, isMuted, o
   // Real profile, or a minimal stand-in so the overlay still renders by handle.
   const user = profile || { handle, avatar: '✦', bio: '', tags: [], pronouns: '' };
 
+  if (!loading && !profile) {
+    return (
+      <div className="absolute inset-0 z-40 bg-[#0A0A0A] animate-slide-in-right flex flex-col">
+        <div className="sticky top-0 z-10 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A] px-4 h-[60px] flex items-center">
+          <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1"><ArrowLeft size={20} /></button>
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center text-center px-10 gap-2">
+          <div className="text-4xl text-[#3F3F3F]">⚰</div>
+          <p className="text-[#A8A29E] text-sm italic" style={F.serif}>this soul has vanished from the coven.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="absolute inset-0 z-40 bg-[#0A0A0A] animate-slide-in-right overflow-y-auto pb-12">
       {/* Header */}

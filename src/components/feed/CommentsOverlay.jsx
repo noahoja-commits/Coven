@@ -126,7 +126,8 @@ export function CommentsOverlay({ post, onClose, onComment, onReact, onReactComm
           <div className="flex-1 bg-[#141414] border border-[#2A2A2A] rounded-2xl px-3 py-2">
             <textarea
               value={draft}
-              onChange={(e) => setDraft(e.target.value)}
+              maxLength={2000}
+              onChange={(e) => setDraft(e.target.value.slice(0, 2000))}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();

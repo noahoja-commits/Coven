@@ -8,6 +8,13 @@ const PRICE_MODE = { firm: 'firm', obo: 'or best offer', trade: 'open to trades'
 export function OddityDetail({ item, onBack, onWhisper, onOpenUser }) {
   if (!item) return null;
   const seller = item.seller || {};
+  const share = async () => {
+    const data = { title: item.title, text: `${item.title} — $${item.price} on Coven`, url: window.location.href };
+    try {
+      if (navigator.share) await navigator.share(data);
+      else { await navigator.clipboard?.writeText(data.url); }
+    } catch { /* user dismissed share sheet — ignore */ }
+  };
   return (
     <div className="absolute inset-0 z-50 bg-[#0A0608] animate-fade-in">
       <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 0%, #2A0710 0%, #0A0408 60%, #050204 100%)' }} />
@@ -17,7 +24,7 @@ export function OddityDetail({ item, onBack, onWhisper, onOpenUser }) {
             <button onClick={onBack} className="text-[#A89968] hover:text-[#C9A961] flex items-center gap-1 p-2 -m-1 transition-colors" style={F.ui}>
               <ChevronLeft size={20} /><span className="text-xs uppercase tracking-wider">oddities</span>
             </button>
-            <button className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors"><Share2 size={18} /></button>
+            <button onClick={share} className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors" title="share"><Share2 size={18} /></button>
           </div>
         </div>
         <div className="pt-[60px] relative">

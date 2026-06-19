@@ -54,7 +54,7 @@ export function ReaderView({ textId, onBack, marginalia = [], onAddMarginalia, o
             <ChevronLeft size={20} /><span className="text-xs uppercase tracking-wider">Library</span>
           </button>
           <div className="text-[#2A1808] text-sm tracking-[0.2em]" style={F.scriptureSC}>{text.shortTitle.toUpperCase()}</div>
-          <button className="text-[#5B0F1A] p-2 -m-1 transition-colors"><Bookmark size={16} /></button>
+          <span className="w-9" />
         </div>
       </div>
       <div className="absolute inset-0 pt-[60px] overflow-y-auto">
@@ -84,11 +84,11 @@ export function ReaderView({ textId, onBack, marginalia = [], onAddMarginalia, o
                     style={{ ...F.scripture, fontSize: '17px', lineHeight: '1.8', color: '#2A1808' }}>
                     {i === 0 && v.text && (
                       <span className="float-left text-[64px] leading-[0.85] mr-2 mt-1 text-[#5B0F1A]" style={{ ...F.scripture, fontWeight: 'bold' }}>
-                        {v.text.charAt(0)}
+                        {v.text?.charAt(0) || ''}
                       </span>
                     )}
                     {v.n > 0 && <span className="text-[#8B6B4A] text-[11px] mr-1.5 align-super" style={F.scriptureSC}>{v.n}</span>}
-                    {i === 0 ? v.text.slice(1) : v.text}
+                    {i === 0 ? (v.text?.slice(1) || '') : (v.text || '')}
                   </p>
                   {isSelected && (
                     <div className="mt-3 mb-4 px-4 py-3 bg-[#2A1808]/5 border-l-2 border-[#5B0F1A]/40 animate-fade-in">

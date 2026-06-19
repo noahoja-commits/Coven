@@ -54,15 +54,17 @@ export async function sendDM(convId, senderId, body) {
 }
 
 export async function markRead(convId, userId) {
-  await supabase.from('conversation_members')
+  const { error } = await supabase.from('conversation_members')
     .update({ last_read_at: new Date().toISOString() })
     .eq('conversation_id', convId).eq('user_id', userId);
+  if (error) throw error;
 }
 
 export async function setBuried(convId, userId, buried) {
-  await supabase.from('conversation_members')
+  const { error } = await supabase.from('conversation_members')
     .update({ buried })
     .eq('conversation_id', convId).eq('user_id', userId);
+  if (error) throw error;
 }
 
 // Live message delivery. RLS scopes inserts to the user's own conversations,

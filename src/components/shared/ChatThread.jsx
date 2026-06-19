@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Send, Plus, Check, CheckCheck } from 'lucide-react';
+import { ArrowLeft, Send, Check, CheckCheck } from 'lucide-react';
 import { F } from '../../styles/fonts';
 
 export function ChatThread({ conversation, messages, onSend, onBack }) {
@@ -85,13 +85,11 @@ export function ChatThread({ conversation, messages, onSend, onBack }) {
       {/* Composer */}
       <div className="border-t border-[#1A1A1A] bg-[#0A0A0A] px-3 py-2 pb-3">
         <div className="flex items-end gap-2">
-          <button className="w-9 h-9 shrink-0 rounded-full bg-[#141414] border border-[#2A2A2A] text-[#A8A29E] flex items-center justify-center">
-            <Plus size={16} />
-          </button>
           <div className="flex-1 bg-[#141414] border border-[#2A2A2A] rounded-2xl px-3 py-2">
             <textarea
               value={draft}
-              onChange={(e) => setDraft(e.target.value)}
+              maxLength={4000}
+              onChange={(e) => setDraft(e.target.value.slice(0, 4000))}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();

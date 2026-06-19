@@ -21,8 +21,15 @@ export function AuthProvider({ children }) {
     let active = true;
 
     (async () => {
-      const { data } = await supabase.auth.getSession();
+      const { data, error } = await supabase.auth.getSession();
       if (!active) return;
+      // A corrupt/expired token (e.g. the account was deleted) — clear it so we
+      // don't loop on failed refreshes; fall back to the sign-in screen.
+      if (error) {
+        try { await supabase.auth.signOut(); } catch { /* noop */ }
+        setSession(null); setDbProfile(null); setLoading(false);
+        return;
+      }
       setSession(data.session);
       await loadProfile(data.session?.user?.id);
       // strip the magic-link token from the URL once parsed

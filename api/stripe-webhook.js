@@ -31,6 +31,12 @@ export default async function handler(req, res) {
   const secrets = (process.env.STRIPE_WEBHOOK_SECRET || '')
     .split(',').map(s => s.trim()).filter(Boolean);
 
+  if (secrets.length === 0) {
+    console.error('stripe-webhook: STRIPE_WEBHOOK_SECRET is not configured — dropping event');
+    res.status(500).send('Webhook secret not configured');
+    return;
+  }
+
   let event, lastErr;
   const raw = await readRawBody(req);
   const sig = req.headers['stripe-signature'];

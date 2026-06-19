@@ -43,9 +43,9 @@ export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpda
             <span className="text-[10px] uppercase tracking-[0.25em] text-[#6B6B6B]" style={F.ui}>· self ·</span>
           </div>
           <div className="flex items-center gap-2">
-            {/* Grave shortcut top-right */}
+            {/* Grave shortcut top-right — opens the memorials section */}
             {graves.length > 0 && (
-              <button className="text-[10px] text-[#6B6B6B] hover:text-[#A8A29E] uppercase tracking-wider flex items-center gap-1" style={F.ui}>
+              <button onClick={onAddGrave} className="text-[10px] text-[#6B6B6B] hover:text-[#A8A29E] uppercase tracking-wider flex items-center gap-1" style={F.ui}>
                 <span className="text-base">⚱</span>
                 <span>{graves[0].name}</span>
               </button>

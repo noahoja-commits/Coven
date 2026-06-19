@@ -494,7 +494,10 @@ export default function App() {
     const next = !conv?.buried;
     setConversations(prev => prev.map(c => c.id === id ? { ...c, buried: next } : c));
     if (activeConversation === id) setActiveConversation(null);
-    if (meId) dmSetBuried(id, meId, next).catch(() => {});
+    if (meId) dmSetBuried(id, meId, next).catch(() => {
+      // revert on failure so the UI matches the server
+      setConversations(prev => prev.map(c => c.id === id ? { ...c, buried: !next } : c));
+    });
   };
 
   const toggleCommunityMembership = (id) => {
