@@ -15,6 +15,7 @@ import { fetchProfileState, saveProfileState } from './lib/db/profileState';
 import { fetchNotifications, markNotificationRead, markAllNotificationsRead, clearNotifications, subscribeNotifications, hydrateRealtime } from './lib/db/notifications';
 import { fetchBlockedIds, blockUser as dbBlockUser, reportContent } from './lib/db/moderation';
 import { enablePush, disablePush, pushStatus } from './lib/db/push';
+import { setTonightPin, clearTonightPin, fetchTonightPins, subscribeTonightPins } from './lib/db/tonight';
 import { Toast } from './components/shared/Toast';
 import { fetchMyTicketEventIds } from './lib/db/festival';
 import { FestivalMap } from './components/festival/FestivalMap';
@@ -117,6 +118,7 @@ export default function App() {
 
   const [profile, setProfile] = useState(null); // mapped from the Supabase profile row
   const [tonightStatus, setTonightStatus] = useLocalStorage('tonightStatus', { text: '', setAt: Date.now(), expiresAt: Date.now() + 1000 * 60 * 60 * 12 });
+  const [tonightPins, setTonightPins] = useState([]); // DB-backed: other souls out tonight
   const [trackers, setTrackers] = useState({}); // Supabase-backed (profile_state)
   const [notifications, setNotifications] = useState([]); // Supabase-backed (DB triggers + realtime)
   const [settings, setSettings] = useLocalStorage('settings', DEFAULT_SETTINGS);
@@ -206,6 +208,15 @@ export default function App() {
     }, 60000);
     return () => clearInterval(t);
   }, [tonightStatus]);
+
+  // Live "out tonight" pins for the map (cross-user, realtime).
+  useEffect(() => {
+    if (!meId) return undefined;
+    const load = () => fetchTonightPins().then(setTonightPins).catch(() => {});
+    load();
+    const unsub = subscribeTonightPins(load);
+    return () => { unsub(); };
+  }, [meId]);
 
   // Map the Supabase profile row -> the UI profile shape, then load real counts.
   useEffect(() => {
@@ -408,6 +419,20 @@ export default function App() {
     await disablePush();
     showToast('Notifications off for this device.');
     refreshPushState();
+  };
+
+  // Save tonight status: keep the instant local copy AND sync the public map pin.
+  // Ghost mode keeps you off the map (status stays local/profile-only).
+  const saveTonightStatus = (status) => {
+    setTonightStatus(status);
+    if (!status || !status.text) {
+      clearTonightPin().catch(() => {});
+    } else if (settings.ghostMode) {
+      clearTonightPin().catch(() => {});
+    } else {
+      setTonightPin({ text: status.text, neighborhood: status.neighborhood, expiresAt: status.expiresAt }).catch(() => {});
+    }
+    fetchTonightPins().then(setTonightPins).catch(() => {});
   };
 
   // Load an event's attendees when its detail opens.
@@ -1130,6 +1155,8 @@ export default function App() {
       return (
         <MapScreen
           tonightStatus={tonightStatus}
+          pins={tonightPins.filter(p => p.userId !== meId && !blockedIds.has(p.userId))}
+          onOpenUser={(h) => setActiveUserHandle(h)}
           onOpenTonightStatus={() => setShowTonightModal(true)}
           festivalEvent={festivalEvent && exitedFestivalId === festivalEvent.id ? festivalEvent : null}
           onEnterFestival={() => setExitedFestivalId(null)}
@@ -1309,7 +1336,7 @@ export default function App() {
       {showTonightModal && (
         <TonightStatusModal
           current={tonightStatus}
-          onSave={setTonightStatus}
+          onSave={saveTonightStatus}
           onClose={() => setShowTonightModal(false)}
         />
       )}

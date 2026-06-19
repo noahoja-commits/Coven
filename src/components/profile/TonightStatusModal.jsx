@@ -15,10 +15,12 @@ const PROMPTS = [
 
 export function TonightStatusModal({ current, onSave, onClose }) {
   const [text, setText] = useState(current?.text || '');
+  const [neighborhood, setNeighborhood] = useState(current?.neighborhood || '');
 
   const save = () => {
     onSave({
       text: text.trim(),
+      neighborhood: neighborhood.trim(),
       setAt: Date.now(),
       expiresAt: Date.now() + 1000 * 60 * 60 * 12, // 12h
     });
@@ -42,7 +44,7 @@ export function TonightStatusModal({ current, onSave, onClose }) {
         </div>
 
         <div className="p-4">
-          <p className="text-[#A8A29E] text-xs mb-3" style={F.serif}>visible to friends for 12 hours, then it disappears.</p>
+          <p className="text-[#A8A29E] text-xs mb-3" style={F.serif}>visible on the map to the coven for 12 hours, then it disappears.</p>
 
           <textarea
             value={text}
@@ -53,9 +55,18 @@ export function TonightStatusModal({ current, onSave, onClose }) {
             maxLength={80}
           />
           <div className="flex justify-between items-center mt-1">
-            <span className="text-[9px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>shown only on profile</span>
+            <span className="text-[9px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>shown on the map &amp; your profile</span>
             <span className="text-[9px] text-[#6B6B6B]" style={F.mono}>{text.length}/80</span>
           </div>
+
+          <input
+            value={neighborhood}
+            onChange={e => setNeighborhood(e.target.value.slice(0, 40))}
+            placeholder="neighborhood (optional) — e.g. Ybor"
+            className="w-full mt-3 bg-[#0A0A0A] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none px-3 py-2 text-[#F5F1E8] text-sm"
+            style={F.serif}
+            maxLength={40}
+          />
 
           <div className="mt-4">
             <div className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2" style={F.ui}>· quick fills ·</div>

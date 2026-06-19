@@ -1,7 +1,19 @@
 import { Plus } from 'lucide-react';
 import { F } from '../../styles/fonts';
+import { Avatar } from '../shared/Avatar';
 
-export function MapScreen({ tonightStatus, onOpenTonightStatus, festivalEvent = null, onEnterFestival }) {
+// Stable pseudo-position from a user id (no real geolocation exists).
+// Returns percentages within the map bounds; deterministic across devices.
+function pinPos(seed) {
+  let h = 0;
+  const s = String(seed || '');
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  const left = 10 + (h % 80);            // 10%..90%
+  const top = 24 + ((Math.floor(h / 80)) % 58); // 24%..82%
+  return { left: `${left}%`, top: `${top}%` };
+}
+
+export function MapScreen({ tonightStatus, pins = [], onOpenUser, onOpenTonightStatus, festivalEvent = null, onEnterFestival }) {
   return (
     <div className="absolute inset-0 top-[60px] bottom-[68px]">
       {festivalEvent && (
@@ -37,12 +49,31 @@ export function MapScreen({ tonightStatus, onOpenTonightStatus, festivalEvent = 
           style={{ backgroundImage: 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'120\' height=\'120\'><filter id=\'n\'><feTurbulence baseFrequency=\'0.85\'/></filter><rect width=\'120\' height=\'120\' filter=\'url(%23n)\' opacity=\'0.3\'/></svg>")' }} />
       </div>
 
-      {/* Empty state — no real venue/event pins yet */}
-      <div className="absolute top-6 left-1/2 -translate-x-1/2 text-center pointer-events-none px-8">
-        <div className="text-[10px] uppercase tracking-[0.3em] text-[#A89968]/70 bg-black/50 backdrop-blur-sm px-3 py-1.5 border border-[#2A2A2A]" style={F.ui}>
-          · no rites near you yet ·
+      {/* Empty state — only when no other souls are out */}
+      {pins.length === 0 && (
+        <div className="absolute top-6 left-1/2 -translate-x-1/2 text-center pointer-events-none px-8">
+          <div className="text-[10px] uppercase tracking-[0.3em] text-[#A89968]/70 bg-black/50 backdrop-blur-sm px-3 py-1.5 border border-[#2A2A2A]" style={F.ui}>
+            · no souls out near you ·
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Other souls out tonight */}
+      {pins.map(p => {
+        const pos = pinPos(p.userId);
+        return (
+          <button key={p.userId} onClick={() => onOpenUser && onOpenUser(p.handle)}
+            className="absolute group" style={pos}>
+            <div className="relative -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+              <span className="absolute inset-0 -m-2 rounded-full bg-[#8B0000] opacity-25 animate-ping-slow" />
+              <Avatar url={p.avatarUrl} glyph={p.avatar} size={28} className="relative ring-2 ring-[#8B0000]/70" />
+              <div className="mt-1 whitespace-nowrap px-1.5 py-0.5 bg-black/80 backdrop-blur-sm border border-[#8B0000]/40 text-[9px] text-[#F5F1E8] max-w-[140px] truncate" style={F.ui}>
+                {p.handle}{p.neighborhood ? ` · ${p.neighborhood}` : (p.text ? ` · ${p.text.slice(0, 18)}` : '')}
+              </div>
+            </div>
+          </button>
+        );
+      })}
 
       {/* Your own pin tonight */}
       <button onClick={onOpenTonightStatus} className="absolute" style={{ left: '48%', top: '52%' }}>
