@@ -12,6 +12,7 @@ import { fetchListings, createListing } from './lib/db/listings';
 import { fetchPayoutStatus, startPayoutSetup, refreshPayoutStatus } from './lib/db/payouts';
 import { listCrews, createCrew as dbCreateCrew, joinCrew as dbJoinCrew } from './lib/db/crews';
 import { fetchProfileState, saveProfileState } from './lib/db/profileState';
+import { fetchNotifications, markNotificationRead, markAllNotificationsRead, clearNotifications, subscribeNotifications } from './lib/db/notifications';
 import { fetchMyTicketEventIds } from './lib/db/festival';
 import { FestivalMap } from './components/festival/FestivalMap';
 import { VenueMapEditor } from './components/festival/VenueMapEditor';
@@ -112,7 +113,7 @@ export default function App() {
   const [profile, setProfile] = useState(null); // mapped from the Supabase profile row
   const [tonightStatus, setTonightStatus] = useLocalStorage('tonightStatus', { text: '', setAt: Date.now(), expiresAt: Date.now() + 1000 * 60 * 60 * 12 });
   const [trackers, setTrackers] = useState({}); // Supabase-backed (profile_state)
-  const [notifications, setNotifications] = useLocalStorage('notifications', []);
+  const [notifications, setNotifications] = useState([]); // Supabase-backed (DB triggers + realtime)
   const [settings, setSettings] = useLocalStorage('settings', DEFAULT_SETTINGS);
 
   // Live content state (Supabase-backed)
@@ -242,6 +243,7 @@ export default function App() {
     fetchPayoutStatus(meId).then(p => { if (active) setPayoutStatus(p); }).catch(() => {});
     listCrews().then(c => { if (active) setCrews(c); }).catch(() => {});
     fetchMyTicketEventIds().then(ids => { if (active) setMyTicketEventIds(ids); }).catch(() => {});
+    fetchNotifications().then(n => { if (active) setNotifications(n); }).catch(() => {});
     fetchProfileState().then(s => {
       if (!active) return;
       if (s.graves) setGraves(s.graves);
@@ -250,6 +252,16 @@ export default function App() {
       if (s.reflections) setReflections(s.reflections);
     }).catch(() => {});
     return () => { active = false; };
+  }, [meId, dbProfile]);
+
+  // Live notifications: a new row (follow/react/comment/dm) → refetch so the
+  // bell updates in real time, with the actor's profile joined in.
+  useEffect(() => {
+    if (!meId || !dbProfile) return;
+    const unsub = subscribeNotifications(() => {
+      fetchNotifications().then(setNotifications).catch(() => {});
+    });
+    return unsub;
   }, [meId, dbProfile]);
 
   // Live DMs: keep the inbox + the open thread fresh as messages arrive.
@@ -340,8 +352,10 @@ export default function App() {
     persistState('trackers', next);
   };
 
-  const markAllNotifsRead = () => setNotifications(n => n.map(x => ({ ...x, read: true })));
-  const markNotifRead = (id) => setNotifications(n => n.map(x => x.id === id ? { ...x, read: true } : x));
+  const markAllNotifsRead = () => { setNotifications(n => n.map(x => ({ ...x, read: true }))); markAllNotificationsRead().catch(() => {}); };
+  const markNotifRead = (id) => { setNotifications(n => n.map(x => x.id === id ? { ...x, read: true } : x)); markNotificationRead(id).catch(() => {}); };
+  // Ephemeral local feedback (errors, your own actions); real cross-user
+  // notifications arrive from DB triggers + realtime below.
   const addNotification = (n) => setNotifications(prev => [{ id: `n${Date.now()}`, read: false, time: 'just now', ...n }, ...prev]);
   const unreadNotifs = notifications.filter(n => !n.read).length;
   const unreadDMs = conversations.reduce((s, c) => s + (c.buried ? 0 : (c.unread || 0)), 0);
@@ -834,14 +848,15 @@ export default function App() {
 
   const handleNotificationTap = (n) => {
     markNotifRead(n.id);
-    if (n.kind === 'dm' || n.kind === 'crew') {
-      const conv = conversations.find(c => c.user === n.user);
-      if (conv) { setShowNotifs(false); setActiveConversation(conv.id); }
+    setShowNotifs(false);
+    if (n.kind === 'dm' && n.conversationId) {
+      openConversation(n.conversationId);
+    } else if (n.kind === 'follow' && n.user && n.user !== 'someone') {
+      setActiveUserHandle(n.user);
+    } else if ((n.kind === 'react' || n.kind === 'comment') && n.postId) {
+      setActivePostComments(n.postId);
     } else if (n.kind === 'event') {
-      setShowNotifs(false); setTab('events');
-    } else if (n.kind === 'reaction' || n.kind === 'reply') {
-      // Best-effort: drop on home
-      setShowNotifs(false); setTab('home');
+      setTab('events');
     }
   };
 
@@ -1153,7 +1168,7 @@ export default function App() {
           onMarkAllRead={markAllNotifsRead}
           onMarkRead={markNotifRead}
           onTap={handleNotificationTap}
-          onClearAll={() => setNotifications([])}
+          onClearAll={() => { setNotifications([]); clearNotifications().catch(() => {}); }}
         />
       )}
       {showTonightModal && (

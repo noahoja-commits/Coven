@@ -5,8 +5,10 @@ import { timeAgo } from '../../data/helpers';
 
 const KIND_ICON = {
   reaction: { icon: Heart, color: '#8B0000' },
+  react: { icon: Heart, color: '#8B0000' },
   follow: { icon: UserPlus, color: '#7B2CBF' },
   dm: { icon: MessageCircle, color: '#A8A29E' },
+  comment: { icon: MessageCircle, color: '#A89968' },
   reply: { icon: MessageCircle, color: '#A89968' },
   event: { icon: Calendar, color: '#C9A961' },
   crew: { icon: MessageCircle, color: '#7B2CBF' },
@@ -79,8 +81,8 @@ export function NotificationsPanel({ notifications, onClose, onMarkAllRead, onMa
                 <button key={n.id}
                   onClick={() => onTap ? onTap(n) : onMarkRead(n.id)}
                   className={`w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-[#0F0F0F] transition-colors ${!n.read ? 'bg-[#0F0506]' : ''}`}>
-                  <div className="relative w-10 h-10 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-base shrink-0">
-                    {n.avatar}
+                  <div className="relative w-10 h-10 rounded-full overflow-hidden bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-base shrink-0">
+                    {n.avatarUrl ? <img src={n.avatarUrl} alt="" className="w-full h-full object-cover" /> : n.avatar}
                     <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#0A0A0A] border border-[#2A2A2A] flex items-center justify-center" style={{ color: k.color }}>
                       <Icon size={9} />
                     </span>
