@@ -10,7 +10,7 @@ import { CODEX } from '../../data/codex';
 
 export function HomeScreen({
   posts, onReact, onOpenComments, onOpenCommunity, onOpenUser, onDeletePost, onHidePost, onQuotePost, onTogglePin, pinnedPostId, feedSort = 'latest', onSetFeedSort,
-  feedScope = 'everyone', onSetFeedScope, onLoadMore, feedHasMore = false,
+  feedScope = 'everyone', onSetFeedScope, onLoadMore, feedHasMore = false, onReportPost,
   bookmarks = {}, onToggleBookmark, postCandles = {}, onToggleCandle, onOpenEvent, onVotePoll,
   onOpenStory, onCreateStory, stories = [], meHandle = 'you', meAvatar = '🦇',
   tonightStatus, onOpenTonightStatus, onOpenTarot, onOpenEphemeris, onOpenLibrary, onOpenCodex, onOpenHashtag, onOpenVespersArchive,
@@ -341,6 +341,12 @@ export function HomeScreen({
                           <button onClick={() => { onHidePost && onHidePost(post.id); setOpenMenu(null); }}
                             className="w-full px-3 py-2 text-left text-xs text-[#A8A29E] hover:bg-[#1A1A1A] flex items-center gap-2" style={F.ui}>
                             <EyeOff size={12} /> hide
+                          </button>
+                        )}
+                        {!mine && !post.anonymous && (
+                          <button onClick={() => { onReportPost && onReportPost(post.id); setOpenMenu(null); }}
+                            className="w-full px-3 py-2 text-left text-xs text-[#A8A29E] hover:bg-[#1A1A1A] flex items-center gap-2" style={F.ui}>
+                            ⚑ report
                           </button>
                         )}
                         {mine && (

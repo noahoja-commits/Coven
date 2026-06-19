@@ -5,7 +5,7 @@ import { getProfileByHandle, getProfileStats } from '../../lib/db/profiles';
 import { fetchUserPosts } from '../../lib/db/posts';
 import { PostGrid } from './PostGrid';
 
-export function UserProfileOverlay({ handle, posts = [], isFollowing, isMuted, onToggleFollow, onToggleMute, onWhisper, onClose, onOpenComments, onReact }) {
+export function UserProfileOverlay({ handle, posts = [], isFollowing, isMuted, onToggleFollow, onToggleMute, onWhisper, onClose, onOpenComments, onReact, onBlock, onReport }) {
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState({ followers: 0, following: 0, posts: 0 });
   const [loading, setLoading] = useState(true);
@@ -101,6 +101,13 @@ export function UserProfileOverlay({ handle, posts = [], isFollowing, isMuted, o
             style={F.ui}>
             {isMuted ? <><VolumeX size={12} /> muted</> : <><Volume2 size={12} /> mute</>}
           </button>
+        </div>
+
+        <div className="relative flex items-center gap-4 mt-3">
+          <button onClick={() => { if (profile?.id && confirm(`Block @${user.handle}? You won't see each other.`)) onBlock && onBlock(profile.id); }}
+            className="text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#8B0000] transition-colors" style={F.ui}>⛒ block</button>
+          <button onClick={() => { if (profile?.id) onReport && onReport(profile.id); }}
+            className="text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#A89968] transition-colors" style={F.ui}>⚑ report</button>
         </div>
       </div>
 

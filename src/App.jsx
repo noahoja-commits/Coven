@@ -13,6 +13,7 @@ import { fetchPayoutStatus, startPayoutSetup, refreshPayoutStatus } from './lib/
 import { listCrews, createCrew as dbCreateCrew, joinCrew as dbJoinCrew } from './lib/db/crews';
 import { fetchProfileState, saveProfileState } from './lib/db/profileState';
 import { fetchNotifications, markNotificationRead, markAllNotificationsRead, clearNotifications, subscribeNotifications } from './lib/db/notifications';
+import { fetchBlockedIds, blockUser as dbBlockUser, reportContent } from './lib/db/moderation';
 import { fetchMyTicketEventIds } from './lib/db/festival';
 import { FestivalMap } from './components/festival/FestivalMap';
 import { VenueMapEditor } from './components/festival/VenueMapEditor';
@@ -161,6 +162,7 @@ export default function App() {
   const [feedScope, setFeedScope] = useState('everyone'); // 'everyone' | 'following'
   const [feedHasMore, setFeedHasMore] = useState(true);
   const [feedLoadingMore, setFeedLoadingMore] = useState(false);
+  const [blockedIds, setBlockedIds] = useState(() => new Set());
   const [divinationLog, setDivinationLog] = useLocalStorage('divinationLog', []);
   const [storyHighlights, setStoryHighlights] = useLocalStorage('storyHighlights', []);
 
@@ -247,6 +249,7 @@ export default function App() {
     listCrews().then(c => { if (active) setCrews(c); }).catch(() => {});
     fetchMyTicketEventIds().then(ids => { if (active) setMyTicketEventIds(ids); }).catch(() => {});
     fetchNotifications().then(n => { if (active) setNotifications(n); }).catch(() => {});
+    fetchBlockedIds().then(ids => { if (active) setBlockedIds(new Set(ids)); }).catch(() => {});
     cloudSyncedRef.current = false;
     fetchProfileState().then(s => {
       if (!active) return;
@@ -854,10 +857,24 @@ export default function App() {
       const body = p.body.toLowerCase();
       if (mutedKeywords.some(k => k && body.includes(k.toLowerCase()))) return false;
     }
+    if (p.authorId && blockedIds.has(p.authorId)) return false; // blocked both-ways
     return true;
   });
 
   const hidePost = (postId) => setHiddenPosts(prev => ({ ...prev, [postId]: Date.now() }));
+
+  const blockUserById = async (profileId, handle) => {
+    if (!profileId) return;
+    setBlockedIds(prev => new Set(prev).add(profileId));
+    setActiveUserHandle(null);
+    addNotification({ kind: 'follow', avatar: '⛒', text: `you blocked ${handle || 'someone'}` });
+    try { await dbBlockUser(profileId); } catch { /* ignore */ }
+    fetchFeed(meId, { scope: feedScope }).then(setPosts).catch(() => {});
+  };
+  const reportTarget = async (kind, targetId) => {
+    try { await reportContent(kind, targetId, ''); addNotification({ kind: 'follow', avatar: '⚑', text: 'reported — thank you' }); }
+    catch { /* ignore */ }
+  };
 
   const todayKey = new Date().toISOString().slice(0, 10);
   const yesterdayKey = (() => {
@@ -1038,6 +1055,7 @@ export default function App() {
         onSetFeedScope={setFeedScope}
         onLoadMore={loadMoreFeed}
         feedHasMore={feedHasMore}
+        onReportPost={(id) => reportTarget('post', id)}
         bookmarks={bookmarks}
         onToggleBookmark={toggleBookmark}
         postCandles={postCandles}
@@ -1230,6 +1248,8 @@ export default function App() {
           onWhisper={() => { const h = activeUserHandle; setActiveUserHandle(null); openDMWithUser(h); }}
           onOpenComments={(id) => setActivePostComments(id)}
           onReact={reactToPost}
+          onBlock={(profileId) => blockUserById(profileId, activeUserHandle)}
+          onReport={(profileId) => reportTarget('user', profileId)}
           onClose={() => setActiveUserHandle(null)}
         />
       )}
