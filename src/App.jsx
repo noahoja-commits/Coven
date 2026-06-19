@@ -12,7 +12,7 @@ import { fetchListings, createListing } from './lib/db/listings';
 import { fetchPayoutStatus, startPayoutSetup, refreshPayoutStatus } from './lib/db/payouts';
 import { listCrews, createCrew as dbCreateCrew, joinCrew as dbJoinCrew } from './lib/db/crews';
 import { fetchProfileState, saveProfileState } from './lib/db/profileState';
-import { fetchNotifications, markNotificationRead, markAllNotificationsRead, clearNotifications, subscribeNotifications } from './lib/db/notifications';
+import { fetchNotifications, markNotificationRead, markAllNotificationsRead, clearNotifications, subscribeNotifications, hydrateRealtime } from './lib/db/notifications';
 import { fetchBlockedIds, blockUser as dbBlockUser, reportContent } from './lib/db/moderation';
 import { fetchMyTicketEventIds } from './lib/db/festival';
 import { FestivalMap } from './components/festival/FestivalMap';
@@ -328,8 +328,15 @@ export default function App() {
   // bell updates in real time, with the actor's profile joined in.
   useEffect(() => {
     if (!meId || !dbProfile) return;
-    const unsub = subscribeNotifications(() => {
+    const unsub = subscribeNotifications((row) => {
       fetchNotifications().then(setNotifications).catch(() => {});
+      // OS notification banner when the app is open/backgrounded (not killed)
+      try {
+        if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && document.hidden) {
+          const n = hydrateRealtime(row);
+          new Notification('Coven', { body: `someone ${n.text}`, icon: '/pwa-192.png', tag: row.id });
+        }
+      } catch { /* noop */ }
     });
     return unsub;
   }, [meId, dbProfile]);
@@ -1176,7 +1183,7 @@ export default function App() {
           onDMs={() => setShowDMs(true)}
           onCompose={() => setShowCompose(true)}
           onLibrary={onLibraryTap}
-          onNotifications={() => setShowNotifs(true)}
+          onNotifications={() => { setShowNotifs(true); try { if (typeof Notification !== 'undefined' && Notification.permission === 'default') Notification.requestPermission(); } catch { /* noop */ } }}
           onSearch={() => setShowSearch(true)}
           communityName={community ? COMMUNITIES.find(c => c.id === community)?.name : null}
           unreadNotifications={unreadNotifs}
