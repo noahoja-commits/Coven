@@ -31,3 +31,14 @@ with (security_invoker = true) as
   join public.profiles p on p.id = t.user_id
   where t.expires_at > now();
 grant select on public.active_tonight to authenticated;
+
+-- Stream pin changes over realtime (new tables aren't in the publication by default).
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'tonight_pins'
+  ) then
+    alter publication supabase_realtime add table public.tonight_pins;
+  end if;
+end $$;
