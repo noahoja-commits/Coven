@@ -1,7 +1,15 @@
 import { F } from '../../styles/fonts';
 
-// Stylized "image" stand-ins
+// Renders a real uploaded photo (when `kind` is a URL) or one of the stylized
+// stand-ins (legacy preset keys).
 export function PostImage({ kind }) {
+  if (typeof kind === 'string' && /^(https?:|blob:|data:)/.test(kind)) {
+    return (
+      <div className="relative w-full overflow-hidden bg-[#0A0608] border border-[#1A1A1A]">
+        <img src={kind} alt="" loading="lazy" className="w-full h-auto max-h-[80vh] object-contain" />
+      </div>
+    );
+  }
   if (kind === 'velvet') {
     return (
       <div className="relative w-full aspect-[4/5] overflow-hidden bg-[#0F0608]">

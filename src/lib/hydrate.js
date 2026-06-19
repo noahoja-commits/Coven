@@ -8,6 +8,7 @@ export function hydratePost(row, myReactionSet, myId) {
     kind: row.kind,
     user: row.handle,            // 'anonymous' for anon posts (view handles it)
     avatar: row.avatar,          // '✟' for anon
+    avatarUrl: row.avatar_url || undefined, // uploaded profile photo (null for anon)
     time: relativeTime(row.created_at),
     community: row.community,
     body: row.body,

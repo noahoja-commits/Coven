@@ -1,22 +1,37 @@
-import { useState } from 'react';
-import { X } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { X, Camera, Loader2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
+import { uploadImage } from '../../lib/db/storage';
 
 const AVATAR_OPTIONS = ['🦇', '🕯', '✟', '⚱', '☠', '🩸', '🌹', '🌙', '⛧', '☩', '✦', '☽', '⚰', '♰', '🜏'];
 const VIBE_OPTIONS = ['goth', 'raver', 'smoker', 'witch', 'mystic', 'darkwave', 'tradgoth', 'industrial', 'romantic', 'doomer', 'punk', 'NYC', 'LA', 'PDX', 'Berlin', 'sober', 'soft', 'feral'];
 
-export function ProfileEditModal({ profile, onSave, onClose }) {
+export function ProfileEditModal({ profile, meId, onSave, onClose }) {
   const [name, setName] = useState(profile.name || '');
   const [pronouns, setPronouns] = useState(profile.pronouns || '');
   const [bio, setBio] = useState(profile.bio || '');
   const [birthday, setBirthday] = useState(profile.birthday || '');
   const [avatar, setAvatar] = useState(profile.avatar || '🦇');
+  const [avatarUrl, setAvatarUrl] = useState(profile.avatarUrl || null);
   const [tags, setTags] = useState(profile.tags || []);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState('');
+  const fileRef = useRef(null);
 
   const toggleTag = (t) => setTags(prev => prev.includes(t) ? prev.filter(x => x !== t) : prev.length >= 6 ? prev : [...prev, t]);
 
+  const onPickPhoto = async (e) => {
+    const file = e.target.files?.[0]; e.target.value = '';
+    if (!file) return;
+    setUploading(true); setError('');
+    try { setAvatarUrl(await uploadImage('avatars', meId, file)); }
+    catch (err) { setError(err?.message || 'upload failed'); }
+    finally { setUploading(false); }
+  };
+
   const save = () => {
-    onSave({ ...profile, name: name.trim() || profile.name, pronouns, bio, birthday, avatar, tags });
+    if (uploading) return;
+    onSave({ ...profile, name: name.trim() || profile.name, pronouns, bio, birthday, avatar, avatarUrl, tags });
     onClose();
   };
 
@@ -32,8 +47,32 @@ export function ProfileEditModal({ profile, onSave, onClose }) {
         </div>
 
         <div className="p-4 space-y-5">
-          {/* Avatar */}
+          {/* Avatar photo */}
           <div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2" style={F.scriptureSC}>· portrait ·</div>
+            <input ref={fileRef} type="file" accept="image/*" onChange={onPickPhoto} className="hidden" />
+            <div className="flex items-center gap-3">
+              <button onClick={() => fileRef.current?.click()}
+                className="w-16 h-16 rounded-full overflow-hidden border border-[#3F3F3F] bg-[#0A0A0A] flex items-center justify-center text-2xl relative shrink-0">
+                {uploading ? <Loader2 size={18} className="animate-spin text-[#C9A961]" />
+                  : avatarUrl ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+                  : <span>{avatar}</span>}
+              </button>
+              <div className="flex flex-col gap-1.5">
+                <button onClick={() => fileRef.current?.click()} disabled={uploading}
+                  className="text-[10px] uppercase tracking-wider px-3 py-1.5 border border-[#3F3F3F] text-[#A8A29E] hover:border-[#5B0F1A] hover:text-[#F5F1E8] flex items-center gap-1.5" style={F.ui}>
+                  <Camera size={12} /> {avatarUrl ? 'change photo' : 'upload photo'}
+                </button>
+                {avatarUrl && (
+                  <button onClick={() => setAvatarUrl(null)} className="text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#8B0000]" style={F.ui}>use a glyph instead</button>
+                )}
+              </div>
+            </div>
+            {error && <div className="text-[11px] text-[#8B0000] mt-1.5" style={F.ui}>{error}</div>}
+          </div>
+
+          {/* Glyph (used when no photo) */}
+          <div className={avatarUrl ? 'opacity-40' : ''}>
             <div className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2" style={F.scriptureSC}>· sigil ·</div>
             <div className="flex flex-wrap gap-1.5">
               {AVATAR_OPTIONS.map(a => (

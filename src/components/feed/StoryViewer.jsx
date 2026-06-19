@@ -89,10 +89,14 @@ export function StoryViewer({ stories = [], startIndex = 0, onReply, onDelete, o
       <button onClick={prev} className="absolute left-0 top-0 bottom-0 w-1/3 z-10 flex items-center justify-start pl-2 opacity-0 hover:opacity-100 transition-opacity"><ChevronLeft size={18} className="text-white/40" /></button>
       <button onClick={next} className="absolute right-0 top-0 bottom-0 w-1/3 z-10 flex items-center justify-end pr-2 opacity-0 hover:opacity-100 transition-opacity"><ChevronRight size={18} className="text-white/40" /></button>
 
-      {/* Glyph + caption */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="text-[200px] opacity-20" style={{ textShadow: '0 0 60px rgba(0,0,0,0.5)' }}>{story.glyph}</div>
-      </div>
+      {/* Photo, or glyph backdrop */}
+      {story.imageUrl ? (
+        <img src={story.imageUrl} alt="" className="absolute inset-0 w-full h-full object-contain" />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-[200px] opacity-20" style={{ textShadow: '0 0 60px rgba(0,0,0,0.5)' }}>{story.glyph}</div>
+        </div>
+      )}
       {story.caption && (
         <div className="absolute bottom-16 left-0 right-0 px-6 text-center">
           <p className="text-white text-xl leading-tight" style={F.scripture}>"{story.caption}"</p>

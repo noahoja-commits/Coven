@@ -3,8 +3,18 @@ import { X, Search, Plus, Bell, MapPin } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { ODDITY_CATEGORIES, ODDITY_PALETTES, CONDITION_LABELS, SHOPS } from '../../data/oddities';
 
-function OddityImage({ shape, palette, small = false }) {
+function OddityImage({ shape, palette, imageUrl, small = false }) {
   const p = ODDITY_PALETTES[palette] || ODDITY_PALETTES.black;
+  if (imageUrl) {
+    return (
+      <div className="relative w-full overflow-hidden bg-[#0A0608]" style={{ aspectRatio: '4/5' }}>
+        <img src={imageUrl} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+        {!small && <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-black/60 backdrop-blur-sm border border-[#5B0F1A]/40">
+          <span className="text-[#C9A961] text-[9px] uppercase tracking-[0.2em]" style={F.scriptureSC}>· for sale ·</span>
+        </div>}
+      </div>
+    );
+  }
   const drawings = {
     duster: <path d="M 30 15 L 40 8 L 60 8 L 70 15 L 78 30 L 75 32 L 75 130 L 25 130 L 25 32 L 22 30 Z M 50 8 L 50 130 M 25 50 L 75 50" stroke={p.stroke} strokeWidth="0.4" fill={p.fill} fillOpacity="0.6" />,
     jewelry: <><circle cx="50" cy="60" r="22" stroke={p.stroke} strokeWidth="0.5" fill={p.fill} fillOpacity="0.4" /><circle cx="50" cy="60" r="14" stroke={p.stroke} strokeWidth="0.3" fill="none" /><circle cx="50" cy="48" r="3" fill={p.stroke} opacity="0.7" /></>,
@@ -36,7 +46,7 @@ function OddityCard({ item, onOpen }) {
   return (
     <button onClick={() => onOpen(item.id)} className="group text-left">
       <div className="border border-[#2A2A2A] hover:border-[#5B0F1A]/50 transition-colors">
-        <OddityImage shape={item.photo.shape} palette={item.photo.palette} />
+        <OddityImage shape={item.photo.shape} palette={item.photo.palette} imageUrl={item.imageUrl} />
         <div className="p-2.5 bg-[#0F0F0F]">
           <div className="flex items-baseline justify-between gap-2 mb-1">
             <span className="text-[#F5F1E8] text-base" style={F.mono}>${item.price}</span>

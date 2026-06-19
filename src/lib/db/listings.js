@@ -22,6 +22,7 @@ function hydrate(r, myId) {
     seller: { user: r.seller_handle, avatar: r.seller_avatar },
     sellerId: r.seller_id,
     mine: !!myId && r.seller_id === myId,
+    imageUrl: r.image_url || null,
     photo: { shape: SHAPE[r.category] || 'book', palette: paletteFor(r.id) },
     tags: [],
     posted: relativeTime(r.created_at),
@@ -45,6 +46,7 @@ export async function createListing(data, me) {
     category: data.category || 'curio',
     description: data.description || '',
     story_behind: data.storyBehind || '',
+    image_url: data.image_url || null,
   }).select('*').single();
   if (error) throw error;
   return hydrate({ ...row, seller_handle: me.handle, seller_avatar: me.avatar }, me.id);

@@ -8,6 +8,7 @@ function hydrate(s, myId) {
     glyph: s.glyph,
     caption: s.caption,
     bg: s.bg,
+    imageUrl: s.image_url || null,
     createdAt: s.created_at,
     expiresAt: new Date(s.expires_at).getTime(),
     mine: !!myId && s.author_id === myId,
@@ -24,7 +25,7 @@ export async function fetchActiveStories(myId) {
 
 export async function postStory(data, me) {
   const { data: row, error } = await supabase.from('stories')
-    .insert({ author_id: me.id, glyph: data.glyph || '✦', caption: data.caption || '', bg: data.bg || 'red' })
+    .insert({ author_id: me.id, glyph: data.glyph || '✦', caption: data.caption || '', bg: data.bg || 'red', image_url: data.image_url || null })
     .select('*').single();
   if (error) throw error;
   return hydrate({ ...row, handle: me.handle, avatar: me.avatar }, me.id);

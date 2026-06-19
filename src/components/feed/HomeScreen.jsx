@@ -264,8 +264,8 @@ export function HomeScreen({
                 <button
                   onClick={() => !mine && !post.anonymous && onOpenUser && onOpenUser(post.user, post.avatar)}
                   disabled={!!post.anonymous}
-                  className={`w-9 h-9 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-base shrink-0 ${post.anonymous ? 'cursor-default' : ''}`}>
-                  {post.avatar}
+                  className={`w-9 h-9 rounded-full overflow-hidden bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-base shrink-0 ${post.anonymous ? 'cursor-default' : ''}`}>
+                  {post.avatarUrl ? <img src={post.avatarUrl} alt="" className="w-full h-full object-cover" /> : post.avatar}
                 </button>
                 <div className="flex-1 min-w-0">
                   <button

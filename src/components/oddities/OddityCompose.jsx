@@ -1,20 +1,33 @@
-import { useState } from 'react';
-import { X, Camera } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { X, Camera, Loader2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { ODDITY_CATEGORIES, CONDITION_LABELS } from '../../data/oddities';
+import { uploadImage } from '../../lib/db/storage';
 
-export function OddityCompose({ onClose, onCreate }) {
+export function OddityCompose({ meId, onClose, onCreate }) {
   const [step, setStep] = useState(1);
-  const [data, setData] = useState({ title: '', price: '', priceMode: 'firm', condition: 'used', category: 'clothing', description: '', storyBehind: '' });
+  const [data, setData] = useState({ title: '', price: '', priceMode: 'firm', condition: 'used', category: 'clothing', description: '', storyBehind: '', image_url: null });
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState('');
+  const fileRef = useRef(null);
+
+  const onPickImage = async (e) => {
+    const file = e.target.files?.[0]; e.target.value = '';
+    if (!file) return;
+    setUploading(true); setError('');
+    try { setData(d => ({ ...d, image_url: '' })); const url = await uploadImage('listing-images', meId, file); setData(d => ({ ...d, image_url: url })); }
+    catch (err) { setError(err?.message || 'upload failed'); setData(d => ({ ...d, image_url: null })); }
+    finally { setUploading(false); }
+  };
 
   const advance = () => {
     if (step < 3) { setStep(step + 1); return; }
-    if (!data.title.trim()) return;
+    if (!data.title.trim() || uploading) return;
     onCreate && onCreate(data);
     onClose && onClose();
   };
 
-  const canAdvance = step !== 1 ? true : data.title.trim().length > 0;
+  const canAdvance = (step !== 1 ? true : data.title.trim().length > 0) && !uploading;
 
   return (
     <div className="absolute inset-0 z-50 bg-[#0A0608] animate-fade-in flex flex-col">
@@ -35,10 +48,17 @@ export function OddityCompose({ onClose, onCreate }) {
           <div className="space-y-4">
             <div>
               <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2 block" style={F.scriptureSC}>· photographs ·</label>
-              <button className="w-full aspect-[4/3] border border-dashed border-[#3F3F3F] flex flex-col items-center justify-center gap-2 text-[#A89968]">
-                <Camera size={28} />
-                <span className="text-xs uppercase tracking-wider" style={F.ui}>tap to add</span>
+              <input ref={fileRef} type="file" accept="image/*" onChange={onPickImage} className="hidden" />
+              <button onClick={() => fileRef.current?.click()}
+                className="w-full aspect-[4/3] border border-dashed border-[#3F3F3F] hover:border-[#5B0F1A] flex flex-col items-center justify-center gap-2 text-[#A89968] overflow-hidden relative">
+                {uploading ? <Loader2 size={28} className="animate-spin text-[#C9A961]" />
+                  : data.image_url ? <img src={data.image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                  : <><Camera size={28} /><span className="text-xs uppercase tracking-wider" style={F.ui}>tap to add</span></>}
               </button>
+              {data.image_url && !uploading && (
+                <button onClick={() => setData(d => ({ ...d, image_url: null }))} className="mt-1.5 text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#8B0000]" style={F.ui}>remove photo</button>
+              )}
+              {error && <div className="text-[11px] text-[#8B0000] mt-1" style={F.ui}>{error}</div>}
             </div>
             <div>
               <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-1 block" style={F.scriptureSC}>· title ·</label>

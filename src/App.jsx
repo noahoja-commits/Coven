@@ -203,6 +203,7 @@ export default function App() {
       id: dbProfile.id,
       name: dbProfile.handle,
       avatar: dbProfile.avatar,
+      avatarUrl: dbProfile.avatar_url || null,
       pronouns: dbProfile.pronouns || '',
       bio: dbProfile.bio || '',
       tags: dbProfile.tags || [],
@@ -362,16 +363,18 @@ export default function App() {
   // === CONTENT HANDLERS ===
   const meHandle = profile?.name || 'you';
   const meAvatar = profile?.avatar || '✟';
+  const meAvatarUrl = profile?.avatarUrl || null;
 
-  const addPost = async ({ body, community, anonymous, poll }) => {
+  const addPost = async ({ body, community, anonymous, poll, img, kind }) => {
     if (!meId) return;
     const tempId = `temp-${Date.now()}`;
     const optimistic = {
-      id: tempId, kind: poll ? 'poll' : 'text',
+      id: tempId, kind: kind || (poll ? 'poll' : 'text'),
       user: anonymous ? 'anonymous' : meHandle,
       avatar: anonymous ? '✟' : meAvatar,
       time: 'just now',
-      community: community || 'general', body,
+      community: community || 'general', body, img,
+      avatarUrl: anonymous ? undefined : meAvatarUrl,
       reactions: { bat: 0, fire: 0, skull: 0, smoke: 0 }, comments: [], myReactions: {},
       mine: !anonymous, anonymous: !!anonymous, baseCommentCount: 0, pending: true,
     };
@@ -384,7 +387,7 @@ export default function App() {
     setPosts(prev => [optimistic, ...prev]);
     logActivity({ kind: 'post', glyph: anonymous ? '✟' : '✦', label: anonymous ? 'confessed' : 'posted', detail: body.length > 60 ? body.slice(0, 60) + '…' : body, postId: tempId });
     try {
-      const saved = await createPost({ body, community, anonymous, poll }, { id: meId, handle: meHandle, avatar: meAvatar });
+      const saved = await createPost({ body, community, anonymous, poll, img, kind }, { id: meId, handle: meHandle, avatar: meAvatar, avatarUrl: meAvatarUrl });
       setPosts(prev => prev.map(p => (p.id === tempId ? saved : p)));
     } catch (e) {
       setPosts(prev => prev.filter(p => p.id !== tempId));
@@ -866,6 +869,7 @@ export default function App() {
       await updateProfile(meId, {
         handle: next.name,
         avatar: next.avatar,
+        avatar_url: next.avatarUrl || null,
         pronouns: next.pronouns || '',
         bio: next.bio || '',
         tags: next.tags || [],
@@ -1104,6 +1108,7 @@ export default function App() {
       )}
       {showCompose && (
         <ComposeOverlay
+          meId={meId}
           onClose={() => setShowCompose(false)}
           onPost={(data) => { addPost(data); setShowCompose(false); }}
         />
@@ -1158,6 +1163,7 @@ export default function App() {
       {showEditProfile && (
         <ProfileEditModal
           profile={profile}
+          meId={meId}
           onSave={saveProfile}
           onClose={() => setShowEditProfile(false)}
         />
@@ -1173,6 +1179,7 @@ export default function App() {
       )}
       {showStoryComposer && (
         <StoryComposer
+          meId={meId}
           onClose={() => setShowStoryComposer(false)}
           onPost={(story) => { postStory(story); setShowStoryComposer(false); }}
         />
@@ -1379,6 +1386,7 @@ export default function App() {
       )}
       {showOddityCompose && (
         <OddityCompose
+          meId={meId}
           onClose={() => setShowOddityCompose(false)}
           onCreate={(data) => addOddity(data)}
         />

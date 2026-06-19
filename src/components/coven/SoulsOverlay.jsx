@@ -68,7 +68,7 @@ export function SoulsOverlay({ meId, following = {}, onClose, onOpenUser }) {
             {filtered.map(u => (
               <button key={u.handle} onClick={() => onOpenUser && onOpenUser(u.handle)}
                 className="w-full flex items-start gap-3 p-3 border border-[#A89968]/15 bg-[#0F0F0F]/60 hover:border-[#A89968]/40 hover:bg-[#0F0F0F] text-left transition-colors">
-                <div className="w-11 h-11 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-lg shrink-0">{u.avatar}</div>
+                <div className="w-11 h-11 rounded-full overflow-hidden bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-lg shrink-0">{u.avatar_url ? <img src={u.avatar_url} alt="" className="w-full h-full object-cover" /> : u.avatar}</div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-2">
                     <span className="text-[#F5F1E8] text-sm" style={F.ui}>{u.handle}</span>

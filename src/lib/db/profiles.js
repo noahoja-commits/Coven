@@ -50,7 +50,7 @@ export async function getSystemAccountIds() {
 export async function fetchProfiles({ excludeId, limit = 60 } = {}) {
   let q = supabase
     .from('profiles')
-    .select('id, handle, avatar, bio, city, tags, pronouns')
+    .select('id, handle, avatar, avatar_url, bio, city, tags, pronouns')
     .eq('is_system', false)
     .order('created_at', { ascending: false })
     .limit(limit);
@@ -67,7 +67,7 @@ export async function searchProfiles(query, { limit = 8 } = {}) {
   if (!q) return [];
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, handle, avatar, bio, city, tags')
+    .select('id, handle, avatar, avatar_url, bio, city, tags')
     .eq('is_system', false)
     .or(`handle.ilike.%${q}%,bio.ilike.%${q}%`)
     .limit(limit);

@@ -21,7 +21,7 @@ export function OddityDetail({ item, onBack, onWhisper, onOpenUser }) {
           </div>
         </div>
         <div className="pt-[60px] relative">
-          <OddityImage shape={item.photo?.shape} palette={item.photo?.palette} />
+          <OddityImage shape={item.photo?.shape} palette={item.photo?.palette} imageUrl={item.imageUrl} />
           <div className="px-4 py-4">
             <h1 className="text-[#F5F1E8] text-xl mb-1" style={F.display}>{item.title}</h1>
             <div className="flex items-baseline gap-3 mb-3">
