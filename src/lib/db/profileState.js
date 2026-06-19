@@ -3,7 +3,7 @@ import { supabase } from '../supabase';
 // Per-user profile depth blobs (graves / trackers / sigils / reflections).
 // Each is stored whole under one key; the client owns the merge.
 
-const KEYS = ['graves', 'trackers', 'sigils', 'reflections'];
+const KEYS = ['graves', 'trackers', 'sigils', 'reflections', 'clientSync'];
 
 export async function fetchProfileState() {
   const { data, error } = await supabase

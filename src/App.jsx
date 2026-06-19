@@ -122,6 +122,7 @@ export default function App() {
   const [messages, setMessages] = useState({});
   const [followingPeople, setFollowingPeople] = useState([]);
   const activeConversationRef = useRef(null);
+  const cloudSyncedRef = useRef(false);
   const [communityMembership, setCommunityMembership] = useLocalStorage('communityMembership', { general: true, goth: true });
   const [eventRsvp, setEventRsvp] = useState({});
   const [events, setEvents] = useState([]);
@@ -244,15 +245,55 @@ export default function App() {
     listCrews().then(c => { if (active) setCrews(c); }).catch(() => {});
     fetchMyTicketEventIds().then(ids => { if (active) setMyTicketEventIds(ids); }).catch(() => {});
     fetchNotifications().then(n => { if (active) setNotifications(n); }).catch(() => {});
+    cloudSyncedRef.current = false;
     fetchProfileState().then(s => {
       if (!active) return;
       if (s.graves) setGraves(s.graves);
       if (s.trackers) setTrackers(s.trackers);
       if (s.sigils) setSigils(s.sigils);
       if (s.reflections) setReflections(s.reflections);
-    }).catch(() => {});
+      // Cross-device personal layer: hydrate from the cloud blob (cloud wins on login).
+      const cs = s.clientSync;
+      if (cs) {
+        if (cs.tonightStatus !== undefined) setTonightStatus(cs.tonightStatus);
+        if (cs.communityMembership !== undefined) setCommunityMembership(cs.communityMembership);
+        if (cs.bookmarks !== undefined) setBookmarks(cs.bookmarks);
+        if (cs.muted !== undefined) setMuted(cs.muted);
+        if (cs.anniversaries !== undefined) setAnniversaries(cs.anniversaries);
+        if (cs.cardHistory !== undefined) setCardHistory(cs.cardHistory);
+        if (cs.marginalia !== undefined) setMarginalia(cs.marginalia);
+        if (cs.postCandles !== undefined) setPostCandles(cs.postCandles);
+        if (cs.nowPlaying !== undefined) setNowPlaying(cs.nowPlaying);
+        if (cs.activityLog !== undefined) setActivityLog(cs.activityLog);
+        if (cs.mutedKeywords !== undefined) setMutedKeywords(cs.mutedKeywords);
+        if (cs.hiddenPosts !== undefined) setHiddenPosts(cs.hiddenPosts);
+        if (cs.ritual !== undefined) setRitual(cs.ritual);
+        if (cs.crystals !== undefined) setCrystals(cs.crystals);
+        if (cs.pinnedPostId !== undefined) setPinnedPostId(cs.pinnedPostId);
+        if (cs.shrineTheme !== undefined) setShrineTheme(cs.shrineTheme);
+        if (cs.divinationLog !== undefined) setDivinationLog(cs.divinationLog);
+        if (cs.storyHighlights !== undefined) setStoryHighlights(cs.storyHighlights);
+      }
+      cloudSyncedRef.current = true;
+    }).catch(() => { cloudSyncedRef.current = true; });
     return () => { active = false; };
   }, [meId, dbProfile]);
+
+  // Persist the personal layer to the cloud (debounced) so it follows the user
+  // across devices. Gated on cloudSyncedRef so we never clobber the cloud with
+  // empty local state before the initial load finishes.
+  useEffect(() => {
+    if (!meId || !cloudSyncedRef.current) return;
+    const blob = {
+      tonightStatus, communityMembership, bookmarks, muted, anniversaries, cardHistory,
+      marginalia, postCandles, nowPlaying, activityLog, mutedKeywords, hiddenPosts,
+      ritual, crystals, pinnedPostId, shrineTheme, divinationLog, storyHighlights,
+    };
+    const t = setTimeout(() => { saveProfileState(meId, 'clientSync', blob).catch(() => {}); }, 800);
+    return () => clearTimeout(t);
+  }, [meId, tonightStatus, communityMembership, bookmarks, muted, anniversaries, cardHistory,
+      marginalia, postCandles, nowPlaying, activityLog, mutedKeywords, hiddenPosts,
+      ritual, crystals, pinnedPostId, shrineTheme, divinationLog, storyHighlights]);
 
   // Live notifications: a new row (follow/react/comment/dm) → refetch so the
   // bell updates in real time, with the actor's profile joined in.
