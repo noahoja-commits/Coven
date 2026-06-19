@@ -14,6 +14,7 @@ import { listCrews, createCrew as dbCreateCrew, joinCrew as dbJoinCrew } from '.
 import { fetchProfileState, saveProfileState } from './lib/db/profileState';
 import { fetchNotifications, markNotificationRead, markAllNotificationsRead, clearNotifications, subscribeNotifications, hydrateRealtime } from './lib/db/notifications';
 import { fetchBlockedIds, blockUser as dbBlockUser, reportContent } from './lib/db/moderation';
+import { enablePush } from './lib/db/push';
 import { fetchMyTicketEventIds } from './lib/db/festival';
 import { FestivalMap } from './components/festival/FestivalMap';
 import { VenueMapEditor } from './components/festival/VenueMapEditor';
@@ -1183,7 +1184,7 @@ export default function App() {
           onDMs={() => setShowDMs(true)}
           onCompose={() => setShowCompose(true)}
           onLibrary={onLibraryTap}
-          onNotifications={() => { setShowNotifs(true); try { if (typeof Notification !== 'undefined' && Notification.permission === 'default') Notification.requestPermission(); } catch { /* noop */ } }}
+          onNotifications={() => { setShowNotifs(true); enablePush(meId).catch(() => {}); }}
           onSearch={() => setShowSearch(true)}
           communityName={community ? COMMUNITIES.find(c => c.id === community)?.name : null}
           unreadNotifications={unreadNotifs}

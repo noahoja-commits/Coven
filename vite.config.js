@@ -26,6 +26,8 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: '/index.html',
+        // Load our push/notificationclick handlers into the generated SW.
+        importScripts: ['/sw-push.js'],
         // Precache only the static shell. NEVER cache Supabase auth/API/realtime —
         // serve them network-only so tokens & RLS-scoped data are always fresh.
         runtimeCaching: [
