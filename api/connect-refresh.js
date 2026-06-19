@@ -3,6 +3,7 @@
 // payout readiness updates instantly instead of waiting on the account.updated webhook.
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
+import { verifyUser } from './_auth.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {
@@ -12,8 +13,10 @@ const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE
 export default async function handler(req, res) {
   if (req.method !== 'POST') { res.status(405).json({ error: 'method not allowed' }); return; }
   try {
-    const { userId } = req.body || {};
-    if (!userId) { res.status(400).json({ error: 'userId required' }); return; }
+    // Authenticate the caller; sync only their own verified account (never the body).
+    const user = await verifyUser(req, supa);
+    if (!user) { res.status(401).json({ error: 'unauthorized' }); return; }
+    const userId = user.id;
 
     const { data: row } = await supa
       .from('payout_accounts').select('stripe_account_id').eq('user_id', userId).maybeSingle();

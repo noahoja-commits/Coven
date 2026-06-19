@@ -2,6 +2,7 @@
 // Secret keys live ONLY here (server-side). Returns the hosted checkout URL.
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
+import { verifyUser } from './_auth.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {
@@ -11,7 +12,11 @@ const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE
 export default async function handler(req, res) {
   if (req.method !== 'POST') { res.status(405).json({ error: 'method not allowed' }); return; }
   try {
-    const { eventId, buyerId } = req.body || {};
+    // Authenticate the buyer; the ticket is attributed to their verified id, not the body.
+    const user = await verifyUser(req, supa);
+    if (!user) { res.status(401).json({ error: 'unauthorized' }); return; }
+    const buyerId = user.id;
+    const { eventId } = req.body || {};
     if (!eventId) { res.status(400).json({ error: 'eventId required' }); return; }
 
     const { data: ev, error } = await supa

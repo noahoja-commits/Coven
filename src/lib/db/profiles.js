@@ -1,5 +1,9 @@
 import { supabase } from '../supabase';
 
+// Every profile column EXCEPT birthday (which is column-locked to the owner at the
+// DB level — read via the my_birthday rpc). Use this instead of select('*').
+const PROFILE_COLS = 'id, handle, avatar, avatar_url, bio, city, created_at, is_system, pronouns, scenes, tags';
+
 // Handles are always stored lowercase (onboarding sanitizes + CHECK enforces),
 // so an exact eq is a correct uniqueness check (no LIKE wildcard pitfalls).
 export async function checkHandleAvailable(handle) {
@@ -10,30 +14,35 @@ export async function checkHandleAvailable(handle) {
   return !data;
 }
 
+// Own profile (called only for the signed-in user). Merges the owner-only
+// birthday from the SECURITY DEFINER rpc, since the column is DB-locked.
 export async function getProfileById(id) {
   const { data, error } = await supabase
-    .from('profiles').select('*').eq('id', id).maybeSingle();
+    .from('profiles').select(PROFILE_COLS).eq('id', id).maybeSingle();
   if (error) throw error;
-  return data;
+  if (!data) return data;
+  const { data: bday } = await supabase.rpc('my_birthday');
+  return { ...data, birthday: bday || null };
 }
 
+// Another user's public profile — never includes birthday.
 export async function getProfileByHandle(handle) {
   const { data, error } = await supabase
-    .from('profiles').select('*').eq('handle', (handle || '').toLowerCase()).maybeSingle();
+    .from('profiles').select(PROFILE_COLS).eq('handle', (handle || '').toLowerCase()).maybeSingle();
   if (error) throw error;
   return data;
 }
 
 // Insert the current user's profile row. Throws on conflict (handle taken → 23505).
 export async function insertProfile(row) {
-  const { data, error } = await supabase.from('profiles').insert(row).select().single();
+  const { data, error } = await supabase.from('profiles').insert(row).select('id, handle').single();
   if (error) throw error;
   return data;
 }
 
 export async function updateProfile(id, patch) {
   const { data, error } = await supabase
-    .from('profiles').update(patch).eq('id', id).select().single();
+    .from('profiles').update(patch).eq('id', id).select('id, handle').single();
   if (error) throw error;
   return data;
 }

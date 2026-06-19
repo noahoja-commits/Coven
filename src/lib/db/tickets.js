@@ -1,11 +1,16 @@
 import { supabase } from '../supabase';
 
 // Kick off Stripe Checkout for an event ticket (redirects to the hosted page).
-export async function startCheckout(eventId, buyerId) {
+// The buyer is taken from the verified session server-side, not passed in.
+export async function startCheckout(eventId) {
+  const { data: sess } = await supabase.auth.getSession();
+  const token = sess?.session?.access_token;
   const res = await fetch('/api/checkout', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ eventId, buyerId }),
+    headers: token
+      ? { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
+      : { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ eventId }),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok || !data.url) throw new Error(data.error || 'could not start checkout');
