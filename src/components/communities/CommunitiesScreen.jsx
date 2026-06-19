@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, ChevronLeft, Bell, X } from 'lucide-react';
+import { Search, ChevronLeft, X } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { COMMUNITIES } from '../../data/communities';
 import { PostImage } from '../shared/Visuals';
@@ -116,7 +116,6 @@ export function CommunityDetail({ id, onBack, posts: postsProp, isMember, onTogg
             style={F.ui}>
             {isMember ? 'joined' : 'join'}
           </button>
-          <button className="px-4 text-[#A8A29E] text-xs py-2 border border-[#2A2A2A] uppercase tracking-wider" style={F.ui}><Bell size={13} /></button>
         </div>
         <div className="relative flex items-center gap-4 mt-4 text-[10px] uppercase tracking-wider text-[#6B6B6B]" style={F.ui}>
           <span><span style={F.mono} className="text-xs text-[#A8A29E]">{formatK(c.members)}</span> souls</span>

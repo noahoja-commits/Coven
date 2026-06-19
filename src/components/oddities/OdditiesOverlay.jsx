@@ -113,12 +113,12 @@ function MarketplaceTab({ onOpenOddity, onCompose, listings = [] }) {
   );
 }
 
-function WantedTab() {
+function WantedTab({ onCompose }) {
   return (
     <div className="px-4 pb-12">
       <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-3" style={F.scriptureSC}>· what the coven is seeking ·</div>
       <div className="py-12 text-center text-[#6B6B6B] text-xs italic" style={F.serif}>no one is seeking anything yet.</div>
-      <button className="mt-2 w-full py-2.5 border border-dashed border-[#3F3F3F] text-[#A8A29E] text-xs uppercase tracking-wider hover:border-[#5B0F1A] hover:text-[#F5F1E8]" style={F.ui}>+ post a wanted</button>
+      <button onClick={onCompose} className="mt-2 w-full py-2.5 border border-dashed border-[#3F3F3F] text-[#A8A29E] text-xs uppercase tracking-wider hover:border-[#5B0F1A] hover:text-[#F5F1E8] transition-colors" style={F.ui}>+ post a wanted</button>
     </div>
   );
 }
@@ -127,7 +127,11 @@ function ParlourTab() {
   return (
     <div className="px-4 pb-12">
       <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-3" style={F.scriptureSC}>· the parlour ·</div>
-      <div className="py-12 text-center text-[#6B6B6B] text-xs italic" style={F.serif}>no artists have set up shop yet.</div>
+      <div className="py-16 text-center text-[#6B6B6B]" style={F.serif}>
+        <div className="text-3xl mb-3">⚰</div>
+        <p className="text-xs italic">commissions from the coven's artists — tattooers, painters, seamstresses.</p>
+        <p className="text-[10px] uppercase tracking-[0.3em] text-[#A89968]/70 mt-3" style={F.ui}>· coming soon ·</p>
+      </div>
     </div>
   );
 }
@@ -135,7 +139,8 @@ function ParlourTab() {
 function ShopsTab() {
   return (
     <div className="px-4 pb-12">
-      <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-3" style={F.scriptureSC}>· the merchants ·</div>
+      <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-1" style={F.scriptureSC}>· the merchants ·</div>
+      <div className="text-[9px] text-[#6B6B6B] uppercase tracking-[0.2em] mb-3" style={F.ui}>sample directory</div>
       <div className="space-y-2">
         {SHOPS.map(s => (
           <div key={s.id} className="border border-[#2A2A2A] bg-[#0F0F0F] p-3 flex items-center gap-3">
@@ -156,6 +161,10 @@ function ShopsTab() {
 
 export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, listings = [] }) {
   const [tab, setTab] = useState('market');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const q = query.trim().toLowerCase();
+  const visibleListings = q ? listings.filter(l => (l.title || '').toLowerCase().includes(q)) : listings;
   return (
     <div className="absolute inset-0 z-40 bg-[#0A0608] animate-fade-in">
       <div className="absolute inset-0" style={{
@@ -168,8 +177,17 @@ export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, listings = [
           <div className="px-4 h-[60px] flex items-center justify-between">
             <button onClick={onClose} className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors"><X size={20} /></button>
             <div className="text-[#C9A961] text-base tracking-[0.3em]" style={F.scriptureSC}>ODDITIES</div>
-            <button className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors"><Search size={18} /></button>
+            <button onClick={() => { setTab('market'); setSearchOpen(o => !o); if (searchOpen) setQuery(''); }}
+              className={`p-2 -m-1 transition-colors ${searchOpen ? 'text-[#C9A961]' : 'text-[#A89968] hover:text-[#C9A961]'}`}><Search size={18} /></button>
           </div>
+          {searchOpen && (
+            <div className="px-4 pb-3">
+              <input autoFocus value={query} onChange={e => setQuery(e.target.value)}
+                placeholder="search the wares…"
+                className="w-full bg-[#0A0608] border border-[#5B0F1A]/40 focus:border-[#5B0F1A] outline-none px-3 py-2 text-[#F5F1E8] text-sm"
+                style={F.serif} />
+            </div>
+          )}
         </div>
         <div className="bg-black/40 border-b border-[#2A2A2A] flex">
           {[
@@ -190,9 +208,9 @@ export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, listings = [
               <h1 className="text-[#C9A961] text-2xl mb-1" style={F.scripture}>The Marketplace</h1>
               <p className="text-[#A89968]/80 text-[11px] italic" style={F.scripture}>"objects with stories, sold by those who held them."</p>
             </div>
-            <MarketplaceTab onOpenOddity={onOpenOddity} onCompose={onCompose} listings={listings} />
+            <MarketplaceTab onOpenOddity={onOpenOddity} onCompose={onCompose} listings={visibleListings} />
           </>)}
-          {tab === 'wanted' && <WantedTab />}
+          {tab === 'wanted' && <WantedTab onCompose={onCompose} />}
           {tab === 'parlour' && <ParlourTab />}
           {tab === 'shops' && <ShopsTab />}
         </div>
