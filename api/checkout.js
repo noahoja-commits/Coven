@@ -23,7 +23,7 @@ export default async function handler(req, res) {
       .from('events')
       .select('id,name,ticketed,price_cents,currency,capacity,host_id')
       .eq('id', eventId)
-      .single();
+      .maybeSingle();
     if (error) {
       console.error('checkout: supabase query error', { code: error.code, message: error.message });
       res.status(502).json({ error: 'database unavailable' });
@@ -73,6 +73,8 @@ export default async function handler(req, res) {
     const session = await stripe.checkout.sessions.create(sessionParams);
     res.status(200).json({ url: session.url });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    // Never leak raw Stripe/internal error detail (keys, account ids) to clients.
+    console.error('checkout', e.message);
+    res.status(500).json({ error: 'checkout unavailable' });
   }
 }

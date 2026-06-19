@@ -30,7 +30,8 @@ export default async function handler(req, res) {
 
     res.status(200).json({ hasAccount: true, enabled });
   } catch (e) {
+    // Don't leak raw Stripe error detail (account ids, key prefixes) to clients.
     console.error('connect-refresh', e.message);
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: 'payout status unavailable' });
   }
 }
