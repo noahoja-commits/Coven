@@ -5,22 +5,31 @@ import { GrainOverlay } from '../shared/Visuals';
 import { useAuth } from '../../auth/AuthProvider';
 
 export function SignInScreen() {
-  const { signInWithPassword, signUpWithPassword } = useAuth();
-  const [mode, setMode] = useState('in'); // 'in' | 'up'
+  const { signInWithPassword, signUpWithPassword, resetPasswordForEmail } = useAuth();
+  const [mode, setMode] = useState('in'); // 'in' | 'up' | 'reset'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [status, setStatus] = useState('idle'); // idle | working | confirm
+  const [status, setStatus] = useState('idle'); // idle | working | confirm | sent
   const [error, setError] = useState('');
 
   const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const passOk = password.length >= 6;
-  const valid = emailOk && passOk;
   const isUp = mode === 'up';
+  const isReset = mode === 'reset';
+  const valid = isReset ? emailOk : (emailOk && passOk);
 
   const submit = async (e) => {
     e.preventDefault();
     if (!valid || status === 'working') return;
     setStatus('working'); setError('');
+
+    if (isReset) {
+      const { error } = await resetPasswordForEmail(email.trim());
+      if (error) { setStatus('idle'); setError(error.message || 'could not send reset email'); return; }
+      setStatus('sent');
+      return;
+    }
+
     const fn = isUp ? signUpWithPassword : signInWithPassword;
     const { data, error } = await fn(email.trim(), password);
     if (error) {
@@ -44,13 +53,16 @@ export function SignInScreen() {
         <div className="text-[#C9A961] text-6xl mb-3 leading-none" style={F.brand}>Coven</div>
         <p className="text-[#A8A29E] text-sm mb-12" style={F.serif}>a gathering place for the nocturnal</p>
 
-        {status === 'confirm' ? (
+        {status === 'confirm' || status === 'sent' ? (
           <div className="animate-fade-in">
             <div className="text-4xl mb-4">✟</div>
-            <h2 className="text-[#F5F1E8] text-lg mb-2" style={F.display}>CONFIRM YOUR EMAIL</h2>
+            <h2 className="text-[#F5F1E8] text-lg mb-2" style={F.display}>
+              {status === 'sent' ? 'CHECK YOUR EMAIL' : 'CONFIRM YOUR EMAIL'}
+            </h2>
             <p className="text-[#A8A29E] text-sm leading-relaxed" style={F.serif}>
-              we sent a confirmation to<br /><span className="text-[#C9A961]">{email.trim()}</span>.
-              <br />confirm it, then come back and sign in.
+              {status === 'sent' ? 'we sent a password reset link to' : 'we sent a confirmation to'}
+              <br /><span className="text-[#C9A961]">{email.trim()}</span>.
+              <br />{status === 'sent' ? 'open it to set a new password.' : 'confirm it, then come back and sign in.'}
             </p>
             <button onClick={() => { setStatus('idle'); setMode('in'); }}
               className="mt-8 text-[10px] uppercase tracking-[0.25em] text-[#6B6B6B] hover:text-[#A8A29E] transition-colors p-2" style={F.ui}>
@@ -60,7 +72,7 @@ export function SignInScreen() {
         ) : (
           <form onSubmit={submit} className="w-full max-w-xs animate-fade-in">
             <div className="text-[10px] uppercase tracking-[0.3em] text-[#A89968] mb-3" style={F.scriptureSC}>
-              · {isUp ? 'join the coven' : 'enter'} ·
+              · {isUp ? 'join the coven' : isReset ? 'reset password' : 'enter'} ·
             </div>
 
             <div className="flex items-center gap-2 border border-[#2A2A2A] focus-within:border-[#5B0F1A] bg-[#0A0204] px-3 py-2.5 transition-colors">
@@ -73,15 +85,17 @@ export function SignInScreen() {
                 style={F.serif} />
             </div>
 
-            <div className="flex items-center gap-2 border border-[#2A2A2A] focus-within:border-[#5B0F1A] bg-[#0A0204] px-3 py-2.5 mt-2 transition-colors">
-              <Lock size={16} className="text-[#6B6B6B] shrink-0" />
-              <input
-                type="password" autoComplete={isUp ? 'new-password' : 'current-password'}
-                value={password} onChange={e => setPassword(e.target.value)}
-                placeholder="password"
-                className="flex-1 bg-transparent outline-none text-[#F5F1E8] text-sm placeholder:text-[#4A4A4A]"
-                style={F.serif} />
-            </div>
+            {!isReset && (
+              <div className="flex items-center gap-2 border border-[#2A2A2A] focus-within:border-[#5B0F1A] bg-[#0A0204] px-3 py-2.5 mt-2 transition-colors">
+                <Lock size={16} className="text-[#6B6B6B] shrink-0" />
+                <input
+                  type="password" autoComplete={isUp ? 'new-password' : 'current-password'}
+                  value={password} onChange={e => setPassword(e.target.value)}
+                  placeholder="password"
+                  className="flex-1 bg-transparent outline-none text-[#F5F1E8] text-sm placeholder:text-[#4A4A4A]"
+                  style={F.serif} />
+              </div>
+            )}
             {isUp && password.length > 0 && !passOk && (
               <p className="text-[#6B6B6B] text-[10px] mt-1.5 text-left" style={F.ui}>at least 6 characters</p>
             )}
@@ -91,13 +105,21 @@ export function SignInScreen() {
               className="w-full mt-4 py-3 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] text-xs uppercase tracking-[0.25em] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
               style={F.ui}>
               {status === 'working'
-                ? <><Loader2 size={14} className="animate-spin" /> {isUp ? 'creating' : 'entering'}</>
-                : (isUp ? 'create account' : 'enter')}
+                ? <><Loader2 size={14} className="animate-spin" /> {isReset ? 'sending' : isUp ? 'creating' : 'entering'}</>
+                : (isReset ? 'send reset link' : isUp ? 'create account' : 'enter')}
             </button>
 
-            <button type="button" onClick={() => { setMode(isUp ? 'in' : 'up'); setError(''); }}
-              className="mt-5 text-[10px] uppercase tracking-[0.2em] text-[#6B6B6B] hover:text-[#A8A29E] transition-colors p-2" style={F.ui}>
-              {isUp ? 'already have an account? sign in' : 'new here? create an account'}
+            {mode === 'in' && (
+              <button type="button" onClick={() => { setMode('reset'); setError(''); }}
+                className="mt-4 text-[10px] uppercase tracking-[0.2em] text-[#6B6B6B] hover:text-[#A8A29E] transition-colors p-1 block mx-auto" style={F.ui}>
+                forgot your password?
+              </button>
+            )}
+
+            <button type="button"
+              onClick={() => { setMode(isReset ? 'in' : (isUp ? 'in' : 'up')); setError(''); }}
+              className="mt-2 text-[10px] uppercase tracking-[0.2em] text-[#6B6B6B] hover:text-[#A8A29E] transition-colors p-2" style={F.ui}>
+              {isReset ? 'back to sign in' : isUp ? 'already have an account? sign in' : 'new here? create an account'}
             </button>
           </form>
         )}

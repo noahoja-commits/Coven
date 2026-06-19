@@ -3,6 +3,7 @@ import { useLocalStorage } from './hooks/useLocalStorage';
 import { useAuth } from './auth/AuthProvider';
 import { isSupabaseConfigured } from './lib/supabase';
 import { SignInScreen } from './components/auth/SignInScreen';
+import { ResetPasswordScreen } from './components/auth/ResetPasswordScreen';
 import { fetchFeed, createPost, deletePost as dbDeletePost, togglePostReaction, fetchComments, createComment, castPollVote, clearPollVote } from './lib/db/posts';
 import { insertProfile, updateProfile, getProfileStats, getProfileByHandle } from './lib/db/profiles';
 import { fetchFollowing, followUser, unfollowUser } from './lib/db/social';
@@ -80,7 +81,7 @@ import { TRACKER_CATEGORIES } from './data/profile';
 
 export default function App() {
   // === AUTH ===
-  const { loading: authLoading, session, userId, dbProfile, signOut, refreshProfile } = useAuth();
+  const { loading: authLoading, session, userId, dbProfile, recovery, signOut, refreshProfile } = useAuth();
   const meId = userId;
   const followIdByHandle = useRef({});
 
@@ -1063,6 +1064,9 @@ export default function App() {
         <div className="text-5xl animate-pulse-slow" style={F.brand}>Coven</div>
       </div>
     );
+  }
+  if (recovery) {
+    return <ResetPasswordScreen />;
   }
   if (!session) {
     return <SignInScreen />;

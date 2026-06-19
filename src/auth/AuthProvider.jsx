@@ -9,6 +9,9 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [dbProfile, setDbProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  // True after the user lands via a password-recovery email link — the app then
+  // shows the "set a new password" screen instead of the normal logged-in surface.
+  const [recovery, setRecovery] = useState(false);
 
   const loadProfile = useCallback(async (uid) => {
     if (!uid) { setDbProfile(null); return; }
@@ -42,6 +45,7 @@ export function AuthProvider({ children }) {
     // Defer profile loads out of the auth callback (supabase-js warns against
     // calling its own client synchronously inside onAuthStateChange).
     const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
+      if (_event === 'PASSWORD_RECOVERY') setRecovery(true);
       setSession(sess);
       setTimeout(() => { if (active) loadProfile(sess?.user?.id); }, 0);
     });
@@ -62,6 +66,20 @@ export function AuthProvider({ children }) {
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     setDbProfile(null);
+    setRecovery(false);
+  }, []);
+
+  // Send a password-reset email; the link returns to the app in recovery mode.
+  const resetPasswordForEmail = useCallback(
+    (email) => supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin }),
+    []
+  );
+
+  // Set a new password (valid while in recovery mode). Clears recovery on success.
+  const updatePassword = useCallback(async (password) => {
+    const res = await supabase.auth.updateUser({ password });
+    if (!res.error) setRecovery(false);
+    return res;
   }, []);
 
   const refreshProfile = useCallback(
@@ -75,8 +93,11 @@ export function AuthProvider({ children }) {
     userId: session?.user?.id || null,
     dbProfile,
     loading,
+    recovery,
     signInWithPassword,
     signUpWithPassword,
+    resetPasswordForEmail,
+    updatePassword,
     signOut,
     refreshProfile,
   };
