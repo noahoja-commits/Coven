@@ -21,16 +21,27 @@ export function pushSupported() {
 }
 
 // Ask permission, subscribe via the service worker, and save the subscription.
-// Returns true if push is now active. Safe to call repeatedly (idempotent).
+// Returns the string 'ok' when push is active, otherwise a human-readable reason
+// the caller can surface (so on-device failures aren't silent). Idempotent.
 export async function enablePush(userId) {
-  if (!pushSupported() || !userId) return false;
+  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) {
+    return 'no service worker — open the installed app, not the Safari tab';
+  }
+  if (typeof window === 'undefined' || !('PushManager' in window)) {
+    return 'push unsupported — on iPhone, Add to Home Screen and open from that icon (needs iOS 16.4+)';
+  }
+  if (!('Notification' in window)) return 'no Notification API on this device';
+  if (!userId) return 'not signed in';
   try {
-    if (Notification.permission === 'denied') return false;
+    if (Notification.permission === 'denied') {
+      return 'notifications are blocked — enable them for this app in your device Settings';
+    }
     if (Notification.permission === 'default') {
       const perm = await Notification.requestPermission();
-      if (perm !== 'granted') return false;
+      if (perm !== 'granted') return 'permission not granted';
     }
     const reg = await navigator.serviceWorker.ready;
+    if (!reg || !reg.pushManager) return 'service worker has no pushManager (stale SW — reinstall the app)';
     let sub = await reg.pushManager.getSubscription();
     if (!sub) {
       sub = await reg.pushManager.subscribe({
@@ -39,14 +50,15 @@ export async function enablePush(userId) {
       });
     }
     const json = sub.toJSON();
-    await supabase.from('push_subscriptions').upsert({
+    const { error } = await supabase.from('push_subscriptions').upsert({
       endpoint: sub.endpoint,
       user_id: userId,
       p256dh: json.keys.p256dh,
       auth: json.keys.auth,
     }, { onConflict: 'endpoint' });
-    return true;
-  } catch {
-    return false;
+    if (error) return 'could not save subscription: ' + error.message;
+    return 'ok';
+  } catch (e) {
+    return 'subscribe failed: ' + (e && e.message ? e.message : String(e));
   }
 }

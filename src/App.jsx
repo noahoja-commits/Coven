@@ -1184,7 +1184,12 @@ export default function App() {
           onDMs={() => setShowDMs(true)}
           onCompose={() => setShowCompose(true)}
           onLibrary={onLibraryTap}
-          onNotifications={() => { setShowNotifs(true); enablePush(meId).catch(() => {}); }}
+          onNotifications={() => {
+            setShowNotifs(true);
+            enablePush(meId).then((r) => {
+              if (r && r !== 'ok') alert('Push notifications not enabled:\n\n' + r);
+            }).catch(() => {});
+          }}
           onSearch={() => setShowSearch(true)}
           communityName={community ? COMMUNITIES.find(c => c.id === community)?.name : null}
           unreadNotifications={unreadNotifs}
