@@ -3,7 +3,7 @@ import { useLocalStorage } from './hooks/useLocalStorage';
 import { useAuth } from './auth/AuthProvider';
 import { isSupabaseConfigured } from './lib/supabase';
 import { SignInScreen } from './components/auth/SignInScreen';
-import { fetchFeed, createPost, deletePost as dbDeletePost, togglePostReaction, fetchComments, createComment } from './lib/db/posts';
+import { fetchFeed, createPost, deletePost as dbDeletePost, togglePostReaction, fetchComments, createComment, castPollVote, clearPollVote } from './lib/db/posts';
 import { insertProfile, updateProfile, getProfileStats, getProfileByHandle } from './lib/db/profiles';
 import { fetchFollowing, followUser, unfollowUser } from './lib/db/social';
 import { fetchConversations, getOrCreateDM, createGroup, fetchMessages as fetchDMMessages, sendDM, markRead as dmMarkRead, setBuried as dmSetBuried, subscribeDMs } from './lib/db/dm';
@@ -409,10 +409,12 @@ export default function App() {
   };
 
   const voteOnPoll = (postId, optionId) => {
+    const post = posts.find(p => p.id === postId);
+    const wasOption = post?.poll?.myVote;
+    const removing = wasOption === optionId; // tapping your current pick un-votes
     setPosts(prev => prev.map(p => {
       if (p.id !== postId || !p.poll) return p;
-      const wasOption = p.poll.myVote;
-      if (wasOption === optionId) {
+      if (removing) {
         return { ...p, poll: { ...p.poll, myVote: null, options: p.poll.options.map(o => o.id === optionId ? { ...o, votes: Math.max(0, o.votes - 1) } : o) } };
       }
       return {
@@ -428,6 +430,9 @@ export default function App() {
         },
       };
     }));
+    if (!meId || String(postId).startsWith('temp-')) return;
+    const op = removing ? clearPollVote(postId, meId) : castPollVote(postId, optionId, meId);
+    op.catch(() => { fetchFeed(meId).then(setPosts).catch(() => {}); }); // reconcile to server truth on error
   };
 
   const flipReaction = (postId, kind, wasMine) => {

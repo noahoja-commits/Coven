@@ -19,7 +19,40 @@ export async function fetchFeed(myId, { limit = 50 } = {}) {
     if (rxErr) throw rxErr;
     (rx || []).forEach(r => myReactionSet.add(`${r.post_id}:${r.kind}`));
   }
-  return (rows || []).map(r => hydratePost(r, myReactionSet, myId));
+
+  const posts = (rows || []).map(r => hydratePost(r, myReactionSet, myId));
+
+  // Merge live poll tallies + the user's own vote into poll posts.
+  const pollIds = posts.filter(p => p.poll).map(p => p.id);
+  if (pollIds.length) {
+    const [{ data: tallies }, { data: myVotes }] = await Promise.all([
+      supabase.from('poll_tallies').select('post_id, option_id, votes').in('post_id', pollIds),
+      myId ? supabase.from('poll_votes').select('post_id, option_id').eq('user_id', myId).in('post_id', pollIds) : Promise.resolve({ data: [] }),
+    ]);
+    const tally = {}; (tallies || []).forEach(t => { (tally[t.post_id] ||= {})[t.option_id] = t.votes; });
+    const mine = {}; (myVotes || []).forEach(v => { mine[v.post_id] = v.option_id; });
+    posts.forEach(p => {
+      if (!p.poll) return;
+      p.poll = {
+        ...p.poll,
+        myVote: mine[p.id] || null,
+        options: p.poll.options.map(o => ({ ...o, votes: tally[p.id]?.[o.id] || 0 })),
+      };
+    });
+  }
+  return posts;
+}
+
+// Cast or change a poll vote (one row per user per poll).
+export async function castPollVote(postId, optionId, userId) {
+  const { error } = await supabase.from('poll_votes')
+    .upsert({ post_id: postId, user_id: userId, option_id: optionId }, { onConflict: 'post_id,user_id' });
+  if (error) throw error;
+}
+
+export async function clearPollVote(postId, userId) {
+  const { error } = await supabase.from('poll_votes').delete().match({ post_id: postId, user_id: userId });
+  if (error) throw error;
 }
 
 // Create a post and return it already hydrated to the client shape.
