@@ -20,6 +20,37 @@ export function pushSupported() {
     && 'Notification' in window;
 }
 
+// Current push state for THIS device, for the settings UI.
+// 'on' = subscribed & granted; 'off' = supported but not subscribed;
+// 'denied' = permission blocked in OS; 'unsupported' = not a push-capable context.
+export async function pushStatus() {
+  if (!pushSupported()) return 'unsupported';
+  if (Notification.permission === 'denied') return 'denied';
+  if (Notification.permission !== 'granted') return 'off';
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sub = reg && reg.pushManager ? await reg.pushManager.getSubscription() : null;
+    return sub ? 'on' : 'off';
+  } catch {
+    return 'off';
+  }
+}
+
+// Turn push off on this device: drop the saved subscription and unsubscribe.
+export async function disablePush() {
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sub = reg && reg.pushManager ? await reg.pushManager.getSubscription() : null;
+    if (sub) {
+      await supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
+      await sub.unsubscribe();
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // Ask permission, subscribe via the service worker, and save the subscription.
 // Returns the string 'ok' when push is active, otherwise a human-readable reason
 // the caller can surface (so on-device failures aren't silent). Idempotent.

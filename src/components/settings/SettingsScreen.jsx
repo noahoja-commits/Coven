@@ -39,7 +39,7 @@ function Row({ label, desc, children }) {
   );
 }
 
-export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOnboarding, mutedKeywords = [], onSetMutedKeywords, payoutStatus, onSetupPayouts }) {
+export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOnboarding, mutedKeywords = [], onSetMutedKeywords, payoutStatus, onSetupPayouts, pushState = 'off', onEnablePush, onDisablePush }) {
   const set = (key, value) => onChange({ ...settings, [key]: value });
   const addKeyword = (e) => {
     e.preventDefault();
@@ -138,6 +138,23 @@ export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOn
         </Section>
 
         <Section title="notifications">
+          <Row label="Push to this device"
+            desc={
+              pushState === 'on' ? 'on — you\'ll be summoned even when the app is closed.'
+              : pushState === 'denied' ? 'blocked. enable notifications for Coven in your device Settings, then return.'
+              : pushState === 'unsupported' ? 'on iPhone: add Coven to your Home Screen and open it from there (iOS 16.4+).'
+              : 'off — get whispered to when someone reaches for you.'
+            }>
+            {pushState === 'on' ? (
+              <Toggle on onChange={() => onDisablePush && onDisablePush()} />
+            ) : pushState === 'denied' || pushState === 'unsupported' ? (
+              <span className="text-[9px] uppercase tracking-[0.18em] text-[#5B0F1A]" style={F.ui}>
+                {pushState === 'denied' ? 'blocked' : 'install'}
+              </span>
+            ) : (
+              <Toggle on={false} onChange={() => onEnablePush && onEnablePush()} />
+            )}
+          </Row>
           {[
             { id: 'reaction', label: 'Reactions' },
             { id: 'reply', label: 'Replies & comments' },

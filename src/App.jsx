@@ -14,7 +14,8 @@ import { listCrews, createCrew as dbCreateCrew, joinCrew as dbJoinCrew } from '.
 import { fetchProfileState, saveProfileState } from './lib/db/profileState';
 import { fetchNotifications, markNotificationRead, markAllNotificationsRead, clearNotifications, subscribeNotifications, hydrateRealtime } from './lib/db/notifications';
 import { fetchBlockedIds, blockUser as dbBlockUser, reportContent } from './lib/db/moderation';
-import { enablePush } from './lib/db/push';
+import { enablePush, disablePush, pushStatus } from './lib/db/push';
+import { Toast } from './components/shared/Toast';
 import { fetchMyTicketEventIds } from './lib/db/festival';
 import { FestivalMap } from './components/festival/FestivalMap';
 import { VenueMapEditor } from './components/festival/VenueMapEditor';
@@ -90,6 +91,8 @@ export default function App() {
   const [showCompose, setShowCompose] = useState(false);
   const [showNotifs, setShowNotifs] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [pushState, setPushState] = useState('off');
   const [showTonightModal, setShowTonightModal] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [activeStoryIndex, setActiveStoryIndex] = useState(null);
@@ -384,6 +387,27 @@ export default function App() {
   const setupPayouts = () => {
     if (!meId) return;
     startPayoutSetup(meId).catch(e => addNotification({ kind: 'event', avatar: '✖', text: `payout setup unavailable — ${e.message}` }));
+  };
+
+  // ---- in-app toast + push device state ----
+  const showToast = (text, kind = 'info') => setToast({ key: `${kind}-${performance.now()}`, text, kind });
+
+  const refreshPushState = () => { pushStatus().then(setPushState).catch(() => {}); };
+  useEffect(() => { refreshPushState(); }, [meId]);
+  useEffect(() => { if (showSettings) refreshPushState(); }, [showSettings]);
+
+  // Turn push on for this device, with clear feedback instead of a silent fail.
+  const turnPushOn = async () => {
+    const r = await enablePush(meId);
+    if (r === 'ok') { showToast('Notifications on for this device.'); }
+    else { showToast(r, 'error'); }
+    refreshPushState();
+    return r;
+  };
+  const turnPushOff = async () => {
+    await disablePush();
+    showToast('Notifications off for this device.');
+    refreshPushState();
   };
 
   // Load an event's attendees when its detail opens.
@@ -1186,9 +1210,11 @@ export default function App() {
           onLibrary={onLibraryTap}
           onNotifications={() => {
             setShowNotifs(true);
-            enablePush(meId).then((r) => {
-              if (r && r !== 'ok') alert('Push notifications not enabled:\n\n' + r);
-            }).catch(() => {});
+            // If already granted, silently make sure this device stays subscribed.
+            // First-time enabling (with feedback) lives in Settings → notifications.
+            if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+              enablePush(meId).then(refreshPushState).catch(() => {});
+            }
           }}
           onSearch={() => setShowSearch(true)}
           communityName={community ? COMMUNITIES.find(c => c.id === community)?.name : null}
@@ -1424,6 +1450,9 @@ export default function App() {
           onSetMutedKeywords={setMutedKeywords}
           payoutStatus={payoutStatus}
           onSetupPayouts={setupPayouts}
+          pushState={pushState}
+          onEnablePush={turnPushOn}
+          onDisablePush={turnPushOff}
         />
       )}
 
@@ -1519,6 +1548,7 @@ export default function App() {
           onCreate={(data) => addOddity(data)}
         />
       )}
+      <Toast toast={toast} onDone={() => setToast(null)} />
     </div>
   );
 }
