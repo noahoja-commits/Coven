@@ -1,13 +1,23 @@
 import { supabase } from '../supabase';
 import { hydratePost, hydrateComment } from '../hydrate';
 
-// Global recent feed (MVP: not follow-scoped) + the current user's own reactions.
-export async function fetchFeed(myId, { limit = 50 } = {}) {
-  const { data: rows, error } = await supabase
+// Recent feed + the current user's own reactions.
+// scope 'everyone' = global; 'following' = posts by people you follow (+ your own).
+// before = ISO timestamp cursor for infinite scroll.
+export async function fetchFeed(myId, { scope = 'everyone', before = null, limit = 20 } = {}) {
+  let q = supabase
     .from('feed_posts')
     .select('*')
     .order('created_at', { ascending: false })
     .limit(limit);
+  if (before) q = q.lt('created_at', before);
+  if (scope === 'following' && myId) {
+    const { data: f } = await supabase.from('follows').select('followee_id').eq('follower_id', myId);
+    const ids = (f || []).map(r => r.followee_id);
+    ids.push(myId); // include your own posts
+    q = q.in('author_id_public', ids);
+  }
+  const { data: rows, error } = await q;
   if (error) throw error;
 
   const myReactionSet = new Set();

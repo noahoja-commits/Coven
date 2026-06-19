@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { MessageCircle, MoreHorizontal, Eye, Bookmark, Trash2, Flame, EyeOff, Repeat, Pin } from 'lucide-react';
+import { useState, useMemo, useRef, useEffect } from 'react';
+import { MessageCircle, MoreHorizontal, Eye, Bookmark, Trash2, Flame, EyeOff, Repeat, Pin, Loader2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { Reaction } from '../shared/Reaction';
 import { PostImage } from '../shared/Visuals';
@@ -10,6 +10,7 @@ import { CODEX } from '../../data/codex';
 
 export function HomeScreen({
   posts, onReact, onOpenComments, onOpenCommunity, onOpenUser, onDeletePost, onHidePost, onQuotePost, onTogglePin, pinnedPostId, feedSort = 'latest', onSetFeedSort,
+  feedScope = 'everyone', onSetFeedScope, onLoadMore, feedHasMore = false,
   bookmarks = {}, onToggleBookmark, postCandles = {}, onToggleCandle, onOpenEvent, onVotePoll,
   onOpenStory, onCreateStory, stories = [], meHandle = 'you', meAvatar = '🦇',
   tonightStatus, onOpenTonightStatus, onOpenTarot, onOpenEphemeris, onOpenLibrary, onOpenCodex, onOpenHashtag, onOpenVespersArchive,
@@ -57,6 +58,29 @@ export function HomeScreen({
         return score(b) - score(a);
       })
     : tagFilteredPosts;
+
+  // Double-tap to like (IG-style): bat-react + a burst animation.
+  const [burst, setBurst] = useState(null);
+  const doubleTapLike = (post) => {
+    if (!post.myReactions?.bat) onReact && onReact(post.id, 'bat');
+    setBurst(post.id);
+    setTimeout(() => setBurst(b => (b === post.id ? null : b)), 800);
+  };
+
+  // Infinite scroll: load more when the sentinel nears the viewport.
+  const sentinelRef = useRef(null);
+  useEffect(() => {
+    if (!onLoadMore || !feedHasMore) return;
+    const el = sentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting) onLoadMore(); },
+      { rootMargin: '500px' },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [onLoadMore, feedHasMore, posts.length]);
+
   const daily = getDailyCard();
   const today = darkDay();
   const vespers = todaysVespers(TEXTS);
@@ -220,6 +244,15 @@ export function HomeScreen({
         </button>
       )}
 
+      {/* Feed scope */}
+      <div className="px-4 pt-2 flex items-center gap-5 border-b border-[#1A1A1A]">
+        {['everyone', 'following'].map(sc => (
+          <button key={sc} onClick={() => onSetFeedScope && onSetFeedScope(sc)}
+            className={`text-xs uppercase tracking-[0.2em] pb-2 transition-colors ${feedScope === sc ? 'text-[#F5F1E8] border-b-2 border-[#8B0000]' : 'text-[#6B6B6B] hover:text-[#A8A29E]'}`}
+            style={F.ui}>{sc === 'everyone' ? 'the coven' : 'following'}</button>
+        ))}
+      </div>
+
       {/* Sort tabs + lucky */}
       <div className="px-4 py-2 border-b border-[#1A1A1A] flex items-center gap-3">
         {['latest', 'trending'].map(s => (
@@ -259,7 +292,12 @@ export function HomeScreen({
           const candled = !!postCandles[post.id];
           const pinned = pinnedPostId === post.id;
           return (
-            <article key={post.id} className="px-4 py-4">
+            <article key={post.id} className="px-4 py-4 relative select-none" onDoubleClick={() => doubleTapLike(post)}>
+              {burst === post.id && (
+                <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+                  <span className="text-6xl animate-like-burst drop-shadow-[0_0_20px_rgba(139,0,0,0.8)]">🦇</span>
+                </div>
+              )}
               <div className="flex items-center gap-2.5 mb-3">
                 <button
                   onClick={() => !mine && !post.anonymous && onOpenUser && onOpenUser(post.user, post.avatar)}
@@ -416,9 +454,22 @@ export function HomeScreen({
             </article>
           );
         })}
-        <div className="py-12 text-center">
-          <div className="text-[#3F3F3F] text-sm" style={F.serif}>· you've reached the bottom of tonight ·</div>
-        </div>
+        {sortedPosts.length === 0 && feedScope === 'following' && (
+          <div className="py-16 text-center px-8">
+            <div className="text-[#3F3F3F] text-3xl mb-2">☾</div>
+            <p className="text-[#A8A29E] text-sm italic" style={F.serif}>your following feed is empty.</p>
+            <p className="text-[#6B6B6B] text-xs mt-1" style={F.ui}>follow some souls, or switch to the coven.</p>
+          </div>
+        )}
+        {feedHasMore ? (
+          <div ref={sentinelRef} className="py-10 flex justify-center">
+            <Loader2 size={16} className="animate-spin text-[#6B6B6B]" />
+          </div>
+        ) : sortedPosts.length > 0 && (
+          <div className="py-12 text-center">
+            <div className="text-[#3F3F3F] text-sm" style={F.serif}>· you've reached the bottom of tonight ·</div>
+          </div>
+        )}
       </div>
     </div>
   );

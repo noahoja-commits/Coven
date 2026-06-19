@@ -10,6 +10,8 @@ export function hydratePost(row, myReactionSet, myId) {
     avatar: row.avatar,          // '✟' for anon
     avatarUrl: row.avatar_url || undefined, // uploaded profile photo (null for anon)
     time: relativeTime(row.created_at),
+    createdAt: row.created_at,           // cursor for infinite scroll
+
     community: row.community,
     body: row.body,
     img: row.img || undefined,

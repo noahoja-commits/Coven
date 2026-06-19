@@ -158,6 +158,9 @@ export default function App() {
   const [pinnedPostId, setPinnedPostId] = useLocalStorage('pinnedPostId', null);
   const [shrineTheme, setShrineTheme] = useLocalStorage('shrineTheme', 'oxblood');
   const [feedSort, setFeedSort] = useLocalStorage('feedSort', 'latest');
+  const [feedScope, setFeedScope] = useState('everyone'); // 'everyone' | 'following'
+  const [feedHasMore, setFeedHasMore] = useState(true);
+  const [feedLoadingMore, setFeedLoadingMore] = useState(false);
   const [divinationLog, setDivinationLog] = useLocalStorage('divinationLog', []);
   const [storyHighlights, setStoryHighlights] = useLocalStorage('storyHighlights', []);
 
@@ -226,7 +229,6 @@ export default function App() {
   useEffect(() => {
     if (!meId || !dbProfile) return;
     let active = true;
-    fetchFeed(meId).then(rows => { if (active) setPosts(rows); }).catch(() => {});
     fetchFollowing(meId).then(({ map, idByHandle, people }) => {
       if (!active) return;
       setFollowing(map);
@@ -278,6 +280,30 @@ export default function App() {
     }).catch(() => { cloudSyncedRef.current = true; });
     return () => { active = false; };
   }, [meId, dbProfile]);
+
+  // Feed: loads (and reloads on scope change) the first page, paginated by cursor.
+  useEffect(() => {
+    if (!meId || !dbProfile) return;
+    let active = true;
+    setFeedHasMore(true);
+    fetchFeed(meId, { scope: feedScope }).then(rows => {
+      if (!active) return;
+      setPosts(rows);
+      setFeedHasMore(rows.length >= 20);
+    }).catch(() => {});
+    return () => { active = false; };
+  }, [meId, dbProfile, feedScope]);
+
+  const loadMoreFeed = () => {
+    if (feedLoadingMore || !feedHasMore || !meId) return;
+    const last = [...posts].reverse().find(p => p.createdAt);
+    if (!last) return;
+    setFeedLoadingMore(true);
+    fetchFeed(meId, { scope: feedScope, before: last.createdAt }).then(more => {
+      setPosts(prev => { const seen = new Set(prev.map(p => p.id)); return [...prev, ...more.filter(p => !seen.has(p.id))]; });
+      setFeedHasMore(more.length >= 20);
+    }).catch(() => {}).finally(() => setFeedLoadingMore(false));
+  };
 
   // Persist the personal layer to the cloud (debounced) so it follows the user
   // across devices. Gated on cloudSyncedRef so we never clobber the cloud with
@@ -1008,6 +1034,10 @@ export default function App() {
         pinnedPostId={pinnedPostId}
         feedSort={feedSort}
         onSetFeedSort={setFeedSort}
+        feedScope={feedScope}
+        onSetFeedScope={setFeedScope}
+        onLoadMore={loadMoreFeed}
+        feedHasMore={feedHasMore}
         bookmarks={bookmarks}
         onToggleBookmark={toggleBookmark}
         postCandles={postCandles}
