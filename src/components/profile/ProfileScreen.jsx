@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Settings, Pencil, Plus, Heart, MoreHorizontal, ChevronRight, Music, X } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { TrackerGrid } from '../trackers/TrackerGrid';
 import { timeAgo, daysBetween, sunSign } from '../../data/helpers';
 import { ACHIEVEMENTS, earnedAchievements } from '../../data/achievements';
+import { fetchUserPosts } from '../../lib/db/posts';
+import { PostGrid } from './PostGrid';
 
 const SHRINE_THEMES = {
   oxblood: 'radial-gradient(ellipse at 50% 0%, #5B0F1A 0%, transparent 60%)',
@@ -18,6 +20,15 @@ export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpda
   const earnedIds = new Set(earned.map(a => a.id));
   const [showThemePicker, setShowThemePicker] = useState(false);
   const [tab, setTab] = useState('grid');
+  const [myPosts, setMyPosts] = useState([]);
+  const [postsLoading, setPostsLoading] = useState(true);
+  useEffect(() => {
+    let on = true;
+    if (!profile?.id) { setPostsLoading(false); return; }
+    setPostsLoading(true);
+    fetchUserPosts(profile.id).then(p => { if (on) { setMyPosts(p); setPostsLoading(false); } }).catch(() => { if (on) setPostsLoading(false); });
+    return () => { on = false; };
+  }, [profile?.id]);
   const [showAllAnniv, setShowAllAnniv] = useState(false);
 
   // Memento mori calc
@@ -437,22 +448,7 @@ export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpda
 
       {/* Grid */}
       {tab === 'grid' && (
-        <div className="grid grid-cols-3 gap-px bg-[#1A1A1A]">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} className="aspect-square relative overflow-hidden bg-[#0A0A0A]">
-              <div className="absolute inset-0" style={{
-                background: i % 3 === 0
-                  ? 'linear-gradient(135deg, #3B0A12 0%, #1A0408 70%, #0A0204 100%)'
-                  : i % 3 === 1
-                  ? 'linear-gradient(135deg, #2D0F3F 0%, #14081F 70%, #0A0410 100%)'
-                  : 'linear-gradient(135deg, #1F1F1F 0%, #0A0A0A 100%)'
-              }} />
-              <div className="absolute inset-0 flex items-center justify-center text-[#3F3F3F] text-3xl" style={F.display}>
-                {['✟', '⚱', '☩', '⛧', '✦', '☽'][i % 6]}
-              </div>
-            </div>
-          ))}
-        </div>
+        <PostGrid posts={myPosts} loading={postsLoading} emptyText="you haven't posted yet" onOpen={onOpenComments} />
       )}
       {tab === 'saved' && (
         bookmarks.length === 0 ? (

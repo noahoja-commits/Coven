@@ -53,6 +53,18 @@ export async function fetchFeed(myId, { scope = 'everyone', before = null, limit
   return posts;
 }
 
+// A user's own posts (newest first) for their profile grid — lightweight shape.
+export async function fetchUserPosts(authorId, { limit = 60 } = {}) {
+  const { data, error } = await supabase
+    .from('feed_posts')
+    .select('id, kind, img, body, community, created_at')
+    .eq('author_id_public', authorId)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return (data || []).map(r => ({ id: r.id, kind: r.kind, img: r.img || null, body: r.body || '', community: r.community }));
+}
+
 // Cast or change a poll vote (one row per user per poll).
 export async function castPollVote(postId, optionId, userId) {
   const { error } = await supabase.from('poll_votes')

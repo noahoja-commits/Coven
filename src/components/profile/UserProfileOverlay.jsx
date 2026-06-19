@@ -2,24 +2,29 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, MessageCircle, UserPlus, UserCheck, VolumeX, Volume2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { getProfileByHandle, getProfileStats } from '../../lib/db/profiles';
-import { Reaction } from '../shared/Reaction';
-import { PostImage } from '../shared/Visuals';
+import { fetchUserPosts } from '../../lib/db/posts';
+import { PostGrid } from './PostGrid';
 
 export function UserProfileOverlay({ handle, posts = [], isFollowing, isMuted, onToggleFollow, onToggleMute, onWhisper, onClose, onOpenComments, onReact }) {
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState({ followers: 0, following: 0, posts: 0 });
   const [loading, setLoading] = useState(true);
+  const [gridPosts, setGridPosts] = useState([]);
+  const [postsLoading, setPostsLoading] = useState(true);
   const theirPosts = posts.filter(p => p.user === handle);
 
   useEffect(() => {
     let on = true;
-    setLoading(true);
+    setLoading(true); setPostsLoading(true);
     getProfileByHandle(handle).then(p => {
       if (!on) return;
       setProfile(p);
       setLoading(false);
-      if (p?.id) getProfileStats(p.id).then(s => { if (on) setStats(s); }).catch(() => {});
-    }).catch(() => { if (on) setLoading(false); });
+      if (p?.id) {
+        getProfileStats(p.id).then(s => { if (on) setStats(s); }).catch(() => {});
+        fetchUserPosts(p.id).then(gp => { if (on) { setGridPosts(gp); setPostsLoading(false); } }).catch(() => { if (on) setPostsLoading(false); });
+      } else { setPostsLoading(false); }
+    }).catch(() => { if (on) { setLoading(false); setPostsLoading(false); } });
     return () => { on = false; };
   }, [handle]);
 
@@ -99,34 +104,8 @@ export function UserProfileOverlay({ handle, posts = [], isFollowing, isMuted, o
         </div>
       </div>
 
-      {/* Posts */}
-      <div className="divide-y divide-[#1A1A1A]">
-        {theirPosts.length === 0 ? (
-          <div className="px-4 py-16 text-center text-[#6B6B6B] text-sm italic" style={F.serif}>· silent so far ·</div>
-        ) : theirPosts.map(post => (
-          <article key={post.id} className="px-4 py-4">
-            <div className="flex items-baseline gap-2 text-[10px] text-[#6B6B6B] mb-2" style={F.ui}>
-              <span style={F.mono} className="text-xs">{post.time}</span>
-              <span>·</span>
-              <span className="uppercase tracking-wider">#{post.community}</span>
-            </div>
-            {post.body && <p className="text-[#F5F1E8] text-[15px] leading-relaxed mb-3" style={F.serif}>{post.body}</p>}
-            {post.kind === 'photo' && <div className="mb-3"><PostImage kind={post.img} /></div>}
-            <div className="flex items-center justify-between -ml-2">
-              <div className="flex items-center">
-                <Reaction icon="🦇" count={post.reactions.bat} active={post.myReactions?.bat} onClick={() => onReact && onReact(post.id, 'bat')} />
-                <Reaction icon="🔥" count={post.reactions.fire} active={post.myReactions?.fire} onClick={() => onReact && onReact(post.id, 'fire')} />
-                <Reaction icon="💀" count={post.reactions.skull} active={post.myReactions?.skull} onClick={() => onReact && onReact(post.id, 'skull')} />
-                <Reaction icon="💨" count={post.reactions.smoke} active={post.myReactions?.smoke} onClick={() => onReact && onReact(post.id, 'smoke')} />
-              </div>
-              <button onClick={() => onOpenComments && onOpenComments(post.id)}
-                className="text-[10px] text-[#6B6B6B] hover:text-[#A8A29E] uppercase tracking-wider px-2 py-1" style={F.ui}>
-                comments
-              </button>
-            </div>
-          </article>
-        ))}
-      </div>
+      {/* Posts grid */}
+      <PostGrid posts={gridPosts} loading={postsLoading} emptyText="· silent so far ·" onOpen={(id) => onOpenComments && onOpenComments(id)} />
     </div>
   );
 }
