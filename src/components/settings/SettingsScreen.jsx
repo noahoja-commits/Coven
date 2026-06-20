@@ -82,7 +82,7 @@ export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOn
           <Row label="Weather mood" desc="tint the app with the weather outside.">
             <Toggle on={settings.weatherMood} onChange={v => set('weatherMood', v)} />
           </Row>
-          <Row label="Sound on" desc="ambient track when you tap the Coven 3 times.">
+          <Row label="Sound on" desc="a low ambient drone while you wander.">
             <Toggle on={settings.soundOn} onChange={v => set('soundOn', v)} />
           </Row>
         </Section>

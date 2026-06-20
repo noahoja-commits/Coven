@@ -29,6 +29,8 @@ import { ChatThread } from './components/shared/ChatThread';
 import { ComposeOverlay } from './components/shared/ComposeOverlay';
 import { NotificationsPanel } from './components/shared/NotificationsPanel';
 import { GrainOverlay } from './components/shared/Visuals';
+import { startAmbient, stopAmbient } from './lib/ambient';
+import { fetchWeatherTint } from './lib/weather';
 import { InstallPrompt } from './components/shared/InstallPrompt';
 
 import { HomeScreen } from './components/feed/HomeScreen';
@@ -95,6 +97,7 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [toast, setToast] = useState(null);
   const [pushState, setPushState] = useState('off');
+  const [weatherTint, setWeatherTint] = useState(null); // {color,opacity} when Weather mood is on
   const [showTonightModal, setShowTonightModal] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [activeStoryIndex, setActiveStoryIndex] = useState(null);
@@ -188,6 +191,27 @@ export default function App() {
     if (settings.parchmentMode) document.body.classList.add('parchment-mode');
     else document.body.classList.remove('parchment-mode');
   }, [settings.parchmentMode]);
+
+  // Ambient drone follows the "Sound on" toggle (the toggle click is the gesture
+  // browsers require to start audio). Always stop on unmount.
+  useEffect(() => {
+    if (settings.soundOn) startAmbient();
+    else stopAmbient();
+    return () => stopAmbient();
+  }, [settings.soundOn]);
+
+  // Weather mood: when enabled, get location + current conditions -> a tint.
+  // Only requests geolocation here (on toggle-on), never on load.
+  useEffect(() => {
+    let active = true;
+    if (!settings.weatherMood) { setWeatherTint(null); return undefined; }
+    fetchWeatherTint().then(t => {
+      if (!active) return;
+      if (t) setWeatherTint(t);
+      else { setWeatherTint(null); showToast("couldn't read your local weather — check location access.", 'error'); }
+    });
+    return () => { active = false; };
+  }, [settings.weatherMood]);
 
   // Lock body scroll when a modal overlay is open
   useEffect(() => {
@@ -1226,6 +1250,15 @@ export default function App() {
           background: settings.parchmentMode
             ? 'radial-gradient(ellipse at center, transparent 60%, rgba(58, 34, 12, 0.25) 100%)'
             : 'radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.55) 100%)'
+        }} />
+      )}
+
+      {/* Weather mood — subtle tint derived from the live local weather */}
+      {settings.weatherMood && weatherTint && !isInsideOverlay && (
+        <div className="absolute inset-0 pointer-events-none z-10" style={{
+          background: weatherTint.color,
+          opacity: weatherTint.opacity,
+          mixBlendMode: 'soft-light',
         }} />
       )}
 
