@@ -7,6 +7,49 @@ for Stripe payments and web push. Live at **project-tuihx.vercel.app**.
 > This file is the shared brain for everyone working here (humans + their Claude Code).
 > Keep it committed and up to date. **Never put secrets in this file** — it's in git.
 
+> **Note to Claude:** a collaborator on this repo may be new to coding/git. Explain your
+> reasoning in plain language, prefer small reversible steps, and confirm before anything
+> that touches the shared production database, Stripe, env vars, or `main`.
+
+## New here? Start with this (especially if you're new to coding)
+
+Welcome. You don't need to be an expert — Claude Code does the heavy lifting. Your job is to
+**describe what you want in plain English, review what Claude does, and follow a few safety rules
+so nobody's work gets lost.** Read this once; it'll save you a lot of confusion.
+
+**The one mental model:** `main` is the live website (real users, real money). You never edit it
+directly. You make a **copy (a "branch")**, do your work there, and open a **Pull Request (PR)** to
+merge it back after a quick review. Branches are cheap and safe — breaking your own branch is fine,
+that's what it's for. Breaking `main` is what we're avoiding.
+
+**Your normal day, step by step:**
+```
+git checkout main && git pull origin main     # get everyone's latest work
+git checkout -b feature/short-name             # make your own branch to work on
+# ...ask Claude to make the change, then TRY IT: npm run dev, open it, click around...
+git add -A && git commit -m "what you did"     # save a checkpoint
+git push origin feature/short-name             # upload your branch
+# then open a Pull Request on GitHub and tell your partner to review it
+```
+
+**Golden rules (when in doubt, stop and ask your partner):**
+- **Always work on a branch, never commit straight to `main`.**
+- **Before opening a PR, actually run the app** (`npm run dev`) and confirm your change works and the
+  page isn't broken — a successful build is NOT proof it works.
+- **Never share or commit secrets/passwords/keys.** If Claude or anyone asks you to paste a key into
+  the code, that's wrong — stop.
+- **Don't touch the database, Stripe, or environment variables on your own.** These are *shared and
+  live* — one wrong move affects everyone. Always coordinate with your partner first.
+- **`git pull` before you start each session** so you're building on the latest code.
+- **If something looks scary or git complains, don't force it** — paste the message to Claude or your
+  partner and ask. Almost nothing is unrecoverable if you stop early; forcing things is what causes loss.
+
+**Working well with Claude Code:**
+- Tell it the goal, not the steps ("add a back button to the events screen" beats "edit line 40").
+- Ask it to **explain** anything you don't understand — "why did you change this?" is a great question.
+- Ask it to **verify** its work (run the app, run a check) before you trust it.
+- Small changes are easier to review and safer than giant ones. Prefer many small PRs.
+
 ## Stack
 - **Frontend:** React 18 + Vite 5 + Tailwind 3 + lucide-react. PWA via `vite-plugin-pwa` (Workbox).
 - **Backend:** Supabase (Postgres, Row-Level Security, Auth = email+password, Realtime, Storage).
