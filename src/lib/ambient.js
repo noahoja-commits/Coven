@@ -16,26 +16,30 @@ function build() {
   master.gain.value = 0;            // start silent; fade in on start
   master.connect(ctx.destination);
 
-  // Gentle lowpass the whole drone runs through, slowly swept by an LFO.
+  // Lowpass the whole drone runs through, slowly swept by an LFO. Cutoff is kept
+  // high enough that the midrange passes — otherwise it's inaudible on phone/laptop
+  // speakers (which can't reproduce deep bass).
   const lp = ctx.createBiquadFilter();
   lp.type = 'lowpass';
-  lp.frequency.value = 320;
-  lp.Q.value = 0.7;
+  lp.frequency.value = 900;
+  lp.Q.value = 0.6;
   lp.connect(master);
 
   const lfo = ctx.createOscillator();
   const lfoGain = ctx.createGain();
-  lfo.frequency.value = 0.05;       // very slow sweep
-  lfoGain.gain.value = 140;         // +/- Hz on the cutoff
+  lfo.frequency.value = 0.06;       // very slow sweep
+  lfoGain.gain.value = 400;         // +/- Hz on the cutoff
   lfo.connect(lfoGain);
   lfoGain.connect(lp.frequency);
   lfo.start();
 
-  // Detuned low oscillators = a thick drone.
+  // Detuned oscillators = a thick drone. Pitched into an audible range (~110-330Hz)
+  // with a low sub for body, so it's actually hearable on small speakers.
   const voices = [
-    { freq: 55, type: 'sine', gain: 0.5 },
-    { freq: 55 * 1.5, type: 'sine', gain: 0.28 },   // a fifth
-    { freq: 82.4, type: 'triangle', gain: 0.18 },   // subtle upper body
+    { freq: 55, type: 'sine', gain: 0.30 },         // sub body (felt more than heard)
+    { freq: 110, type: 'sine', gain: 0.50 },        // fundamental — clearly audible
+    { freq: 110 * 1.5, type: 'sine', gain: 0.34 },  // a fifth (165Hz)
+    { freq: 220, type: 'triangle', gain: 0.22 },    // upper body / presence
   ];
   voices.forEach((v, i) => {
     const osc = ctx.createOscillator();
@@ -65,7 +69,7 @@ export function startAmbient() {
     const now = ctx.currentTime;
     master.gain.cancelScheduledValues(now);
     master.gain.setValueAtTime(master.gain.value, now);
-    master.gain.linearRampToValueAtTime(0.09, now + 0.8); // subtle target
+    master.gain.linearRampToValueAtTime(0.16, now + 0.8); // audible but ambient
     running = true;
   } catch { /* audio unavailable — fail silent */ }
 }

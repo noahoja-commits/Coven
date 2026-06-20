@@ -17,19 +17,20 @@ function getPosition() {
   });
 }
 
-// WMO weather_code (+ day/night) -> subtle tint. Low opacity, soft-light blend.
+// WMO weather_code (+ day/night) -> tint { color, opacity, label }. soft-light blend.
+// Opacities kept noticeable (subtle was imperceptible on the dark UI).
 export function tintForCode(code, isDay) {
   const night = !isDay;
   if (code === 0 || code === 1) {                     // clear / mainly clear
-    return night ? { color: '#1B1145', opacity: 0.16 } : { color: '#C9A961', opacity: 0.10 };
+    return night ? { color: '#2A1C6E', opacity: 0.30, label: 'clear night 🌙' } : { color: '#E8C45A', opacity: 0.22, label: 'clear skies ☀' };
   }
-  if (code === 2) return { color: night ? '#241B3A' : '#8A8AA0', opacity: 0.12 };  // partly cloudy
-  if (code === 3) return { color: '#5A5A66', opacity: 0.16 };                       // overcast
-  if (code === 45 || code === 48) return { color: '#6B6B6B', opacity: 0.18 };       // fog
-  if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return { color: '#2E4A6B', opacity: 0.18 }; // rain/drizzle
-  if ((code >= 71 && code <= 77) || code === 85 || code === 86) return { color: '#AEC2D6', opacity: 0.16 };  // snow
-  if (code >= 95) return { color: '#3A1A55', opacity: 0.20 };                       // thunderstorm
-  return { color: '#5A5A66', opacity: 0.12 };                                       // fallback
+  if (code === 2) return { color: night ? '#322657' : '#9A9AB5', opacity: 0.26, label: 'partly cloudy ⛅' };
+  if (code === 3) return { color: '#6E6E7E', opacity: 0.30, label: 'overcast ☁' };
+  if (code === 45 || code === 48) return { color: '#8A8A8A', opacity: 0.32, label: 'fog 🌫' };
+  if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return { color: '#3E6FA8', opacity: 0.34, label: 'rain 🌧' };
+  if ((code >= 71 && code <= 77) || code === 85 || code === 86) return { color: '#C5D8EC', opacity: 0.30, label: 'snow ❄' };
+  if (code >= 95) return { color: '#5A2A85', opacity: 0.38, label: 'thunderstorm ⛈' };
+  return { color: '#6E6E7E', opacity: 0.24, label: 'weather' };                     // fallback
 }
 
 // Returns { color, opacity, code } or null (permission denied / error / unsupported).

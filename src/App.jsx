@@ -193,10 +193,14 @@ export default function App() {
   }, [settings.parchmentMode]);
 
   // Ambient drone follows the "Sound on" toggle (the toggle click is the gesture
-  // browsers require to start audio). Always stop on unmount.
+  // browsers require to start audio). Always stop on unmount. Skip the toast on the
+  // initial mount so a persisted "on" doesn't pop a toast at load.
+  const soundMounted = useRef(false);
   useEffect(() => {
     if (settings.soundOn) startAmbient();
     else stopAmbient();
+    if (soundMounted.current) showToast(settings.soundOn ? 'ambient drone on 🔊' : 'ambient off');
+    soundMounted.current = true;
     return () => stopAmbient();
   }, [settings.soundOn]);
 
@@ -205,10 +209,11 @@ export default function App() {
   useEffect(() => {
     let active = true;
     if (!settings.weatherMood) { setWeatherTint(null); return undefined; }
+    showToast('reading your local weather…');
     fetchWeatherTint().then(t => {
       if (!active) return;
-      if (t) setWeatherTint(t);
-      else { setWeatherTint(null); showToast("couldn't read your local weather — check location access.", 'error'); }
+      if (t) { setWeatherTint(t); showToast(`weather mood: ${t.label}`); }
+      else { setWeatherTint(null); showToast("couldn't read your local weather — allow location access, then toggle again.", 'error'); }
     });
     return () => { active = false; };
   }, [settings.weatherMood]);
