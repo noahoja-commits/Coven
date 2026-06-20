@@ -19,8 +19,8 @@ export function CovenMenu({ onClose, onOpen }) {
       style={{ background: 'radial-gradient(ellipse at 50% 50%, #14080C 0%, #050204 70%)' }}>
       <div className="absolute inset-0 opacity-[0.04] mix-blend-overlay pointer-events-none"
         style={{ backgroundImage: 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><filter id=\'n\'><feTurbulence baseFrequency=\'0.85\'/></filter><rect width=\'200\' height=\'200\' filter=\'url(%23n)\'/></svg>")' }} />
-      <button onClick={onClose} className="absolute top-4 right-4 z-20 text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors"><X size={20} /></button>
-      <div className="absolute inset-0 flex flex-col items-center justify-center px-6">
+      <button onClick={onClose} className="absolute top-4 right-4 z-20 text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors safe-pt"><X size={20} /></button>
+      <div className="absolute inset-0 flex flex-col items-center justify-center px-6 safe-pt safe-pb overflow-y-auto">
         <div className="text-center mb-10 animate-fade-in">
           <div className="text-[#A89968] text-[10px] uppercase tracking-[0.5em] mb-3" style={F.scriptureSC}>· enter the ·</div>
           <h1 className="text-[#C9A961] text-5xl mb-3" style={F.brand}>Coven</h1>

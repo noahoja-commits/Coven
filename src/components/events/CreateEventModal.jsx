@@ -53,7 +53,7 @@ export function CreateEventModal({ onCreate, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center animate-fade-in">
-      <div className="bg-[#0F0F0F] border border-[#2A2A2A] w-full sm:max-w-md sm:m-4 max-h-[92vh] flex flex-col animate-slide-up">
+      <div className="bg-[#0F0F0F] border border-[#2A2A2A] w-full sm:max-w-md sm:m-4 max-h-[92vh] flex flex-col animate-slide-up safe-pb">
         <div className="px-4 h-[60px] flex items-center justify-between border-b border-[#1A1A1A] shrink-0">
           <div className="text-[#F5F1E8] text-base tracking-[0.25em]" style={F.display}>HOST A RITE</div>
           <button onClick={onClose} className="p-2 -m-1 text-[#A8A29E] hover:text-[#F5F1E8] transition-colors"><X size={20} /></button>

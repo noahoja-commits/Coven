@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Send, Check, CheckCheck } from 'lucide-react';
 import { F } from '../../styles/fonts';
 
-export function ChatThread({ conversation, messages, onSend, onBack }) {
+export function ChatThread({ conversation, messages, onSend, onBack, onRetry }) {
   const [draft, setDraft] = useState('');
   const [seenAt, setSeenAt] = useState(null); // simulated remote read after delay
   const scrollRef = useRef(null);
@@ -61,9 +61,10 @@ export function ChatThread({ conversation, messages, onSend, onBack }) {
                 <div className="text-[10px] text-[#6B6B6B] mb-0.5 ml-1" style={F.mono}>{m.from}</div>
               )}
               <div
-                className={`max-w-[78%] px-3 py-2 text-sm break-words ${
+                onClick={() => m.failed && onRetry && onRetry(m.id)}
+                className={`max-w-[78%] px-3 py-2 text-sm break-words ${m.failed ? 'cursor-pointer' : ''} ${
                   mine
-                    ? 'bg-[#8B0000] text-[#F5F1E8] rounded-l-2xl rounded-tr-2xl rounded-br-md'
+                    ? `text-[#F5F1E8] rounded-l-2xl rounded-tr-2xl rounded-br-md ${m.failed ? 'bg-[#3a0d0d] border border-[#8B0000]' : m.pending ? 'bg-[#8B0000]/60' : 'bg-[#8B0000]'}`
                     : 'bg-[#141414] text-[#F5F1E8] border border-[#2A2A2A] rounded-r-2xl rounded-tl-2xl rounded-bl-md'
                 }`}
                 style={F.serif}
@@ -71,11 +72,15 @@ export function ChatThread({ conversation, messages, onSend, onBack }) {
                 {m.body}
               </div>
               <div className="text-[9px] text-[#6B6B6B] mt-0.5 px-1 flex items-center gap-1" style={F.mono}>
-                {m.time}
-                {mine && isLast && (
-                  seen ? <span className="text-[#C9A961] flex items-center gap-0.5"><CheckCheck size={10} /> seen</span>
-                       : <Check size={10} />
-                )}
+                {m.failed ? (
+                  <span className="text-[#C97a7a]">failed — tap to retry</span>
+                ) : <>
+                  {m.time}
+                  {mine && isLast && (
+                    seen ? <span className="text-[#C9A961] flex items-center gap-0.5"><CheckCheck size={10} /> seen</span>
+                         : <Check size={10} />
+                  )}
+                </>}
               </div>
             </div>
           );
@@ -83,7 +88,7 @@ export function ChatThread({ conversation, messages, onSend, onBack }) {
       </div>
 
       {/* Composer */}
-      <div className="border-t border-[#1A1A1A] bg-[#0A0A0A] px-3 py-2 pb-3">
+      <div className="border-t border-[#1A1A1A] bg-[#0A0A0A] px-3 py-2 pb-3 safe-pb">
         <div className="flex items-end gap-2">
           <div className="flex-1 bg-[#141414] border border-[#2A2A2A] rounded-2xl px-3 py-2">
             <textarea

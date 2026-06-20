@@ -31,7 +31,7 @@ export function OddityCompose({ meId, onClose, onCreate }) {
 
   return (
     <div className="absolute inset-0 z-50 bg-[#0A0608] animate-fade-in flex flex-col">
-      <div className="bg-black/60 backdrop-blur-md border-b border-[#5B0F1A]/40">
+      <div className="bg-black/60 backdrop-blur-md border-b border-[#5B0F1A]/40 safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
           <button onClick={() => step > 1 ? setStep(step - 1) : onClose()} className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors">
             <X size={20} />
@@ -43,7 +43,7 @@ export function OddityCompose({ meId, onClose, onCreate }) {
           </button>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-4 safe-pb">
         {step === 1 && (
           <div className="space-y-4">
             <div>

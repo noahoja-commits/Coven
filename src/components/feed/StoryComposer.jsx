@@ -44,7 +44,7 @@ export function StoryComposer({ meId, onClose, onPost }) {
 
   return (
     <div className="fixed inset-0 z-[55] bg-black flex flex-col animate-fade-in">
-      <div className="bg-black/60 backdrop-blur-md border-b border-white/10 z-10">
+      <div className="bg-black/60 backdrop-blur-md border-b border-white/10 z-10 safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
           <button onClick={onClose} className="text-white/80 hover:text-white p-2 -m-1 transition-colors"><X size={20} /></button>
           <div className="text-white text-sm tracking-[0.3em]" style={F.display}>YOUR STORY</div>
@@ -73,7 +73,7 @@ export function StoryComposer({ meId, onClose, onPost }) {
       </div>
 
       {/* Controls */}
-      <div className="bg-black/80 backdrop-blur-md border-t border-white/10 p-4 space-y-3">
+      <div className="bg-black/80 backdrop-blur-md border-t border-white/10 p-4 space-y-3 safe-pb">
         {error && <div className="text-[11px] text-[#FF6B6B] text-center" style={F.ui}>{error}</div>}
         <div className="flex items-center gap-2">
           <input

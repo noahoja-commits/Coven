@@ -38,14 +38,14 @@ export function LibraryOverlay({ onClose, onOpenText }) {
       style={{ background: 'radial-gradient(ellipse at 50% 30%, #2A1808 0%, #0A0408 65%, #050204 100%)' }}>
       <div className="absolute inset-0 opacity-[0.04] mix-blend-overlay pointer-events-none"
         style={{ backgroundImage: 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><filter id=\'n\'><feTurbulence baseFrequency=\'0.85\'/></filter><rect width=\'200\' height=\'200\' filter=\'url(%23n)\'/></svg>")' }} />
-      <div className="absolute top-0 inset-x-0 z-10 bg-black/60 backdrop-blur-md border-b border-[#5C3A1A]/40">
+      <div className="absolute top-0 inset-x-0 z-10 bg-black/60 backdrop-blur-md border-b border-[#5C3A1A]/40 safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
           <button onClick={onClose} className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors"><X size={20} /></button>
           <div className="text-[#C9A961] text-base tracking-[0.3em]" style={F.scriptureSC}>THE LIBRARY</div>
           <BookOpen size={18} className="text-[#A89968]" />
         </div>
       </div>
-      <div className="absolute inset-0 pt-[60px] pb-8 overflow-y-auto">
+      <div className="absolute inset-0 pt-[60px] pb-8 overflow-y-auto safe-pb">
         <div className="px-4 py-6 text-center">
           <div className="text-[#A89968] text-[10px] uppercase tracking-[0.4em] mb-3" style={F.scriptureSC}>· of the wisdoms gathered ·</div>
           <h1 className="text-[#C9A961] text-3xl mb-2" style={F.scripture}>The Library</h1>

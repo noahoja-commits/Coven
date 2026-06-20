@@ -23,8 +23,8 @@ export function TicketManager({ event, onClose, onEditVenueMap }) {
   const money = (c) => `$${(c / 100) % 1 === 0 ? (c / 100).toFixed(0) : (c / 100).toFixed(2)}`;
 
   return (
-    <div className="absolute inset-0 z-50 bg-[#0A0A0A] animate-slide-in-right overflow-y-auto">
-      <div className="sticky top-0 z-10 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A]">
+    <div className="absolute inset-0 z-50 bg-[#0A0A0A] animate-slide-in-right overflow-y-auto safe-pb">
+      <div className="sticky top-0 z-10 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A] safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
           <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
           <div className="text-[#F5F1E8] text-sm tracking-[0.25em]" style={F.display}>DOOR</div>

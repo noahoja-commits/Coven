@@ -173,7 +173,7 @@ export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, listings = [
       <div className="absolute inset-0 opacity-[0.05] mix-blend-overlay pointer-events-none"
         style={{ backgroundImage: 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><filter id=\'n\'><feTurbulence baseFrequency=\'0.85\'/></filter><rect width=\'200\' height=\'200\' filter=\'url(%23n)\'/></svg>")' }} />
       <div className="relative h-full flex flex-col">
-        <div className="bg-black/60 backdrop-blur-md border-b border-[#5B0F1A]/40">
+        <div className="bg-black/60 backdrop-blur-md border-b border-[#5B0F1A]/40 safe-pt">
           <div className="px-4 h-[60px] flex items-center justify-between">
             <button onClick={onClose} className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors"><X size={20} /></button>
             <div className="text-[#C9A961] text-base tracking-[0.3em]" style={F.scriptureSC}>ODDITIES</div>
@@ -201,7 +201,7 @@ export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, listings = [
               style={F.ui}>{t.label}</button>
           ))}
         </div>
-        <div className="flex-1 overflow-y-auto pt-3">
+        <div className="flex-1 overflow-y-auto pt-3 safe-pb">
           {tab === 'market' && (<>
             <div className="px-4 pt-2 pb-3 text-center">
               <div className="text-[#A89968] text-[10px] uppercase tracking-[0.4em] mb-2" style={F.scriptureSC}>· of curiosities & wares ·</div>

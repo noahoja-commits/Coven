@@ -61,8 +61,8 @@ export function VenueMapEditor({ event, me, onClose, onSaved }) {
   };
 
   return (
-    <div className="absolute inset-0 z-50 bg-[#0A0A0A] animate-slide-in-right overflow-y-auto pb-28">
-      <div className="sticky top-0 z-10 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A] px-4 h-[60px] flex items-center gap-3">
+    <div className="absolute inset-0 z-50 bg-[#0A0A0A] animate-slide-in-right overflow-y-auto pb-28 safe-pb">
+      <div className="sticky top-0 z-10 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A] px-4 h-[60px] flex items-center gap-3 safe-pt">
         <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1"><ArrowLeft size={20} /></button>
         <div className="flex-1">
           <div className="text-[#F5F1E8] text-base tracking-[0.2em]" style={F.display}>VENUE MAP</div>
@@ -138,7 +138,7 @@ export function VenueMapEditor({ event, me, onClose, onSaved }) {
         )}
       </div>
 
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md p-4 bg-gradient-to-t from-[#0A0A0A] to-transparent">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md p-4 bg-gradient-to-t from-[#0A0A0A] to-transparent safe-pb">
         <button onClick={save} disabled={saving}
           className="w-full py-3 border border-[#8B0000] bg-[#8B0000]/20 text-[#F5F1E8] text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 disabled:opacity-50" style={F.ui}>
           {saved ? <><Check size={14} /> saved</> : saving ? 'saving…' : 'save venue map'}

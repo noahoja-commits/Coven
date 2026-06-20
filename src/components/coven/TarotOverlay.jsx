@@ -81,12 +81,12 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
     .sort((a, b) => b.date.localeCompare(a.date));
 
   return (
-    <div className="absolute inset-0 z-30 overflow-y-auto"
+    <div className="absolute inset-0 z-30 overflow-y-auto safe-pb"
       style={{ background: 'radial-gradient(ellipse at 50% 30%, #14080C 0%, #050204 80%)' }}>
       <div className="absolute inset-0 opacity-[0.04] mix-blend-overlay pointer-events-none"
         style={{ backgroundImage: 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><filter id=\'n\'><feTurbulence baseFrequency=\'0.85\'/></filter><rect width=\'200\' height=\'200\' filter=\'url(%23n)\'/></svg>")' }} />
 
-      <div className="sticky top-0 z-10 bg-[#050204]/95 backdrop-blur-md border-b border-[#A89968]/15">
+      <div className="sticky top-0 z-10 bg-[#050204]/95 backdrop-blur-md border-b border-[#A89968]/15 safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
           <button onClick={onClose} className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
           <div className="text-[#C9A961] text-base tracking-[0.3em]" style={F.display}>THE DECK</div>

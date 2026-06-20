@@ -57,7 +57,7 @@ export function ComposeOverlay({ meId, onClose, onPost }) {
 
   return (
     <div className="absolute inset-0 z-30 bg-[#0A0A0A] flex flex-col animate-fade-in">
-      <div className="bg-[#0A0A0A] border-b border-[#1A1A1A]">
+      <div className="bg-[#0A0A0A] border-b border-[#1A1A1A] safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
           <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
           <div className="text-[#F5F1E8] text-sm tracking-[0.25em]" style={F.display}>NEW POST</div>
@@ -109,7 +109,7 @@ export function ComposeOverlay({ meId, onClose, onPost }) {
           )}
         </div>
         {error && <div className="px-4 py-2 text-[11px] text-[#8B0000] text-center" style={F.ui}>{error}</div>}
-        <div className="border-t border-[#1A1A1A] px-4 py-3 flex items-center gap-4">
+        <div className={`border-t border-[#1A1A1A] px-4 py-3 flex items-center gap-4 ${anonymous ? '' : 'safe-pb'}`}>
           <input ref={fileRef} type="file" accept="image/*" onChange={onPickImage} className="hidden" />
           <button onClick={() => fileRef.current?.click()} disabled={!!poll}
             className={`${imgPreview ? 'text-[#C9A961]' : 'text-[#A8A29E] hover:text-[#F5F1E8]'} disabled:opacity-30`} title="add a photo"><ImageIcon size={18} /></button>
@@ -123,7 +123,7 @@ export function ComposeOverlay({ meId, onClose, onPost }) {
           <span className="ml-auto text-[10px] text-[#6B6B6B]" style={F.mono}>{text.length}</span>
         </div>
         {anonymous && (
-          <div className="px-4 py-2 bg-[#7B2CBF]/10 border-t border-[#7B2CBF]/30 text-[10px] text-[#A89968] text-center" style={F.serif}>
+          <div className="px-4 py-2 bg-[#7B2CBF]/10 border-t border-[#7B2CBF]/30 text-[10px] text-[#A89968] text-center safe-pb" style={F.serif}>
             · posted as <span className="text-[#7B2CBF]">anonymous · the confessor</span> ·
           </div>
         )}

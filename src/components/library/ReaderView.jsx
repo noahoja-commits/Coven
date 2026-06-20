@@ -48,7 +48,7 @@ export function ReaderView({ textId, onBack, marginalia = [], onAddMarginalia, o
       <div className="absolute inset-0 pointer-events-none" style={{
         background: 'radial-gradient(ellipse at 50% 50%, transparent 50%, rgba(58, 34, 12, 0.25) 100%)'
       }} />
-      <div className="absolute top-0 inset-x-0 z-10 bg-[#EDE0C2]/85 backdrop-blur-sm border-b border-[#8B6B4A]/30">
+      <div className="absolute top-0 inset-x-0 z-10 bg-[#EDE0C2]/85 backdrop-blur-sm border-b border-[#8B6B4A]/30 safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
           <button onClick={onBack} className="text-[#5B0F1A] flex items-center gap-1 p-2 -m-1 transition-colors" style={F.scriptureSC}>
             <ChevronLeft size={20} /><span className="text-xs uppercase tracking-wider">Library</span>
@@ -57,7 +57,7 @@ export function ReaderView({ textId, onBack, marginalia = [], onAddMarginalia, o
           <span className="w-9" />
         </div>
       </div>
-      <div className="absolute inset-0 pt-[60px] overflow-y-auto">
+      <div className="absolute inset-0 pt-[60px] overflow-y-auto safe-pb">
         <div className="max-w-2xl mx-auto px-6 sm:px-8 py-8">
           <div className="text-center mb-8">
             <div className="text-[#8B6B4A] text-[11px] uppercase tracking-[0.4em] mb-3" style={F.scriptureSC}>· {text.title} ·</div>

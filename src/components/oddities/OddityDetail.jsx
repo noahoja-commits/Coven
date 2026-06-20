@@ -18,8 +18,8 @@ export function OddityDetail({ item, onBack, onWhisper, onOpenUser }) {
   return (
     <div className="absolute inset-0 z-50 bg-[#0A0608] animate-fade-in">
       <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 0%, #2A0710 0%, #0A0408 60%, #050204 100%)' }} />
-      <div className="absolute inset-0 overflow-y-auto pb-32">
-        <div className="absolute top-0 inset-x-0 z-10 bg-black/60 backdrop-blur-md border-b border-[#5B0F1A]/40">
+      <div className="absolute inset-0 overflow-y-auto pb-32 safe-pb">
+        <div className="absolute top-0 inset-x-0 z-10 bg-black/60 backdrop-blur-md border-b border-[#5B0F1A]/40 safe-pt">
           <div className="px-4 h-[60px] flex items-center justify-between">
             <button onClick={onBack} className="text-[#A89968] hover:text-[#C9A961] flex items-center gap-1 p-2 -m-1 transition-colors" style={F.ui}>
               <ChevronLeft size={20} /><span className="text-xs uppercase tracking-wider">oddities</span>
@@ -60,7 +60,7 @@ export function OddityDetail({ item, onBack, onWhisper, onOpenUser }) {
         </div>
       </div>
       {!item.mine && (
-        <div className="absolute bottom-0 inset-x-0 z-20 bg-[#0A0608]/95 backdrop-blur-md border-t border-[#2A2A2A] p-3">
+        <div className="absolute bottom-0 inset-x-0 z-20 bg-[#0A0608]/95 backdrop-blur-md border-t border-[#2A2A2A] p-3 safe-pb">
           <button onClick={() => onWhisper && onWhisper(seller.user)}
             className="w-full py-3 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-colors" style={F.ui}>
             <MessageCircle size={14} /> whisper the seller

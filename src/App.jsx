@@ -94,6 +94,10 @@ export default function App() {
   const [community, setCommunity] = useState(null);
   const [showDMs, setShowDMs] = useState(false);
   const [activeConversation, setActiveConversation] = useState(null);
+  // Best-known meta for the open thread so it renders even before the inbox
+  // (fetchConversations) has caught up — e.g. opening from a DM notification or
+  // a brand-new conversation. Without this the thread renders blank (no reply box).
+  const [activeConvMeta, setActiveConvMeta] = useState(null);
   const [showCompose, setShowCompose] = useState(false);
   const [showNotifs, setShowNotifs] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -398,7 +402,13 @@ export default function App() {
       fetchConversations().then(setConversations).catch(() => {});
       const openId = activeConversationRef.current;
       if (openId && row.conversation_id === openId) {
-        fetchDMMessages(openId, meId).then(msgs => setMessages(prev => ({ ...prev, [openId]: msgs }))).catch(() => {});
+        // Re-fetch for correct handles/order, but keep any still-in-flight or
+        // failed local messages so a refetch never clobbers what the user typed.
+        fetchDMMessages(openId, meId).then(msgs => setMessages(prev => {
+          const keep = (prev[openId] || []).filter(m =>
+            (m.pending || m.failed) && !msgs.some(s => s.from === 'me' && s.body === m.body));
+          return { ...prev, [openId]: [...msgs, ...keep] };
+        })).catch(() => {});
         dmMarkRead(openId, meId).catch(() => {});
       }
     });
@@ -657,11 +667,39 @@ export default function App() {
     ));
     sendDM(conversationId, meId, body)
       .then(saved => setMessages(prev => ({ ...prev, [conversationId]: (prev[conversationId] || []).map(m => m.id === tempId ? saved : m) })))
-      .catch(() => setMessages(prev => ({ ...prev, [conversationId]: (prev[conversationId] || []).filter(m => m.id !== tempId) })));
+      // Keep the message (marked failed) so it isn't silently lost, and tell the user.
+      .catch(() => {
+        setMessages(prev => ({ ...prev, [conversationId]: (prev[conversationId] || []).map(m => m.id === tempId ? { ...m, pending: false, failed: true } : m) }));
+        showToast("whisper didn't send — tap it to retry.", 'error');
+      });
   };
 
-  const openConversation = (id) => {
+  // Retry a failed message: drop the failed copy and resend.
+  const retryMessage = (conversationId, messageId) => {
+    let body = null;
+    setMessages(prev => {
+      const list = prev[conversationId] || [];
+      const failed = list.find(m => m.id === messageId);
+      if (failed) body = failed.body;
+      return { ...prev, [conversationId]: list.filter(m => m.id !== messageId) };
+    });
+    if (body) sendMessage(conversationId, body);
+  };
+
+  const openConversation = (id, meta) => {
+    if (!id) return;
+    // Synthetic fallback so the thread (and its reply box) always render, even
+    // before the inbox has this conversation. Real data overwrites it on fetch.
+    const known = conversations.find(c => c.id === id);
+    setActiveConvMeta(known || {
+      id,
+      user: meta?.user || (meta?.group ? 'whisper circle' : 'whisper'),
+      avatar: meta?.avatar || '✦',
+      avatarUrl: meta?.avatarUrl || null,
+      group: !!meta?.group,
+    });
     setActiveConversation(id);
+    setShowDMs(false);
     setConversations(prev => prev.map(c => c.id === id ? { ...c, unread: 0 } : c));
     if (meId) {
       fetchDMMessages(id, meId).then(msgs => setMessages(prev => ({ ...prev, [id]: msgs }))).catch(() => {});
@@ -775,7 +813,7 @@ export default function App() {
     if (!convId) return;
     await fetchConversations().then(setConversations).catch(() => {});
     setShowDMs(false);
-    openConversation(convId);
+    openConversation(convId, { user: handle });
   };
 
   const sendMessageToUser = async (handle, body) => {
@@ -887,7 +925,7 @@ export default function App() {
       await refreshCrews();
       await fetchConversations().then(setConversations).catch(() => {});
       setShowCrewBrowse(false);
-      openConversation(convId);
+      openConversation(convId, { user: c?.name || 'a crew', avatar: c?.glyph || '✦', group: true });
     } catch { /* ignore */ }
     finally { setCrewBusy(prev => { const n = { ...prev }; delete n[convId]; return n; }); }
   };
@@ -900,7 +938,7 @@ export default function App() {
       await refreshCrews();
       await fetchConversations().then(setConversations).catch(() => {});
       setShowCrewBrowse(false);
-      openConversation(convId);
+      openConversation(convId, { user: name, avatar: glyph || '✦', group: true });
     } catch { /* ignore */ }
   };
 
@@ -1036,7 +1074,7 @@ export default function App() {
     markNotifRead(n.id);
     setShowNotifs(false);
     if (n.kind === 'dm' && n.conversationId) {
-      openConversation(n.conversationId);
+      openConversation(n.conversationId, { user: n.user, avatar: n.avatar });
     } else if (n.kind === 'follow' && n.user && n.user !== 'someone') {
       setActiveUserHandle(n.user);
     } else if ((n.kind === 'react' || n.kind === 'comment') && n.postId) {
@@ -1333,10 +1371,11 @@ export default function App() {
       {activeConversation && (
         <ChatThread
           conversationId={activeConversation}
-          conversation={conversations.find(c => c.id === activeConversation)}
+          conversation={conversations.find(c => c.id === activeConversation) || activeConvMeta}
           messages={messages[activeConversation] || []}
           onSend={(body) => sendMessage(activeConversation, body)}
-          onBack={() => setActiveConversation(null)}
+          onRetry={(messageId) => retryMessage(activeConversation, messageId)}
+          onBack={() => { setActiveConversation(null); setActiveConvMeta(null); }}
         />
       )}
       {showCompose && (
