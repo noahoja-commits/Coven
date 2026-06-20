@@ -12,6 +12,7 @@ function hydrate(r) {
     avatarUrl: r.avatar_url || null,
     text: r.text || '',
     neighborhood: r.neighborhood || '',
+    city: r.city || '',
     expiresAt: r.expires_at,
   };
 }
@@ -38,7 +39,7 @@ export async function clearTonightPin() {
 export async function fetchTonightPins() {
   const { data, error } = await supabase
     .from('active_tonight')
-    .select('user_id, text, neighborhood, expires_at, handle, avatar, avatar_url');
+    .select('user_id, text, neighborhood, expires_at, handle, avatar, avatar_url, city');
   if (error) throw error;
   return (data || []).map(hydrate);
 }

@@ -2,15 +2,31 @@ import { Plus } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { Avatar } from '../shared/Avatar';
 
-// Stable pseudo-position from a user id (no real geolocation exists).
-// Returns percentages within the map bounds; deterministic across devices.
-function pinPos(seed) {
+function hashStr(s) {
   let h = 0;
-  const s = String(seed || '');
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
-  const left = 10 + (h % 80);            // 10%..90%
-  const top = 24 + ((Math.floor(h / 80)) % 58); // 24%..82%
-  return { left: `${left}%`, top: `${top}%` };
+  const str = String(s || '');
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+// Approximate-by-area placement (no real geolocation): the cluster CENTER comes
+// from the user's area (neighborhood, else city) so people in the same place sit
+// together; a small per-user jitter keeps overlapping pins from stacking. Users
+// with no area fall back to a stable per-user spot.
+function pinPos(pin) {
+  const area = (pin.neighborhood || pin.city || '').trim().toLowerCase();
+  if (!area) {
+    const h = hashStr('u:' + pin.userId);
+    return { left: `${10 + (h % 80)}%`, top: `${24 + (Math.floor(h / 80) % 58)}%` };
+  }
+  const hc = hashStr('a:' + area);
+  const cx = 18 + (hc % 64);                       // cluster center 18%..82%
+  const cy = 28 + (Math.floor(hc / 64) % 50);      // 28%..78%
+  const hu = hashStr('u:' + pin.userId);
+  const jx = (hu % 13) - 6;                         // jitter -6..+6
+  const jy = (Math.floor(hu / 13) % 13) - 6;
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  return { left: `${clamp(cx + jx, 6, 94)}%`, top: `${clamp(cy + jy, 22, 84)}%` };
 }
 
 export function MapScreen({ tonightStatus, pins = [], onOpenUser, onOpenTonightStatus, festivalEvent = null, onEnterFestival }) {
@@ -60,7 +76,7 @@ export function MapScreen({ tonightStatus, pins = [], onOpenUser, onOpenTonightS
 
       {/* Other souls out tonight */}
       {pins.map(p => {
-        const pos = pinPos(p.userId);
+        const pos = pinPos(p);
         return (
           <button key={p.userId} onClick={() => onOpenUser && onOpenUser(p.handle)}
             className="absolute group" style={pos}>
