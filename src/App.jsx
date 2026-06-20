@@ -1324,6 +1324,21 @@ export default function App() {
         }} />
       )}
 
+      {/* Color mood — Blood moon (red wash) or Ash (desaturate). Rendered as
+          overlay layers (not a root CSS filter) so fixed modals don't break. */}
+      {settings.colorMood === 'bloodMoon' && !isInsideOverlay && (
+        <div className="absolute inset-0 pointer-events-none z-10" style={{
+          background: 'radial-gradient(ellipse at 50% 20%, rgba(139,0,0,0.35), rgba(60,0,0,0.5))',
+          mixBlendMode: 'soft-light',
+        }} />
+      )}
+      {settings.colorMood === 'ash' && !isInsideOverlay && (
+        <div className="absolute inset-0 pointer-events-none z-10" style={{
+          backdropFilter: 'grayscale(0.85) contrast(1.05)',
+          WebkitBackdropFilter: 'grayscale(0.85) contrast(1.05)',
+        }} />
+      )}
+
       {/* Grain */}
       {settings.grainIntensity > 0 && <GrainOverlay opacity={settings.grainIntensity} />}
 

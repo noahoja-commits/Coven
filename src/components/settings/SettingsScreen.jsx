@@ -18,6 +18,20 @@ function Slider({ value, onChange, min = 0, max = 1, step = 0.05 }) {
   );
 }
 
+function Segmented({ value, onChange, options }) {
+  return (
+    <div className="flex border border-[#2A2A2A] divide-x divide-[#2A2A2A]">
+      {options.map(([val, label]) => (
+        <button key={val} onClick={() => onChange(val)}
+          className={`px-2.5 py-1 text-[10px] uppercase tracking-wider transition-colors ${value === val ? 'bg-[#8B0000] text-[#F5F1E8]' : 'text-[#A8A29E] hover:text-[#F5F1E8]'}`}
+          style={F.ui}>
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function Section({ title, children }) {
   return (
     <div className="mb-6">
@@ -73,8 +87,12 @@ export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOn
           <Row label="Vignette" desc="dark edges around the screen.">
             <Toggle on={settings.vignette} onChange={v => set('vignette', v)} />
           </Row>
-          <Row label="Soft blur" desc="slight haze on backgrounds.">
-            <Toggle on={settings.blur} onChange={v => set('blur', v)} />
+          <Row label="Color mood" desc="wash the whole app in a mood.">
+            <Segmented
+              value={settings.colorMood || 'none'}
+              onChange={v => set('colorMood', v)}
+              options={[['none', 'none'], ['bloodMoon', 'blood'], ['ash', 'ash']]}
+            />
           </Row>
         </Section>
 
@@ -236,7 +254,7 @@ export const DEFAULT_SETTINGS = {
   parchmentMode: false,
   grainIntensity: 0.07,
   vignette: true,
-  blur: false,
+  colorMood: 'none',
   weatherMood: false,
   soundOn: false,
   tarotEnabled: true,

@@ -1,4 +1,4 @@
-import { Plus, MessageCircle, Bell, Search } from 'lucide-react';
+import { Plus, MessageCircle, Bell, Search, Sparkles } from 'lucide-react';
 import { F } from '../../styles/fonts';
 
 export function Header({ tab, onDMs, onCompose, onLibrary, onNotifications, onSearch, communityName, unreadNotifications = 0, unreadDMs = 0, parchment = false }) {
@@ -35,6 +35,7 @@ export function Header({ tab, onDMs, onCompose, onLibrary, onNotifications, onSe
           )}
         </div>
         <div className="flex items-center gap-1">
+          <button onClick={onLibrary} className={`${accentColor} hover:text-[#C9A961] transition-colors p-2`} title="the coven · portals"><Sparkles size={18} /></button>
           {tab === 'home' && (
             <button onClick={onCompose} className={`${accentColor} hover:text-[#F5F1E8] transition-colors p-2`} title="new post"><Plus size={20} /></button>
           )}
