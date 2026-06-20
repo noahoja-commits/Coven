@@ -39,7 +39,7 @@ function Row({ label, desc, children }) {
   );
 }
 
-export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOnboarding, mutedKeywords = [], onSetMutedKeywords, payoutStatus, onSetupPayouts, pushState = 'off', onEnablePush, onDisablePush, onEditProfile, onOpenBlocked }) {
+export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOnboarding, mutedKeywords = [], onSetMutedKeywords, payoutStatus, payoutBusy = false, onSetupPayouts, pushState = 'off', onEnablePush, onDisablePush, onEditProfile, onOpenBlocked }) {
   const set = (key, value) => onChange({ ...settings, [key]: value });
   const addKeyword = (e) => {
     e.preventDefault();
@@ -82,7 +82,7 @@ export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOn
           <Row label="Weather mood" desc="tint the app with the weather outside.">
             <Toggle on={settings.weatherMood} onChange={v => set('weatherMood', v)} />
           </Row>
-          <Row label="Sound on" desc="a low ambient drone while you wander.">
+          <Row label="Sound on" desc="a low ambient drone while you wander. turn up your volume — on iPhone, flip the side silent switch off.">
             <Toggle on={settings.soundOn} onChange={v => set('soundOn', v)} />
           </Row>
         </Section>
@@ -187,9 +187,9 @@ export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOn
                 <p className="text-[10px] text-[#6B6B6B] mb-2" style={F.serif}>
                   {payoutStatus?.hasAccount ? 'finish onboarding to start receiving ticket money.' : 'connect a bank to sell tickets and get paid automatically when people buy.'}
                 </p>
-                <button onClick={onSetupPayouts}
-                  className="px-3 py-1.5 text-[10px] uppercase tracking-wider bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] transition-colors" style={F.ui}>
-                  {payoutStatus?.hasAccount ? 'finish payout setup' : 'set up payouts'}
+                <button onClick={onSetupPayouts} disabled={payoutBusy}
+                  className="px-3 py-1.5 text-[10px] uppercase tracking-wider bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] transition-colors disabled:opacity-60 disabled:cursor-wait" style={F.ui}>
+                  {payoutBusy ? 'opening Stripe…' : (payoutStatus?.hasAccount ? 'finish payout setup' : 'set up payouts')}
                 </button>
               </>
             )}

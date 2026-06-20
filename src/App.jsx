@@ -154,6 +154,7 @@ export default function App() {
   const [festTick, setFestTick] = useState(0);
   const [ticketSuccess, setTicketSuccess] = useState(false);
   const [payoutStatus, setPayoutStatus] = useState({ hasAccount: false, enabled: false });
+  const [payoutBusy, setPayoutBusy] = useState(false);
   const [bookmarks, setBookmarks] = useLocalStorage('bookmarks', {});
   const [graves, setGraves] = useState([]); // Supabase-backed (profile_state)
   const [sigils, setSigils] = useState([]); // Supabase-backed (profile_state)
@@ -440,8 +441,15 @@ export default function App() {
   }, [meId]);
 
   const setupPayouts = () => {
-    if (!meId) return;
-    startPayoutSetup(meId).catch(e => addNotification({ kind: 'event', avatar: '✖', text: `payout setup unavailable — ${e.message}` }));
+    if (!meId || payoutBusy) return;
+    setPayoutBusy(true);
+    showToast('opening secure payout setup…');
+    // On success the page redirects to Stripe (no need to clear busy); only
+    // clear + surface on failure so the button doesn't feel dead on a slow tap.
+    startPayoutSetup(meId).catch(e => {
+      setPayoutBusy(false);
+      showToast(`payout setup unavailable — ${e.message}`, 'error');
+    });
   };
 
   // ---- in-app toast + push device state ----
@@ -1570,6 +1578,7 @@ export default function App() {
           mutedKeywords={mutedKeywords}
           onSetMutedKeywords={setMutedKeywords}
           payoutStatus={payoutStatus}
+          payoutBusy={payoutBusy}
           onSetupPayouts={setupPayouts}
           pushState={pushState}
           onEnablePush={turnPushOn}
