@@ -16,7 +16,7 @@ export function DMsOverlay({ conversations = [], onClose, onOpenConversation, on
 
   return (
     <div className="absolute inset-0 z-30 bg-[#0A0A0A] animate-slide-in-right">
-      <div className="absolute top-0 inset-x-0 z-10 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A]">
+      <div className="absolute top-0 inset-x-0 z-10 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A] safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
           <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
           <div className="text-[#F5F1E8] text-base tracking-[0.3em]" style={F.display}>WHISPERS</div>

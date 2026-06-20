@@ -31,7 +31,7 @@ function pinPos(pin) {
 
 export function MapScreen({ tonightStatus, pins = [], onOpenUser, onOpenTonightStatus, festivalEvent = null, onEnterFestival }) {
   return (
-    <div className="absolute inset-0 top-[60px] bottom-[68px]">
+    <div className="absolute inset-0">
       {festivalEvent && (
         <button onClick={onEnterFestival}
           className="absolute top-2 left-1/2 -translate-x-1/2 z-30 px-4 py-2 bg-[#8B0000]/90 border border-[#C9A961] text-[#F5F1E8] text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 shadow-xl animate-pulse-slow" style={F.ui}>

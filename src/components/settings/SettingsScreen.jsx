@@ -53,7 +53,7 @@ export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOn
   };
   return (
     <div className="absolute inset-0 z-50 bg-[#0A0A0A] animate-slide-in-right flex flex-col">
-      <div className="bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A]">
+      <div className="bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A] safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
           <button onClick={onBack} className="text-[#A8A29E] hover:text-[#F5F1E8] transition-colors flex items-center gap-1 -ml-1" style={F.ui}>
             <ChevronLeft size={18} /><span className="text-xs uppercase tracking-wider">back</span>
@@ -62,7 +62,7 @@ export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOn
           <span className="w-12" />
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto py-4">
+      <div className="flex-1 overflow-y-auto py-4 safe-pb">
         <Section title="appearance">
           <Row label="Parchment mode" desc="invert the world. cream & oxblood for daylight reading.">
             <Toggle on={settings.parchmentMode} onChange={v => set('parchmentMode', v)} />

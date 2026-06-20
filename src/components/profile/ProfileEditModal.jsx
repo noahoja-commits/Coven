@@ -37,7 +37,7 @@ export function ProfileEditModal({ profile, meId, onSave, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center animate-fade-in">
-      <div className="bg-[#0F0F0F] border border-[#2A2A2A] w-full sm:max-w-md sm:m-4 max-h-[90vh] overflow-y-auto animate-slide-up">
+      <div className="bg-[#0F0F0F] border border-[#2A2A2A] w-full sm:max-w-md sm:m-4 max-h-[90dvh] overflow-y-auto safe-pb animate-slide-up">
         <div className="sticky top-0 z-10 bg-[#0F0F0F] flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A]">
           <div>
             <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· edit ·</span>

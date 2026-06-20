@@ -1247,7 +1247,7 @@ export default function App() {
   };
 
   return (
-    <div className="phone-frame max-w-md mx-auto relative overflow-hidden text-[#F5F1E8]"
+    <div className="phone-frame max-w-md mx-auto relative overflow-hidden h-[100dvh] text-[#F5F1E8]"
       style={{ background: settings.parchmentMode ? '#EDE0C2' : '#0A0A0A' }}>
       {/* Vignette */}
       {settings.vignette && !isInsideOverlay && (
@@ -1270,27 +1270,29 @@ export default function App() {
       {/* Grain */}
       {settings.grainIntensity > 0 && <GrainOverlay opacity={settings.grainIntensity} />}
 
-      {/* Main content area */}
-      <div className="relative pt-[60px] pb-0 min-h-[100vh]" style={{ minHeight: '100dvh' }}>
-        <Header
-          tab={tab}
-          onDMs={() => setShowDMs(true)}
-          onCompose={() => setShowCompose(true)}
-          onLibrary={onLibraryTap}
-          onNotifications={() => {
-            setShowNotifs(true);
-            // If already granted, silently make sure this device stays subscribed.
-            // First-time enabling (with feedback) lives in Settings → notifications.
-            if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-              enablePush(meId).then(refreshPushState).catch(() => {});
-            }
-          }}
-          onSearch={() => setShowSearch(true)}
-          communityName={community ? COMMUNITIES.find(c => c.id === community)?.name : null}
-          unreadNotifications={unreadNotifs}
-          unreadDMs={unreadDMs}
-          parchment={settings.parchmentMode}
-        />
+      {/* Fixed header (pinned to the viewport frame) */}
+      <Header
+        tab={tab}
+        onDMs={() => setShowDMs(true)}
+        onCompose={() => setShowCompose(true)}
+        onLibrary={onLibraryTap}
+        onNotifications={() => {
+          setShowNotifs(true);
+          // If already granted, silently make sure this device stays subscribed.
+          // First-time enabling (with feedback) lives in Settings → notifications.
+          if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+            enablePush(meId).then(refreshPushState).catch(() => {});
+          }
+        }}
+        onSearch={() => setShowSearch(true)}
+        communityName={community ? COMMUNITIES.find(c => c.id === community)?.name : null}
+        unreadNotifications={unreadNotifs}
+        unreadDMs={unreadDMs}
+        parchment={settings.parchmentMode}
+      />
+      {/* Main content scrolls INSIDE the frame, between the fixed header and bottom nav.
+          (top-[60px]/bottom-[68px] already include the safe-area insets — see index.css.) */}
+      <div className="absolute inset-0 top-[60px] bottom-[68px] overflow-y-auto">
         <div className="animate-screen-in" key={`${tab}-${community || ''}`}>
           {renderTab()}
         </div>

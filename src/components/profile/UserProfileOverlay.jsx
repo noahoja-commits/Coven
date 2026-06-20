@@ -34,7 +34,7 @@ export function UserProfileOverlay({ handle, posts = [], isFollowing, isMuted, o
   if (!loading && !profile) {
     return (
       <div className="absolute inset-0 z-40 bg-[#0A0A0A] animate-slide-in-right flex flex-col">
-        <div className="sticky top-0 z-10 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A] px-4 h-[60px] flex items-center">
+        <div className="sticky top-0 z-10 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A] safe-pt px-4 h-[60px] flex items-center">
           <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1"><ArrowLeft size={20} /></button>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center text-center px-10 gap-2">
@@ -48,7 +48,7 @@ export function UserProfileOverlay({ handle, posts = [], isFollowing, isMuted, o
   return (
     <div className="absolute inset-0 z-40 bg-[#0A0A0A] animate-slide-in-right overflow-y-auto pb-12">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A]">
+      <div className="sticky top-0 z-10 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A] safe-pt">
         <div className="px-4 h-[60px] flex items-center gap-3">
           <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
           <div className="flex-1 min-w-0">
