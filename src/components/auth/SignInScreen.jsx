@@ -71,9 +71,18 @@ export function SignInScreen() {
           </div>
         ) : (
           <form onSubmit={submit} className="w-full max-w-xs animate-fade-in">
-            <div className="text-[10px] uppercase tracking-[0.3em] text-[#A89968] mb-3" style={F.scriptureSC}>
-              · {isUp ? 'join the coven' : isReset ? 'reset password' : 'enter'} ·
-            </div>
+            {isReset ? (
+              <div className="text-[10px] uppercase tracking-[0.3em] text-[#A89968] mb-4" style={F.scriptureSC}>· reset password ·</div>
+            ) : (
+              <div className="flex border border-[#2A2A2A] mb-5">
+                <button type="button" onClick={() => { setMode('in'); setError(''); }}
+                  className={`flex-1 py-2.5 text-[10px] uppercase tracking-[0.2em] transition-colors ${!isUp ? 'bg-[#5B0F1A] text-[#F5F1E8]' : 'text-[#6B6B6B] hover:text-[#A8A29E]'}`}
+                  style={F.ui}>sign in</button>
+                <button type="button" onClick={() => { setMode('up'); setError(''); }}
+                  className={`flex-1 py-2.5 text-[10px] uppercase tracking-[0.2em] transition-colors ${isUp ? 'bg-[#5B0F1A] text-[#F5F1E8]' : 'text-[#6B6B6B] hover:text-[#A8A29E]'}`}
+                  style={F.ui}>create account</button>
+              </div>
+            )}
 
             <div className="flex items-center gap-2 border border-[#2A2A2A] focus-within:border-[#5B0F1A] bg-[#0A0204] px-3 py-2.5 transition-colors">
               <Mail size={16} className="text-[#6B6B6B] shrink-0" />
@@ -100,6 +109,12 @@ export function SignInScreen() {
               <p className="text-[#6B6B6B] text-[10px] mt-1.5 text-left" style={F.ui}>at least 6 characters</p>
             )}
             {error && <p className="text-[#8B0000] text-[11px] mt-2" style={F.ui}>{error}</p>}
+            {!isUp && !isReset && /invalid login/i.test(error) && (
+              <button type="button" onClick={() => { setMode('up'); setError(''); }}
+                className="mt-2 text-[11px] text-[#C9A961] hover:text-[#F5F1E8] underline block mx-auto transition-colors" style={F.ui}>
+                no account with that email? create one →
+              </button>
+            )}
 
             <button type="submit" disabled={!valid || status === 'working'}
               className="w-full mt-4 py-3 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] text-xs uppercase tracking-[0.25em] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
@@ -116,11 +131,12 @@ export function SignInScreen() {
               </button>
             )}
 
-            <button type="button"
-              onClick={() => { setMode(isReset ? 'in' : (isUp ? 'in' : 'up')); setError(''); }}
-              className="mt-2 text-[10px] uppercase tracking-[0.2em] text-[#6B6B6B] hover:text-[#A8A29E] transition-colors p-2" style={F.ui}>
-              {isReset ? 'back to sign in' : isUp ? 'already have an account? sign in' : 'new here? create an account'}
-            </button>
+            {isReset && (
+              <button type="button" onClick={() => { setMode('in'); setError(''); }}
+                className="mt-2 text-[10px] uppercase tracking-[0.2em] text-[#6B6B6B] hover:text-[#A8A29E] transition-colors p-2" style={F.ui}>
+                back to sign in
+              </button>
+            )}
           </form>
         )}
       </div>

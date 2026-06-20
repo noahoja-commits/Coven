@@ -17,7 +17,6 @@ const VIBES = ['romantic', 'darkwave', 'industrial', 'punk', 'witchy', 'religiou
 
 export function OnboardingFlow({ onComplete }) {
   const [step, setStep] = useState(0);
-  const [name, setName] = useState('');
   const [handle, setHandle] = useState('');
   const [glyph, setGlyph] = useState('🦇');
   const [city, setCity] = useState('');
@@ -48,10 +47,11 @@ export function OnboardingFlow({ onComplete }) {
   }, [handle]);
 
   const toggle = (arr, set, id) => set(arr.includes(id) ? arr.filter(x => x !== id) : [...arr, id]);
+  // Only the handle is required to get in; everything else is optional and editable
+  // later. (We allow advancing while the availability check is still in flight —
+  // finish() catches a taken handle and bounces back, so a slow check can't wall you.)
   const canAdvance = () => {
-    if (step === 1) return name.trim() && handle.trim().length >= 2 && handleStatus !== 'taken' && handleStatus !== 'checking';
-    if (step === 2) return scenes.length >= 1;
-    if (step === 3) return city.trim() && birthday;
+    if (step === 1) return handle.trim().length >= 2 && handleStatus !== 'taken';
     return true;
   };
 
@@ -59,7 +59,7 @@ export function OnboardingFlow({ onComplete }) {
     if (submitting) return;
     setSubmitting(true); setError('');
     try {
-      await onComplete({ name: name.trim(), handle: handle.trim().toLowerCase().replace(/\s/g, '_'), glyph, city: city.trim(), birthday, scenes, vibes });
+      await onComplete({ handle: handle.trim().toLowerCase().replace(/\s/g, '_'), glyph, city: city.trim(), birthday, scenes, vibes });
     } catch (e) {
       setError(e?.message === 'handle taken' ? 'that handle was just taken — pick another' : (e?.message || 'something went wrong'));
       setHandleStatus('taken');
@@ -87,7 +87,7 @@ export function OnboardingFlow({ onComplete }) {
       {error && <div className="relative px-6 mt-3 text-center text-[11px] text-[#8B0000]" style={F.ui}>{error}</div>}
 
       {/* Content */}
-      <div className="relative z-10 flex-1 overflow-y-auto px-6 pt-8 pb-32">
+      <div className="relative z-10 flex-1 overflow-y-auto px-6 pt-8 pb-8">
         {step === 0 && (
           <div className="flex flex-col items-center text-center max-w-xs mx-auto pt-12 animate-fade-in">
             <div className="text-[#A89968] text-[10px] uppercase tracking-[0.5em] mb-4" style={F.scriptureSC}>· welcome to ·</div>
@@ -105,13 +105,6 @@ export function OnboardingFlow({ onComplete }) {
               <h2 className="text-[#F5F1E8] text-3xl" style={F.scripture}>What shall we call you?</h2>
             </div>
             <div className="space-y-5">
-              <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-1.5 block" style={F.scriptureSC}>· your name · or alias ·</label>
-                <input value={name} onChange={e => setName(e.target.value.slice(0, 30))}
-                  placeholder="how you'd like to be known"
-                  className="w-full bg-[#0F0F0F] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none p-3 text-[#F5F1E8] text-lg"
-                  style={F.serif} />
-              </div>
               <div>
                 <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-1.5 block" style={F.scriptureSC}>· handle ·</label>
                 <div className="flex items-center bg-[#0F0F0F] border border-[#2A2A2A] focus-within:border-[#5B0F1A]">
@@ -211,8 +204,8 @@ export function OnboardingFlow({ onComplete }) {
         )}
       </div>
 
-      {/* Footer nav */}
-      <div className="absolute bottom-0 inset-x-0 bg-[#0A0A0A]/95 backdrop-blur-md border-t border-[#1A1A1A] p-4 flex items-center justify-between">
+      {/* Footer nav — a real flex child (NOT absolute) so the scroll area can never overlay/block the buttons */}
+      <div className="relative z-20 bg-[#0A0A0A]/95 backdrop-blur-md border-t border-[#1A1A1A] p-4 safe-pb flex items-center justify-between">
         {step > 0 ? (
           <button onClick={() => setStep(step - 1)} className="text-[#A89968] flex items-center gap-1 text-sm" style={F.ui}>
             <ChevronLeft size={16} /> back
