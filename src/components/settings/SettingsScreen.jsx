@@ -1,4 +1,4 @@
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { F } from '../../styles/fonts';
 
 function Toggle({ on, onChange }) {
@@ -39,7 +39,7 @@ function Row({ label, desc, children }) {
   );
 }
 
-export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOnboarding, mutedKeywords = [], onSetMutedKeywords, payoutStatus, onSetupPayouts, pushState = 'off', onEnablePush, onDisablePush }) {
+export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOnboarding, mutedKeywords = [], onSetMutedKeywords, payoutStatus, onSetupPayouts, pushState = 'off', onEnablePush, onDisablePush, onEditProfile, onOpenBlocked }) {
   const set = (key, value) => onChange({ ...settings, [key]: value });
   const addKeyword = (e) => {
     e.preventDefault();
@@ -197,10 +197,16 @@ export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOn
         </Section>
 
         <Section title="account">
-          {['Edit profile', 'Privacy & blocked', 'Notifications', 'Help & feedback'].map(label => (
-            <Row key={label} label={label}>
-              <span className="text-[9px] uppercase tracking-[0.18em] text-[#3F3F3F]" style={F.ui}>soon</span>
-            </Row>
+          {[
+            { label: 'Edit profile', onClick: onEditProfile },
+            { label: 'Privacy & blocked', onClick: onOpenBlocked },
+            { label: 'Help & feedback', onClick: () => { window.location.href = 'mailto:noahoja@gmail.com?subject=Coven%20feedback'; } },
+          ].map(item => (
+            <button key={item.label} onClick={item.onClick}
+              className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-[#0F0F0F] transition-colors">
+              <span className="flex-1 text-[#F5F1E8] text-sm" style={F.serif}>{item.label}</span>
+              <ChevronRight size={16} className="text-[#3F3F3F]" />
+            </button>
           ))}
         </Section>
 

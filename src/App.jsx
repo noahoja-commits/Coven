@@ -14,7 +14,8 @@ import { fetchPayoutStatus, startPayoutSetup, refreshPayoutStatus } from './lib/
 import { listCrews, createCrew as dbCreateCrew, joinCrew as dbJoinCrew } from './lib/db/crews';
 import { fetchProfileState, saveProfileState } from './lib/db/profileState';
 import { fetchNotifications, markNotificationRead, markAllNotificationsRead, clearNotifications, subscribeNotifications, hydrateRealtime } from './lib/db/notifications';
-import { fetchBlockedIds, blockUser as dbBlockUser, reportContent } from './lib/db/moderation';
+import { fetchBlockedIds, blockUser as dbBlockUser, unblockUser as dbUnblockUser, reportContent } from './lib/db/moderation';
+import { BlockedOverlay } from './components/settings/BlockedOverlay';
 import { enablePush, disablePush, pushStatus } from './lib/db/push';
 import { setTonightPin, clearTonightPin, fetchTonightPins, subscribeTonightPins } from './lib/db/tonight';
 import { Toast } from './components/shared/Toast';
@@ -100,6 +101,7 @@ export default function App() {
   const [weatherTint, setWeatherTint] = useState(null); // {color,opacity} when Weather mood is on
   const [showTonightModal, setShowTonightModal] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showBlocked, setShowBlocked] = useState(false);
   const [activeStoryIndex, setActiveStoryIndex] = useState(null);
   const [activeUserHandle, setActiveUserHandle] = useState(null);
   const [showStoryComposer, setShowStoryComposer] = useState(false);
@@ -223,10 +225,10 @@ export default function App() {
     const anyModal = showEditProfile || showTonightModal || showSettings || showNotifs
       || showCompose || showStoryComposer || showSearch || showVespersArchive
       || showAddGrave || showAddAnniv || showNewGroup || showReflections || showCrewBrowse
-      || showNowPlaying || quoteTarget || activeStoryIndex !== null;
+      || showNowPlaying || showBlocked || quoteTarget || activeStoryIndex !== null;
     document.body.style.overflow = anyModal ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
-  }, [showEditProfile, showTonightModal, showSettings, showNotifs, showCompose, showStoryComposer, showSearch, showVespersArchive, showAddGrave, showAddAnniv, showNewGroup, showReflections, showCrewBrowse, showNowPlaying, quoteTarget, activeStoryIndex]);
+  }, [showEditProfile, showTonightModal, showSettings, showNotifs, showCompose, showStoryComposer, showSearch, showVespersArchive, showAddGrave, showAddAnniv, showNewGroup, showReflections, showCrewBrowse, showNowPlaying, showBlocked, quoteTarget, activeStoryIndex]);
 
   // Auto-expire tonight status after 12h
   useEffect(() => {
@@ -958,6 +960,12 @@ export default function App() {
     try { await dbBlockUser(profileId); } catch { /* ignore */ }
     fetchFeed(meId, { scope: feedScope }).then(setPosts).catch(() => {});
   };
+  const unblockUserById = async (profileId) => {
+    if (!profileId) return;
+    await dbUnblockUser(profileId);
+    setBlockedIds(prev => { const n = new Set(prev); n.delete(profileId); return n; });
+    fetchFeed(meId, { scope: feedScope }).then(setPosts).catch(() => {});
+  };
   const reportTarget = async (kind, targetId) => {
     try { await reportContent(kind, targetId, ''); addNotification({ kind: 'follow', avatar: '⚑', text: 'reported — thank you' }); }
     catch { /* ignore */ }
@@ -1524,6 +1532,14 @@ export default function App() {
           pushState={pushState}
           onEnablePush={turnPushOn}
           onDisablePush={turnPushOff}
+          onEditProfile={() => setShowEditProfile(true)}
+          onOpenBlocked={() => setShowBlocked(true)}
+        />
+      )}
+      {showBlocked && (
+        <BlockedOverlay
+          onBack={() => setShowBlocked(false)}
+          onUnblock={unblockUserById}
         />
       )}
 
