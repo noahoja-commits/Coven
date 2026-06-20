@@ -15,7 +15,7 @@ const SHRINE_THEMES = {
   cathedral: 'linear-gradient(180deg, #1F0810 0%, transparent 100%)',
 };
 
-export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpdateTracker, onOpenTonightStatus, onOpenSettings, mementoMoriOn, settings, onEditProfile, onLightCandle, crews = [], onOpenCrew, onBrowseCrews, onAddGrave, onAddAnniversary, onOpenNowPlaying, onOpenReflections, reflectionsCount = 0, nowPlaying, activityLog = [], sigils = [], bookmarks = [], onOpenComments, onOpenPost, ritual, ritualDoneToday, onPerformRitual, crystals = [], onToggleCrystal, pinnedPost, shrineTheme = 'oxblood', onSetShrineTheme, storyHighlights = [], onRemoveHighlight, achievementState = {} }) {
+export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpdateTracker, onOpenTonightStatus, onOpenSettings, mementoMoriOn, settings, onEditProfile, onLightCandle, crews = [], onOpenCrew, onBrowseCrews, onAddGrave, onAddAnniversary, onOpenNowPlaying, onOpenReflections, onOpenTickets, reflectionsCount = 0, nowPlaying, activityLog = [], sigils = [], bookmarks = [], onOpenComments, onOpenPost, ritual, ritualDoneToday, onPerformRitual, crystals = [], onToggleCrystal, pinnedPost, shrineTheme = 'oxblood', onSetShrineTheme, storyHighlights = [], onRemoveHighlight, achievementState = {} }) {
   const earned = earnedAchievements(achievementState);
   const earnedIds = new Set(earned.map(a => a.id));
   const [showThemePicker, setShowThemePicker] = useState(false);
@@ -224,6 +224,16 @@ export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpda
             {reflectionsCount > 0 ? `${reflectionsCount} ${reflectionsCount === 1 ? 'entry' : 'entries'}` : 'write to yourself'}
           </span>
         </span>
+      </button>
+
+      {/* Your tickets (rites you've bought into) */}
+      <button onClick={onOpenTickets} className="w-full text-left mx-4 mt-3 p-3 border border-[#2A2A2A] bg-[#0F0F0F] hover:border-[#A89968]/40 transition-colors group flex items-center gap-2" style={{ width: 'calc(100% - 2rem)' }}>
+        <span className="text-[#A89968] text-base">𖤐</span>
+        <span className="flex-1">
+          <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.ui}>· your tickets ·</span>
+          <span className="block text-[#A8A29E] text-xs italic" style={F.serif}>rites you've paid into</span>
+        </span>
+        <ChevronRight size={16} className="text-[#3F3F3F]" />
       </button>
 
       {/* Tonight status — clickable */}

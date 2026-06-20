@@ -51,6 +51,7 @@ import { AddAnniversaryModal } from './components/profile/AddAnniversaryModal';
 import { EventDetail } from './components/events/EventDetail';
 import { CreateEventModal } from './components/events/CreateEventModal';
 import { TicketManager } from './components/events/TicketManager';
+import { MyTicketsOverlay } from './components/events/MyTicketsOverlay';
 import { startCheckout } from './lib/db/tickets';
 import { NowPlayingModal } from './components/profile/NowPlayingModal';
 import { NewGroupDMModal } from './components/shared/NewGroupDMModal';
@@ -102,6 +103,7 @@ export default function App() {
   const [showTonightModal, setShowTonightModal] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showBlocked, setShowBlocked] = useState(false);
+  const [showMyTickets, setShowMyTickets] = useState(false);
   const [activeStoryIndex, setActiveStoryIndex] = useState(null);
   const [activeUserHandle, setActiveUserHandle] = useState(null);
   const [showStoryComposer, setShowStoryComposer] = useState(false);
@@ -225,10 +227,10 @@ export default function App() {
     const anyModal = showEditProfile || showTonightModal || showSettings || showNotifs
       || showCompose || showStoryComposer || showSearch || showVespersArchive
       || showAddGrave || showAddAnniv || showNewGroup || showReflections || showCrewBrowse
-      || showNowPlaying || showBlocked || quoteTarget || activeStoryIndex !== null;
+      || showNowPlaying || showBlocked || showMyTickets || quoteTarget || activeStoryIndex !== null;
     document.body.style.overflow = anyModal ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
-  }, [showEditProfile, showTonightModal, showSettings, showNotifs, showCompose, showStoryComposer, showSearch, showVespersArchive, showAddGrave, showAddAnniv, showNewGroup, showReflections, showCrewBrowse, showNowPlaying, showBlocked, quoteTarget, activeStoryIndex]);
+  }, [showEditProfile, showTonightModal, showSettings, showNotifs, showCompose, showStoryComposer, showSearch, showVespersArchive, showAddGrave, showAddAnniv, showNewGroup, showReflections, showCrewBrowse, showNowPlaying, showBlocked, showMyTickets, quoteTarget, activeStoryIndex]);
 
   // Auto-expire tonight status after 12h
   useEffect(() => {
@@ -1229,6 +1231,7 @@ export default function App() {
         activityLog={activityLog}
         reflectionsCount={reflections.length}
         onOpenReflections={() => setShowReflections(true)}
+        onOpenTickets={() => setShowMyTickets(true)}
         ritual={ritual}
         ritualDoneToday={ritualDoneToday}
         onPerformRitual={performRitual}
@@ -1540,6 +1543,13 @@ export default function App() {
         <BlockedOverlay
           onBack={() => setShowBlocked(false)}
           onUnblock={unblockUserById}
+        />
+      )}
+      {showMyTickets && (
+        <MyTicketsOverlay
+          meId={meId}
+          onBack={() => setShowMyTickets(false)}
+          onOpenEvent={(id) => { setShowMyTickets(false); setActiveEvent(id); }}
         />
       )}
 
