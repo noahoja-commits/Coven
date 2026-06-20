@@ -36,11 +36,13 @@ export async function fetchNotifications() {
 }
 
 export async function markNotificationRead(id) {
-  await supabase.from('notifications').update({ read: true }).eq('id', id);
+  const { error } = await supabase.from('notifications').update({ read: true }).eq('id', id);
+  if (error) throw error;
 }
 
 export async function markAllNotificationsRead() {
-  await supabase.from('notifications').update({ read: true }).eq('read', false);
+  const { error } = await supabase.from('notifications').update({ read: true }).eq('read', false);
+  if (error) throw error;
 }
 
 export async function clearNotifications() {

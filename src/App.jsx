@@ -758,9 +758,14 @@ export default function App() {
 
   const addEvent = async (data) => {
     if (!meId) return;
-    const saved = await createEvent(data, { id: meId, handle: meHandle, avatar: meAvatar });
-    setEvents(prev => [saved, ...prev]);
-    logActivity({ kind: 'event', glyph: '◈', label: 'summoned a rite', detail: data.name });
+    try {
+      const saved = await createEvent(data, { id: meId, handle: meHandle, avatar: meAvatar });
+      setEvents(prev => [saved, ...prev]);
+      logActivity({ kind: 'event', glyph: '◈', label: 'summoned a rite', detail: data.name });
+    } catch (e) {
+      showToast("couldn't create the rite — try again.", 'error');
+      throw e; // let the modal keep itself open so the user doesn't lose their input
+    }
   };
 
   const buyTicket = (eventId) => {
@@ -895,6 +900,7 @@ export default function App() {
           if (wasFollowing) next[handle] = Date.now(); else delete next[handle];
           return next;
         });
+        showToast(wasFollowing ? "couldn't unfollow — try again." : "couldn't follow — try again.", 'error');
       }
     })();
   };
@@ -908,8 +914,13 @@ export default function App() {
   };
 
   const removeStory = (id) => {
-    setStories(prev => prev.filter(s => s.id !== id));
-    deleteStory(id).catch(() => {});
+    let removed = null;
+    setStories(prev => { removed = prev.find(s => s.id === id) || null; return prev.filter(s => s.id !== id); });
+    deleteStory(id).catch(() => {
+      // re-add on failure so it doesn't silently reappear on the next refresh
+      if (removed) setStories(prev => prev.some(s => s.id === id) ? prev : [...prev, removed]);
+      showToast("couldn't remove that story — try again.", 'error');
+    });
   };
 
   const addOddity = async (data) => {
@@ -1129,6 +1140,7 @@ export default function App() {
       await refreshProfile();
     } catch {
       await refreshProfile(); // revert to server truth on failure (e.g. handle taken)
+      showToast("couldn't save your profile — that handle may be taken.", 'error');
     }
   };
 

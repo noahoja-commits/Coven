@@ -9,6 +9,7 @@ import { searchProfiles } from '../../lib/db/profiles';
 export function SearchOverlay({ posts = [], events = [], onClose, onOpenPost, onOpenUser, onOpenCommunity, onOpenEvent, onOpenCodex, onOpenLibrary }) {
   const [q, setQ] = useState('');
   const [userResults, setUserResults] = useState([]);
+  const [userError, setUserError] = useState(false);
   const inputRef = useRef(null);
 
   useEffect(() => { inputRef.current?.focus(); }, []);
@@ -16,10 +17,12 @@ export function SearchOverlay({ posts = [], events = [], onClose, onOpenPost, on
   // Real people search is async — debounce it lightly.
   useEffect(() => {
     const query = q.trim();
-    if (!query) { setUserResults([]); return; }
+    if (!query) { setUserResults([]); setUserError(false); return; }
     let on = true;
     const t = setTimeout(() => {
-      searchProfiles(query).then(rows => { if (on) setUserResults(rows); }).catch(() => { if (on) setUserResults([]); });
+      searchProfiles(query)
+        .then(rows => { if (on) { setUserResults(rows); setUserError(false); } })
+        .catch(() => { if (on) { setUserResults([]); setUserError(true); } });
     }, 180);
     return () => { on = false; clearTimeout(t); };
   }, [q]);
@@ -74,6 +77,12 @@ export function SearchOverlay({ posts = [], events = [], onClose, onOpenPost, on
         {results && totalCount === 0 && (
           <div className="px-6 pt-12 text-center">
             <p className="text-[#6B6B6B] text-sm italic" style={F.serif}>· nothing in the dark matches "{q}" ·</p>
+          </div>
+        )}
+
+        {userError && q.trim() && (
+          <div className="px-4 py-2.5 text-[11px] text-[#C97a7a] italic" style={F.serif}>
+            · couldn't reach the soul directory — check your connection ·
           </div>
         )}
 
