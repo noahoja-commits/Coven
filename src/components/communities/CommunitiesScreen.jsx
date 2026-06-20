@@ -1,13 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, ChevronLeft, X } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { COMMUNITIES } from '../../data/communities';
 import { PostImage } from '../shared/Visuals';
-import { formatK } from '../../data/helpers';
+import { fetchCommunityStats } from '../../lib/db/posts';
+import { relativeTime } from '../../lib/time';
 
 export function CommunitiesScreen({ onOpenCommunity, membership = {}, onToggleMembership }) {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all'); // all | joined
+  const [stats, setStats] = useState(null); // real per-scene activity, null = loading
+
+  useEffect(() => {
+    let active = true;
+    fetchCommunityStats().then(s => { if (active) setStats(s); }).catch(() => { if (active) setStats({}); });
+    return () => { active = false; };
+  }, []);
+
   const q = query.trim().toLowerCase();
   const filtered = COMMUNITIES.filter(c => {
     if (filter === 'joined' && !membership[c.id]) return false;
@@ -58,6 +67,9 @@ export function CommunitiesScreen({ onOpenCommunity, membership = {}, onToggleMe
         )}
         {filtered.map(c => {
           const joined = !!membership[c.id];
+          const st = stats?.[c.id];
+          const postCount = st?.posts ?? 0;
+          const activeLabel = !stats ? '·' : (st?.latest ? `active ${relativeTime(st.latest)}` : 'quiet');
           return (
             <button key={c.id} onClick={() => onOpenCommunity(c.id)} className="w-full px-4 py-4 flex items-start gap-3 hover:bg-[#0F0F0F] transition-colors text-left">
               <div className="w-12 h-12 bg-[#141414] border border-[#2A2A2A] flex items-center justify-center text-[#F5F1E8] text-xl shrink-0" style={F.display}>
@@ -66,11 +78,11 @@ export function CommunitiesScreen({ onOpenCommunity, membership = {}, onToggleMe
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline justify-between gap-2 mb-0.5">
                   <h3 className="text-[#F5F1E8] text-base" style={F.display}>{c.name.toUpperCase()}</h3>
-                  <span className="text-[10px] text-[#6B6B6B] shrink-0" style={F.mono}>active {c.active}</span>
+                  <span className="text-[10px] text-[#6B6B6B] shrink-0" style={F.mono}>{activeLabel}</span>
                 </div>
                 <p className="text-[#A8A29E] text-sm leading-snug mb-1.5" style={F.serif}>{c.desc}</p>
                 <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-wider text-[#6B6B6B]" style={F.ui}>
-                  <span><span style={F.mono} className="text-xs text-[#A8A29E]">{formatK(c.members + (joined ? 1 : 0))}</span> souls</span>
+                  <span><span style={F.mono} className="text-xs text-[#A8A29E]">{!stats ? '·' : postCount}</span> {postCount === 1 ? 'post' : 'posts'}</span>
                   <span
                     role="button"
                     tabIndex={0}
@@ -118,9 +130,8 @@ export function CommunityDetail({ id, onBack, posts: postsProp, isMember, onTogg
           </button>
         </div>
         <div className="relative flex items-center gap-4 mt-4 text-[10px] uppercase tracking-wider text-[#6B6B6B]" style={F.ui}>
-          <span><span style={F.mono} className="text-xs text-[#A8A29E]">{formatK(c.members)}</span> souls</span>
-          <span><span style={F.mono} className="text-xs text-[#A8A29E]">{Math.floor(c.members * 0.08)}</span> online</span>
-          <span>active {c.active}</span>
+          <span><span style={F.mono} className="text-xs text-[#A8A29E]">{posts.length}</span> {posts.length === 1 ? 'post' : 'posts'}</span>
+          <span>{posts[0]?.time ? `active ${posts[0].time}` : 'quiet'}</span>
         </div>
       </div>
 

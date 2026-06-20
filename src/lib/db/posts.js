@@ -53,6 +53,26 @@ export async function fetchFeed(myId, { scope = 'everyone', before = null, limit
   return posts;
 }
 
+// Per-scene activity: real post counts + most-recent post time, grouped by
+// community. Powers the Scenes screen so its numbers reflect actual activity
+// instead of hardcoded fixtures. Returns { [communityId]: { posts, latest } }.
+export async function fetchCommunityStats() {
+  const { data, error } = await supabase
+    .from('feed_posts')
+    .select('community, created_at')
+    .order('created_at', { ascending: false })
+    .limit(2000);
+  if (error) throw error;
+  const stats = {};
+  (data || []).forEach(r => {
+    const key = r.community || 'general';
+    if (!stats[key]) stats[key] = { posts: 0, latest: null };
+    stats[key].posts += 1;
+    if (!stats[key].latest || r.created_at > stats[key].latest) stats[key].latest = r.created_at;
+  });
+  return stats;
+}
+
 // A user's own posts (newest first) for their profile grid — lightweight shape.
 export async function fetchUserPosts(authorId, { limit = 60 } = {}) {
   const { data, error } = await supabase
