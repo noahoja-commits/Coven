@@ -31,10 +31,21 @@ export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpda
   }, [profile?.id]);
   const [showAllAnniv, setShowAllAnniv] = useState(false);
 
-  // Memento mori calc
-  const daysLived = profile.birthday ? daysBetween(new Date(profile.birthday)) : 0;
-  // life expectancy ~80 years = 29200 days
-  const daysExpected = Math.max(0, 29200 - daysLived);
+  // Memento mori calc — whole days since birth, computed from LOCAL calendar
+  // dates (parse "YYYY-MM-DD" as local midnight, not UTC) so there's no
+  // timezone off-by-one. Missing/invalid birthday → null (handled in render).
+  const daysLived = (() => {
+    if (!profile.birthday) return null;
+    const [y, m, d] = String(profile.birthday).split('-').map(Number);
+    if (!y || !m || !d) return null;
+    const birth = new Date(y, m - 1, d);
+    const now = new Date();
+    const todayMid = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return Math.max(0, Math.floor((todayMid - birth) / 86400000));
+  })();
+  // life expectancy ~80 years (accounts for leap days: 80 × 365.25 ≈ 29220)
+  const LIFE_DAYS = Math.round(80 * 365.25);
+  const daysExpected = daysLived == null ? null : Math.max(0, LIFE_DAYS - daysLived);
   const sign = sunSign(profile.birthday);
 
   // Candle burn calc — 8 hours total
@@ -261,18 +272,22 @@ export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpda
             <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· memento mori ·</span>
             <span className="text-[#6B6B6B] text-base">☠</span>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <div className="text-[#F5F1E8] text-2xl leading-none" style={F.mono}>{daysLived.toLocaleString()}</div>
-              <div className="text-[10px] text-[#6B6B6B] uppercase tracking-wider mt-1" style={F.ui}>days lived</div>
-            </div>
-            {settings?.mementoExpected !== false && (
+          {daysLived == null ? (
+            <p className="text-[#A8A29E] text-sm" style={F.serif}>add your birthday to count the days.</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <div className="text-[#A89968] text-2xl leading-none" style={F.mono}>~{daysExpected.toLocaleString()}</div>
-                <div className="text-[10px] text-[#6B6B6B] uppercase tracking-wider mt-1" style={F.ui}>days expected</div>
+                <div className="text-[#F5F1E8] text-2xl leading-none" style={F.mono}>{daysLived.toLocaleString()}</div>
+                <div className="text-[10px] text-[#6B6B6B] uppercase tracking-wider mt-1" style={F.ui}>days lived</div>
               </div>
-            )}
-          </div>
+              {settings?.mementoExpected !== false && (
+                <div>
+                  <div className="text-[#A89968] text-2xl leading-none" style={F.mono}>~{daysExpected.toLocaleString()}</div>
+                  <div className="text-[10px] text-[#6B6B6B] uppercase tracking-wider mt-1" style={F.ui}>days left · est</div>
+                </div>
+              )}
+            </div>
+          )}
           <p className="text-[#6B6B6B] text-[11px] mt-2 italic" style={F.serif}>"remember, mortal, that thou must die."</p>
         </div>
       )}

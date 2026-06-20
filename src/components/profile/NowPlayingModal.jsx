@@ -36,15 +36,18 @@ export function NowPlayingModal({ current, onSave, onShare, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center animate-fade-in">
-      <div className="bg-[#0F0F0F] border border-[#2A2A2A] w-full sm:max-w-md sm:m-4 animate-slide-up">
+      <div className="bg-[#0F0F0F] border border-[#2A2A2A] w-full sm:max-w-md sm:m-4 animate-slide-up max-h-[90dvh] overflow-y-auto safe-pb">
         <div className="flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A]">
           <div>
-            <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· now playing ·</span>
-            <h3 className="text-[#F5F1E8] text-lg leading-none mt-1" style={F.display}>ON ROTATION</h3>
+            <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· on rotation ·</span>
+            <h3 className="text-[#F5F1E8] text-lg leading-none mt-1" style={F.display}>WHAT YOU'RE SPINNING</h3>
           </div>
           <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
         </div>
         <div className="p-4 space-y-3">
+          <p className="text-[10px] text-[#6B6B6B] italic leading-snug" style={F.serif}>
+            type in the track you're listening to — Coven doesn't read your music apps, this is yours to set and share.
+          </p>
           <div>
             <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968]" style={F.scriptureSC}>· artist ·</label>
             <input value={artist} onChange={e => setArtist(e.target.value.slice(0, 60))}

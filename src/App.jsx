@@ -570,7 +570,7 @@ export default function App() {
       };
     }
     setPosts(prev => [optimistic, ...prev]);
-    logActivity({ kind: 'post', glyph: anonymous ? '✟' : '✦', label: anonymous ? 'confessed' : 'posted', detail: body.length > 60 ? body.slice(0, 60) + '…' : body, postId: tempId });
+    logActivity({ kind: 'post', glyph: anonymous ? '✟' : '✦', label: anonymous ? 'made a confession' : 'spoke into the dark', detail: body.length > 60 ? body.slice(0, 60) + '…' : body, postId: tempId });
     try {
       const saved = await createPost({ body, community, anonymous, poll, img, kind }, { id: meId, handle: meHandle, avatar: meAvatar, avatarUrl: meAvatarUrl });
       setPosts(prev => prev.map(p => (p.id === tempId ? saved : p)));
@@ -631,7 +631,7 @@ export default function App() {
     const optimistic = { id: tempId, user: meHandle, avatar: meAvatar, body, time: 'just now', mine: true, parentId, reactions: { heart: 0, skull: 0 }, myReactions: {}, pending: true };
     setPosts(prev => prev.map(p => (p.id === postId ? { ...p, comments: [...(p.comments || []), optimistic] } : p)));
     const target = posts.find(p => p.id === postId);
-    logActivity({ kind: 'comment', glyph: '✎', label: `commented on ${target?.user || 'a post'}`, detail: body.length > 60 ? body.slice(0, 60) + '…' : body, postId });
+    logActivity({ kind: 'comment', glyph: '✎', label: `answered ${target?.user || 'a soul'}`, detail: body.length > 60 ? body.slice(0, 60) + '…' : body, postId });
     createComment({ postId, body, parentId }, { id: meId, handle: meHandle, avatar: meAvatar, avatarUrl: meAvatarUrl })
       .then(saved => setPosts(prev => prev.map(p => (p.id === postId ? { ...p, comments: (p.comments || []).map(c => (c.id === tempId ? saved : c)) } : p))))
       .catch(() => setPosts(prev => prev.map(p => (p.id === postId ? { ...p, comments: (p.comments || []).filter(c => c.id !== tempId) } : p))));
@@ -724,7 +724,7 @@ export default function App() {
     if (!wasMember) {
       const c = COMMUNITIES.find(x => x.id === id);
       addNotification({ kind: 'crew', avatar: c?.glyph || '✦', text: `you joined ${c?.name || id}` });
-      logActivity({ kind: 'join', glyph: c?.glyph || '✦', label: `joined ${c?.name || id}` });
+      logActivity({ kind: 'join', glyph: c?.glyph || '✦', label: `joined the ${c?.name || 'a'} scene` });
     }
   };
 
@@ -737,7 +737,7 @@ export default function App() {
     });
     if (!wasGoing) {
       addNotification({ kind: 'event', avatar: '◈', text: `you said you're going` });
-      logActivity({ kind: 'rsvp', glyph: '◈', label: 'rsvp’d to a rite', detail: id });
+      logActivity({ kind: 'rsvp', glyph: '◈', label: 'pledged to a rite', detail: events.find(e => e.id === id)?.name || null });
     }
     if (meId && !String(id).startsWith('temp-')) {
       dbToggleRsvp(id, meId, wasGoing).catch(() => setEventRsvp(prev => {
@@ -752,7 +752,7 @@ export default function App() {
     if (!meId) return;
     const saved = await createEvent(data, { id: meId, handle: meHandle, avatar: meAvatar });
     setEvents(prev => [saved, ...prev]);
-    logActivity({ kind: 'event', glyph: '◈', label: 'hosted a rite', detail: data.name });
+    logActivity({ kind: 'event', glyph: '◈', label: 'summoned a rite', detail: data.name });
   };
 
   const buyTicket = (eventId) => {
@@ -778,7 +778,7 @@ export default function App() {
       reactions: { bat: 0, fire: 0, skull: 0, smoke: 0 }, comments: [], myReactions: {},
       mine: true, baseCommentCount: 0, pending: true, quoted,
     }, ...prev]);
-    logActivity({ kind: 'repost', glyph: '↻', label: `reposted ${original.user}`, detail: commentary || original.body?.slice(0, 60) });
+    logActivity({ kind: 'repost', glyph: '↻', label: `echoed ${original.user}`, detail: commentary || original.body?.slice(0, 60) });
     try {
       const saved = await createPost({ body: commentary, community: original.community, quoted, kind: 'repost' }, { id: meId, handle: meHandle, avatar: meAvatar });
       setPosts(prev => prev.map(p => (p.id === tempId ? saved : p)));
@@ -865,7 +865,7 @@ export default function App() {
       else {
         next[handle] = Date.now();
         addNotification({ kind: 'follow', user: handle, avatar: '✦', text: `you followed ${handle}` });
-        logActivity({ kind: 'follow', glyph: '✦', label: `followed ${handle}`, handle });
+        logActivity({ kind: 'follow', glyph: '✦', label: `bound to ${handle}`, handle });
       }
       return next;
     });
@@ -1024,7 +1024,7 @@ export default function App() {
     const newStreak = continuing ? ritual.streak + 1 : 1;
     setRitual({ streak: newStreak, lastDay: todayKey });
     addNotification({ kind: 'vespers', avatar: '☩', text: `ritual marked · ${newStreak}d streak` });
-    logActivity({ kind: 'ritual', glyph: '☩', label: `marked the ritual · day ${newStreak}` });
+    logActivity({ kind: 'ritual', glyph: '☩', label: `kept the ritual · day ${newStreak}` });
   };
 
   const toggleCrystal = (id) => {
