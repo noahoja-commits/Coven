@@ -103,6 +103,11 @@ export function ComposeOverlay({ meId, onClose, onPost }) {
               <button onClick={clearMedia} className="absolute top-1 right-1 w-7 h-7 bg-black/80 border border-[#3F3F3F] text-[#F5F1E8] flex items-center justify-center" title="remove"><X size={14} /></button>
             </div>
           )}
+          {mediaKind === 'video' && (
+            <p className="mt-1.5 text-[10px] text-[#A89968]/70 italic" style={F.serif}>
+              heads up — camera videos can carry your location; Coven can't strip that from video yet.
+            </p>
+          )}
           {poll && (
             <div className="mt-4 border border-[#7B2CBF]/30 bg-[#7B2CBF]/5 p-3 space-y-2">
               <div className="text-[10px] uppercase tracking-[0.25em] text-[#7B2CBF] mb-1" style={F.scriptureSC}>· poll ·</div>

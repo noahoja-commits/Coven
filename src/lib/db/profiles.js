@@ -99,14 +99,23 @@ export async function searchProfiles(query, { limit = 8 } = {}) {
 
 // Follower / following / post counts for a profile (aggregate; fine at MVP scale).
 export async function getProfileStats(id) {
-  const [followers, following, posts] = await Promise.all([
-    supabase.from('follows').select('*', { count: 'exact', head: true }).eq('followee_id', id),
-    supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', id),
+  // Follower/following counts come from a SECURITY DEFINER rpc so the follow graph
+  // itself stays private (raw `follows` is locked to own edges). Fall back to direct
+  // counts for the window before migration 0029 adds the rpc.
+  const [counts, posts] = await Promise.all([
+    supabase.rpc('profile_follow_counts', { p_id: id }),
     supabase.from('feed_posts').select('*', { count: 'exact', head: true }).eq('author_id_public', id),
   ]);
-  return {
-    followers: followers.count || 0,
-    following: following.count || 0,
-    posts: posts.count || 0,
-  };
+  let followers = 0, following = 0;
+  if (!counts.error && counts.data && counts.data[0]) {
+    followers = Number(counts.data[0].followers) || 0;
+    following = Number(counts.data[0].following) || 0;
+  } else {
+    const [f1, f2] = await Promise.all([
+      supabase.from('follows').select('*', { count: 'exact', head: true }).eq('followee_id', id),
+      supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', id),
+    ]);
+    followers = f1.count || 0; following = f2.count || 0;
+  }
+  return { followers, following, posts: posts.count || 0 };
 }
