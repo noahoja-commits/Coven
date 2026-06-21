@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Send, Check, CheckCheck } from 'lucide-react';
 import { F } from '../../styles/fonts';
 
-export function ChatThread({ conversation, messages, onSend, onBack, onRetry }) {
-  const [draft, setDraft] = useState('');
+export function ChatThread({ conversation, messages, onSend, onBack, onRetry, initialDraft = '' }) {
+  const [draft, setDraft] = useState(initialDraft);
   const [seenAt, setSeenAt] = useState(null); // simulated remote read after delay
   const scrollRef = useRef(null);
 

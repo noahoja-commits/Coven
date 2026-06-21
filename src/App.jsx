@@ -102,6 +102,7 @@ export default function App() {
   // (fetchConversations) has caught up — e.g. opening from a DM notification or
   // a brand-new conversation. Without this the thread renders blank (no reply box).
   const [activeConvMeta, setActiveConvMeta] = useState(null);
+  const [dmPrefill, setDmPrefill] = useState(''); // seeds the chat draft (e.g. an oddity inquiry)
   const [showCompose, setShowCompose] = useState(false);
   const [showNotifs, setShowNotifs] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -735,6 +736,7 @@ export default function App() {
 
   const openConversation = (id, meta) => {
     if (!id) return;
+    setDmPrefill(meta?.prefill || ''); // seed (or clear) the draft for this open
     // Synthetic fallback so the thread (and its reply box) always render, even
     // before the inbox has this conversation. Real data overwrites it on fetch.
     const known = conversations.find(c => c.id === id);
@@ -858,7 +860,7 @@ export default function App() {
     return null;
   };
 
-  const openDMWithUser = async (handle) => {
+  const openDMWithUser = async (handle, prefill = '') => {
     if (!meId || !handle || handle === meHandle) return;
     const otherId = await resolveUserId(handle);
     if (!otherId) return;
@@ -866,7 +868,7 @@ export default function App() {
     if (!convId) return;
     await fetchConversations().then(setConversations).catch(() => {});
     setShowDMs(false);
-    openConversation(convId, { user: handle });
+    openConversation(convId, { user: handle, prefill });
   };
 
   const sendMessageToUser = async (handle, body) => {
@@ -1578,9 +1580,11 @@ export default function App() {
       )}
       {activeConversation && (
         <ChatThread
+          key={activeConversation}
           conversationId={activeConversation}
           conversation={conversations.find(c => c.id === activeConversation) || activeConvMeta}
           messages={messages[activeConversation] || []}
+          initialDraft={dmPrefill}
           onSend={(body) => sendMessage(activeConversation, body)}
           onRetry={(messageId) => retryMessage(activeConversation, messageId)}
           onBack={() => { setActiveConversation(null); setActiveConvMeta(null); }}
@@ -1892,7 +1896,11 @@ export default function App() {
       {activeOddity && (
         <OddityDetail
           item={listings.find(l => l.id === activeOddity)}
-          onWhisper={(h) => { setActiveOddity(null); setActivePortal(null); openDMWithUser(h); }}
+          onWhisper={(h) => {
+            const it = listings.find(l => l.id === activeOddity);
+            const prefill = it ? `re: "${it.title}" — is this still available?` : '';
+            setActiveOddity(null); setActivePortal(null); openDMWithUser(h, prefill);
+          }}
           onOpenUser={(h) => { setActiveOddity(null); setActivePortal(null); if (h && h !== meHandle) setActiveUserHandle(h); }}
           onBack={() => setActiveOddity(null)}
         />
