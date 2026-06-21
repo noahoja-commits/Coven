@@ -112,6 +112,31 @@ export function dailyPrompt(date = new Date()) {
   return REFLECTION_PROMPTS[((day % REFLECTION_PROMPTS.length) + REFLECTION_PROMPTS.length) % REFLECTION_PROMPTS.length];
 }
 
+// The app keeps vampire hours — a tint that shifts with the local hour, deepening
+// after midnight and going faint-grey at dawn. 3–4am is the witching hour (deepest).
+export function livingTheme(date = new Date()) {
+  const h = date.getHours() + date.getMinutes() / 60;
+  const witching = h >= 3 && h < 4;
+  let color, opacity = 0.5;
+  if (witching) {
+    color = 'radial-gradient(ellipse at 50% 25%, rgba(91,15,26,0.55), rgba(20,0,5,0.72))';
+    opacity = 0.62;
+  } else if (h < 5) {           // deep night
+    color = 'radial-gradient(ellipse at 50% 30%, rgba(40,7,16,0.45), rgba(5,2,4,0.62))';
+  } else if (h < 7) {           // dawn — faint grey
+    color = 'linear-gradient(180deg, rgba(120,122,138,0.16), rgba(40,42,52,0.10))';
+    opacity = 0.45;
+  } else if (h < 17) {          // day — barely there
+    color = 'linear-gradient(180deg, rgba(120,122,138,0.05), transparent)';
+    opacity = 0.4;
+  } else if (h < 20) {          // dusk — warm
+    color = 'radial-gradient(ellipse at 50% 82%, rgba(139,60,0,0.12), rgba(20,8,4,0.20))';
+  } else {                      // evening into night
+    color = 'radial-gradient(ellipse at 50% 30%, rgba(43,7,16,0.26), rgba(10,4,8,0.40))';
+  }
+  return { color, opacity, witching };
+}
+
 // Approximate sunrise/sunset for NYC (lat 40.7, lon -74.0)
 // Returns { sunrise: "06:42", sunset: "20:14" } in local time
 export function sunTimes(date = new Date()) {

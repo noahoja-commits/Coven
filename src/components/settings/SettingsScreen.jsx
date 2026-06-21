@@ -97,6 +97,12 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
         </Section>
 
         <Section title="atmosphere">
+          <Row label="Living theme" desc="the app keeps vampire hours — darker after midnight, faint grey at dawn, deepest at 3am. posts fade as they age.">
+            <Toggle on={settings.livingTheme !== false} onChange={v => set('livingTheme', v)} />
+          </Row>
+          <Row label="The familiar" desc="a small black cat pads around the screen. tap to feed it.">
+            <Toggle on={settings.familiar !== false} onChange={v => set('familiar', v)} />
+          </Row>
           <Row label="Weather mood" desc="tint the app with the weather outside.">
             <Toggle on={settings.weatherMood} onChange={v => set('weatherMood', v)} />
           </Row>

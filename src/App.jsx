@@ -88,6 +88,8 @@ import { CommentsOverlay } from './components/feed/CommentsOverlay';
 import { QuoteModal } from './components/feed/QuoteModal';
 import { VespersArchiveModal } from './components/feed/VespersArchiveModal';
 import { TRACKER_CATEGORIES } from './data/profile';
+import { livingTheme } from './data/helpers';
+import { FloatingCat } from './components/shared/FloatingCat';
 
 export default function App() {
   // === AUTH ===
@@ -1464,6 +1466,7 @@ export default function App() {
         suggestedSouls={suggestedSouls}
         following={following}
         onFollow={toggleFollow}
+        witching={!!living?.witching}
         settings={settings}
       />
     );
@@ -1546,6 +1549,9 @@ export default function App() {
     return null;
   };
 
+  // Living theme — a tint that follows the local hour (festTick re-renders us every 60s).
+  const living = (settings.livingTheme !== false && !settings.parchmentMode) ? livingTheme() : null;
+
   return (
     <div className="phone-frame max-w-md mx-auto relative overflow-hidden h-[100dvh] text-[#F5F1E8]"
       style={{ background: settings.parchmentMode ? '#EDE0C2' : '#0A0A0A' }}>
@@ -1579,6 +1585,15 @@ export default function App() {
         <div className="absolute inset-0 pointer-events-none z-10" style={{
           backdropFilter: 'grayscale(0.85) contrast(1.05)',
           WebkitBackdropFilter: 'grayscale(0.85) contrast(1.05)',
+        }} />
+      )}
+
+      {/* Living theme — time-of-day tint; deepest at the 3–4am witching hour */}
+      {living && !isInsideOverlay && (
+        <div className="absolute inset-0 pointer-events-none z-10 transition-opacity duration-[3000ms]" style={{
+          background: living.color,
+          opacity: living.opacity,
+          mixBlendMode: 'soft-light',
         }} />
       )}
 
@@ -1989,6 +2004,7 @@ export default function App() {
           onSpeak={() => { setSeenWelcome(true); setShowCompose(true); }}
         />
       )}
+      {settings.familiar !== false && !isInsideOverlay && <FloatingCat active />}
       <Toast toast={toast} onDone={() => setToast(null)} />
     </div>
   );

@@ -16,9 +16,17 @@ export function HomeScreen({
   onOpenStory, onCreateStory, stories = [], meHandle = 'you', meAvatar = '🦇',
   tonightStatus, onOpenTonightStatus, onOpenTarot, onOpenEphemeris, onOpenLibrary, onOpenCodex, onOpenHashtag, onOpenVespersArchive,
   ritual, ritualDoneToday, onPerformRitual, crystals = [], trackers = {}, onUpdateTracker, onOpenReflections,
-  feedLoading = false, suggestedSouls = [], following = {}, onFollow,
+  feedLoading = false, suggestedSouls = [], following = {}, onFollow, witching = false,
   settings = {},
 }) {
+  // Posts fade + desaturate with age (only when the living theme is on).
+  const decayOn = settings.livingTheme !== false;
+  const postAgeStyle = (createdAt) => {
+    if (!decayOn || !createdAt) return undefined;
+    const hrs = (Date.now() - new Date(createdAt).getTime()) / 3600000;
+    const opacity = hrs < 4 ? 1 : hrs < 12 ? 0.94 : hrs < 24 ? 0.86 : hrs < 72 ? 0.76 : 0.62;
+    return { opacity, filter: hrs > 168 ? 'grayscale(0.35)' : undefined, transition: 'opacity 0.6s' };
+  };
   const tarotOn = settings.tarotEnabled !== false;
   const vespersOn = settings.vespersEnabled !== false;
   const ghostOn = !!settings.ghostMode;
@@ -113,6 +121,17 @@ export function HomeScreen({
 
   return (
     <div className="pb-24">
+      {/* The witching hour (3–4am) — a fleeting threshold */}
+      {witching && (
+        <button onClick={onOpenReflections}
+          className="w-full px-4 py-2.5 border-b border-[#5B0F1A]/40 flex items-center justify-center gap-2 animate-pulse-slow"
+          style={{ background: 'linear-gradient(90deg, rgba(91,15,26,0.35), rgba(20,0,5,0.5), rgba(91,15,26,0.35))' }}>
+          <span className="text-[#C9A961]">⛧</span>
+          <span className="text-[10px] uppercase tracking-[0.4em] text-[#C9A961]" style={F.scriptureSC}>the witching hour · reflect</span>
+          <span className="text-[#C9A961]">⛧</span>
+        </button>
+      )}
+
       {/* Daily altar — personal practice anchor */}
       {altarOn && (
         <DailyAltar
@@ -326,7 +345,7 @@ export function HomeScreen({
           const candled = !!postCandles[post.id];
           const pinned = pinnedPostId === post.id;
           return (
-            <article key={post.id} className="px-4 py-4 relative select-none" onDoubleClick={() => doubleTapLike(post)}>
+            <article key={post.id} className="px-4 py-4 relative select-none" style={postAgeStyle(post.createdAt)} onDoubleClick={() => doubleTapLike(post)}>
               {burst === post.id && (
                 <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
                   <span className="text-6xl animate-like-burst drop-shadow-[0_0_20px_rgba(139,0,0,0.8)]">🦇</span>
