@@ -146,7 +146,7 @@ export function CommunityDetail({ id, onBack, posts: postsProp, isMember, onTogg
               </div>
             </div>
             {post.body && <p className="text-[#F5F1E8] text-[15px] leading-relaxed" style={F.serif}>{post.body}</p>}
-            {post.kind === 'photo' && <div className="mt-3"><PostImage kind={post.img} /></div>}
+            {(post.kind === 'photo' || post.kind === 'video') && <div className="mt-3"><PostImage kind={post.img} /></div>}
           </article>
         )) : (
           <div className="px-4 py-12 text-center">

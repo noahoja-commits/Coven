@@ -29,6 +29,23 @@ async function compress(file, { maxEdge = 1600, quality = 0.82 } = {}) {
 }
 
 // Compress, then upload to a public bucket. Returns the public URL.
+// Upload a video as-is (no client-side compression — browsers can't transcode).
+// Hard size cap keeps the free Supabase storage/egress quota from blowing up.
+export async function uploadVideo(bucket, keyPrefix, file) {
+  if (!file) throw new Error('no file');
+  if (!file.type?.startsWith('video/')) throw new Error('please choose a video');
+  if (file.size > 30 * 1024 * 1024) throw new Error('video is too large (max 30MB) — trim it or lower the quality');
+  const ext = (file.name?.split('.').pop() || file.type.split('/')[1] || 'mp4').toLowerCase();
+  const safeExt = ['mp4', 'webm', 'mov', 'm4v', 'ogg'].includes(ext) ? ext : 'mp4';
+  const rand = Math.random().toString(36).slice(2, 8);
+  const path = `${keyPrefix || 'anon'}/${Date.now()}-${rand}.${safeExt}`;
+  const { error } = await supabase.storage.from(bucket).upload(path, file, {
+    upsert: true, contentType: file.type || 'video/mp4', cacheControl: '3600',
+  });
+  if (error) throw error;
+  return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+}
+
 // keyPrefix is usually the owner/user id so paths are namespaced.
 export async function uploadImage(bucket, keyPrefix, file) {
   if (!file) throw new Error('no file');

@@ -6,8 +6,10 @@ const GRADS = [
   'linear-gradient(135deg, #1F1F1F 0%, #0A0A0A 100%)',
 ];
 
-// Instagram-style 3-column grid of a user's posts. Photos show the image;
-// text/poll posts show a snippet on a gradient.
+const isVideoUrl = (u) => typeof u === 'string' && /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u);
+
+// Instagram-style 3-column grid of a user's posts. Photos show the image,
+// videos show their first frame with a ▶ badge; text/poll posts show a snippet.
 export function PostGrid({ posts = [], loading = false, emptyText = 'no posts yet', onOpen }) {
   if (loading) return <div className="py-12 text-center text-[#6B6B6B] text-xs italic" style={F.serif}>· unrolling ·</div>;
   if (!posts.length) return <div className="py-16 text-center text-[#6B6B6B] text-sm italic" style={F.serif}>{emptyText}</div>;
@@ -16,7 +18,12 @@ export function PostGrid({ posts = [], loading = false, emptyText = 'no posts ye
       {posts.map((p, i) => (
         <button key={p.id} onClick={() => onOpen && onOpen(p.id)}
           className="aspect-square relative overflow-hidden bg-[#0A0A0A]">
-          {p.img ? (
+          {p.img && isVideoUrl(p.img) ? (
+            <>
+              <video src={p.img} muted playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
+              <span className="absolute bottom-1 right-1 text-[#F5F1E8] text-[10px] bg-black/60 px-1 rounded-sm">▶</span>
+            </>
+          ) : p.img ? (
             <img src={p.img} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
           ) : (
             <>

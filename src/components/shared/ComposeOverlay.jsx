@@ -2,32 +2,40 @@ import { useState, useRef } from 'react';
 import { X, Image as ImageIcon, Hash, EyeOff, Eye, BarChart2, Plus, Minus, Loader2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { COMMUNITIES } from '../../data/communities';
-import { uploadImage } from '../../lib/db/storage';
+import { uploadImage, uploadVideo } from '../../lib/db/storage';
 
 export function ComposeOverlay({ meId, onClose, onPost }) {
   const [text, setText] = useState('');
   const [community, setCommunity] = useState('general');
   const [anonymous, setAnonymous] = useState(false);
   const [poll, setPoll] = useState(null); // null or {options: ['', '']}
-  const [imgFile, setImgFile] = useState(null);
-  const [imgPreview, setImgPreview] = useState(null);
+  const [mediaFile, setMediaFile] = useState(null);
+  const [mediaPreview, setMediaPreview] = useState(null);
+  const [mediaKind, setMediaKind] = useState(null); // 'image' | 'video'
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const fileRef = useRef(null);
 
   const pollOk = !poll || poll.options.filter(o => o.trim()).length >= 2;
-  const canPost = (text.trim().length > 0 || imgFile) && pollOk && !busy;
+  const canPost = (text.trim().length > 0 || mediaFile) && pollOk && !busy;
 
-  const onPickImage = (e) => {
+  const onPickMedia = (e) => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
-    if (!file.type?.startsWith('image/')) { setError('please choose an image'); return; }
+    const isVideo = file.type?.startsWith('video/');
+    const isImage = file.type?.startsWith('image/');
+    if (!isVideo && !isImage) { setError('please choose a photo or video'); return; }
+    if (isVideo && file.size > 30 * 1024 * 1024) { setError('video is too large (max 30MB) — trim it or lower the quality'); return; }
     setError('');
-    setImgFile(file);
-    setImgPreview(URL.createObjectURL(file));
+    setMediaFile(file);
+    setMediaKind(isVideo ? 'video' : 'image');
+    setMediaPreview(URL.createObjectURL(file));
   };
-  const clearImage = () => { setImgFile(null); setImgPreview(null); };
+  const clearMedia = () => {
+    if (mediaPreview) URL.revokeObjectURL(mediaPreview);
+    setMediaFile(null); setMediaPreview(null); setMediaKind(null);
+  };
 
   const submit = async () => {
     if (!canPost) return;
@@ -38,12 +46,17 @@ export function ComposeOverlay({ meId, onClose, onPost }) {
         const opts = poll.options.map(o => o.trim()).filter(Boolean);
         if (opts.length >= 2) payload.poll = opts;
       }
-      if (imgFile) {
-        payload.img = await uploadImage('post-images', meId, imgFile);
-        payload.kind = 'photo';
+      if (mediaFile) {
+        if (mediaKind === 'video') {
+          payload.img = await uploadVideo('post-images', meId, mediaFile);
+          payload.kind = 'video';
+        } else {
+          payload.img = await uploadImage('post-images', meId, mediaFile);
+          payload.kind = 'photo';
+        }
       }
       onPost && onPost(payload);
-      setText(''); clearImage();
+      setText(''); clearMedia();
     } catch (err) {
       setError(err?.message || 'could not post — try again');
       setBusy(false);
@@ -78,12 +91,16 @@ export function ComposeOverlay({ meId, onClose, onPost }) {
           <textarea value={text} onChange={e => setText(e.target.value.slice(0, 2000))} maxLength={2000}
             placeholder="speak..."
             className="w-full bg-transparent text-[#F5F1E8] text-base outline-none resize-none placeholder:text-[#3F3F3F]"
-            style={{ ...F.serif, minHeight: poll ? '120px' : (imgPreview ? '120px' : '60vh') }}
+            style={{ ...F.serif, minHeight: poll ? '120px' : (mediaPreview ? '120px' : '60vh') }}
             autoFocus />
-          {imgPreview && (
+          {mediaPreview && (
             <div className="mt-3 relative inline-block">
-              <img src={imgPreview} alt="" className="max-h-72 w-auto border border-[#2A2A2A]" />
-              <button onClick={clearImage} className="absolute top-1 right-1 w-7 h-7 bg-black/80 border border-[#3F3F3F] text-[#F5F1E8] flex items-center justify-center" title="remove image"><X size={14} /></button>
+              {mediaKind === 'video' ? (
+                <video src={mediaPreview} controls playsInline className="max-h-72 w-auto border border-[#2A2A2A]" />
+              ) : (
+                <img src={mediaPreview} alt="" className="max-h-72 w-auto border border-[#2A2A2A]" />
+              )}
+              <button onClick={clearMedia} className="absolute top-1 right-1 w-7 h-7 bg-black/80 border border-[#3F3F3F] text-[#F5F1E8] flex items-center justify-center" title="remove"><X size={14} /></button>
             </div>
           )}
           {poll && (
@@ -110,10 +127,10 @@ export function ComposeOverlay({ meId, onClose, onPost }) {
         </div>
         {error && <div className="px-4 py-2 text-[11px] text-[#8B0000] text-center" style={F.ui}>{error}</div>}
         <div className={`border-t border-[#1A1A1A] px-4 py-3 flex items-center gap-4 ${anonymous ? '' : 'safe-pb'}`}>
-          <input ref={fileRef} type="file" accept="image/*" onChange={onPickImage} className="hidden" />
+          <input ref={fileRef} type="file" accept="image/*,video/*" onChange={onPickMedia} className="hidden" />
           <button onClick={() => fileRef.current?.click()} disabled={!!poll}
-            className={`${imgPreview ? 'text-[#C9A961]' : 'text-[#A8A29E] hover:text-[#F5F1E8]'} disabled:opacity-30`} title="add a photo"><ImageIcon size={18} /></button>
-          <button onClick={togglePoll} disabled={!!imgFile} className={`${poll ? 'text-[#7B2CBF]' : 'text-[#A8A29E] hover:text-[#F5F1E8]'} disabled:opacity-30`} title="poll"><BarChart2 size={18} /></button>
+            className={`${mediaPreview ? 'text-[#C9A961]' : 'text-[#A8A29E] hover:text-[#F5F1E8]'} disabled:opacity-30`} title="add a photo or video"><ImageIcon size={18} /></button>
+          <button onClick={togglePoll} disabled={!!mediaFile} className={`${poll ? 'text-[#7B2CBF]' : 'text-[#A8A29E] hover:text-[#F5F1E8]'} disabled:opacity-30`} title="poll"><BarChart2 size={18} /></button>
           <button onClick={() => setAnonymous(!anonymous)}
             className={`flex items-center gap-1.5 text-[10px] uppercase tracking-wider transition-colors ${anonymous ? 'text-[#7B2CBF]' : 'text-[#6B6B6B] hover:text-[#A8A29E]'}`}
             style={F.ui} title="post as confession">

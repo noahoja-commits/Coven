@@ -407,7 +407,7 @@ export function HomeScreen({
                 );
               })()}
 
-              {post.kind === 'photo' && <div className="mb-3"><PostImage kind={post.img} /></div>}
+              {(post.kind === 'photo' || post.kind === 'video') && <div className="mb-3"><PostImage kind={post.img} /></div>}
 
               {post.kind === 'event' && (
                 <button onClick={() => onOpenEvent && onOpenEvent({ id: post.event.id, name: post.event.name })}

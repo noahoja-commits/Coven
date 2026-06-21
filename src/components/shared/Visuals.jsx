@@ -1,12 +1,17 @@
 import { F } from '../../styles/fonts';
 
-// Renders a real uploaded photo (when `kind` is a URL) or one of the stylized
-// stand-ins (legacy preset keys).
+// Renders real uploaded media (when `kind` is a URL — image or video) or one of
+// the stylized stand-ins (legacy preset keys).
 export function PostImage({ kind }) {
   if (typeof kind === 'string' && /^(https?:|blob:|data:)/.test(kind)) {
+    const isVideo = /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(kind);
     return (
       <div className="relative w-full overflow-hidden bg-[#0A0608] border border-[#1A1A1A]">
-        <img src={kind} alt="" loading="lazy" className="w-full h-auto max-h-[80vh] object-contain" />
+        {isVideo ? (
+          <video src={kind} controls playsInline preload="metadata" className="w-full h-auto max-h-[80vh] object-contain bg-black" />
+        ) : (
+          <img src={kind} alt="" loading="lazy" className="w-full h-auto max-h-[80vh] object-contain" />
+        )}
       </div>
     );
   }

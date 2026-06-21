@@ -69,7 +69,7 @@ export function CommentsOverlay({ post, onClose, onComment, onReact, onReactComm
             </div>
           </div>
           {post.body && <p className="text-[#F5F1E8] text-[15px] leading-relaxed mb-3" style={F.serif}>{post.body}</p>}
-          {post.kind === 'photo' && <div className="mb-3"><PostImage kind={post.img} /></div>}
+          {(post.kind === 'photo' || post.kind === 'video') && <div className="mb-3"><PostImage kind={post.img} /></div>}
           {post.kind === 'event' && (
             <div className="mb-3 border border-[#2A2A2A] bg-[#0F0F0F] p-3">
               <div className="text-[#F5F1E8] text-lg" style={F.display}>{post.event.name}</div>
