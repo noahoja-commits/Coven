@@ -23,6 +23,7 @@ export function OnboardingFlow({ onComplete }) {
   const [birthday, setBirthday] = useState('');
   const [scenes, setScenes] = useState([]);
   const [vibes, setVibes] = useState([]);
+  const [adult, setAdult] = useState(false); // 18+ self-attestation, gates entry
   const [handleStatus, setHandleStatus] = useState('idle'); // idle|checking|free|taken
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -51,12 +52,25 @@ export function OnboardingFlow({ onComplete }) {
   // later. (We allow advancing while the availability check is still in flight —
   // finish() catches a taken handle and bounces back, so a slow check can't wall you.)
   const canAdvance = () => {
+    if (step === 0) return adult; // must confirm 18+ before entering
     if (step === 1) return handle.trim().length >= 2 && handleStatus !== 'taken';
     return true;
   };
 
+  // If a birthday is given, enforce 18+ from it (self-attested checkbox is the floor).
+  const isUnder18 = (iso) => {
+    if (!iso) return false;
+    const b = new Date(iso); if (isNaN(b)) return false;
+    const now = new Date();
+    let age = now.getFullYear() - b.getFullYear();
+    const m = now.getMonth() - b.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < b.getDate())) age--;
+    return age < 18;
+  };
+
   const finish = async () => {
     if (submitting) return;
+    if (isUnder18(birthday)) { setError('you must be 18 or older to enter the Coven'); setStep(3); return; }
     setSubmitting(true); setError('');
     try {
       await onComplete({ handle: handle.trim().toLowerCase().replace(/\s/g, '_'), glyph, city: city.trim(), birthday, scenes, vibes });
@@ -95,6 +109,11 @@ export function OnboardingFlow({ onComplete }) {
             <p className="text-[#F5F1E8] text-2xl leading-snug mb-3" style={F.scripture}>You have found the Coven.</p>
             <p className="text-[#A89968]/80 text-sm italic" style={F.scripture}>"a quiet place for the dark-clad, the dramatic, the devout, and the wandering. proceed when ready."</p>
             <div className="mt-8 text-[#6B6B6B] text-[10px] uppercase tracking-[0.3em]" style={F.ui}>goth & alt only · 18+</div>
+            <button onClick={() => setAdult(a => !a)}
+              className="mt-6 flex items-center gap-3 text-left max-w-[16rem] group">
+              <span className={`shrink-0 w-5 h-5 border flex items-center justify-center transition-all ${adult ? 'border-[#8B0000] bg-[#5B0F1A]/30 text-[#C9A961]' : 'border-[#2A2A2A] text-transparent'}`}>✓</span>
+              <span className="text-[#A89968]/80 text-xs leading-snug" style={F.serif}>I confirm I am 18 years of age or older.</span>
+            </button>
           </div>
         )}
 

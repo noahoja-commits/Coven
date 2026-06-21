@@ -1755,6 +1755,7 @@ export default function App() {
           }))}
           onConfess={(body) => addPost({ body, community: 'general', anonymous: true })}
           onReact={reactToPost}
+          onReport={(id) => reportTarget('post', id)}
         />
       )}
       {activePortal === 'oddities' && !activeOddity && !showOddityCompose && (

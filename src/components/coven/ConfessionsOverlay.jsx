@@ -1,14 +1,21 @@
 import { useState } from 'react';
-import { ArrowLeft, Send } from 'lucide-react';
+import { ArrowLeft, Send, Flag } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { Reaction } from '../shared/Reaction';
 
 // Confessions are real anonymous posts. `userConfessions` is the live list of the
 // current feed's anonymous posts (author masked server-side); confessing creates a
 // real anonymous post via onConfess; reactions go through the normal post reactions.
-export function ConfessionsOverlay({ onClose, userConfessions = [], onConfess, onReact }) {
+// onReport reports + locally hides a confession (the backend auto-hides at 3 reporters).
+export function ConfessionsOverlay({ onClose, userConfessions = [], onConfess, onReact, onReport }) {
   const [draft, setDraft] = useState('');
   const [posting, setPosting] = useState(false);
+  const [hidden, setHidden] = useState({}); // id -> true once reported/hidden locally
+
+  const report = (id) => {
+    setHidden(h => ({ ...h, [id]: true }));
+    onReport && onReport(id);
+  };
 
   const submit = async () => {
     const body = draft.trim();
@@ -66,7 +73,7 @@ export function ConfessionsOverlay({ onClose, userConfessions = [], onConfess, o
             <p className="text-center text-[#A89968]/40 text-xs italic py-8" style={F.scripture}>
               · no confessions yet. be the first to unburden ·
             </p>
-          ) : userConfessions.map(c => (
+          ) : userConfessions.filter(c => !hidden[c.id]).map(c => (
             <div key={c.id} className="border border-[#7B2CBF]/20 bg-[#0A0204]/60 p-4">
               <p className="text-[#F5F1E8] text-base italic leading-relaxed mb-3" style={F.scripture}>"{c.body}"</p>
               <div className="flex items-center justify-between">
@@ -76,6 +83,11 @@ export function ConfessionsOverlay({ onClose, userConfessions = [], onConfess, o
                   <Reaction icon="🔥" count={c.reactions?.fire || 0} active={!!c.myReactions?.fire} onClick={() => onReact && onReact(c.id, 'fire')} />
                 </div>
                 <div className="text-[10px] text-[#A89968]/50 flex items-center gap-2" style={F.scriptureSC}>
+                  <button onClick={() => report(c.id)}
+                    className="text-[#A89968]/40 hover:text-[#8B0000] transition-colors p-1 -m-1"
+                    title="report this confession">
+                    <Flag size={11} />
+                  </button>
                   <span>· anonymous ·</span>
                   <span style={F.mono}>{c.time}</span>
                 </div>
