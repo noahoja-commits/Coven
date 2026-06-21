@@ -68,19 +68,26 @@ export function daysBetween(a, b = new Date()) {
 }
 
 // Compute moon phase (very approximate, good for display)
+export const SYNODIC = 29.530588853; // mean synodic month (days)
+
 export function moonPhase(date = new Date()) {
-  // Days since reference new moon (Jan 6, 2000)
-  const ref = new Date('2000-01-06').getTime();
-  const days = (date.getTime() - ref) / (1000 * 60 * 60 * 24);
-  const phase = (days % 29.53059) / 29.53059;
-  if (phase < 0.0625 || phase > 0.9375) return { name: 'New Moon', glyph: '●', illum: 0 };
-  if (phase < 0.1875) return { name: 'Waxing Crescent', glyph: '☽', illum: 0.25 };
-  if (phase < 0.3125) return { name: 'First Quarter', glyph: '◐', illum: 0.5 };
-  if (phase < 0.4375) return { name: 'Waxing Gibbous', glyph: '◑', illum: 0.75 };
-  if (phase < 0.5625) return { name: 'Full Moon', glyph: '○', illum: 1 };
-  if (phase < 0.6875) return { name: 'Waning Gibbous', glyph: '◒', illum: 0.75 };
-  if (phase < 0.8125) return { name: 'Last Quarter', glyph: '◓', illum: 0.5 };
-  return { name: 'Waning Crescent', glyph: '☾', illum: 0.25 };
+  // Days since an accurate reference new moon: 2000-01-06 18:14 UTC (not midnight —
+  // that was ~18h off and pushed the phase boundaries).
+  const ref = Date.UTC(2000, 0, 6, 18, 14, 0);
+  const days = (date.getTime() - ref) / 86400000;
+  let phase = (days % SYNODIC) / SYNODIC;
+  if (phase < 0) phase += 1;                              // 0..1, 0 = new moon
+  const illum = (1 - Math.cos(2 * Math.PI * phase)) / 2; // continuous 0..1 fraction
+  let name, glyph;
+  if (phase < 0.0625 || phase >= 0.9375) { name = 'New Moon'; glyph = '●'; }
+  else if (phase < 0.1875) { name = 'Waxing Crescent'; glyph = '☽'; }
+  else if (phase < 0.3125) { name = 'First Quarter'; glyph = '◐'; }
+  else if (phase < 0.4375) { name = 'Waxing Gibbous'; glyph = '◑'; }
+  else if (phase < 0.5625) { name = 'Full Moon'; glyph = '○'; }
+  else if (phase < 0.6875) { name = 'Waning Gibbous'; glyph = '◒'; }
+  else if (phase < 0.8125) { name = 'Last Quarter'; glyph = '◓'; }
+  else { name = 'Waning Crescent'; glyph = '☾'; }
+  return { name, glyph, illum, phase };
 }
 
 // Approximate sunrise/sunset for NYC (lat 40.7, lon -74.0)

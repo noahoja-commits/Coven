@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { F } from '../../styles/fonts';
-import { moonPhase, sunTimes, sunSign } from '../../data/helpers';
+import { moonPhase, sunTimes, sunSign, SYNODIC } from '../../data/helpers';
+import { fetchSunTimes } from '../../lib/weather';
 
 function MoonGlyph({ phase }) {
   // Draw a stylized moon disc whose illuminated fraction matches the phase
@@ -62,16 +64,28 @@ function Row({ label, value, sub }) {
 export function EphemerisOverlay({ onClose, profile }) {
   const now = new Date();
   const phase = moonPhase(now);
-  const sun = sunTimes(now);
   const sign = profile?.birthday ? sunSign(profile.birthday) : null;
   const dateStr = now.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
 
-  // Days until next full / new moon (rough)
-  const synodic = 29.530588853;
-  const phaseFraction = ((now - new Date('2000-01-06')) / (1000 * 60 * 60 * 24)) / synodic;
-  const f = phaseFraction - Math.floor(phaseFraction);
-  const daysToFull = ((0.5 - f + 1) % 1) * synodic;
-  const daysToNew = ((1 - f) % 1) * synodic;
+  // Real sun times for the user's location; fall back to the local approximation
+  // (labeled "approx") if geolocation is denied/unavailable.
+  const [sun, setSun] = useState(null); // null = loading
+  const [sunApprox, setSunApprox] = useState(false);
+  useEffect(() => {
+    let on = true;
+    fetchSunTimes().then(s => {
+      if (!on) return;
+      if (s) { setSun(s); setSunApprox(false); }
+      else { setSun(sunTimes(new Date())); setSunApprox(true); }
+    }).catch(() => { if (on) { setSun(sunTimes(new Date())); setSunApprox(true); } });
+    return () => { on = false; };
+  }, []);
+
+  // Days until next full / new moon — derived from the same accurate phase fraction
+  // as the disc so the numbers always agree.
+  const f = phase.phase;
+  const daysToFull = ((0.5 - f + 1) % 1) * SYNODIC;
+  const daysToNew = ((1 - f) % 1) * SYNODIC;
 
   return (
     <div className="absolute inset-0 z-30 overflow-y-auto safe-pb"
@@ -120,8 +134,8 @@ export function EphemerisOverlay({ onClose, profile }) {
         </div>
 
         <div className="border border-[#A89968]/20 max-w-sm mx-auto" style={{ background: 'rgba(20, 8, 12, 0.4)' }}>
-          <Row label="Sunrise" value={sun.sunrise} sub="local · approx" />
-          <Row label="Sunset" value={sun.sunset} sub="local · approx" />
+          <Row label="Sunrise" value={sun ? sun.sunrise : '…'} sub={sun ? (sunApprox ? 'approx' : 'local') : 'locating'} />
+          <Row label="Sunset" value={sun ? sun.sunset : '…'} sub={sun ? (sunApprox ? 'approx' : 'local') : 'locating'} />
           <Row label="Next Full" value={daysToFull < 1 ? 'tonight' : `${Math.round(daysToFull)} days`} />
           <Row label="Next Dark" value={daysToNew < 1 ? 'tonight' : `${Math.round(daysToNew)} days`} sub="new moon" />
           {sign && <Row label="Your Sun" value={`${sign.glyph} ${sign.name.toLowerCase()}`} />}

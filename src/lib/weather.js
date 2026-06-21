@@ -33,6 +33,26 @@ export function tintForCode(code, isDay) {
   return { color: '#6E6E7E', opacity: 0.24, label: 'weather' };                     // fallback
 }
 
+// Real local sunrise/sunset for the device's location (Open-Meteo, free, no key).
+// timezone=auto → times come back in local ISO ("YYYY-MM-DDTHH:MM"). Returns
+// { sunrise, sunset } as "HH:MM", or null (permission denied / error).
+export async function fetchSunTimes() {
+  try {
+    const { latitude, longitude } = await getPosition();
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude.toFixed(3)}&longitude=${longitude.toFixed(3)}&daily=sunrise,sunset&timezone=auto`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const sr = data?.daily?.sunrise?.[0];
+    const ss = data?.daily?.sunset?.[0];
+    if (!sr || !ss) return null;
+    const hhmm = (iso) => String(iso).slice(11, 16);
+    return { sunrise: hhmm(sr), sunset: hhmm(ss) };
+  } catch {
+    return null;
+  }
+}
+
 // Returns { color, opacity, code } or null (permission denied / error / unsupported).
 export async function fetchWeatherTint() {
   try {
