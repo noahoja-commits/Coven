@@ -128,8 +128,8 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], onOpenUser,
                 <div className="relative -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
                   <span className="absolute inset-0 -m-2 rounded-full bg-[#8B0000] opacity-25 animate-ping-slow" />
                   <Avatar url={p.avatarUrl} glyph={p.avatar} size={28} className="relative ring-2 ring-[#8B0000]/70" />
-                  <div className="mt-1 whitespace-nowrap px-1.5 py-0.5 bg-black/80 backdrop-blur-sm border border-[#8B0000]/40 text-[9px] text-[#F5F1E8] max-w-[150px] truncate" style={F.ui}>
-                    {p.handle} · {areaLabel(p)}
+                  <div className="mt-1 whitespace-nowrap px-1.5 py-0.5 bg-black/80 backdrop-blur-sm border border-[#8B0000]/40 text-[9px] text-[#F5F1E8] max-w-[160px] truncate" style={F.ui}>
+                    {p.handle} · {p.text ? p.text.slice(0, 28) : areaLabel(p)}
                   </div>
                 </div>
               </button>
