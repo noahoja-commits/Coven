@@ -1238,59 +1238,13 @@ export default function App() {
     }
   };
 
-  // === RENDER ===
-  if (!isSupabaseConfigured) {
-    return (
-      <div className="phone-frame max-w-md mx-auto bg-[#0A0A0A] text-[#F5F1E8] flex items-center justify-center min-h-[100dvh] px-8 text-center">
-        <div>
-          <div className="text-[#C9A961] text-4xl mb-4" style={F.brand}>Coven</div>
-          <p className="text-[#A8A29E] text-sm" style={F.serif}>backend not configured — set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY, then reload.</p>
-        </div>
-      </div>
-    );
-  }
-  if (authLoading || (session && dbProfile && !profile)) {
-    return (
-      <div className="phone-frame max-w-md mx-auto bg-[#0A0A0A] text-[#C9A961] flex items-center justify-center min-h-[100dvh]">
-        <div className="text-5xl animate-pulse-slow" style={F.brand}>Coven</div>
-      </div>
-    );
-  }
-  if (recovery) {
-    return <ResetPasswordScreen />;
-  }
-  if (!session) {
-    return <SignInScreen />;
-  }
-  if (!dbProfile) {
-    return (
-      <div className="phone-frame max-w-md mx-auto bg-black text-[#F5F1E8] relative overflow-hidden min-h-[100dvh]">
-        <OnboardingFlow onComplete={handleOnboard} />
-      </div>
-    );
-  }
-
-  // Profile context for header
-  const isInsideOverlay = activePortal || activeOddity || showOddityCompose || activeText;
-  const onLibraryTap = () => {            // ✦ star → the portals menu
-    if (activePortal) return;
-    setActivePortal('menu');
-  };
-  const onLogoTap = () => {               // Coven wordmark → straight into The Library
-    if (activePortal) return;
-    setPortalFromMenu(false);             // opened directly → close returns to home
-    setActivePortal('library');
-  };
-  // Open a portal directly from outside the menu (home screen tiles); closing returns home.
-  const openPortalDirect = (id) => { setPortalFromMenu(false); setActivePortal(id); };
-  // Single close handler for every portal overlay: back to the menu if that's where we
-  // came from, otherwise all the way out to where the user was (home).
-  const closePortal = () => setActivePortal(portalFromMenu ? 'menu' : null);
-
   // ---- Overlay back-button + Escape handling ----------------------------------
-  // No router → without this the Android hardware back button exits the whole PWA from
-  // any overlay, and Escape does nothing. We treat overlays like a history stack: each
-  // open pushes a guard entry, and Back / Escape peel exactly one layer.
+  // Hooks MUST live above the early-return gate below (a render that returns early would
+  // otherwise run fewer hooks → React hooks-order crash). No router → without this the
+  // Android hardware back button exits the whole PWA from any overlay, and Escape does
+  // nothing. We treat overlays like a history stack: each open pushes a guard entry, and
+  // Back / Escape peel exactly one layer. (closePortal is defined below the gate; it's only
+  // called from event handlers, after render, so referencing it here is safe.)
   const anyOverlayOpen = !!(
     ticketSuccess || activeStoryIndex !== null || showStoryComposer || venueEditorEvent ||
     ticketManagerEvent || showCreateEvent || showEditProfile || showSettings || showBlocked ||
@@ -1373,6 +1327,55 @@ export default function App() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
+
+  // === RENDER ===
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="phone-frame max-w-md mx-auto bg-[#0A0A0A] text-[#F5F1E8] flex items-center justify-center min-h-[100dvh] px-8 text-center">
+        <div>
+          <div className="text-[#C9A961] text-4xl mb-4" style={F.brand}>Coven</div>
+          <p className="text-[#A8A29E] text-sm" style={F.serif}>backend not configured — set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY, then reload.</p>
+        </div>
+      </div>
+    );
+  }
+  if (authLoading || (session && dbProfile && !profile)) {
+    return (
+      <div className="phone-frame max-w-md mx-auto bg-[#0A0A0A] text-[#C9A961] flex items-center justify-center min-h-[100dvh]">
+        <div className="text-5xl animate-pulse-slow" style={F.brand}>Coven</div>
+      </div>
+    );
+  }
+  if (recovery) {
+    return <ResetPasswordScreen />;
+  }
+  if (!session) {
+    return <SignInScreen />;
+  }
+  if (!dbProfile) {
+    return (
+      <div className="phone-frame max-w-md mx-auto bg-black text-[#F5F1E8] relative overflow-hidden min-h-[100dvh]">
+        <OnboardingFlow onComplete={handleOnboard} />
+      </div>
+    );
+  }
+
+  // Profile context for header
+  const isInsideOverlay = activePortal || activeOddity || showOddityCompose || activeText;
+  const onLibraryTap = () => {            // ✦ star → the portals menu
+    if (activePortal) return;
+    setActivePortal('menu');
+  };
+  const onLogoTap = () => {               // Coven wordmark → straight into The Library
+    if (activePortal) return;
+    setPortalFromMenu(false);             // opened directly → close returns to home
+    setActivePortal('library');
+  };
+  // Open a portal directly from outside the menu (home screen tiles); closing returns home.
+  const openPortalDirect = (id) => { setPortalFromMenu(false); setActivePortal(id); };
+  // Single close handler for every portal overlay: back to the menu if that's where we
+  // came from, otherwise all the way out to where the user was (home).
+  const closePortal = () => setActivePortal(portalFromMenu ? 'menu' : null);
 
   const renderTab = () => {
     if (community) {
