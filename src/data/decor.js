@@ -7,6 +7,8 @@ export const BORDERS = [
   { id: 'gilded', label: 'gilded' },
   { id: 'bone', label: 'bone' },
   { id: 'thorns', label: 'thorns' },
+  { id: 'amethyst', label: 'amethyst' },
+  { id: 'silver', label: 'silver' },
 ];
 
 export const BANNERS = [
@@ -17,12 +19,16 @@ export const BANNERS = [
   { id: 'moon', label: 'moonlit' },
 ];
 
+// Layered box-shadows build a framed ring: a thin dark liner, the colored band,
+// a second dark liner, then an outer glow — reads as a carved frame, not a flat stroke.
 export function borderStyle(id) {
   switch (id) {
-    case 'oxblood': return { boxShadow: '0 0 0 2px #8B0000, 0 0 14px rgba(139,0,0,0.5)' };
-    case 'gilded': return { boxShadow: '0 0 0 2px #C9A961, 0 0 14px rgba(201,169,97,0.45)' };
-    case 'bone': return { boxShadow: '0 0 0 2px #D8C7A8' };
-    case 'thorns': return { boxShadow: '0 0 0 2px #2E3B2A, 0 0 0 4px #0A0A0A, 0 0 10px rgba(60,80,55,0.5)' };
+    case 'oxblood': return { boxShadow: '0 0 0 1px rgba(0,0,0,0.85), 0 0 0 3px #8B0000, 0 0 0 4px rgba(0,0,0,0.6), 0 0 16px rgba(139,0,0,0.55)' };
+    case 'gilded': return { boxShadow: '0 0 0 1px #6B5418, 0 0 0 3px #C9A961, 0 0 0 4px #6B5418, 0 0 18px rgba(201,169,97,0.5)' };
+    case 'bone': return { boxShadow: '0 0 0 1px #8A7A5C, 0 0 0 3px #D8C7A8, 0 0 0 4px #4A4030, 0 0 8px rgba(216,199,168,0.3)' };
+    case 'thorns': return { boxShadow: '0 0 0 1px #0A0A0A, 0 0 0 2px #2E3B2A, 0 0 0 4px #0A0A0A, 0 0 0 5px #3C4A35, 0 0 12px rgba(60,80,55,0.55)' };
+    case 'amethyst': return { boxShadow: '0 0 0 1px rgba(0,0,0,0.8), 0 0 0 3px #7B2CBF, 0 0 0 4px rgba(0,0,0,0.5), 0 0 18px rgba(123,44,191,0.55)' };
+    case 'silver': return { boxShadow: '0 0 0 1px #3A3A40, 0 0 0 3px #B8BAC2, 0 0 0 4px #3A3A40, 0 0 14px rgba(184,186,194,0.4)' };
     default: return {};
   }
 }

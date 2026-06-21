@@ -18,26 +18,32 @@ function FashionTile({ item }) {
   const open = () => window.open(shopUrl(item), '_blank', 'noopener,noreferrer');
   return (
     <button onClick={open}
-      className="relative w-full text-left overflow-hidden border border-[#2A2A2A] hover:border-[#3F3F3F] active:scale-[0.98] transition-all group"
+      className="relative w-full text-left overflow-hidden border border-[#2A2A2A] hover:border-[#C9A961]/40 active:scale-[0.98] transition-all group"
       style={{ height: item.h, background: palette }}>
-      <svg viewBox="0 0 100 140" className="absolute inset-0 w-full h-full opacity-60" preserveAspectRatio="xMidYMid slice">
+      <svg viewBox="0 0 100 140" className="absolute inset-0 w-full h-full opacity-60 transition-transform duration-500 group-hover:scale-110" preserveAspectRatio="xMidYMid slice">
         <path d="M 30 20 L 40 10 L 60 10 L 70 20 L 85 35 L 80 50 L 75 50 L 75 130 L 25 130 L 25 50 L 20 50 L 15 35 Z"
           fill="rgba(0,0,0,0.5)" stroke="rgba(245,241,232,0.08)" strokeWidth="0.3" />
         <line x1="50" y1="20" x2="50" y2="130" stroke="rgba(245,241,232,0.06)" strokeWidth="0.3" />
       </svg>
       <div className="absolute inset-0 opacity-20 mix-blend-overlay pointer-events-none"
         style={{ backgroundImage: 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\'><filter id=\'n\'><feTurbulence baseFrequency=\'0.9\'/></filter><rect width=\'80\' height=\'80\' filter=\'url(%23n)\' opacity=\'0.5\'/></svg>")' }} />
+      {/* bottom scrim keeps the brand/price legible over any silhouette */}
+      <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/45 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 ring-1 ring-inset ring-white/5 pointer-events-none" />
       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-        <ExternalLink size={13} className="text-[#F5F1E8]/70" />
+        <ExternalLink size={13} className="text-[#C9A961]" />
       </div>
       <div className="absolute inset-x-0 bottom-0 p-3">
-        <div className="text-[#F5F1E8] text-sm" style={F.display}>{item.brand.toUpperCase()}</div>
-        <div className="text-[#A8A29E] text-[11px] mt-0.5" style={F.ui}>{item.kind}</div>
-        <div className="flex items-center gap-1.5 mt-2">
+        <div className="flex items-center gap-1.5">
+          <span className="h-3 w-[2px] bg-[#8B0000] group-hover:bg-[#C9A961] transition-colors shrink-0" />
+          <div className="text-[#F5F1E8] text-sm tracking-wide group-hover:text-[#C9A961] transition-colors" style={F.display}>{item.brand.toUpperCase()}</div>
+        </div>
+        <div className="text-[#A8A29E] text-[11px] mt-0.5 pl-2.5" style={F.ui}>{item.kind}</div>
+        <div className="flex items-center gap-1.5 mt-2 pl-2.5">
           {item.tags.map(t => (
             <span key={t} className="text-[10px] px-1.5 py-0.5 border border-[#3F3F3F] text-[#A8A29E] uppercase tracking-wider" style={F.ui}>{t}</span>
           ))}
-          <span className="ml-auto text-[#A8A29E] text-xs" style={F.mono}>{item.price}</span>
+          <span className="ml-auto text-[#C9A961]/90 text-xs" style={F.mono}>{item.price}</span>
         </div>
       </div>
     </button>

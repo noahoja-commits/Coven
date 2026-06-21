@@ -4,7 +4,8 @@ import { F } from '../../styles/fonts';
 import { uploadImage } from '../../lib/db/storage';
 import { BORDERS, BANNERS, borderStyle, bannerStyle } from '../../data/decor';
 
-const AVATAR_OPTIONS = ['🦇', '🕯', '✟', '⚱', '☠', '🩸', '🌹', '🌙', '⛧', '☩', '✦', '☽', '⚰', '♰', '🜏', '𖤐', '☥', '✠', '†', '⸸', '♆', '☿', '⚸', '✧'];
+// A cohesive occult/gothic sigil set — mourning, moon, cross, and alchemical marks.
+const AVATAR_OPTIONS = ['🦇', '🕯', '🥀', '🌹', '🌙', '🌑', '☾', '☽', '⛧', '⛤', '🜏', '𖤐', '☠', '💀', '⚰', '⚱', '✝', '✟', '☦', '♰', '†', '⸸', '☥', '🔮', '🕸', '🗝', '🦴', '⚜', '✦', '✧'];
 const VIBE_OPTIONS = ['goth', 'raver', 'smoker', 'witch', 'mystic', 'darkwave', 'tradgoth', 'industrial', 'romantic', 'doomer', 'punk', 'NYC', 'LA', 'PDX', 'Berlin', 'sober', 'soft', 'feral'];
 
 export function ProfileEditModal({ profile, meId, onSave, onClose }) {
@@ -80,8 +81,8 @@ export function ProfileEditModal({ profile, meId, onSave, onClose }) {
             <div className="grid grid-cols-6 gap-1.5 p-2 border border-[#1A1A1A] bg-[#0A0204]/60">
               {AVATAR_OPTIONS.map(a => (
                 <button key={a} onClick={() => setAvatar(a)}
-                  className={`aspect-square flex items-center justify-center text-xl border transition-all ${avatar === a ? 'border-[#8B0000] bg-[#5B0F1A]/25 text-[#C9A961]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#5B0F1A]/60'}`}
-                  style={avatar === a ? { boxShadow: '0 0 10px rgba(139,0,0,0.45)' } : undefined}>
+                  className={`aspect-square flex items-center justify-center text-xl rounded-sm border transition-all ${avatar === a ? 'border-[#C9A961] bg-gradient-to-b from-[#5B0F1A]/30 to-[#2D0F3F]/20 text-[#C9A961] scale-105' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#C9A961]/40 hover:text-[#F5F1E8]'}`}
+                  style={avatar === a ? { boxShadow: '0 0 0 1px rgba(201,169,97,0.5), 0 0 12px rgba(201,169,97,0.4)' } : undefined}>
                   {a}
                 </button>
               ))}
