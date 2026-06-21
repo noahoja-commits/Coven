@@ -445,10 +445,13 @@ export default function App() {
     if (connect === 'done' && meId) {
       // Pull status straight from Stripe for an instant update; retry a couple
       // times in case the account is still settling, falling back to the DB read.
-      const refresh = (n) => refreshPayoutStatus(meId).then(p => {
+      const refresh = (n) => refreshPayoutStatus().then(p => {
         setPayoutStatus(p);
         if (!p.enabled && n > 0) setTimeout(() => refresh(n - 1), 2500);
-      }).catch(() => fetchPayoutStatus(meId).then(setPayoutStatus).catch(() => {}));
+      }).catch((e) => {
+        console.error('[payouts] live refresh failed, falling back to DB read:', e);
+        fetchPayoutStatus(meId).then(setPayoutStatus).catch(() => {});
+      });
       refresh(3);
     }
   }, [meId]);
@@ -459,7 +462,8 @@ export default function App() {
     showToast('opening secure payout setup…');
     // On success the page redirects to Stripe (no need to clear busy); only
     // clear + surface on failure so the button doesn't feel dead on a slow tap.
-    startPayoutSetup(meId).catch(e => {
+    startPayoutSetup().catch(e => {
+      console.error('[payouts] setup failed:', e);
       setPayoutBusy(false);
       showToast(`payout setup unavailable — ${e.message}`, 'error');
     });
@@ -801,7 +805,8 @@ export default function App() {
 
   const buyTicket = (eventId) => {
     if (!meId) return;
-    startCheckout(eventId, meId).catch(e => {
+    startCheckout(eventId).catch(e => {
+      console.error('[checkout] failed:', e);
       addNotification({ kind: 'event', avatar: '✖', text: `checkout unavailable — ${e.message}` });
     });
   };
@@ -1014,7 +1019,7 @@ export default function App() {
   };
 
   const addGrave = (grave) => {
-    const next = [{ id: `g${Date.now()}`, flowers: 0, addedFlowers: [], visibility: 'friends', ...grave }, ...graves];
+    const next = [{ id: `g${Date.now()}`, flowers: 0, addedFlowers: [], ...grave, visibility: grave.private ? 'private' : 'friends' }, ...graves];
     setGraves(next);
     persistState('graves', next);
   };

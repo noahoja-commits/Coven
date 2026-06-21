@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Lock } from 'lucide-react';
 import { F } from '../../styles/fonts';
 
 const KINDS = ['relationship', 'friendship', 'self', 'pet', 'era', 'job', 'place'];
@@ -9,10 +9,11 @@ export function AddGraveModal({ onSave, onClose }) {
   const [kind, setKind] = useState('relationship');
   const [dates, setDates] = useState('');
   const [epitaph, setEpitaph] = useState('');
+  const [isPrivate, setIsPrivate] = useState(false);
 
   const submit = () => {
     if (!name.trim()) return;
-    onSave({ name: name.trim(), kind, dates: dates.trim(), epitaph: epitaph.trim() });
+    onSave({ name: name.trim(), kind, dates: dates.trim(), epitaph: epitaph.trim(), private: isPrivate });
     onClose();
   };
 
@@ -59,6 +60,13 @@ export function AddGraveModal({ onSave, onClose }) {
               className="w-full mt-1.5 bg-[#0A0A0A] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none p-2.5 text-[#F5F1E8] text-sm italic resize-none"
               style={F.serif} />
           </div>
+          <button onClick={() => setIsPrivate(p => !p)} className="w-full flex items-center gap-3 text-left">
+            <span className={`shrink-0 w-5 h-5 border flex items-center justify-center transition-all ${isPrivate ? 'border-[#5B0F1A] bg-[#5B0F1A]/30 text-[#C9A961]' : 'border-[#2A2A2A] text-transparent'}`}>✓</span>
+            <span className="flex items-center gap-1.5 text-[#A8A29E] text-xs" style={F.serif}>
+              <Lock size={12} className={isPrivate ? 'text-[#C9A961]' : 'text-[#6B6B6B]'} />
+              private — only you can see this memorial
+            </span>
+          </button>
         </div>
         <div className="flex items-center gap-2 p-4 border-t border-[#1A1A1A]">
           <button onClick={onClose}

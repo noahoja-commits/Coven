@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings, Pencil, Plus, Heart, MoreHorizontal, ChevronRight, Music, X } from 'lucide-react';
+import { Settings, Pencil, Plus, Heart, MoreHorizontal, ChevronRight, Music, X, Lock } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { TrackerGrid } from '../trackers/TrackerGrid';
 import { timeAgo, daysBetween, sunSign } from '../../data/helpers';
@@ -70,13 +70,17 @@ export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpda
             <span className="text-[10px] uppercase tracking-[0.25em] text-[#6B6B6B]" style={F.ui}>· self ·</span>
           </div>
           <div className="flex items-center gap-2">
-            {/* Grave shortcut top-right — opens the memorials section */}
-            {graves.length > 0 && (
-              <button onClick={onAddGrave} className="text-[10px] text-[#6B6B6B] hover:text-[#A8A29E] uppercase tracking-wider flex items-center gap-1" style={F.ui}>
-                <span className="text-base">⚱</span>
-                <span>{graves[0].name}</span>
-              </button>
-            )}
+            {/* Grave shortcut top-right — surfaces the first PUBLIC memorial only;
+                private ones aren't promoted to the header chip. */}
+            {(() => {
+              const headline = graves.find(g => !g.private);
+              return headline ? (
+                <button onClick={onAddGrave} className="text-[10px] text-[#6B6B6B] hover:text-[#A8A29E] uppercase tracking-wider flex items-center gap-1" style={F.ui}>
+                  <span className="text-base">⚱</span>
+                  <span>{headline.name}</span>
+                </button>
+              ) : null;
+            })()}
             <button onClick={() => setShowThemePicker(true)} className="text-[#6B6B6B] hover:text-[#A8A29E]" title="shrine theme">✦</button>
             <button onClick={onEditProfile} className="text-[#6B6B6B] hover:text-[#A8A29E]" title="edit profile"><Pencil size={14} /></button>
             <button onClick={onOpenSettings} className="text-[#6B6B6B] hover:text-[#A8A29E]"><Settings size={16} /></button>
@@ -326,7 +330,10 @@ export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpda
                   </span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline justify-between gap-2 mb-0.5">
-                      <h4 className="text-[#F5F1E8] text-base leading-tight" style={F.display}>{g.name}</h4>
+                      <h4 className="text-[#F5F1E8] text-base leading-tight flex items-center gap-1.5" style={F.display}>
+                        {g.name}
+                        {g.private && <Lock size={11} className="text-[#6B6B6B] shrink-0" title="private — only you can see this" />}
+                      </h4>
                       <span className="text-[10px] text-[#A89968] uppercase tracking-wider shrink-0" style={F.ui}>{g.kind}</span>
                     </div>
                     <div className="text-[10px] text-[#6B6B6B]" style={F.mono}>{g.dates}</div>
@@ -557,22 +564,25 @@ export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpda
   );
 }
 
+// Each stone carries an intention. The first stone you carry becomes your visible
+// "focus" on the profile — a reason to choose them beyond decoration.
 const CRYSTAL_OPTIONS = [
-  { id: 'obsidian', name: 'obsidian', glyph: '◆', color: '#1A1A1A', tint: '#2A2A2A' },
-  { id: 'onyx', name: 'onyx', glyph: '◆', color: '#0A0A0A', tint: '#5B0F1A' },
-  { id: 'amethyst', name: 'amethyst', glyph: '◇', color: '#2D0F3F', tint: '#7B2CBF' },
-  { id: 'jet', name: 'jet', glyph: '◆', color: '#0A0204', tint: '#1F1F1F' },
-  { id: 'garnet', name: 'garnet', glyph: '◆', color: '#3B0A12', tint: '#8B0000' },
-  { id: 'moonstone', name: 'moonstone', glyph: '◯', color: '#1A1A2A', tint: '#8A8A92' },
-  { id: 'tourmaline', name: 'tourmaline', glyph: '◆', color: '#1A1F2E', tint: '#3F3F3F' },
-  { id: 'labradorite', name: 'labradorite', glyph: '◇', color: '#2A2A30', tint: '#7B5C3A' },
-  { id: 'bloodstone', name: 'bloodstone', glyph: '◆', color: '#1F0A0A', tint: '#5B0F1A' },
-  { id: 'smoky', name: 'smoky quartz', glyph: '◇', color: '#2A1F1F', tint: '#A89968' },
+  { id: 'obsidian', name: 'obsidian', glyph: '◆', color: '#1A1A1A', tint: '#2A2A2A', intention: 'protection', meaning: 'a shield against harm and ill intent' },
+  { id: 'onyx', name: 'onyx', glyph: '◆', color: '#0A0A0A', tint: '#5B0F1A', intention: 'willpower', meaning: 'grounding and steady resolve' },
+  { id: 'amethyst', name: 'amethyst', glyph: '◇', color: '#2D0F3F', tint: '#7B2CBF', intention: 'clarity', meaning: 'intuition and a quiet mind' },
+  { id: 'jet', name: 'jet', glyph: '◆', color: '#0A0204', tint: '#1F1F1F', intention: 'mourning', meaning: 'carrying grief without drowning in it' },
+  { id: 'garnet', name: 'garnet', glyph: '◆', color: '#3B0A12', tint: '#8B0000', intention: 'passion', meaning: 'vitality and the will to want' },
+  { id: 'moonstone', name: 'moonstone', glyph: '◯', color: '#1A1A2A', tint: '#8A8A92', intention: 'new beginnings', meaning: 'change, cycles, what comes next' },
+  { id: 'tourmaline', name: 'tourmaline', glyph: '◆', color: '#1A1F2E', tint: '#3F3F3F', intention: 'warding', meaning: 'turning away what drains you' },
+  { id: 'labradorite', name: 'labradorite', glyph: '◇', color: '#2A2A30', tint: '#7B5C3A', intention: 'transformation', meaning: 'becoming, and hidden magic' },
+  { id: 'bloodstone', name: 'bloodstone', glyph: '◆', color: '#1F0A0A', tint: '#5B0F1A', intention: 'courage', meaning: 'strength to face what is hard' },
+  { id: 'smoky', name: 'smoky quartz', glyph: '◇', color: '#2A1F1F', tint: '#A89968', intention: 'release', meaning: 'letting go of what is finished' },
 ];
 
 function CrystalsBlock({ crystals, onToggleCrystal }) {
   const [open, setOpen] = useState(false);
   const carried = CRYSTAL_OPTIONS.filter(c => crystals.includes(c.id));
+  const focus = carried[0]; // first stone carried = your current intention
 
   return (
     <>
@@ -580,13 +590,18 @@ function CrystalsBlock({ crystals, onToggleCrystal }) {
         className="p-3 border border-[#2A2A2A] hover:border-[#A89968]/40 bg-[#0F0F0F] text-left transition-colors">
         <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-1" style={F.ui}>· crystals carried ·</div>
         {carried.length === 0 ? (
-          <div className="text-[#6B6B6B] text-sm italic" style={F.serif}>none yet</div>
+          <div className="text-[#6B6B6B] text-sm italic" style={F.serif}>none yet — carry a stone, set an intention</div>
         ) : (
-          <div className="flex flex-wrap gap-1">
-            {carried.map(c => (
-              <span key={c.id} className="text-base" style={{ color: c.tint }} title={c.name}>{c.glyph}</span>
-            ))}
-          </div>
+          <>
+            <div className="flex flex-wrap gap-1">
+              {carried.map(c => (
+                <span key={c.id} className="text-base" style={{ color: c.tint }} title={`${c.name} — ${c.intention}`}>{c.glyph}</span>
+              ))}
+            </div>
+            {focus && (
+              <div className="text-[10px] text-[#A89968]/80 mt-1.5 italic" style={F.serif}>· focus: {focus.intention} ·</div>
+            )}
+          </>
         )}
       </button>
 
@@ -595,7 +610,7 @@ function CrystalsBlock({ crystals, onToggleCrystal }) {
           <div className="bg-[#0F0F0F] border border-[#2A2A2A] w-full sm:max-w-md sm:m-4 animate-slide-up" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A]">
               <div>
-                <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· choose up to 6 ·</span>
+                <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· choose up to 6 · first sets your focus ·</span>
                 <h3 className="text-[#F5F1E8] text-lg leading-none mt-1" style={F.display}>STONES CARRIED</h3>
               </div>
               <button onClick={() => setOpen(false)} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
@@ -605,9 +620,13 @@ function CrystalsBlock({ crystals, onToggleCrystal }) {
                 const has = crystals.includes(c.id);
                 return (
                   <button key={c.id} onClick={() => onToggleCrystal(c.id)}
-                    className={`flex items-center gap-2 p-2 border transition-colors ${has ? 'border-[#C9A961] bg-[#C9A961]/10' : 'border-[#2A2A2A] hover:border-[#3F3F3F]'}`}>
-                    <span className="text-2xl" style={{ color: c.tint }}>{c.glyph}</span>
-                    <span className="text-[#F5F1E8] text-sm" style={F.serif}>{c.name}</span>
+                    className={`flex items-start gap-2 p-2 border text-left transition-colors ${has ? 'border-[#C9A961] bg-[#C9A961]/10' : 'border-[#2A2A2A] hover:border-[#3F3F3F]'}`}>
+                    <span className="text-2xl shrink-0 leading-none mt-0.5" style={{ color: c.tint }}>{c.glyph}</span>
+                    <span className="min-w-0">
+                      <span className="block text-[#F5F1E8] text-sm" style={F.serif}>{c.name}</span>
+                      <span className="block text-[10px] text-[#A89968]/80 uppercase tracking-wider" style={F.ui}>{c.intention}</span>
+                      <span className="block text-[10px] text-[#6B6B6B] italic mt-0.5 leading-snug" style={F.serif}>{c.meaning}</span>
+                    </span>
                   </button>
                 );
               })}
