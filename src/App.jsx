@@ -1437,6 +1437,13 @@ export default function App() {
         onOpenLibrary={(id) => { setPortalFromMenu(false); setActivePortal('library'); setActiveText(id); }}
         onOpenCodex={() => openPortalDirect('codex')}
         onOpenVespersArchive={() => setShowVespersArchive(true)}
+        ritual={ritual}
+        ritualDoneToday={ritualDoneToday}
+        onPerformRitual={performRitual}
+        crystals={crystals}
+        trackers={trackers}
+        onUpdateTracker={updateTracker}
+        onOpenReflections={() => setShowReflections(true)}
         settings={settings}
       />
     );

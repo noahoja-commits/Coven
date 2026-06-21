@@ -90,6 +90,28 @@ export function moonPhase(date = new Date()) {
   return { name, glyph, illum, phase };
 }
 
+// A reflection prompt for the daily altar — same prompt all day, rotates by date.
+const REFLECTION_PROMPTS = [
+  'what are you carrying today that you could set down?',
+  'name one thing that haunted you this week.',
+  'what would you do tonight if no one was watching?',
+  'who have you not forgiven — including yourself?',
+  'what felt sacred today, however small?',
+  'what are you pretending not to know?',
+  'what would the version of you from a year ago think of now?',
+  'name a fear. is it protecting you, or caging you?',
+  'what do you want more of, and what would it cost?',
+  'what ended recently that you haven’t mourned?',
+  'where did you feel most yourself today?',
+  'what truth are you avoiding saying out loud?',
+  'what would you tell someone you love who felt how you feel?',
+  'what’s one small ritual that grounded you today?',
+];
+export function dailyPrompt(date = new Date()) {
+  const day = Math.floor(date.getTime() / 86400000);
+  return REFLECTION_PROMPTS[((day % REFLECTION_PROMPTS.length) + REFLECTION_PROMPTS.length) % REFLECTION_PROMPTS.length];
+}
+
 // Approximate sunrise/sunset for NYC (lat 40.7, lon -74.0)
 // Returns { sunrise: "06:42", sunset: "20:14" } in local time
 export function sunTimes(date = new Date()) {

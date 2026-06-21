@@ -5,6 +5,7 @@ import { Reaction } from '../shared/Reaction';
 import { PostImage } from '../shared/Visuals';
 import { getDailyCard } from '../../data/tarot';
 import { darkDay, todaysVespers, todaysCodex } from '../../data/helpers';
+import { DailyAltar } from './DailyAltar';
 import { TEXTS } from '../../data/library';
 import { CODEX } from '../../data/codex';
 
@@ -14,6 +15,7 @@ export function HomeScreen({
   bookmarks = {}, onToggleBookmark, postCandles = {}, onToggleCandle, onOpenEvent, onVotePoll,
   onOpenStory, onCreateStory, stories = [], meHandle = 'you', meAvatar = '🦇',
   tonightStatus, onOpenTonightStatus, onOpenTarot, onOpenEphemeris, onOpenLibrary, onOpenCodex, onOpenHashtag, onOpenVespersArchive,
+  ritual, ritualDoneToday, onPerformRitual, crystals = [], trackers = {}, onUpdateTracker, onOpenReflections,
   settings = {},
 }) {
   const tarotOn = settings.tarotEnabled !== false;
@@ -106,8 +108,24 @@ export function HomeScreen({
     : '#C9A961'
     : null;
 
+  const altarOn = settings.altarEnabled !== false;
+
   return (
     <div className="pb-24">
+      {/* Daily altar — personal practice anchor */}
+      {altarOn && (
+        <DailyAltar
+          ritual={ritual}
+          ritualDoneToday={ritualDoneToday}
+          onPerformRitual={onPerformRitual}
+          crystals={crystals}
+          trackers={trackers}
+          onUpdateTracker={onUpdateTracker}
+          onOpenReflections={onOpenReflections}
+          onOpenEphemeris={onOpenEphemeris}
+        />
+      )}
+
       {/* Dark calendar banner */}
       {today && (
         <button onClick={onOpenEphemeris}
