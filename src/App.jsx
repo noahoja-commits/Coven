@@ -1209,9 +1209,13 @@ export default function App() {
 
   // Profile context for header
   const isInsideOverlay = activePortal || activeOddity || showOddityCompose || activeText;
-  const onLibraryTap = () => {
+  const onLibraryTap = () => {            // ✦ star → the portals menu
     if (activePortal) return;
     setActivePortal('menu');
+  };
+  const onLogoTap = () => {               // Coven wordmark → straight into The Library
+    if (activePortal) return;
+    setActivePortal('library');
   };
 
   const renderTab = () => {
@@ -1392,6 +1396,7 @@ export default function App() {
         onDMs={() => setShowDMs(true)}
         onCompose={() => setShowCompose(true)}
         onLibrary={onLibraryTap}
+        onLogo={onLogoTap}
         onNotifications={() => {
           setShowNotifs(true);
           // If already granted, silently make sure this device stays subscribed.

@@ -3,7 +3,7 @@ import { X, Camera, Loader2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { uploadImage } from '../../lib/db/storage';
 
-const AVATAR_OPTIONS = ['🦇', '🕯', '✟', '⚱', '☠', '🩸', '🌹', '🌙', '⛧', '☩', '✦', '☽', '⚰', '♰', '🜏'];
+const AVATAR_OPTIONS = ['🦇', '🕯', '✟', '⚱', '☠', '🩸', '🌹', '🌙', '⛧', '☩', '✦', '☽', '⚰', '♰', '🜏', '𖤐', '☥', '✠', '†', '⸸', '♆', '☿', '⚸', '✧'];
 const VIBE_OPTIONS = ['goth', 'raver', 'smoker', 'witch', 'mystic', 'darkwave', 'tradgoth', 'industrial', 'romantic', 'doomer', 'punk', 'NYC', 'LA', 'PDX', 'Berlin', 'sober', 'soft', 'feral'];
 
 export function ProfileEditModal({ profile, meId, onSave, onClose }) {
@@ -73,11 +73,12 @@ export function ProfileEditModal({ profile, meId, onSave, onClose }) {
 
           {/* Glyph (used when no photo) */}
           <div className={avatarUrl ? 'opacity-40' : ''}>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2" style={F.scriptureSC}>· sigil ·</div>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2" style={F.scriptureSC}>· your sigil ·</div>
+            <div className="grid grid-cols-6 gap-1.5 p-2 border border-[#1A1A1A] bg-[#0A0204]/60">
               {AVATAR_OPTIONS.map(a => (
                 <button key={a} onClick={() => setAvatar(a)}
-                  className={`w-10 h-10 flex items-center justify-center text-xl border transition-colors ${avatar === a ? 'border-[#C9A961] bg-[#C9A961]/10' : 'border-[#2A2A2A] hover:border-[#3F3F3F]'}`}>
+                  className={`aspect-square flex items-center justify-center text-xl border transition-all ${avatar === a ? 'border-[#8B0000] bg-[#5B0F1A]/25 text-[#C9A961]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#5B0F1A]/60'}`}
+                  style={avatar === a ? { boxShadow: '0 0 10px rgba(139,0,0,0.45)' } : undefined}>
                   {a}
                 </button>
               ))}

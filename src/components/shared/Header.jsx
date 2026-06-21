@@ -1,7 +1,7 @@
 import { Plus, MessageCircle, Bell, Search, Sparkles } from 'lucide-react';
 import { F } from '../../styles/fonts';
 
-export function Header({ tab, onDMs, onCompose, onLibrary, onNotifications, onSearch, communityName, unreadNotifications = 0, unreadDMs = 0, parchment = false }) {
+export function Header({ tab, onDMs, onCompose, onLibrary, onLogo, onNotifications, onSearch, communityName, unreadNotifications = 0, unreadDMs = 0, parchment = false }) {
   const titles = {
     home: null,
     communities: null,
@@ -23,11 +23,11 @@ export function Header({ tab, onDMs, onCompose, onLibrary, onNotifications, onSe
           {communityName ? (
             <span className={`${textColor} text-base`} style={F.display}>{communityName}</span>
           ) : tab === 'home' ? (
-            <button onClick={onLibrary}
+            <button onClick={onLogo}
               className={`${textColor} text-3xl leading-none hover:text-[#C9A961] transition-colors`}
-              style={F.brand} title="The Coven">Coven</button>
+              style={F.brand} title="The Library">Coven</button>
           ) : (
-            <button onClick={onLibrary}
+            <button onClick={onLogo}
               className={`${textColor} text-base tracking-[0.3em] hover:text-[#C9A961] transition-colors`}
               style={F.display}>
               {(titles[tab] || tab.toUpperCase())}
