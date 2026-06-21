@@ -13,6 +13,7 @@ function hydrate(r, myId) {
   return {
     id: r.id,
     title: r.title,
+    kind: r.kind || 'sale',
     price: Math.round((r.price_cents || 0) / 100),
     priceMode: r.price_mode,
     condition: r.condition,
@@ -40,6 +41,9 @@ export async function createListing(data, me) {
   const { data: row, error } = await supabase.from('listings').insert({
     seller_id: me.id,
     title: data.title,
+    // Only send kind for non-sale listings so plain wares still post even before
+    // migration 0028 adds the column (the column defaults to 'sale').
+    ...(data.kind && data.kind !== 'sale' ? { kind: data.kind } : {}),
     price_cents: Math.round((parseFloat(data.price) || 0) * 100),
     price_mode: data.priceMode || 'firm',
     condition: data.condition || 'used',

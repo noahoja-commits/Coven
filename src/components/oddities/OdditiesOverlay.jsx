@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { X, Search, Plus, Bell, MapPin } from 'lucide-react';
+import { X, Search, Plus } from 'lucide-react';
 import { F } from '../../styles/fonts';
-import { ODDITY_CATEGORIES, ODDITY_PALETTES, CONDITION_LABELS, SHOPS } from '../../data/oddities';
+import { ODDITY_CATEGORIES, ODDITY_PALETTES, CONDITION_LABELS } from '../../data/oddities';
 
 function OddityImage({ shape, palette, imageUrl, small = false }) {
   const p = ODDITY_PALETTES[palette] || ODDITY_PALETTES.black;
@@ -113,58 +113,108 @@ function MarketplaceTab({ onOpenOddity, onCompose, listings = [] }) {
   );
 }
 
-function WantedTab({ onCompose }) {
+function WantedTab({ items, onOpenOddity, onCompose }) {
   return (
     <div className="px-4 pb-12">
       <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-3" style={F.scriptureSC}>· what the coven is seeking ·</div>
-      <div className="py-12 text-center text-[#6B6B6B] text-xs italic" style={F.serif}>no one is seeking anything yet.</div>
+      {items.length === 0 ? (
+        <div className="py-10 text-center text-[#6B6B6B] text-xs italic" style={F.serif}>no one is seeking anything yet.</div>
+      ) : (
+        <div className="grid grid-cols-2 gap-2 mb-3">
+          {items.map(item => <OddityCard key={item.id} item={item} onOpen={onOpenOddity} />)}
+        </div>
+      )}
       <button onClick={onCompose} className="mt-2 w-full py-2.5 border border-dashed border-[#3F3F3F] text-[#A8A29E] text-xs uppercase tracking-wider hover:border-[#5B0F1A] hover:text-[#F5F1E8] transition-colors" style={F.ui}>+ post a wanted</button>
     </div>
   );
 }
 
-function ParlourTab() {
+function ParlourTab({ items, onOpenOddity, onCompose }) {
   return (
     <div className="px-4 pb-12">
-      <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-3" style={F.scriptureSC}>· the parlour ·</div>
-      <div className="py-16 text-center text-[#6B6B6B]" style={F.serif}>
-        <div className="text-3xl mb-3">⚰</div>
-        <p className="text-xs italic">commissions from the coven's artists — tattooers, painters, seamstresses.</p>
-        <p className="text-[10px] uppercase tracking-[0.3em] text-[#A89968]/70 mt-3" style={F.ui}>· coming soon ·</p>
-      </div>
+      <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-1" style={F.scriptureSC}>· the parlour ·</div>
+      <p className="text-[10px] text-[#6B6B6B] italic mb-3" style={F.serif}>commissions from the coven's artists — tattooers, painters, seamstresses.</p>
+      {items.length === 0 ? (
+        <div className="py-10 text-center text-[#6B6B6B]" style={F.serif}>
+          <div className="text-3xl mb-3">⚰</div>
+          <p className="text-xs italic">no commissions offered yet.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-2 mb-3">
+          {items.map(item => <OddityCard key={item.id} item={item} onOpen={onOpenOddity} />)}
+        </div>
+      )}
+      <button onClick={onCompose} className="mt-2 w-full py-2.5 border border-dashed border-[#3F3F3F] text-[#A8A29E] text-xs uppercase tracking-wider hover:border-[#5B0F1A] hover:text-[#F5F1E8] transition-colors" style={F.ui}>+ offer a commission</button>
     </div>
   );
 }
 
-function ShopsTab() {
+function ShopsTab({ shops = [], meId, onAddShop, onDeleteShop }) {
+  const [adding, setAdding] = useState(false);
+  const [form, setForm] = useState({ name: '', kind: '', neighborhood: '', url: '', blurb: '' });
+  const submit = () => {
+    if (!form.name.trim()) return;
+    onAddShop && onAddShop(form);
+    setForm({ name: '', kind: '', neighborhood: '', url: '', blurb: '' });
+    setAdding(false);
+  };
   return (
     <div className="px-4 pb-12">
-      <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-1" style={F.scriptureSC}>· the merchants ·</div>
-      <div className="text-[9px] text-[#6B6B6B] uppercase tracking-[0.2em] mb-3" style={F.ui}>sample directory</div>
-      <div className="space-y-2">
-        {SHOPS.map(s => (
-          <div key={s.id} className="border border-[#2A2A2A] bg-[#0F0F0F] p-3 flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-[#A89968]" style={F.display}>☩</div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-baseline justify-between gap-2">
-                <h4 className="text-[#F5F1E8] text-sm" style={F.display}>{s.name.toUpperCase()}</h4>
-                {s.verified && <span className="text-[9px] text-[#A89968]" style={F.ui}>✓ verified</span>}
+      <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-3" style={F.scriptureSC}>· the merchants ·</div>
+      {shops.length === 0 ? (
+        <div className="py-8 text-center text-[#6B6B6B] text-xs italic" style={F.serif}>no shops listed yet. add yours.</div>
+      ) : (
+        <div className="space-y-2 mb-3">
+          {shops.map(s => (
+            <div key={s.id} className="border border-[#2A2A2A] bg-[#0F0F0F] p-3 flex items-center gap-3">
+              <div className="w-10 h-10 bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-[#A89968]" style={F.display}>☩</div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline justify-between gap-2">
+                  {s.url ? (
+                    <a href={s.url.startsWith('http') ? s.url : `https://${s.url}`} target="_blank" rel="noreferrer" className="text-[#F5F1E8] text-sm hover:text-[#C9A961]" style={F.display}>{s.name.toUpperCase()}</a>
+                  ) : (
+                    <h4 className="text-[#F5F1E8] text-sm" style={F.display}>{s.name.toUpperCase()}</h4>
+                  )}
+                  {s.verified && <span className="text-[9px] text-[#A89968]" style={F.ui}>✓ verified</span>}
+                </div>
+                <div className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>{[s.kind, s.neighborhood].filter(Boolean).join(' · ')}</div>
+                {s.blurb && <div className="text-[11px] text-[#A8A29E] italic mt-0.5 truncate" style={F.serif}>{s.blurb}</div>}
               </div>
-              <div className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>{s.kind} · <MapPin size={8} className="inline -mt-0.5" /> {s.neighborhood}</div>
+              {s.mine && (
+                <button onClick={() => onDeleteShop && onDeleteShop(s.id)} className="text-[#6B6B6B] hover:text-[#8B0000] p-1"><X size={12} /></button>
+              )}
             </div>
+          ))}
+        </div>
+      )}
+      {adding ? (
+        <div className="border border-[#2A2A2A] bg-[#0F0F0F] p-3 space-y-2">
+          {[['name', 'shop name'], ['kind', 'kind (e.g. thrift · vintage)'], ['neighborhood', 'neighborhood / online'], ['url', 'link (optional)'], ['blurb', 'one line about it (optional)']].map(([k, ph]) => (
+            <input key={k} value={form[k]} onChange={e => setForm({ ...form, [k]: e.target.value })} placeholder={ph}
+              className="w-full bg-[#0A0608] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none px-2.5 py-1.5 text-[#F5F1E8] text-sm" style={F.serif} />
+          ))}
+          <div className="flex gap-2 justify-end">
+            <button onClick={() => setAdding(false)} className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-[#6B6B6B]" style={F.ui}>cancel</button>
+            <button onClick={submit} disabled={!form.name.trim()} className="px-3 py-1.5 text-[10px] uppercase tracking-wider bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] disabled:opacity-40" style={F.ui}>add shop</button>
           </div>
-        ))}
-      </div>
+        </div>
+      ) : (
+        <button onClick={() => setAdding(true)} className="w-full py-2.5 border border-dashed border-[#3F3F3F] text-[#A8A29E] text-xs uppercase tracking-wider hover:border-[#5B0F1A] hover:text-[#F5F1E8] transition-colors" style={F.ui}>+ add your shop</button>
+      )}
     </div>
   );
 }
 
-export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, listings = [] }) {
+export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, listings = [], shops = [], meId, onAddShop, onDeleteShop }) {
   const [tab, setTab] = useState('market');
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
   const q = query.trim().toLowerCase();
-  const visibleListings = q ? listings.filter(l => (l.title || '').toLowerCase().includes(q)) : listings;
+  const byKind = (k) => listings.filter(l => (l.kind || 'sale') === k);
+  const matchesQ = (l) => !q || (l.title || '').toLowerCase().includes(q);
+  const wares = byKind('sale').filter(matchesQ);
+  const wantedItems = byKind('wanted');
+  const commissionItems = byKind('commission');
   return (
     <div className="absolute inset-0 z-40 bg-[#0A0608] animate-fade-in">
       <div className="absolute inset-0" style={{
@@ -208,11 +258,11 @@ export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, listings = [
               <h1 className="text-[#C9A961] text-2xl mb-1" style={F.scripture}>The Marketplace</h1>
               <p className="text-[#A89968]/80 text-[11px] italic" style={F.scripture}>"objects with stories, sold by those who held them."</p>
             </div>
-            <MarketplaceTab onOpenOddity={onOpenOddity} onCompose={onCompose} listings={visibleListings} />
+            <MarketplaceTab onOpenOddity={onOpenOddity} onCompose={() => onCompose('sale')} listings={wares} />
           </>)}
-          {tab === 'wanted' && <WantedTab onCompose={onCompose} />}
-          {tab === 'parlour' && <ParlourTab />}
-          {tab === 'shops' && <ShopsTab />}
+          {tab === 'wanted' && <WantedTab items={wantedItems} onOpenOddity={onOpenOddity} onCompose={() => onCompose('wanted')} />}
+          {tab === 'parlour' && <ParlourTab items={commissionItems} onOpenOddity={onOpenOddity} onCompose={() => onCompose('commission')} />}
+          {tab === 'shops' && <ShopsTab shops={shops} meId={meId} onAddShop={onAddShop} onDeleteShop={onDeleteShop} />}
         </div>
       </div>
     </div>

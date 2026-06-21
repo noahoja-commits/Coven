@@ -4,9 +4,16 @@ import { F } from '../../styles/fonts';
 import { ODDITY_CATEGORIES, CONDITION_LABELS } from '../../data/oddities';
 import { uploadImage } from '../../lib/db/storage';
 
-export function OddityCompose({ meId, onClose, onCreate }) {
+const KIND_COPY = {
+  sale: { head: 'LIST WARE', title: 'describe the ware', price: '· price · usd ·', img: '· photographs ·' },
+  wanted: { head: 'POST A WANTED', title: 'what are you seeking?', price: '· budget · usd ·', img: '· reference (optional) ·' },
+  commission: { head: 'OFFER A COMMISSION', title: 'what do you make? (tattoos, portraits…)', price: '· starting at · usd ·', img: '· portfolio sample ·' },
+};
+
+export function OddityCompose({ meId, onClose, onCreate, kind = 'sale' }) {
+  const copy = KIND_COPY[kind] || KIND_COPY.sale;
   const [step, setStep] = useState(1);
-  const [data, setData] = useState({ title: '', price: '', priceMode: 'firm', condition: 'used', category: 'clothing', description: '', storyBehind: '', image_url: null });
+  const [data, setData] = useState({ kind, title: '', price: '', priceMode: 'firm', condition: 'used', category: 'clothing', description: '', storyBehind: '', image_url: null });
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const fileRef = useRef(null);
@@ -36,7 +43,7 @@ export function OddityCompose({ meId, onClose, onCreate }) {
           <button onClick={() => step > 1 ? setStep(step - 1) : onClose()} className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors">
             <X size={20} />
           </button>
-          <div className="text-[#C9A961] text-sm tracking-[0.3em]" style={F.scriptureSC}>LIST WARE — {step}/3</div>
+          <div className="text-[#C9A961] text-sm tracking-[0.3em]" style={F.scriptureSC}>{copy.head} — {step}/3</div>
           <button disabled={!canAdvance} onClick={advance}
             className="text-[#F5F1E8] text-xs px-3 py-1.5 bg-[#8B0000] hover:bg-[#5B0F1A] uppercase tracking-wider disabled:opacity-40" style={F.ui}>
             {step < 3 ? 'next' : 'list it'}
@@ -47,7 +54,7 @@ export function OddityCompose({ meId, onClose, onCreate }) {
         {step === 1 && (
           <div className="space-y-4">
             <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2 block" style={F.scriptureSC}>· photographs ·</label>
+              <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2 block" style={F.scriptureSC}>{copy.img}</label>
               <input ref={fileRef} type="file" accept="image/*" onChange={onPickImage} className="hidden" />
               <button onClick={() => fileRef.current?.click()}
                 className="w-full aspect-[4/3] border border-dashed border-[#3F3F3F] hover:border-[#5B0F1A] flex flex-col items-center justify-center gap-2 text-[#A89968] overflow-hidden relative">
@@ -63,7 +70,7 @@ export function OddityCompose({ meId, onClose, onCreate }) {
             <div>
               <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-1 block" style={F.scriptureSC}>· title ·</label>
               <input value={data.title} onChange={e => setData({ ...data, title: e.target.value })}
-                placeholder="describe the ware" className="w-full bg-[#0F0F0F] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none p-3 text-[#F5F1E8]" style={F.serif} />
+                placeholder={copy.title} className="w-full bg-[#0F0F0F] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none p-3 text-[#F5F1E8]" style={F.serif} />
             </div>
             <div>
               <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-1 block" style={F.scriptureSC}>· category ·</label>
@@ -77,10 +84,12 @@ export function OddityCompose({ meId, onClose, onCreate }) {
         {step === 2 && (
           <div className="space-y-4">
             <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-1 block" style={F.scriptureSC}>· price · usd ·</label>
+              <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-1 block" style={F.scriptureSC}>{copy.price}</label>
               <input type="number" value={data.price} onChange={e => setData({ ...data, price: e.target.value })}
                 placeholder="0" className="w-full bg-[#0F0F0F] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none p-3 text-[#F5F1E8] text-2xl" style={F.mono} />
             </div>
+            {/* terms + condition only make sense for a sale */}
+            {kind === 'sale' && (<>
             <div>
               <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2 block" style={F.scriptureSC}>· terms ·</label>
               <div className="grid grid-cols-3 gap-2">
@@ -101,6 +110,7 @@ export function OddityCompose({ meId, onClose, onCreate }) {
                 ))}
               </div>
             </div>
+            </>)}
           </div>
         )}
         {step === 3 && (

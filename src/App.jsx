@@ -10,6 +10,7 @@ import { fetchFollowing, followUser, unfollowUser } from './lib/db/social';
 import { fetchConversations, getOrCreateDM, createGroup, fetchMessages as fetchDMMessages, sendDM, markRead as dmMarkRead, setBuried as dmSetBuried, subscribeDMs } from './lib/db/dm';
 import { fetchActiveStories, postStory as dbPostStory, deleteStory, reactToStory } from './lib/db/stories';
 import { fetchListings, createListing } from './lib/db/listings';
+import { fetchShops, createShop, deleteShop as dbDeleteShop } from './lib/db/shops';
 import { fetchPayoutStatus, startPayoutSetup, refreshPayoutStatus } from './lib/db/payouts';
 import { listCrews, createCrew as dbCreateCrew, joinCrew as dbJoinCrew } from './lib/db/crews';
 import { fetchProfileState, saveProfileState } from './lib/db/profileState';
@@ -126,6 +127,8 @@ export default function App() {
   const [activeText, setActiveText] = useState(null); // library reader
   const [activeOddity, setActiveOddity] = useState(null);
   const [showOddityCompose, setShowOddityCompose] = useState(false);
+  const [composeKind, setComposeKind] = useState('sale'); // sale | wanted | commission
+  const [shops, setShops] = useState([]);
   const [activePostComments, setActivePostComments] = useState(null);
 
   const [profile, setProfile] = useState(null); // mapped from the Supabase profile row
@@ -304,6 +307,7 @@ export default function App() {
     fetchConversations().then(c => { if (active) setConversations(c); }).catch(() => {});
     fetchActiveStories(meId).then(s => { if (active) setStories(s); }).catch(() => {});
     fetchListings(meId).then(l => { if (active) setListings(l); }).catch(() => {});
+    fetchShops(meId).then(s => { if (active) setShops(s); }).catch(() => {});
     fetchPayoutStatus(meId).then(p => { if (active) setPayoutStatus(p); }).catch(() => {});
     listCrews().then(c => { if (active) setCrews(c); }).catch(() => {});
     fetchMyTicketEventIds().then(ids => { if (active) setMyTicketEventIds(ids); }).catch(() => {});
@@ -951,7 +955,19 @@ export default function App() {
     try {
       const saved = await createListing(data, { id: meId, handle: meHandle, avatar: meAvatar });
       setListings(prev => [saved, ...prev]);
-    } catch { /* ignore */ }
+    } catch { showToast("couldn't post that — try again.", 'error'); }
+  };
+
+  const addShop = async (data) => {
+    if (!meId) return;
+    try {
+      const saved = await createShop(data, { id: meId, handle: meHandle, avatar: meAvatar });
+      setShops(prev => [saved, ...prev]);
+    } catch { showToast("couldn't add your shop — try again.", 'error'); }
+  };
+  const removeShop = (id) => {
+    setShops(prev => prev.filter(s => s.id !== id));
+    dbDeleteShop(id).catch(() => { showToast("couldn't remove that shop.", 'error'); fetchShops(meId).then(setShops).catch(() => {}); });
   };
 
   const refreshCrews = () => listCrews().then(setCrews).catch(() => {});
@@ -1743,8 +1759,12 @@ export default function App() {
         <OdditiesOverlay
           onClose={() => setActivePortal('menu')}
           onOpenOddity={(id) => setActiveOddity(id)}
-          onCompose={() => setShowOddityCompose(true)}
+          onCompose={(kind) => { setComposeKind(kind || 'sale'); setShowOddityCompose(true); }}
           listings={listings}
+          shops={shops}
+          meId={meId}
+          onAddShop={addShop}
+          onDeleteShop={removeShop}
         />
       )}
       {activeOddity && (
@@ -1758,6 +1778,7 @@ export default function App() {
       {showOddityCompose && (
         <OddityCompose
           meId={meId}
+          kind={composeKind}
           onClose={() => setShowOddityCompose(false)}
           onCreate={(data) => addOddity(data)}
         />
