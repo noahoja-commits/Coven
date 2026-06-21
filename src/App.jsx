@@ -76,6 +76,7 @@ const SigilOverlay = lazy(() => import('./components/coven/SigilOverlay').then(m
 const PendulumOverlay = lazy(() => import('./components/coven/PendulumOverlay').then(m => ({ default: m.PendulumOverlay })));
 const ConfessionsOverlay = lazy(() => import('./components/coven/ConfessionsOverlay').then(m => ({ default: m.ConfessionsOverlay })));
 const SoulsOverlay = lazy(() => import('./components/coven/SoulsOverlay').then(m => ({ default: m.SoulsOverlay })));
+const SigilDrawOverlay = lazy(() => import('./components/coven/SigilDrawOverlay').then(m => ({ default: m.SigilDrawOverlay })));
 import { FashionScreen } from './components/fashion/FashionScreen';
 
 import { OnboardingFlow } from './components/onboarding/OnboardingFlow';
@@ -204,6 +205,8 @@ export default function App() {
   const [feedLoading, setFeedLoading] = useState(true); // first-page spinner/skeleton
   const [suggestedSouls, setSuggestedSouls] = useState([]); // real recent profiles for cold-start
   const [seenWelcome, setSeenWelcome] = useLocalStorage('seenWelcome', false); // one-time first-run guide
+  const [loreUnlocked, setLoreUnlocked] = useLocalStorage('loreUnlocked', false); // hidden-lore easter egg
+  const [showSigilDraw, setShowSigilDraw] = useState(false);
   const [blockedIds, setBlockedIds] = useState(() => new Set());
   const [divinationLog, setDivinationLog] = useLocalStorage('divinationLog', []);
   const [storyHighlights, setStoryHighlights] = useLocalStorage('storyHighlights', []);
@@ -1268,6 +1271,7 @@ export default function App() {
   // Back / Escape peel exactly one layer. (closePortal is defined below the gate; it's only
   // called from event handlers, after render, so referencing it here is safe.)
   const anyOverlayOpen = !!(
+    showSigilDraw ||
     ticketSuccess || activeStoryIndex !== null || showStoryComposer || venueEditorEvent ||
     ticketManagerEvent || showCreateEvent || showEditProfile || showSettings || showBlocked ||
     showMyTickets || showReflections || showNowPlaying || showAddGrave || showAddAnniv ||
@@ -1277,6 +1281,7 @@ export default function App() {
   );
   // Close the single top-most overlay (z-order priority). Returns true if it closed one.
   const closeTopOverlay = () => {
+    if (showSigilDraw) { setShowSigilDraw(false); return true; }
     if (ticketSuccess) { setTicketSuccess(false); return true; }
     if (activeStoryIndex !== null) { setActiveStoryIndex(null); return true; }
     if (showStoryComposer) { setShowStoryComposer(false); return true; }
@@ -1615,6 +1620,7 @@ export default function App() {
         onCompose={() => setShowCompose(true)}
         onLibrary={onLibraryTap}
         onLogo={onLogoTap}
+        onSecret={() => setShowSigilDraw(true)}
         onNotifications={() => {
           setShowNotifs(true);
           // If already granted, silently make sure this device stays subscribed.
@@ -2011,6 +2017,15 @@ export default function App() {
           onFindSouls={() => { setSeenWelcome(true); openPortalDirect('souls'); }}
           onSpeak={() => { setSeenWelcome(true); setShowCompose(true); }}
         />
+      )}
+      {showSigilDraw && (
+        <Suspense fallback={<div className="absolute inset-0 z-[60] bg-[#050204] flex items-center justify-center text-[#C9A961] text-2xl animate-pulse-slow" style={F.brand}>Coven</div>}>
+          <SigilDrawOverlay
+            unlocked={loreUnlocked}
+            onUnlock={() => { setLoreUnlocked(true); showToast('the dark answered — a hidden leaf opens'); }}
+            onClose={() => setShowSigilDraw(false)}
+          />
+        </Suspense>
       )}
       {settings.familiar !== false && !isInsideOverlay && <FloatingCat active />}
       <Toast toast={toast} onDone={() => setToast(null)} />

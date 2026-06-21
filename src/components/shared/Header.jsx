@@ -1,7 +1,15 @@
+import { useRef } from 'react';
 import { Plus, MessageCircle, Bell, Search, Sparkles } from 'lucide-react';
 import { F } from '../../styles/fonts';
 
-export function Header({ tab, onDMs, onCompose, onLibrary, onLogo, onNotifications, onSearch, communityName, unreadNotifications = 0, unreadDMs = 0, parchment = false }) {
+export function Header({ tab, onDMs, onCompose, onLibrary, onLogo, onNotifications, onSearch, onSecret, communityName, unreadNotifications = 0, unreadDMs = 0, parchment = false }) {
+  // Long-press the wordmark to summon the sigil canvas (hidden lore). A normal tap still
+  // opens the Library; the long-press suppresses that tap.
+  const pressTimer = useRef(null);
+  const fired = useRef(false);
+  const startPress = () => { fired.current = false; pressTimer.current = setTimeout(() => { fired.current = true; onSecret && onSecret(); }, 650); };
+  const endPress = () => clearTimeout(pressTimer.current);
+  const logoTap = () => { if (!fired.current) onLogo && onLogo(); };
   const titles = {
     home: null,
     communities: null,
@@ -23,8 +31,9 @@ export function Header({ tab, onDMs, onCompose, onLibrary, onLogo, onNotificatio
           {communityName ? (
             <span className={`${textColor} text-base`} style={F.display}>{communityName}</span>
           ) : tab === 'home' ? (
-            <button onClick={onLogo}
-              className={`${textColor} text-3xl leading-none hover:text-[#C9A961] transition-colors`}
+            <button onClick={logoTap}
+              onPointerDown={startPress} onPointerUp={endPress} onPointerLeave={endPress}
+              className={`${textColor} text-3xl leading-none hover:text-[#C9A961] transition-colors select-none`}
               style={F.brand} title="The Library">Coven</button>
           ) : (
             <button onClick={onLogo}
