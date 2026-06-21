@@ -16,6 +16,7 @@ export function HomeScreen({
   onOpenStory, onCreateStory, stories = [], meHandle = 'you', meAvatar = '🦇',
   tonightStatus, onOpenTonightStatus, onOpenTarot, onOpenEphemeris, onOpenLibrary, onOpenCodex, onOpenHashtag, onOpenVespersArchive,
   ritual, ritualDoneToday, onPerformRitual, crystals = [], trackers = {}, onUpdateTracker, onOpenReflections,
+  feedLoading = false, suggestedSouls = [], following = {}, onFollow,
   settings = {},
 }) {
   const tarotOn = settings.tarotEnabled !== false;
@@ -304,6 +305,21 @@ export function HomeScreen({
 
       {/* Feed */}
       <div className="divide-y divide-[#1A1A1A]">
+        {feedLoading && sortedPosts.length === 0 && (
+          [0, 1, 2, 3].map(i => (
+            <div key={`sk${i}`} className="px-4 py-4 animate-pulse">
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className="w-9 h-9 rounded-full bg-[#141414]" />
+                <div className="flex-1">
+                  <div className="h-2.5 w-24 bg-[#141414] rounded mb-1.5" />
+                  <div className="h-2 w-16 bg-[#0F0F0F] rounded" />
+                </div>
+              </div>
+              <div className="h-3 w-full bg-[#141414] rounded mb-1.5" />
+              <div className="h-3 w-3/4 bg-[#141414] rounded" />
+            </div>
+          ))
+        )}
         {sortedPosts.map(post => {
           const mine = post.mine || post.user === meHandle;
           const bookmarked = !!bookmarks[post.id];
@@ -478,11 +494,47 @@ export function HomeScreen({
             </article>
           );
         })}
-        {sortedPosts.length === 0 && feedScope === 'following' && (
-          <div className="py-16 text-center px-8">
-            <div className="text-[#3F3F3F] text-3xl mb-2">☾</div>
-            <p className="text-[#A8A29E] text-sm italic" style={F.serif}>your following feed is empty.</p>
-            <p className="text-[#6B6B6B] text-xs mt-1" style={F.ui}>follow some souls, or switch to the coven.</p>
+        {!feedLoading && sortedPosts.length === 0 && (
+          <div className="py-12 text-center px-8">
+            <div className="text-[#3F3F3F] text-4xl mb-3">{feedScope === 'following' ? '☾' : '✦'}</div>
+            {feedScope === 'following' ? (
+              <>
+                <p className="text-[#A8A29E] text-sm italic" style={F.serif}>you follow no one yet.</p>
+                <p className="text-[#6B6B6B] text-xs mt-1" style={F.ui}>gather some souls below — or switch to the coven.</p>
+              </>
+            ) : (
+              <>
+                <p className="text-[#A8A29E] text-sm italic" style={F.serif}>the coven is quiet tonight.</p>
+                <p className="text-[#6B6B6B] text-xs mt-1" style={F.ui}>be the first flame — speak, or drop a tonight status.</p>
+              </>
+            )}
+          </div>
+        )}
+        {/* Discover real souls — surfaced when your feed is sparse */}
+        {!feedLoading && suggestedSouls.length > 0 && (sortedPosts.length === 0 || feedScope === 'following') && (
+          <div className="px-4 py-4 bg-[#0A0204]/40">
+            <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-3" style={F.ui}>· souls who've gathered ·</div>
+            <div className="space-y-2">
+              {suggestedSouls.slice(0, 6).map(s => {
+                const followed = !!following[s.handle];
+                return (
+                  <div key={s.id || s.handle} className="flex items-center gap-3">
+                    <button onClick={() => onOpenUser && onOpenUser(s.handle)} className="flex items-center gap-3 flex-1 min-w-0 text-left">
+                      <div className="w-10 h-10 rounded-full overflow-hidden bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-base shrink-0">
+                        {s.avatarUrl ? <img src={s.avatarUrl} alt="" className="w-full h-full object-cover" /> : s.avatar}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[#F5F1E8] text-sm truncate" style={F.ui}>{s.handle}</div>
+                        {s.bio && <div className="text-[11px] text-[#6B6B6B] truncate" style={F.serif}>{s.bio}</div>}
+                      </div>
+                    </button>
+                    <button onClick={() => onFollow && onFollow(s.handle)} disabled={followed}
+                      className={`shrink-0 text-[10px] uppercase tracking-wider px-3 py-1.5 border transition-colors ${followed ? 'border-[#2A2A2A] text-[#6B6B6B]' : 'border-[#5B0F1A] text-[#F5F1E8] hover:bg-[#8B0000]/20'}`}
+                      style={F.ui}>{followed ? 'following' : 'follow'}</button>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
         {feedHasMore ? (

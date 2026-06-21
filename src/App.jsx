@@ -5,7 +5,7 @@ import { isSupabaseConfigured } from './lib/supabase';
 import { SignInScreen } from './components/auth/SignInScreen';
 import { ResetPasswordScreen } from './components/auth/ResetPasswordScreen';
 import { fetchFeed, createPost, deletePost as dbDeletePost, togglePostReaction, fetchComments, createComment, castPollVote, clearPollVote } from './lib/db/posts';
-import { insertProfile, updateProfile, getProfileStats, getProfileByHandle } from './lib/db/profiles';
+import { insertProfile, updateProfile, getProfileStats, getProfileByHandle, fetchProfiles } from './lib/db/profiles';
 import { fetchFollowing, fetchFollowers, followUser, unfollowUser } from './lib/db/social';
 import { FollowListOverlay } from './components/profile/FollowListOverlay';
 import { joinCommunity, leaveCommunity, fetchCommunityMemberCounts } from './lib/db/communities';
@@ -79,6 +79,7 @@ const SoulsOverlay = lazy(() => import('./components/coven/SoulsOverlay').then(m
 import { FashionScreen } from './components/fashion/FashionScreen';
 
 import { OnboardingFlow } from './components/onboarding/OnboardingFlow';
+import { WelcomeOverlay } from './components/onboarding/WelcomeOverlay';
 import { SettingsScreen, DEFAULT_SETTINGS } from './components/settings/SettingsScreen';
 
 import { COMMUNITIES } from './data/communities';
@@ -196,6 +197,9 @@ export default function App() {
   const [feedScope, setFeedScope] = useState('everyone'); // 'everyone' | 'following'
   const [feedHasMore, setFeedHasMore] = useState(true);
   const [feedLoadingMore, setFeedLoadingMore] = useState(false);
+  const [feedLoading, setFeedLoading] = useState(true); // first-page spinner/skeleton
+  const [suggestedSouls, setSuggestedSouls] = useState([]); // real recent profiles for cold-start
+  const [seenWelcome, setSeenWelcome] = useLocalStorage('seenWelcome', false); // one-time first-run guide
   const [blockedIds, setBlockedIds] = useState(() => new Set());
   const [divinationLog, setDivinationLog] = useLocalStorage('divinationLog', []);
   const [storyHighlights, setStoryHighlights] = useLocalStorage('storyHighlights', []);
@@ -327,6 +331,7 @@ export default function App() {
     fetchNotifications().then(n => { if (active) setNotifications(n); }).catch(e => console.error('[load] notifications failed:', e));
     fetchBlockedIds().then(ids => { if (active) setBlockedIds(new Set(ids)); }).catch(() => {});
     fetchCommunityMemberCounts().then(c => { if (active) setCommunityCounts(c); }).catch(() => {});
+    fetchProfiles({ excludeId: meId, limit: 12 }).then(s => { if (active) setSuggestedSouls((s || []).map(p => ({ ...p, avatarUrl: p.avatar_url }))); }).catch(() => {});
     cloudSyncedRef.current = false;
     fetchProfileState().then(s => {
       if (!active) return;
@@ -366,11 +371,13 @@ export default function App() {
     if (!meId || !dbProfile) return;
     let active = true;
     setFeedHasMore(true);
+    setFeedLoading(true);
     fetchFeed(meId, { scope: feedScope }).then(rows => {
       if (!active) return;
       setPosts(rows);
       setFeedHasMore(rows.length >= 20);
-    }).catch(e => console.error('[load] feed failed:', e));
+    }).catch(e => console.error('[load] feed failed:', e))
+      .finally(() => { if (active) setFeedLoading(false); });
     return () => { active = false; };
   }, [meId, dbProfile, feedScope]);
 
@@ -1453,6 +1460,10 @@ export default function App() {
         trackers={trackers}
         onUpdateTracker={updateTracker}
         onOpenReflections={() => setShowReflections(true)}
+        feedLoading={feedLoading}
+        suggestedSouls={suggestedSouls}
+        following={following}
+        onFollow={toggleFollow}
         settings={settings}
       />
     );
@@ -1967,6 +1978,15 @@ export default function App() {
           people={followList.people}
           onClose={() => setFollowList(null)}
           onOpenUser={(h) => { setFollowList(null); if (h && h !== meHandle) setActiveUserHandle(h); }}
+        />
+      )}
+      {!seenWelcome && meId && dbProfile && profile && (
+        <WelcomeOverlay
+          handle={meHandle}
+          onClose={() => setSeenWelcome(true)}
+          onDropStatus={() => { setSeenWelcome(true); setShowTonightModal(true); }}
+          onFindSouls={() => { setSeenWelcome(true); openPortalDirect('souls'); }}
+          onSpeak={() => { setSeenWelcome(true); setShowCompose(true); }}
         />
       )}
       <Toast toast={toast} onDone={() => setToast(null)} />
