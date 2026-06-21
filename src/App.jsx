@@ -308,14 +308,14 @@ export default function App() {
       setEvents(events);
       setEventRsvp(rsvp);
     }).catch(() => {});
-    fetchConversations().then(c => { if (active) setConversations(c); }).catch(() => {});
+    fetchConversations().then(c => { if (active) setConversations(c); }).catch(e => console.error('[load] conversations failed:', e));
     fetchActiveStories(meId).then(s => { if (active) setStories(s); }).catch(() => {});
     fetchListings(meId).then(l => { if (active) setListings(l); }).catch(() => {});
     fetchShops(meId).then(s => { if (active) setShops(s); }).catch(() => {});
     fetchPayoutStatus(meId).then(p => { if (active) setPayoutStatus(p); }).catch(() => {});
     listCrews().then(c => { if (active) setCrews(c); }).catch(() => {});
     fetchMyTicketEventIds().then(ids => { if (active) setMyTicketEventIds(ids); }).catch(() => {});
-    fetchNotifications().then(n => { if (active) setNotifications(n); }).catch(() => {});
+    fetchNotifications().then(n => { if (active) setNotifications(n); }).catch(e => console.error('[load] notifications failed:', e));
     fetchBlockedIds().then(ids => { if (active) setBlockedIds(new Set(ids)); }).catch(() => {});
     cloudSyncedRef.current = false;
     fetchProfileState().then(s => {
@@ -360,7 +360,7 @@ export default function App() {
       if (!active) return;
       setPosts(rows);
       setFeedHasMore(rows.length >= 20);
-    }).catch(() => {});
+    }).catch(e => console.error('[load] feed failed:', e));
     return () => { active = false; };
   }, [meId, dbProfile, feedScope]);
 
@@ -1068,7 +1068,7 @@ export default function App() {
   const hidePost = (postId) => setHiddenPosts(prev => ({ ...prev, [postId]: Date.now() }));
 
   const blockUserById = async (profileId, handle) => {
-    if (!profileId) return;
+    if (!profileId || !meId) return;
     setBlockedIds(prev => new Set(prev).add(profileId));
     setActiveUserHandle(null);
     addNotification({ kind: 'follow', avatar: '⛒', text: `you blocked ${handle || 'someone'}` });
@@ -1076,12 +1076,13 @@ export default function App() {
     fetchFeed(meId, { scope: feedScope }).then(setPosts).catch(() => {});
   };
   const unblockUserById = async (profileId) => {
-    if (!profileId) return;
+    if (!profileId || !meId) return;
     await dbUnblockUser(profileId);
     setBlockedIds(prev => { const n = new Set(prev); n.delete(profileId); return n; });
     fetchFeed(meId, { scope: feedScope }).then(setPosts).catch(() => {});
   };
   const reportTarget = async (kind, targetId) => {
+    if (!meId || !targetId) return;
     try { await reportContent(kind, targetId, ''); addNotification({ kind: 'follow', avatar: '⚑', text: 'reported — thank you' }); }
     catch { /* ignore */ }
   };
@@ -1249,6 +1250,92 @@ export default function App() {
   // Single close handler for every portal overlay: back to the menu if that's where we
   // came from, otherwise all the way out to where the user was (home).
   const closePortal = () => setActivePortal(portalFromMenu ? 'menu' : null);
+
+  // ---- Overlay back-button + Escape handling ----------------------------------
+  // No router → without this the Android hardware back button exits the whole PWA from
+  // any overlay, and Escape does nothing. We treat overlays like a history stack: each
+  // open pushes a guard entry, and Back / Escape peel exactly one layer.
+  const anyOverlayOpen = !!(
+    ticketSuccess || activeStoryIndex !== null || showStoryComposer || venueEditorEvent ||
+    ticketManagerEvent || showCreateEvent || showEditProfile || showSettings || showBlocked ||
+    showMyTickets || showReflections || showNowPlaying || showAddGrave || showAddAnniv ||
+    showVespersArchive || showNewGroup || showTonightModal || quoteTarget || showOddityCompose ||
+    activeOddity || activeText || activePostComments || activeConversation || activeUserHandle ||
+    showSearch || showCrewBrowse || activeEvent || showCompose || showNotifs || showDMs || activePortal
+  );
+  // Close the single top-most overlay (z-order priority). Returns true if it closed one.
+  const closeTopOverlay = () => {
+    if (ticketSuccess) { setTicketSuccess(false); return true; }
+    if (activeStoryIndex !== null) { setActiveStoryIndex(null); return true; }
+    if (showStoryComposer) { setShowStoryComposer(false); return true; }
+    if (venueEditorEvent) { setVenueEditorEvent(null); return true; }
+    if (ticketManagerEvent) { setTicketManagerEvent(null); return true; }
+    if (showCreateEvent) { setShowCreateEvent(false); return true; }
+    if (showEditProfile) { setShowEditProfile(false); return true; }
+    if (showSettings) { setShowSettings(false); return true; }
+    if (showBlocked) { setShowBlocked(false); return true; }
+    if (showMyTickets) { setShowMyTickets(false); return true; }
+    if (showReflections) { setShowReflections(false); return true; }
+    if (showNowPlaying) { setShowNowPlaying(false); return true; }
+    if (showAddGrave) { setShowAddGrave(false); return true; }
+    if (showAddAnniv) { setShowAddAnniv(false); return true; }
+    if (showVespersArchive) { setShowVespersArchive(false); return true; }
+    if (showNewGroup) { setShowNewGroup(false); return true; }
+    if (showTonightModal) { setShowTonightModal(false); return true; }
+    if (quoteTarget) { setQuoteTarget(null); return true; }
+    if (showOddityCompose) { setShowOddityCompose(false); return true; }
+    if (activeOddity) { setActiveOddity(null); return true; }
+    if (activeText) { setActiveText(null); return true; }
+    if (activePostComments) { setActivePostComments(null); return true; }
+    if (activeConversation) { setActiveConversation(null); setActiveConvMeta(null); return true; }
+    if (activeUserHandle) { setActiveUserHandle(null); return true; }
+    if (showSearch) { setShowSearch(false); return true; }
+    if (showCrewBrowse) { setShowCrewBrowse(false); return true; }
+    if (activeEvent) { setActiveEvent(null); return true; }
+    if (showCompose) { setShowCompose(false); return true; }
+    if (showNotifs) { setShowNotifs(false); return true; }
+    if (showDMs) { setShowDMs(false); return true; }
+    if (activePortal) { closePortal(); return true; }
+    return false;
+  };
+  // Keep the latest state/closure reachable from the once-attached listeners below.
+  const anyOverlayOpenRef = useRef(false); anyOverlayOpenRef.current = anyOverlayOpen;
+  const closeTopRef = useRef(null); closeTopRef.current = closeTopOverlay;
+  const overlayGuardRef = useRef(false);
+
+  // Push a history guard when an overlay opens; consume an orphaned guard on UI-close.
+  useEffect(() => {
+    if (anyOverlayOpen && !overlayGuardRef.current) {
+      overlayGuardRef.current = true;
+      window.history.pushState({ covenOverlay: true }, '');
+    } else if (!anyOverlayOpen && overlayGuardRef.current) {
+      overlayGuardRef.current = false;
+      if (window.history.state?.covenOverlay) window.history.back();
+    }
+  }, [anyOverlayOpen]);
+
+  // Back button → peel one layer. The browser already popped our guard; if layers remain
+  // open the effect above re-pushes a fresh guard for the next Back press.
+  useEffect(() => {
+    const onPop = () => {
+      overlayGuardRef.current = false;
+      if (anyOverlayOpenRef.current) closeTopRef.current?.();
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
+  // Escape behaves exactly like Back so the guard stack stays consistent.
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key !== 'Escape' || !anyOverlayOpenRef.current) return;
+      e.preventDefault();
+      if (overlayGuardRef.current) window.history.back();
+      else closeTopRef.current?.();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   const renderTab = () => {
     if (community) {

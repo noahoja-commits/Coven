@@ -118,6 +118,8 @@ export async function createPost({ body, community, anonymous, poll, kind, img, 
   return {
     id: data.id,
     kind: data.kind,
+    createdAt: data.created_at,
+    authorId: anonymous ? null : me.id,
     user: anonymous ? 'anonymous' : me.handle,
     avatar: anonymous ? '✟' : me.avatar,
     avatarUrl: anonymous ? undefined : (me.avatarUrl || undefined),
