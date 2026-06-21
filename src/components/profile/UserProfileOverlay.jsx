@@ -5,7 +5,7 @@ import { getProfileByHandle, getProfileStats } from '../../lib/db/profiles';
 import { fetchUserPosts } from '../../lib/db/posts';
 import { PostGrid } from './PostGrid';
 
-export function UserProfileOverlay({ handle, posts = [], isFollowing, isMuted, onToggleFollow, onToggleMute, onWhisper, onClose, onOpenComments, onReact, onBlock, onReport }) {
+export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], isFollowing, isMuted, onToggleFollow, onToggleMute, onWhisper, onClose, onOpenComments, onReact, onBlock, onReport }) {
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState({ followers: 0, following: 0, posts: 0 });
   const [loading, setLoading] = useState(true);
@@ -111,8 +111,10 @@ export function UserProfileOverlay({ handle, posts = [], isFollowing, isMuted, o
         </div>
       </div>
 
-      {/* Posts grid */}
-      <PostGrid posts={gridPosts} loading={postsLoading} emptyText="· silent so far ·" onOpen={(id) => onOpenComments && onOpenComments(id)} />
+      {/* Posts grid (respect muted keywords) */}
+      <PostGrid
+        posts={gridPosts.filter(p => !mutedKeywords.some(k => k && (p.body || '').toLowerCase().includes(k.toLowerCase())))}
+        loading={postsLoading} emptyText="· silent so far ·" onOpen={(id) => onOpenComments && onOpenComments(id)} />
     </div>
   );
 }

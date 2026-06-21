@@ -36,7 +36,7 @@ function pinPos(pin) {
   return { left: `${clamp(cx + jx, 6, 94)}%`, top: `${clamp(cy + jy, 22, 84)}%` };
 }
 
-export function MapScreen({ tonightStatus, pins = [], onOpenUser, onOpenTonightStatus, festivalEvent = null, onEnterFestival }) {
+export function MapScreen({ tonightStatus, ghost = false, pins = [], onOpenUser, onOpenTonightStatus, festivalEvent = null, onEnterFestival }) {
   const [view, setView] = useState('map'); // 'map' | 'list'
 
   // Group souls by area (for the cluster headings + the by-area list).
@@ -136,16 +136,24 @@ export function MapScreen({ tonightStatus, pins = [], onOpenUser, onOpenTonightS
             );
           })}
 
-          {/* Your own pin tonight */}
-          <button onClick={onOpenTonightStatus} className="absolute" style={{ left: '48%', top: '52%' }}>
-            <div className="relative -translate-x-1/2 -translate-y-1/2">
-              <span className="absolute inset-0 -m-3 rounded-full bg-[#7B2CBF] opacity-30 animate-ping-slow" />
-              <span className="relative block w-3 h-3 rounded-full bg-[#7B2CBF] ring-2 ring-[#0A0A0A]" />
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 whitespace-nowrap px-2 py-0.5 bg-black/80 backdrop-blur-sm border border-[#7B2CBF]/40 text-[10px] text-[#F5F1E8]" style={F.ui}>
-                you{tonightStatus?.text ? ` · ${tonightStatus.text.slice(0, 24)}` : ' · drop a status'}
+          {/* Your own pin tonight — hidden while ghosted (you're invisible) */}
+          {ghost ? (
+            <div className="absolute left-1/2 bottom-20 -translate-x-1/2 text-center pointer-events-none px-8">
+              <div className="text-[10px] uppercase tracking-[0.3em] text-[#7B2CBF] bg-black/60 backdrop-blur-sm px-3 py-1.5 border border-[#7B2CBF]/40" style={F.ui}>
+                · ghosted · you're off the map ·
               </div>
             </div>
-          </button>
+          ) : (
+            <button onClick={onOpenTonightStatus} className="absolute" style={{ left: '48%', top: '52%' }}>
+              <div className="relative -translate-x-1/2 -translate-y-1/2">
+                <span className="absolute inset-0 -m-3 rounded-full bg-[#7B2CBF] opacity-30 animate-ping-slow" />
+                <span className="relative block w-3 h-3 rounded-full bg-[#7B2CBF] ring-2 ring-[#0A0A0A]" />
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 whitespace-nowrap px-2 py-0.5 bg-black/80 backdrop-blur-sm border border-[#7B2CBF]/40 text-[10px] text-[#F5F1E8]" style={F.ui}>
+                  you{tonightStatus?.text ? ` · ${tonightStatus.text.slice(0, 24)}` : ' · drop a status'}
+                </div>
+              </div>
+            </button>
+          )}
         </>
       ) : (
         /* By-area list */

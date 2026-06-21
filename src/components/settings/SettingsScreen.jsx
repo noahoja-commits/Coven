@@ -53,7 +53,7 @@ function Row({ label, desc, children }) {
   );
 }
 
-export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOnboarding, mutedKeywords = [], onSetMutedKeywords, payoutStatus, payoutBusy = false, onSetupPayouts, pushState = 'off', onEnablePush, onDisablePush, onEditProfile, onOpenBlocked }) {
+export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLogout, onRerunOnboarding, mutedKeywords = [], onSetMutedKeywords, payoutStatus, payoutBusy = false, onSetupPayouts, pushState = 'off', onEnablePush, onDisablePush, onEditProfile, onOpenBlocked }) {
   const set = (key, value) => onChange({ ...settings, [key]: value });
   const addKeyword = (e) => {
     e.preventDefault();
@@ -101,7 +101,7 @@ export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOn
             <Toggle on={settings.weatherMood} onChange={v => set('weatherMood', v)} />
           </Row>
           <Row label="Sound on" desc="a low ambient drone while you wander. turn up your volume — on iPhone, flip the side silent switch off.">
-            <Toggle on={settings.soundOn} onChange={v => set('soundOn', v)} />
+            <Toggle on={settings.soundOn} onChange={v => (onToggleSound ? onToggleSound(v) : set('soundOn', v))} />
           </Row>
         </Section>
 
@@ -124,7 +124,7 @@ export function SettingsScreen({ settings, onChange, onBack, onLogout, onRerunOn
           <Row label="Show expected days" desc="the second number. ~80 years estimated.">
             <Toggle on={settings.mementoExpected} onChange={v => set('mementoExpected', v)} />
           </Row>
-          <Row label="Ghost mode" desc="hide tonight, online, last seen, and your map pin.">
+          <Row label="Ghost mode" desc="go invisible — pull your tonight status and map pin so no one can see where you are.">
             <Toggle on={settings.ghostMode} onChange={v => set('ghostMode', v)} />
           </Row>
         </Section>

@@ -201,14 +201,19 @@ export default function App() {
     else document.body.classList.remove('parchment-mode');
   }, [settings.parchmentMode]);
 
-  // Ambient drone follows the "Sound on" toggle (the toggle click is the gesture
-  // browsers require to start audio). Always stop on unmount. Skip the toast on the
-  // initial mount so a persisted "on" doesn't pop a toast at load.
+  // Ambient drone. The AudioContext MUST be started/resumed synchronously inside
+  // the user's tap (toggleSound, called straight from the toggle) — iOS drops audio
+  // started later from an effect because the user-activation has already expired.
   const soundMounted = useRef(false);
+  const toggleSound = (on) => {
+    if (on) startAmbient(); else stopAmbient();   // synchronous, inside the gesture
+    setSettings(s => ({ ...s, soundOn: on }));
+    showToast(on ? 'ambient drone on 🔊' : 'ambient off');
+  };
+  // Secondary: reflect a persisted/loaded soundOn and clean up on unmount. Does NOT
+  // toast (that's the toggle's job) and won't fight the gesture-started context.
   useEffect(() => {
-    if (settings.soundOn) startAmbient();
-    else stopAmbient();
-    if (soundMounted.current) showToast(settings.soundOn ? 'ambient drone on 🔊' : 'ambient off');
+    if (settings.soundOn && soundMounted.current) startAmbient();
     soundMounted.current = true;
     return () => stopAmbient();
   }, [settings.soundOn]);
@@ -474,18 +479,26 @@ export default function App() {
   };
 
   // Save tonight status: keep the instant local copy AND sync the public map pin.
-  // Ghost mode keeps you off the map (status stays local/profile-only).
-  const saveTonightStatus = (status) => {
+  // Ghost mode keeps you off the map entirely (status stays local/profile-only).
+  // Await the write before refetching so a clear can't race the refetch and
+  // re-surface a pin that's mid-delete.
+  const saveTonightStatus = async (status) => {
     setTonightStatus(status);
-    if (!status || !status.text) {
-      clearTonightPin().catch(() => {});
-    } else if (settings.ghostMode) {
-      clearTonightPin().catch(() => {});
-    } else {
-      setTonightPin({ text: status.text, neighborhood: status.neighborhood, expiresAt: status.expiresAt }).catch(() => {});
-    }
+    try {
+      if (!status || !status.text || settings.ghostMode) {
+        await clearTonightPin();
+      } else {
+        await setTonightPin({ text: status.text, neighborhood: status.neighborhood, expiresAt: status.expiresAt });
+      }
+    } catch { /* ignore network errors */ }
     fetchTonightPins().then(setTonightPins).catch(() => {});
   };
+
+  // Going ghost must immediately pull any existing pin from the shared map.
+  useEffect(() => {
+    if (!settings.ghostMode) return;
+    clearTonightPin().then(() => fetchTonightPins().then(setTonightPins)).catch(() => {});
+  }, [settings.ghostMode]);
 
   // Load an event's attendees when its detail opens.
   useEffect(() => {
@@ -998,13 +1011,21 @@ export default function App() {
     }));
   };
 
-  const visiblePosts = posts.filter(p => {
-    if (hiddenPosts[p.id]) return false;
-    if (muted[p.user]) return false;
+  // Shared mute test (muted handle OR muted keyword in the body). Used by the home
+  // feed AND scene/profile lists so muting actually applies everywhere posts show.
+  const isMutedPost = (p) => {
+    if (!p) return false;
+    if (p.user && muted[p.user]) return true;
     if (mutedKeywords.length > 0 && p.body) {
       const body = p.body.toLowerCase();
-      if (mutedKeywords.some(k => k && body.includes(k.toLowerCase()))) return false;
+      if (mutedKeywords.some(k => k && body.includes(k.toLowerCase()))) return true;
     }
+    return false;
+  };
+
+  const visiblePosts = posts.filter(p => {
+    if (hiddenPosts[p.id]) return false;
+    if (isMutedPost(p)) return false;
     if (p.authorId && blockedIds.has(p.authorId)) return false; // blocked both-ways
     return true;
   });
@@ -1189,7 +1210,7 @@ export default function App() {
         <CommunityDetail
           id={community}
           onBack={() => setCommunity(null)}
-          posts={posts}
+          posts={posts.filter(p => !isMutedPost(p) && !hiddenPosts[p.id])}
           isMember={!!communityMembership[community]}
           onToggleMembership={() => toggleCommunityMembership(community)}
         />
@@ -1256,6 +1277,7 @@ export default function App() {
       return (
         <MapScreen
           tonightStatus={tonightStatus}
+          ghost={settings.ghostMode}
           pins={tonightPins.filter(p => p.userId !== meId && !blockedIds.has(p.userId))}
           onOpenUser={(h) => setActiveUserHandle(h)}
           onOpenTonightStatus={() => setShowTonightModal(true)}
@@ -1436,6 +1458,7 @@ export default function App() {
         <UserProfileOverlay
           handle={activeUserHandle}
           posts={posts}
+          mutedKeywords={mutedKeywords}
           isFollowing={!!following[activeUserHandle]}
           isMuted={!!muted[activeUserHandle]}
           onToggleFollow={() => toggleFollow(activeUserHandle)}
@@ -1600,6 +1623,7 @@ export default function App() {
         <SettingsScreen
           settings={settings}
           onChange={setSettings}
+          onToggleSound={toggleSound}
           onBack={() => setShowSettings(false)}
           onLogout={() => { setShowSettings(false); signOut(); }}
           mutedKeywords={mutedKeywords}
