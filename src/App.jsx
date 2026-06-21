@@ -193,6 +193,8 @@ export default function App() {
   const [hiddenPosts, setHiddenPosts] = useLocalStorage('hiddenPosts', {});
   const [ritual, setRitual] = useLocalStorage('ritual', { streak: 0, lastDay: null });
   const [crystals, setCrystals] = useLocalStorage('crystals', []);
+  const [shrine, setShrine] = useLocalStorage('shrine', []); // placed altar object ids
+  const [flameLitAt, setFlameLitAt] = useLocalStorage('flameLitAt', 0); // your profile flame
   const [pinnedPostId, setPinnedPostId] = useLocalStorage('pinnedPostId', null);
   const [shrineTheme, setShrineTheme] = useLocalStorage('shrineTheme', 'oxblood');
   const [feedSort, setFeedSort] = useLocalStorage('feedSort', 'latest');
@@ -362,6 +364,8 @@ export default function App() {
         if (cs.shrineTheme !== undefined) setShrineTheme(cs.shrineTheme);
         if (cs.divinationLog !== undefined) setDivinationLog(cs.divinationLog);
         if (cs.storyHighlights !== undefined) setStoryHighlights(cs.storyHighlights);
+        if (cs.shrine !== undefined) setShrine(cs.shrine);
+        if (cs.flameLitAt !== undefined) setFlameLitAt(cs.flameLitAt);
       }
       cloudSyncedRef.current = true;
     }).catch(() => { cloudSyncedRef.current = true; });
@@ -414,13 +418,13 @@ export default function App() {
     const blob = {
       tonightStatus, communityMembership, bookmarks, muted, anniversaries, cardHistory,
       marginalia, postCandles, nowPlaying, activityLog, mutedKeywords, hiddenPosts,
-      ritual, crystals, pinnedPostId, shrineTheme, divinationLog, storyHighlights,
+      ritual, crystals, pinnedPostId, shrineTheme, divinationLog, storyHighlights, shrine, flameLitAt,
     };
     const t = setTimeout(() => { saveProfileState(meId, 'clientSync', blob).catch(() => {}); }, 800);
     return () => clearTimeout(t);
   }, [meId, tonightStatus, communityMembership, bookmarks, muted, anniversaries, cardHistory,
       marginalia, postCandles, nowPlaying, activityLog, mutedKeywords, hiddenPosts,
-      ritual, crystals, pinnedPostId, shrineTheme, divinationLog, storyHighlights]);
+      ritual, crystals, pinnedPostId, shrineTheme, divinationLog, storyHighlights, shrine, flameLitAt]);
 
   // Live notifications: a new row (follow/react/comment/dm) → refetch so the
   // bell updates in real time, with the actor's profile joined in.
@@ -1529,6 +1533,10 @@ export default function App() {
         onPerformRitual={performRitual}
         crystals={crystals}
         onToggleCrystal={toggleCrystal}
+        shrine={shrine}
+        onSetShrine={setShrine}
+        flameLitAt={flameLitAt}
+        onTendFlame={() => setFlameLitAt(Date.now())}
         pinnedPost={pinnedPostId ? posts.find(p => p.id === pinnedPostId && p.mine) : null}
         shrineTheme={shrineTheme}
         onSetShrineTheme={setShrineTheme}

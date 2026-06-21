@@ -24,7 +24,7 @@ export function MyTicketsOverlay({ meId, onBack, onOpenEvent }) {
           <button onClick={onBack} className="text-[#A8A29E] hover:text-[#F5F1E8] transition-colors flex items-center gap-1 -ml-1" style={F.ui}>
             <ChevronLeft size={18} /><span className="text-xs uppercase tracking-wider">back</span>
           </button>
-          <div className="text-[#F5F1E8] text-base tracking-[0.3em]" style={F.display}>TICKETS</div>
+          <div className="text-[#F5F1E8] text-base tracking-[0.3em]" style={F.display}>STUBS</div>
           <span className="w-12" />
         </div>
       </div>
@@ -35,28 +35,37 @@ export function MyTicketsOverlay({ meId, onBack, onOpenEvent }) {
         ) : tickets.length === 0 ? (
           <div className="text-center py-16 text-[#6B6B6B]" style={F.serif}>
             <div className="text-3xl mb-3">𖤐</div>
-            <p className="text-sm italic">no tickets yet — buy into a rite and it'll appear here.</p>
+            <p className="text-sm italic">no stubs yet — buy into a rite and keep the stub here.</p>
           </div>
         ) : (
           <div className="space-y-3">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-[#6B6B6B] text-center pb-1" style={F.ui}>· the rites you've kept ·</p>
             {tickets.map(t => {
               const ev = t.event || {};
               const checkedIn = !!t.checked_in_at;
               return (
                 <button key={t.id} onClick={() => ev.id && onOpenEvent && onOpenEvent(ev.id)}
-                  className="w-full text-left border border-[#2A2A2A] bg-[#0F0F0F] hover:border-[#5B0F1A]/50 transition-colors p-3 flex items-center gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[#F5F1E8] text-sm truncate" style={F.display}>{ev.name || 'a rite'}</div>
-                    <div className="text-[10px] text-[#A8A29E] mt-0.5" style={F.ui}>
+                  className="relative w-full text-left flex items-stretch overflow-hidden border border-[#3A2F1A] hover:border-[#C9A961]/50 transition-colors group"
+                  style={{ background: 'linear-gradient(95deg, #17110A 0%, #120D08 100%)' }}>
+                  {/* torn perforation edge */}
+                  <span className="w-2 shrink-0 border-r border-dashed border-[#3A2F1A]"
+                    style={{ backgroundImage: 'radial-gradient(circle at left, #0A0A0A 2px, transparent 2px)', backgroundSize: '8px 8px', backgroundPosition: 'left center', backgroundRepeat: 'repeat-y' }} />
+                  <div className="flex-1 min-w-0 p-3">
+                    <div className="text-[#F5F1E8] text-sm truncate" style={F.display}>{(ev.name || 'a rite').toUpperCase()}</div>
+                    <div className="text-[10px] text-[#A89968] mt-0.5" style={F.ui}>
                       {[ev.event_date, ev.venue].filter(Boolean).join(' · ') || 'details soon'}
                     </div>
-                    <div className="text-[10px] text-[#6B6B6B] mt-1" style={F.mono}>{money(t.amount_cents, t.currency)} · {t.status}</div>
+                    <div className="text-[10px] text-[#6B6B6B] mt-1" style={F.mono}>{money(t.amount_cents, t.currency)} · admit one</div>
                   </div>
-                  {checkedIn ? (
-                    <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-[#C9A961]" style={F.ui}><Check size={12} /> in</span>
-                  ) : (
-                    <span className="text-[9px] uppercase tracking-[0.18em] text-[#5B0F1A] border border-[#5B0F1A]/40 px-2 py-1" style={F.ui}>ticket</span>
-                  )}
+                  {/* stub end */}
+                  <div className="shrink-0 w-16 border-l border-dashed border-[#3A2F1A] flex flex-col items-center justify-center px-1 py-2 relative">
+                    {checkedIn ? (
+                      <span className="text-[9px] uppercase tracking-[0.15em] text-[#C9A961] border border-[#C9A961]/50 px-1.5 py-0.5 rotate-[-8deg] flex items-center gap-0.5" style={F.ui}><Check size={9} /> kept</span>
+                    ) : (
+                      <span className="text-[9px] uppercase tracking-[0.15em] text-[#A89968]/70" style={F.ui}>stub</span>
+                    )}
+                    <span className="text-[8px] text-[#5B5B5B] mt-1" style={F.mono}>№{String(t.id || '').replace(/\D/g, '').slice(0, 4) || '0000'}</span>
+                  </div>
                 </button>
               );
             })}

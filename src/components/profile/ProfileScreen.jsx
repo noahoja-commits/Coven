@@ -8,6 +8,7 @@ import { ACHIEVEMENTS, earnedAchievements } from '../../data/achievements';
 import { fetchUserPosts } from '../../lib/db/posts';
 import { borderStyle, bannerStyle } from '../../data/decor';
 import { CRYSTAL_OPTIONS } from '../../data/crystals';
+import { SHRINE_OBJECTS, earnedShrine } from '../../data/shrine';
 import { PostGrid } from './PostGrid';
 
 const SHRINE_THEMES = {
@@ -18,7 +19,8 @@ const SHRINE_THEMES = {
   cathedral: 'linear-gradient(180deg, #1F0810 0%, transparent 100%)',
 };
 
-export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpdateTracker, onOpenTonightStatus, onOpenSettings, mementoMoriOn, settings, onEditProfile, onLightCandle, crews = [], onOpenCrew, onBrowseCrews, onAddGrave, onAddAnniversary, onOpenNowPlaying, onOpenReflections, onOpenTickets, reflectionsCount = 0, nowPlaying, activityLog = [], sigils = [], bookmarks = [], onOpenComments, onOpenPost, ritual, ritualDoneToday, onPerformRitual, crystals = [], onToggleCrystal, pinnedPost, shrineTheme = 'oxblood', onSetShrineTheme, storyHighlights = [], onRemoveHighlight, achievementState = {}, onShowFollowers, onShowFollowing, joinedScenes = [], onOpenScene }) {
+export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpdateTracker, onOpenTonightStatus, onOpenSettings, mementoMoriOn, settings, onEditProfile, onLightCandle, crews = [], onOpenCrew, onBrowseCrews, onAddGrave, onAddAnniversary, onOpenNowPlaying, onOpenReflections, onOpenTickets, reflectionsCount = 0, nowPlaying, activityLog = [], sigils = [], bookmarks = [], onOpenComments, onOpenPost, ritual, ritualDoneToday, onPerformRitual, crystals = [], onToggleCrystal, pinnedPost, shrineTheme = 'oxblood', onSetShrineTheme, storyHighlights = [], onRemoveHighlight, achievementState = {}, onShowFollowers, onShowFollowing, joinedScenes = [], onOpenScene,
+shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
   const earned = earnedAchievements(achievementState);
   const earnedIds = new Set(earned.map(a => a.id));
   const [showThemePicker, setShowThemePicker] = useState(false);
@@ -234,6 +236,10 @@ export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpda
         </button>
         <CrystalsBlock crystals={crystals} onToggleCrystal={onToggleCrystal} />
       </div>
+
+      {/* Your flame + altar shrine */}
+      <SelfFlame flameLitAt={flameLitAt} onTend={onTendFlame} />
+      <ShrineBlock shrine={shrine} onSetShrine={onSetShrine} state={achievementState} />
 
       {/* Now playing */}
       <button onClick={onOpenNowPlaying} className="w-full text-left mx-4 mt-4 p-3 border border-[#2A2A2A] bg-gradient-to-br from-[#A89968]/10 to-transparent hover:border-[#A89968]/50 transition-colors group" style={{ width: 'calc(100% - 2rem)' }}>
@@ -580,6 +586,93 @@ export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpda
         )
       )}
     </div>
+  );
+}
+
+// Your own flame — lit by tending it; burns down over ~48h and gutters out if you stay away.
+const FLAME_MS = 48 * 60 * 60 * 1000;
+function SelfFlame({ flameLitAt = 0, onTend }) {
+  const elapsed = Date.now() - (flameLitAt || 0);
+  const lit = flameLitAt > 0 && elapsed < FLAME_MS;
+  const pct = lit ? Math.max(0, 1 - elapsed / FLAME_MS) : 0;
+  const low = lit && pct < 0.25;
+  return (
+    <button onClick={onTend}
+      className="w-full text-left mx-4 mt-4 p-3 border border-[#2A2A2A] bg-gradient-to-br from-[#5B0F1A]/10 to-transparent hover:border-[#5B0F1A]/50 transition-colors flex items-center gap-3"
+      style={{ width: 'calc(100% - 2rem)' }}>
+      <span className={`text-2xl ${lit ? 'animate-flicker' : 'opacity-40 grayscale'}`}>🕯</span>
+      <div className="flex-1 min-w-0">
+        <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.ui}>· your flame ·</div>
+        <div className="text-[#A8A29E] text-xs italic mt-0.5" style={F.serif}>
+          {!lit ? 'your flame has gone out — tap to light it' : low ? 'guttering — tend it before it dies' : 'burning. return to tend it.'}
+        </div>
+        <div className="mt-1.5 h-1 bg-[#1A1A1A] overflow-hidden">
+          <div className="h-full transition-all" style={{ width: `${Math.round(pct * 100)}%`, background: low ? '#8B0000' : '#C9A961' }} />
+        </div>
+      </div>
+      <span className="text-[10px] uppercase tracking-wider text-[#A89968] shrink-0" style={F.ui}>{lit ? 'tend' : 'light'}</span>
+    </button>
+  );
+}
+
+// The altar — arrange objects you've earned through practice. Up to 5 on the shrine.
+function ShrineBlock({ shrine = [], onSetShrine, state = {} }) {
+  const [open, setOpen] = useState(false);
+  const earned = new Set(earnedShrine(state).map(o => o.id));
+  const placed = SHRINE_OBJECTS.filter(o => shrine.includes(o.id)).slice(0, 5);
+  const toggle = (id) => {
+    if (!earned.has(id)) return;
+    const has = shrine.includes(id);
+    const next = has ? shrine.filter(x => x !== id) : (shrine.length < 5 ? [...shrine, id] : shrine);
+    onSetShrine && onSetShrine(next);
+  };
+  return (
+    <>
+      <button onClick={() => setOpen(true)}
+        className="w-full text-left mx-4 mt-4 p-3 border border-[#2A2A2A] bg-[#0F0F0F] hover:border-[#A89968]/40 transition-colors" style={{ width: 'calc(100% - 2rem)' }}>
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.ui}>· the altar ·</span>
+          <span className="text-[10px] text-[#6B6B6B]" style={F.ui}>{earned.size}/{SHRINE_OBJECTS.length} earned</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {[0, 1, 2, 3, 4].map(i => (
+            <span key={i} className="w-8 h-8 flex items-center justify-center border border-[#1A1A1A] bg-[#0A0204]/60 text-lg">
+              {placed[i] ? placed[i].glyph : <span className="text-[#2A2A2A] text-xs">·</span>}
+            </span>
+          ))}
+          <span className="ml-auto text-[10px] uppercase tracking-wider text-[#6B6B6B]" style={F.ui}>arrange →</span>
+        </div>
+      </button>
+      {open && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center animate-fade-in" onClick={() => setOpen(false)}>
+          <div className="bg-[#0F0F0F] border border-[#2A2A2A] w-full sm:max-w-md sm:m-4 animate-slide-up max-h-[90dvh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A]">
+              <div>
+                <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· place up to 5 · earned by practice ·</span>
+                <h3 className="text-[#F5F1E8] text-lg leading-none mt-1" style={F.display}>THE ALTAR</h3>
+              </div>
+              <button onClick={() => setOpen(false)} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1"><X size={20} /></button>
+            </div>
+            <div className="p-4 grid grid-cols-2 gap-2">
+              {SHRINE_OBJECTS.map(o => {
+                const got = earned.has(o.id);
+                const on = shrine.includes(o.id);
+                return (
+                  <button key={o.id} onClick={() => toggle(o.id)} disabled={!got}
+                    className={`flex items-start gap-2 p-2 border text-left transition-colors ${on ? 'border-[#C9A961] bg-[#C9A961]/10' : got ? 'border-[#2A2A2A] hover:border-[#3F3F3F]' : 'border-[#1A1A1A] opacity-50'}`}>
+                    <span className={`text-2xl shrink-0 leading-none mt-0.5 ${got ? '' : 'grayscale opacity-60'}`}>{o.glyph}</span>
+                    <span className="min-w-0">
+                      <span className="block text-[#F5F1E8] text-sm" style={F.serif}>{o.name}</span>
+                      <span className="block text-[10px] text-[#6B6B6B] italic mt-0.5 leading-snug" style={F.serif}>{got ? 'earned' : o.desc}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
