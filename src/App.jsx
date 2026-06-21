@@ -124,6 +124,9 @@ export default function App() {
   const [showVespersArchive, setShowVespersArchive] = useState(false);
 
   const [activePortal, setActivePortal] = useState(null); // 'menu' | 'library' | 'oddities' | etc.
+  // Tracks whether the current portal was opened from the star→menu (so closing returns
+  // to the menu) vs. directly from the home screen / logo (so closing returns to home).
+  const [portalFromMenu, setPortalFromMenu] = useState(false);
   const [activeText, setActiveText] = useState(null); // library reader
   const [activeOddity, setActiveOddity] = useState(null);
   const [showOddityCompose, setShowOddityCompose] = useState(false);
@@ -1233,8 +1236,14 @@ export default function App() {
   };
   const onLogoTap = () => {               // Coven wordmark → straight into The Library
     if (activePortal) return;
+    setPortalFromMenu(false);             // opened directly → close returns to home
     setActivePortal('library');
   };
+  // Open a portal directly from outside the menu (home screen tiles); closing returns home.
+  const openPortalDirect = (id) => { setPortalFromMenu(false); setActivePortal(id); };
+  // Single close handler for every portal overlay: back to the menu if that's where we
+  // came from, otherwise all the way out to where the user was (home).
+  const closePortal = () => setActivePortal(portalFromMenu ? 'menu' : null);
 
   const renderTab = () => {
     if (community) {
@@ -1287,10 +1296,10 @@ export default function App() {
         meAvatar={meAvatar}
         tonightStatus={tonightStatus}
         onOpenTonightStatus={() => setShowTonightModal(true)}
-        onOpenTarot={() => setActivePortal('tarot')}
-        onOpenEphemeris={() => setActivePortal('ephemeris')}
-        onOpenLibrary={(id) => { setActivePortal('library'); setActiveText(id); }}
-        onOpenCodex={() => setActivePortal('codex')}
+        onOpenTarot={() => openPortalDirect('tarot')}
+        onOpenEphemeris={() => openPortalDirect('ephemeris')}
+        onOpenLibrary={(id) => { setPortalFromMenu(false); setActivePortal('library'); setActiveText(id); }}
+        onOpenCodex={() => openPortalDirect('codex')}
         onOpenVespersArchive={() => setShowVespersArchive(true)}
         settings={settings}
       />
@@ -1610,7 +1619,7 @@ export default function App() {
       {showVespersArchive && (
         <VespersArchiveModal
           onClose={() => setShowVespersArchive(false)}
-          onOpenLibrary={(id) => { setActivePortal('library'); setActiveText(id); setShowVespersArchive(false); }}
+          onOpenLibrary={(id) => { setPortalFromMenu(false); setActivePortal('library'); setActiveText(id); setShowVespersArchive(false); }}
         />
       )}
       {quoteTarget && (
@@ -1648,8 +1657,8 @@ export default function App() {
           onOpenUser={(handle) => { setActiveUserHandle(handle); setShowSearch(false); }}
           onOpenCommunity={(id) => { setTab('communities'); setCommunity(id); setShowSearch(false); }}
           onOpenEvent={() => { setTab('events'); setShowSearch(false); }}
-          onOpenCodex={() => { setActivePortal('codex'); setShowSearch(false); }}
-          onOpenLibrary={(id) => { setActivePortal('library'); setActiveText(id); setShowSearch(false); }}
+          onOpenCodex={() => { setPortalFromMenu(false); setActivePortal('codex'); setShowSearch(false); }}
+          onOpenLibrary={(id) => { setPortalFromMenu(false); setActivePortal('library'); setActiveText(id); setShowSearch(false); }}
         />
       )}
       {showSettings && (
@@ -1689,14 +1698,14 @@ export default function App() {
       {activePortal === 'menu' && (
         <CovenMenu
           onClose={() => setActivePortal(null)}
-          onOpen={(id) => setActivePortal(id)}
+          onOpen={(id) => { setPortalFromMenu(true); setActivePortal(id); }}
         />
       )}
       {(activePortal === 'library' || activeText) && (
         <Suspense fallback={<div className="absolute inset-0 z-50 bg-[#0A0A0A] flex items-center justify-center text-[#C9A961] text-2xl animate-pulse-slow" style={F.brand}>Coven</div>}>
           {activePortal === 'library' && !activeText && (
             <LibraryOverlay
-              onClose={() => setActivePortal('menu')}
+              onClose={closePortal}
               onOpenText={(id) => setActiveText(id)}
             />
           )}
@@ -1715,7 +1724,7 @@ export default function App() {
       )}
       {activePortal === 'tarot' && (
         <TarotOverlay
-          onClose={() => setActivePortal('menu')}
+          onClose={closePortal}
           history={cardHistory}
           onRecord={recordCardDraw}
           onLogDivination={logDivination}
@@ -1723,32 +1732,32 @@ export default function App() {
           onShare={(pull) => {
             const body = `✦ today's pull: ${pull.card.name}${pull.reversed ? ' · reversed' : ''} — "${pull.reversed ? pull.card.reversed : pull.card.upright}"`;
             addPost({ body, community: 'general' });
-            setActivePortal('menu');
+            closePortal();
           }}
         />
       )}
       {activePortal === 'codex' && (
-        <CodexOverlay onClose={() => setActivePortal('menu')} />
+        <CodexOverlay onClose={closePortal} />
       )}
       {activePortal === 'ephemeris' && (
-        <EphemerisOverlay onClose={() => setActivePortal('menu')} profile={profile} />
+        <EphemerisOverlay onClose={closePortal} profile={profile} />
       )}
       {activePortal === 'sigils' && (
-        <SigilOverlay onClose={() => setActivePortal('menu')} onSave={saveSigil} />
+        <SigilOverlay onClose={closePortal} onSave={saveSigil} />
       )}
       {activePortal === 'pendulum' && (
-        <PendulumOverlay onClose={() => setActivePortal('menu')} onLog={logDivination} />
+        <PendulumOverlay onClose={closePortal} onLog={logDivination} />
       )}
       {activePortal === 'souls' && (
         <SoulsOverlay
           meId={meId}
           following={following}
-          onClose={() => setActivePortal('menu')}
+          onClose={closePortal}
           onOpenUser={(h) => { setActivePortal(null); setActiveUserHandle(h); }}
         />
       )}
       {activePortal === 'confessions' && (
-        <ConfessionsOverlay onClose={() => setActivePortal('menu')}
+        <ConfessionsOverlay onClose={closePortal}
           userConfessions={posts.filter(p => p.anonymous).map(p => ({
             id: p.id, body: p.body, time: p.time,
             reactions: p.reactions, myReactions: p.myReactions || {},
@@ -1760,7 +1769,7 @@ export default function App() {
       )}
       {activePortal === 'oddities' && !activeOddity && !showOddityCompose && (
         <OdditiesOverlay
-          onClose={() => setActivePortal('menu')}
+          onClose={closePortal}
           onOpenOddity={(id) => setActiveOddity(id)}
           onCompose={(kind) => { setComposeKind(kind || 'sale'); setShowOddityCompose(true); }}
           listings={listings}

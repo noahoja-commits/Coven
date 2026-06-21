@@ -68,10 +68,12 @@ export function DMsOverlay({ conversations = [], onClose, onOpenConversation, on
             </div>
           )}
           {filtered.map(c => (
-            <div key={c.id} className="relative group">
+            // Archive lives in its own column (a sibling of the open-conversation button)
+            // so it can never overlap the timestamp, and stays visible/tappable on touch.
+            <div key={c.id} className="group flex items-stretch hover:bg-[#0F0F0F]">
               <button
                 onClick={() => onOpenConversation?.(c.id)}
-                className="w-full px-4 py-3 flex items-center gap-3 hover:bg-[#0F0F0F] text-left"
+                className="flex-1 min-w-0 pl-4 py-3 flex items-center gap-3 text-left"
               >
                 <div className="relative w-12 h-12 rounded-full overflow-hidden bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-lg shrink-0">
                   {c.avatarUrl ? <img src={c.avatarUrl} alt="" className="w-full h-full object-cover" /> : c.avatar}
@@ -86,8 +88,8 @@ export function DMsOverlay({ conversations = [], onClose, onOpenConversation, on
                 </div>
               </button>
               <button onClick={(e) => { e.stopPropagation(); onBury && onBury(c.id); }}
-                className="absolute top-1/2 -translate-y-1/2 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#6B6B6B] hover:text-[#A89968] p-1"
-                title={showBuried ? 'restore' : 'bury'}>
+                className="shrink-0 px-4 flex items-center text-[#5B5B5B] hover:text-[#A89968] opacity-70 group-hover:opacity-100 transition-opacity"
+                title={showBuried ? 'restore' : 'bury'} aria-label={showBuried ? 'restore' : 'bury'}>
                 <Archive size={14} />
               </button>
             </div>
