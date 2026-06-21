@@ -62,16 +62,18 @@ import { CovenMenu } from './components/coven/CovenMenu';
 // Lazy — the Library carries the full text of every book; keep it out of the initial bundle.
 const LibraryOverlay = lazy(() => import('./components/library/LibraryOverlay').then(m => ({ default: m.LibraryOverlay })));
 const ReaderView = lazy(() => import('./components/library/ReaderView').then(m => ({ default: m.ReaderView })));
-import { OdditiesOverlay } from './components/oddities/OdditiesOverlay';
-import { OddityDetail } from './components/oddities/OddityDetail';
-import { OddityCompose } from './components/oddities/OddityCompose';
-import { TarotOverlay } from './components/coven/TarotOverlay';
-import { CodexOverlay } from './components/coven/CodexOverlay';
-import { EphemerisOverlay } from './components/coven/EphemerisOverlay';
-import { SigilOverlay } from './components/coven/SigilOverlay';
-import { PendulumOverlay } from './components/coven/PendulumOverlay';
-import { ConfessionsOverlay } from './components/coven/ConfessionsOverlay';
-import { SoulsOverlay } from './components/coven/SoulsOverlay';
+// Lazy — the Coven portals + marketplace are all off the initial render path, so keep
+// them out of the main bundle and load on first open (wrapped in Suspense below).
+const OdditiesOverlay = lazy(() => import('./components/oddities/OdditiesOverlay').then(m => ({ default: m.OdditiesOverlay })));
+const OddityDetail = lazy(() => import('./components/oddities/OddityDetail').then(m => ({ default: m.OddityDetail })));
+const OddityCompose = lazy(() => import('./components/oddities/OddityCompose').then(m => ({ default: m.OddityCompose })));
+const TarotOverlay = lazy(() => import('./components/coven/TarotOverlay').then(m => ({ default: m.TarotOverlay })));
+const CodexOverlay = lazy(() => import('./components/coven/CodexOverlay').then(m => ({ default: m.CodexOverlay })));
+const EphemerisOverlay = lazy(() => import('./components/coven/EphemerisOverlay').then(m => ({ default: m.EphemerisOverlay })));
+const SigilOverlay = lazy(() => import('./components/coven/SigilOverlay').then(m => ({ default: m.SigilOverlay })));
+const PendulumOverlay = lazy(() => import('./components/coven/PendulumOverlay').then(m => ({ default: m.PendulumOverlay })));
+const ConfessionsOverlay = lazy(() => import('./components/coven/ConfessionsOverlay').then(m => ({ default: m.ConfessionsOverlay })));
+const SoulsOverlay = lazy(() => import('./components/coven/SoulsOverlay').then(m => ({ default: m.SoulsOverlay })));
 import { FashionScreen } from './components/fashion/FashionScreen';
 
 import { OnboardingFlow } from './components/onboarding/OnboardingFlow';
@@ -1786,7 +1788,8 @@ export default function App() {
         />
       )}
 
-      {/* Coven portals */}
+      {/* Coven portals — lazy-loaded, so one Suspense covers the whole block */}
+      <Suspense fallback={<div className="absolute inset-0 z-50 bg-[#0A0A0A] flex items-center justify-center text-[#C9A961] text-2xl animate-pulse-slow" style={F.brand}>Coven</div>}>
       {activePortal === 'menu' && (
         <CovenMenu
           onClose={() => setActivePortal(null)}
@@ -1887,6 +1890,7 @@ export default function App() {
           onCreate={(data) => addOddity(data)}
         />
       )}
+      </Suspense>
       <Toast toast={toast} onDone={() => setToast(null)} />
     </div>
   );
