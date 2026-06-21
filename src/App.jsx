@@ -456,8 +456,17 @@ export default function App() {
     const params = new URLSearchParams(window.location.search);
     const t = params.get('ticket');
     const connect = params.get('connect');
-    if (!t && !connect) return;
+    // Deep links: a shared link can open specific content on load.
+    const u = params.get('u');
+    const ev = params.get('event');
+    const od = params.get('oddity');
+    const po = params.get('post');
+    if (!t && !connect && !u && !ev && !od && !po) return;
     history.replaceState(null, '', window.location.pathname);
+    if (u) setActiveUserHandle(u.toLowerCase().replace(/[^a-z0-9_.]/g, ''));
+    if (ev) { setActiveEvent(ev); setTab('events'); }
+    if (od) { setActiveOddity(od); setActivePortal('oddities'); setPortalFromMenu(false); }
+    if (po) setActivePostComments(po);
     if (t === 'success') {
       setTicketSuccess(true);
       if (meId) setTimeout(() => {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Settings, Pencil, Plus, Heart, MoreHorizontal, ChevronRight, Music, X, Lock } from 'lucide-react';
+import { Settings, Pencil, Plus, Heart, MoreHorizontal, ChevronRight, Music, X, Lock, Share2 } from 'lucide-react';
+import { shareCoven } from '../../lib/share';
 import { F } from '../../styles/fonts';
 import { TrackerGrid } from '../trackers/TrackerGrid';
 import { timeAgo, daysBetween, sunSign } from '../../data/helpers';
@@ -82,6 +83,8 @@ export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpda
                 </button>
               ) : null;
             })()}
+            <button onClick={() => shareCoven({ title: `@${profile.name} on Coven`, text: profile.bio || 'a soul in the coven', path: `?u=${profile.name}` })}
+              className="text-[#6B6B6B] hover:text-[#A8A29E]" title="share your profile"><Share2 size={14} /></button>
             <button onClick={() => setShowThemePicker(true)} className="text-[#6B6B6B] hover:text-[#A8A29E]" title="shrine theme">✦</button>
             <button onClick={onEditProfile} className="text-[#6B6B6B] hover:text-[#A8A29E]" title="edit profile"><Pencil size={14} /></button>
             <button onClick={onOpenSettings} className="text-[#6B6B6B] hover:text-[#A8A29E]"><Settings size={16} /></button>

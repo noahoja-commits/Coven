@@ -2,19 +2,14 @@ import { ChevronLeft, MessageCircle, Share2, MapPin } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { CONDITION_LABELS } from '../../data/oddities';
 import { OddityImage } from './OdditiesOverlay';
+import { shareCoven } from '../../lib/share';
 
 const PRICE_MODE = { firm: 'firm', obo: 'or best offer', trade: 'open to trades' };
 
 export function OddityDetail({ item, onBack, onWhisper, onOpenUser }) {
   if (!item) return null;
   const seller = item.seller || {};
-  const share = async () => {
-    const data = { title: item.title, text: `${item.title} — $${item.price} on Coven`, url: window.location.href };
-    try {
-      if (navigator.share) await navigator.share(data);
-      else { await navigator.clipboard?.writeText(data.url); }
-    } catch { /* user dismissed share sheet — ignore */ }
-  };
+  const share = () => shareCoven({ title: item.title, text: `${item.title} — $${item.price} on Coven`, path: `?oddity=${item.id}` });
   return (
     <div className="absolute inset-0 z-50 bg-[#0A0608] animate-fade-in">
       <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 0%, #2A0710 0%, #0A0408 60%, #050204 100%)' }} />
