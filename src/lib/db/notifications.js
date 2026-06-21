@@ -10,6 +10,9 @@ function text(n) {
     case 'comment': return n.body ? `commented: "${n.body}"` : 'commented on your post';
     case 'dm':      return n.body ? `whispered: "${n.body}"` : 'sent you a whisper';
     case 'story_react': return `reacted ${n.reaction || ''} to your story`;
+    case 'rsvp':      return n.body ? `is coming to ${n.body}` : 'is coming to your event';
+    case 'crew_join': return n.body ? `joined ${n.body}` : 'joined your crew';
+    case 'mention':   return 'mentioned you';
     default:        return 'did something';
   }
 }

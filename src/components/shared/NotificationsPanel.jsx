@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Bell, Heart, MessageCircle, UserPlus, Calendar, ShoppingBag, Trash2 } from 'lucide-react';
+import { X, Bell, Heart, MessageCircle, UserPlus, Calendar, ShoppingBag, Trash2, AtSign } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { timeAgo } from '../../data/helpers';
 
@@ -13,11 +13,33 @@ const KIND_ICON = {
   reply: { icon: MessageCircle, color: '#A89968' },
   event: { icon: Calendar, color: '#C9A961' },
   crew: { icon: MessageCircle, color: '#7B2CBF' },
+  crew_join: { icon: UserPlus, color: '#7B2CBF' },
+  rsvp: { icon: Calendar, color: '#C9A961' },
+  mention: { icon: AtSign, color: '#A89968' },
   oddity: { icon: ShoppingBag, color: '#5B0F1A' },
   candle: { icon: Bell, color: '#C9A961' },
   tonight: { icon: Bell, color: '#8B0000' },
   vespers: { icon: Bell, color: '#C9A961' },
 };
+
+// Collapse consecutive same-post reactions into one row ("X and N others reacted…").
+// Only reactions group (the spammy kind); everything else stays a singleton.
+function groupNotifs(list) {
+  const out = [];
+  for (const n of list) {
+    const key = (n.kind === 'react' || n.kind === 'reaction') && n.postId ? `react:${n.postId}` : null;
+    const prev = out[out.length - 1];
+    if (key && prev && prev._key === key) {
+      prev.count += 1;
+      prev.read = prev.read && n.read;
+      if (n.user && !prev.actors.includes(n.user)) prev.actors.push(n.user);
+      prev.ids.push(n.id);
+    } else {
+      out.push({ ...n, _key: key, count: 1, actors: n.user ? [n.user] : [], ids: [n.id] });
+    }
+  }
+  return out;
+}
 
 export function NotificationsPanel({ notifications, onClose, onMarkAllRead, onMarkRead, onTap, onClearAll }) {
   const [pressTimer, setPressTimer] = useState(null);
@@ -75,12 +97,13 @@ export function NotificationsPanel({ notifications, onClose, onMarkAllRead, onMa
           </div>
         ) : (
           <div className="divide-y divide-[#1A1A1A]">
-            {notifications.map(n => {
+            {groupNotifs(notifications).map(n => {
               const k = KIND_ICON[n.kind] || KIND_ICON.reaction;
               const Icon = k.icon;
+              const extra = n.count - 1;
               return (
                 <button key={n.id}
-                  onClick={() => onTap ? onTap(n) : onMarkRead(n.id)}
+                  onClick={() => { n.ids.forEach(id => onMarkRead && onMarkRead(id)); onTap && onTap(n); }}
                   className={`w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-[#0F0F0F] transition-colors ${!n.read ? 'bg-[#0F0506]' : ''}`}>
                   <div className="relative w-10 h-10 rounded-full overflow-hidden bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-base shrink-0">
                     {n.avatarUrl ? <img src={n.avatarUrl} alt="" className="w-full h-full object-cover" /> : n.avatar}
@@ -91,6 +114,7 @@ export function NotificationsPanel({ notifications, onClose, onMarkAllRead, onMa
                   <div className="flex-1 min-w-0">
                     <p className="text-[#F5F1E8] text-sm leading-snug" style={F.serif}>
                       {n.user && <span style={F.ui}>{n.user} </span>}
+                      {extra > 0 && <span style={F.ui} className="text-[#A89968]">and {extra} {extra === 1 ? 'other' : 'others'} </span>}
                       <span className="text-[#A8A29E]">{n.text}</span>
                     </p>
                     {n.target && <p className="text-[10px] text-[#6B6B6B] truncate mt-0.5" style={F.serif}>"{n.target}"</p>}

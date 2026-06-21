@@ -16,6 +16,9 @@ function bodyFor(n, actor) {
     case 'comment':     return n.body ? `${actor} commented: "${n.body}"` : `${actor} commented on your post`;
     case 'dm':          return n.body ? `${actor} whispered: "${n.body}"` : `${actor} sent you a whisper`;
     case 'story_react': return `${actor} reacted ${n.reaction || ''} to your story`;
+    case 'rsvp':        return n.body ? `${actor} is coming to ${n.body}` : `${actor} is coming to your event`;
+    case 'crew_join':   return n.body ? `${actor} joined ${n.body}` : `${actor} joined your crew`;
+    case 'mention':     return `${actor} mentioned you`;
     default:            return `${actor} did something`;
   }
 }

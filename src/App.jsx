@@ -1185,13 +1185,13 @@ export default function App() {
   const handleNotificationTap = (n) => {
     markNotifRead(n.id);
     setShowNotifs(false);
-    if (n.kind === 'dm' && n.conversationId) {
+    if ((n.kind === 'dm' || n.kind === 'crew_join') && n.conversationId) {
       openConversation(n.conversationId, { user: n.user, avatar: n.avatar });
     } else if (n.kind === 'follow' && n.user && n.user !== 'someone') {
       setActiveUserHandle(n.user);
-    } else if ((n.kind === 'react' || n.kind === 'comment') && n.postId) {
+    } else if ((n.kind === 'react' || n.kind === 'comment' || n.kind === 'mention') && n.postId) {
       setActivePostComments(n.postId);
-    } else if (n.kind === 'event') {
+    } else if (n.kind === 'event' || n.kind === 'rsvp') {
       setTab('events');
     }
   };
