@@ -5,6 +5,7 @@ import { TrackerGrid } from '../trackers/TrackerGrid';
 import { timeAgo, daysBetween, sunSign } from '../../data/helpers';
 import { ACHIEVEMENTS, earnedAchievements } from '../../data/achievements';
 import { fetchUserPosts } from '../../lib/db/posts';
+import { borderStyle, bannerStyle } from '../../data/decor';
 import { PostGrid } from './PostGrid';
 
 const SHRINE_THEMES = {
@@ -60,6 +61,9 @@ export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpda
       {/* Header card */}
       <div className="relative px-4 pt-4 pb-5 border-b border-[#1A1A1A] overflow-hidden">
         <div className="absolute inset-0 opacity-25" style={{ background: SHRINE_THEMES[shrineTheme] || SHRINE_THEMES.oxblood }} />
+        {profile.decor?.banner && profile.decor.banner !== 'none' && (
+          <div className="absolute top-0 inset-x-0 h-24 pointer-events-none" style={bannerStyle(profile.decor.banner) || undefined} />
+        )}
 
         <div className="relative flex justify-between items-start mb-4">
           <div className="flex items-center gap-1">
@@ -83,7 +87,7 @@ export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpda
           {/* Avatar with candle */}
           <div className="relative shrink-0">
             <div className={`w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#3B0A12] to-[#0A0A0A] border ${settings?.ghostMode ? 'border-[#7B2CBF]' : 'border-[#3F3F3F]'} flex items-center justify-center text-3xl`}
-              style={settings?.ghostMode ? { boxShadow: '0 0 20px rgba(123, 44, 191, 0.5)' } : {}}>{profile.avatarUrl ? <img src={profile.avatarUrl} alt="" className="w-full h-full object-cover" /> : (profile.avatar || '🦇')}</div>
+              style={settings?.ghostMode ? { boxShadow: '0 0 20px rgba(123, 44, 191, 0.5)' } : borderStyle(profile.decor?.border)}>{profile.avatarUrl ? <img src={profile.avatarUrl} alt="" className="w-full h-full object-cover" /> : (profile.avatar || '🦇')}</div>
             {/* Candle indicator */}
             {candleActive && (
               <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[#0A0A0A] border border-[#C9A961]/40 flex items-center justify-center" title={`lit by ${profile.candleLit.lastBy}`}>

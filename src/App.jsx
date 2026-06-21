@@ -278,6 +278,7 @@ export default function App() {
       tags: dbProfile.tags || [],
       scenes: dbProfile.scenes || [],
       birthday: dbProfile.birthday || null,
+      decor: dbProfile.decor || {},
       city: dbProfile.city || '',
       scene: dbProfile.city || '',
       joinedScene: dbProfile.created_at,
@@ -1183,6 +1184,7 @@ export default function App() {
         tags: next.tags || [],
         city: next.city || next.scene || '',
         birthday: next.birthday || null,
+        decor: next.decor || {},
       });
       await refreshProfile();
     } catch {

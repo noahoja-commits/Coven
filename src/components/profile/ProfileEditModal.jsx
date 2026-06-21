@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { X, Camera, Loader2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { uploadImage } from '../../lib/db/storage';
+import { BORDERS, BANNERS, borderStyle, bannerStyle } from '../../data/decor';
 
 const AVATAR_OPTIONS = ['🦇', '🕯', '✟', '⚱', '☠', '🩸', '🌹', '🌙', '⛧', '☩', '✦', '☽', '⚰', '♰', '🜏', '𖤐', '☥', '✠', '†', '⸸', '♆', '☿', '⚸', '✧'];
 const VIBE_OPTIONS = ['goth', 'raver', 'smoker', 'witch', 'mystic', 'darkwave', 'tradgoth', 'industrial', 'romantic', 'doomer', 'punk', 'NYC', 'LA', 'PDX', 'Berlin', 'sober', 'soft', 'feral'];
@@ -14,6 +15,8 @@ export function ProfileEditModal({ profile, meId, onSave, onClose }) {
   const [avatar, setAvatar] = useState(profile.avatar || '🦇');
   const [avatarUrl, setAvatarUrl] = useState(profile.avatarUrl || null);
   const [tags, setTags] = useState(profile.tags || []);
+  const [border, setBorder] = useState(profile.decor?.border || 'none');
+  const [banner, setBanner] = useState(profile.decor?.banner || 'none');
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const fileRef = useRef(null);
@@ -31,7 +34,7 @@ export function ProfileEditModal({ profile, meId, onSave, onClose }) {
 
   const save = () => {
     if (uploading) return;
-    onSave({ ...profile, name: name.trim() || profile.name, pronouns, bio, birthday, avatar, avatarUrl, tags });
+    onSave({ ...profile, name: name.trim() || profile.name, pronouns, bio, birthday, avatar, avatarUrl, tags, decor: { border, banner } });
     onClose();
   };
 
@@ -83,6 +86,33 @@ export function ProfileEditModal({ profile, meId, onSave, onClose }) {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Decorations — border + banner */}
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2" style={F.scriptureSC}>· border ·</div>
+            <div className="flex flex-wrap gap-1.5">
+              {BORDERS.map(b => (
+                <button key={b.id} onClick={() => setBorder(b.id)}
+                  className={`px-2.5 py-1 text-[10px] uppercase tracking-wider border transition-colors ${border === b.id ? 'border-[#8B0000] bg-[#5B0F1A]/25 text-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#5B0F1A]/60'}`}
+                  style={F.ui}>{b.label}</button>
+              ))}
+            </div>
+            <div className="mt-2 flex items-center gap-2">
+              <span className="w-12 h-12 rounded-full bg-[#1A1A1A] flex items-center justify-center text-xl" style={borderStyle(border)}>{avatarUrl ? '🦇' : avatar}</span>
+              <span className="text-[10px] text-[#6B6B6B] italic" style={F.serif}>preview</span>
+            </div>
+          </div>
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2" style={F.scriptureSC}>· banner ·</div>
+            <div className="flex flex-wrap gap-1.5">
+              {BANNERS.map(b => (
+                <button key={b.id} onClick={() => setBanner(b.id)}
+                  className={`px-2.5 py-1 text-[10px] uppercase tracking-wider border transition-colors ${banner === b.id ? 'border-[#8B0000] bg-[#5B0F1A]/25 text-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#5B0F1A]/60'}`}
+                  style={F.ui}>{b.label}</button>
+              ))}
+            </div>
+            {banner !== 'none' && <div className="mt-2 h-10 border border-[#1A1A1A]" style={bannerStyle(banner) || undefined} />}
           </div>
 
           {/* Handle */}

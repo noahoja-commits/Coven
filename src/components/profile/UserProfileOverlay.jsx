@@ -3,6 +3,7 @@ import { ArrowLeft, MessageCircle, UserPlus, UserCheck, VolumeX, Volume2 } from 
 import { F } from '../../styles/fonts';
 import { getProfileByHandle, getProfileStats } from '../../lib/db/profiles';
 import { fetchUserPosts } from '../../lib/db/posts';
+import { borderStyle, bannerStyle } from '../../data/decor';
 import { PostGrid } from './PostGrid';
 
 export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], isFollowing, isMuted, onToggleFollow, onToggleMute, onWhisper, onClose, onOpenComments, onReact, onBlock, onReport }) {
@@ -61,8 +62,12 @@ export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], isF
       {/* Card */}
       <div className="relative px-4 pt-5 pb-5 border-b border-[#1A1A1A] overflow-hidden">
         <div className="absolute inset-0 opacity-15" style={{ background: 'radial-gradient(ellipse at 50% 0%, #5B0F1A 0%, transparent 60%)' }} />
+        {user.decor?.banner && user.decor.banner !== 'none' && (
+          <div className="absolute top-0 inset-x-0 h-24 pointer-events-none" style={bannerStyle(user.decor.banner) || undefined} />
+        )}
         <div className="relative flex items-start gap-4">
-          <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#3B0A12] to-[#0A0A0A] border border-[#3F3F3F] flex items-center justify-center text-3xl shrink-0">
+          <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#3B0A12] to-[#0A0A0A] border border-[#3F3F3F] flex items-center justify-center text-3xl shrink-0"
+            style={borderStyle(user.decor?.border)}>
             {user.avatar_url ? <img src={user.avatar_url} alt="" className="w-full h-full object-cover" /> : user.avatar}
           </div>
           <div className="flex-1 min-w-0">

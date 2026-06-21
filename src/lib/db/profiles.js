@@ -2,7 +2,18 @@ import { supabase } from '../supabase';
 
 // Every profile column EXCEPT birthday (which is column-locked to the owner at the
 // DB level — read via the my_birthday rpc). Use this instead of select('*').
-const PROFILE_COLS = 'id, handle, avatar, avatar_url, bio, city, created_at, is_system, pronouns, scenes, tags';
+const PROFILE_COLS = 'id, handle, avatar, avatar_url, bio, city, created_at, is_system, pronouns, scenes, tags, decor';
+// Fallback without `decor` so reads don't break in the window before migration 0028
+// adds the column. Once applied, the primary select always succeeds.
+const PROFILE_COLS_BASE = 'id, handle, avatar, avatar_url, bio, city, created_at, is_system, pronouns, scenes, tags';
+
+async function selectProfile(col, val) {
+  let res = await supabase.from('profiles').select(PROFILE_COLS).eq(col, val).maybeSingle();
+  if (res.error && /decor/i.test(res.error.message || '')) {
+    res = await supabase.from('profiles').select(PROFILE_COLS_BASE).eq(col, val).maybeSingle();
+  }
+  return res;
+}
 
 // Handles are always stored lowercase (onboarding sanitizes + CHECK enforces),
 // so an exact eq is a correct uniqueness check (no LIKE wildcard pitfalls).
@@ -17,8 +28,7 @@ export async function checkHandleAvailable(handle) {
 // Own profile (called only for the signed-in user). Merges the owner-only
 // birthday from the SECURITY DEFINER rpc, since the column is DB-locked.
 export async function getProfileById(id) {
-  const { data, error } = await supabase
-    .from('profiles').select(PROFILE_COLS).eq('id', id).maybeSingle();
+  const { data, error } = await selectProfile('id', id);
   if (error) throw error;
   if (!data) return data;
   const { data: bday } = await supabase.rpc('my_birthday');
@@ -27,8 +37,7 @@ export async function getProfileById(id) {
 
 // Another user's public profile — never includes birthday.
 export async function getProfileByHandle(handle) {
-  const { data, error } = await supabase
-    .from('profiles').select(PROFILE_COLS).eq('handle', (handle || '').toLowerCase()).maybeSingle();
+  const { data, error } = await selectProfile('handle', (handle || '').toLowerCase());
   if (error) throw error;
   return data;
 }
@@ -41,10 +50,14 @@ export async function insertProfile(row) {
 }
 
 export async function updateProfile(id, patch) {
-  const { data, error } = await supabase
-    .from('profiles').update(patch).eq('id', id).select('id, handle').single();
-  if (error) throw error;
-  return data;
+  let res = await supabase.from('profiles').update(patch).eq('id', id).select('id, handle').single();
+  // Pre-migration: drop `decor` and retry so the rest of the profile still saves.
+  if (res.error && /decor/i.test(res.error.message || '') && patch.decor !== undefined) {
+    const { decor, ...rest } = patch;
+    res = await supabase.from('profiles').update(rest).eq('id', id).select('id, handle').single();
+  }
+  if (res.error) throw res.error;
+  return res.data;
 }
 
 export async function getSystemAccountIds() {
