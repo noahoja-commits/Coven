@@ -390,26 +390,6 @@ export const TEXTS = [
   },
 ];
 
-export const HIGHLIGHTS = {
-  'kjv-gen-1-2': [
-    { user: 'cryptic.rose', avatar: '🌹', comment: 'the silence before. everything begins in darkness.', likes: 47, time: '2d' },
-    { user: 'vesper.exe', avatar: '✟', comment: '"without form, and void" — the most goth opening in literature', likes: 89, time: '5d' },
-  ],
-  'kjv-psalm-23-4': [
-    { user: 'ash.in.october', avatar: '🕯', comment: 'i read this every winter. it always lands different.', likes: 34, time: '1w' },
-  ],
-  'kjv-john-1-5': [
-    { user: 'lilith_xiv', avatar: '🦇', comment: 'the entire thesis of the album i’m writing tbh', likes: 156, time: '3d' },
-    { user: 'mortuary.dj', avatar: '⚰', comment: 'comprehended ≠ overcame. the dark just doesn’t get it.', likes: 72, time: '4d' },
-  ],
-  'goetia-spirits-1-3-1': [
-    { user: 'mortis.kvlt', avatar: '☠', comment: 'bael appearing as a cat, a toad, and a man simultaneously is the most fucked up flex', likes: 203, time: '6h' },
-  ],
-  'solomon-key-preface-1': [
-    { user: 'cryptic.rose', avatar: '🌹', comment: 'fear → adore → honour → invoke. the order matters.', likes: 28, time: '1d' },
-  ],
-};
-
 // Cross-references between texts
 export const CROSS_REFS = {
   'kjv-gen-1-1': [{ book: 'john-1', chapter: 'john-1', verse: 1, note: 'echoed in the Logos' }],

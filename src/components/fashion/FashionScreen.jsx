@@ -72,7 +72,7 @@ export function FashionScreen() {
           return (
             <button key={t} onClick={() => setFilter(t)}
               className={`shrink-0 px-3 py-1.5 text-[10px] uppercase tracking-wider border transition-colors
-                ${active ? 'bg-[#F5F1E8] text-[#0A0A0A] border-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#3F3F3F]'}`}
+                ${active ? 'bg-[#5B0F1A] text-[#F5F1E8] border-[#8B0000]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#5B0F1A]/60'}`}
               style={F.ui}>{t}</button>
           );
         })}

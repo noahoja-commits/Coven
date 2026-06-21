@@ -3,9 +3,12 @@ import { ArrowLeft, RotateCcw } from 'lucide-react';
 import { F } from '../../styles/fonts';
 
 // Answers cycle in this order: yes (right) / no (left) / ask again (still)
+// angle is the SVG rotation of the bob (which hangs below the pivot). A positive
+// rotation swings it LEFT, so yes (label on the right) uses a negative angle and
+// no (label on the left) uses a positive one — otherwise it rests on the wrong side.
 const ANSWERS = [
-  { key: 'yes', label: 'yes', glyph: '✓', detail: 'the line tilts right.', tone: '#C9A961', angle: 25 },
-  { key: 'no', label: 'no', glyph: '✗', detail: 'the line tilts left.', tone: '#8B0000', angle: -25 },
+  { key: 'yes', label: 'yes', glyph: '✓', detail: 'the line tilts right.', tone: '#C9A961', angle: -25 },
+  { key: 'no', label: 'no', glyph: '✗', detail: 'the line tilts left.', tone: '#8B0000', angle: 25 },
   { key: 'unclear', label: 'ask again', glyph: '○', detail: 'the line is still.', tone: '#8A8A92', angle: 0 },
 ];
 

@@ -1693,9 +1693,12 @@ export default function App() {
       {activePortal === 'confessions' && (
         <ConfessionsOverlay onClose={() => setActivePortal('menu')}
           userConfessions={posts.filter(p => p.anonymous).map(p => ({
-            id: p.id, body: p.body, at: Date.now(),
+            id: p.id, body: p.body, time: p.time,
             reactions: p.reactions, myReactions: p.myReactions || {},
-          }))} />
+          }))}
+          onConfess={(body) => addPost({ body, community: 'general', anonymous: true })}
+          onReact={reactToPost}
+        />
       )}
       {activePortal === 'oddities' && !activeOddity && !showOddityCompose && (
         <OdditiesOverlay

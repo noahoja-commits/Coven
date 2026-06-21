@@ -3,34 +3,24 @@ import { ArrowLeft, Send } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { Reaction } from '../shared/Reaction';
 
-const SEED_CONFESSIONS = [
-  { id: 'cf1', body: 'i still drive past their apartment on saturdays.', at: Date.now() - 1000 * 60 * 60 * 3, reactions: { bat: 12, fire: 0, skull: 8, smoke: 2 }, myReactions: {} },
-  { id: 'cf2', body: 'i told everyone i was sober for a year. it’s been four months.', at: Date.now() - 1000 * 60 * 60 * 8, reactions: { bat: 28, fire: 4, skull: 19, smoke: 3 }, myReactions: {} },
-  { id: 'cf3', body: 'i don\'t actually like the bands i wear shirts of. i just like the shirts.', at: Date.now() - 1000 * 60 * 60 * 14, reactions: { bat: 9, fire: 42, skull: 31, smoke: 7 }, myReactions: {} },
-  { id: 'cf4', body: 'every time someone says "let\'s hang" i panic and never reply.', at: Date.now() - 1000 * 60 * 60 * 22, reactions: { bat: 71, fire: 8, skull: 102, smoke: 14 }, myReactions: {} },
-  { id: 'cf5', body: 'st. john the divine is the only place i feel like a person.', at: Date.now() - 1000 * 60 * 60 * 30, reactions: { bat: 44, fire: 2, skull: 6, smoke: 0 }, myReactions: {} },
-];
-
-function ago(ts) {
-  const m = Math.floor((Date.now() - ts) / 60000);
-  if (m < 60) return `${m}m`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h`;
-  return `${Math.floor(h / 24)}d`;
-}
-
-export function ConfessionsOverlay({ onClose, userConfessions = [] }) {
+// Confessions are real anonymous posts. `userConfessions` is the live list of the
+// current feed's anonymous posts (author masked server-side); confessing creates a
+// real anonymous post via onConfess; reactions go through the normal post reactions.
+export function ConfessionsOverlay({ onClose, userConfessions = [], onConfess, onReact }) {
   const [draft, setDraft] = useState('');
-  const [submitted, setSubmitted] = useState([]);
+  const [posting, setPosting] = useState(false);
 
-  const submit = () => {
+  const submit = async () => {
     const body = draft.trim();
-    if (!body) return;
-    setSubmitted(prev => [{ id: `cf${Date.now()}`, body, at: Date.now(), reactions: { bat: 0, fire: 0, skull: 0, smoke: 0 }, myReactions: {} }, ...prev]);
-    setDraft('');
+    if (!body || posting) return;
+    setPosting(true);
+    try {
+      await (onConfess && onConfess(body));
+      setDraft('');
+    } finally {
+      setPosting(false);
+    }
   };
-
-  const all = [...submitted, ...userConfessions, ...SEED_CONFESSIONS];
 
   return (
     <div className="absolute inset-0 z-30 overflow-y-auto safe-pb"
@@ -50,7 +40,7 @@ export function ConfessionsOverlay({ onClose, userConfessions = [] }) {
         <div className="text-center mb-4">
           <div className="text-[#A89968]/60 text-[10px] uppercase tracking-[0.4em]" style={F.scriptureSC}>· anonymous · ephemeral ·</div>
           <p className="text-[#A89968]/50 text-xs italic mt-1 max-w-xs mx-auto" style={F.scripture}>
-            speak without your name. no replies. only witnesses.
+            speak without your name. only witnesses.
           </p>
         </div>
 
@@ -58,31 +48,36 @@ export function ConfessionsOverlay({ onClose, userConfessions = [] }) {
           <textarea value={draft} onChange={e => setDraft(e.target.value.slice(0, 280))}
             placeholder="what couldn't you say with your name attached..."
             rows={3}
-            className="w-full bg-[#0A0204]/80 border border-[#7B2CBF]/30 focus:border-[#7B2CBF] outline-none p-3 text-[#F5F1E8] text-base italic resize-none placeholder:text-[#A89968]/30"
+            disabled={posting}
+            className="w-full bg-[#0A0204]/80 border border-[#7B2CBF]/30 focus:border-[#7B2CBF] outline-none p-3 text-[#F5F1E8] text-base italic resize-none placeholder:text-[#A89968]/30 disabled:opacity-60"
             style={F.scripture} />
           <div className="flex items-center justify-between mt-2">
             <span className="text-[10px] text-[#A89968]/40" style={F.mono}>{draft.length}/280</span>
-            <button onClick={submit} disabled={!draft.trim()}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-wider ${draft.trim() ? 'bg-[#7B2CBF] text-[#F5F1E8]' : 'bg-[#1A1A1A] text-[#6B6B6B]'}`}
+            <button onClick={submit} disabled={!draft.trim() || posting}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-wider ${draft.trim() && !posting ? 'bg-[#7B2CBF] text-[#F5F1E8]' : 'bg-[#1A1A1A] text-[#6B6B6B]'}`}
               style={F.ui}>
-              <Send size={11} /> confess
+              <Send size={11} /> {posting ? 'sealing…' : 'confess'}
             </button>
           </div>
         </div>
 
         <div className="space-y-3 max-w-md mx-auto">
-          {all.map(c => (
+          {userConfessions.length === 0 ? (
+            <p className="text-center text-[#A89968]/40 text-xs italic py-8" style={F.scripture}>
+              · no confessions yet. be the first to unburden ·
+            </p>
+          ) : userConfessions.map(c => (
             <div key={c.id} className="border border-[#7B2CBF]/20 bg-[#0A0204]/60 p-4">
               <p className="text-[#F5F1E8] text-base italic leading-relaxed mb-3" style={F.scripture}>"{c.body}"</p>
               <div className="flex items-center justify-between">
                 <div className="flex items-center -ml-2">
-                  <Reaction icon="🦇" count={c.reactions.bat} />
-                  <Reaction icon="💀" count={c.reactions.skull} />
-                  <Reaction icon="🔥" count={c.reactions.fire} />
+                  <Reaction icon="🦇" count={c.reactions?.bat || 0} active={!!c.myReactions?.bat} onClick={() => onReact && onReact(c.id, 'bat')} />
+                  <Reaction icon="💀" count={c.reactions?.skull || 0} active={!!c.myReactions?.skull} onClick={() => onReact && onReact(c.id, 'skull')} />
+                  <Reaction icon="🔥" count={c.reactions?.fire || 0} active={!!c.myReactions?.fire} onClick={() => onReact && onReact(c.id, 'fire')} />
                 </div>
                 <div className="text-[10px] text-[#A89968]/50 flex items-center gap-2" style={F.scriptureSC}>
                   <span>· anonymous ·</span>
-                  <span style={F.mono}>{ago(c.at)}</span>
+                  <span style={F.mono}>{c.time}</span>
                 </div>
               </div>
             </div>

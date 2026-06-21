@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ChevronLeft, MessageCircle, Bookmark, Highlighter } from 'lucide-react';
 import { F } from '../../styles/fonts';
-import { TEXTS, HIGHLIGHTS } from '../../data/library';
+import { TEXTS } from '../../data/library';
 
 export function ReaderView({ textId, onBack, marginalia = [], onAddMarginalia, onRemoveMarginalia, meHandle = 'you', meAvatar = '✟' }) {
   const isBookmarked = (verseKey) => marginalia.some(m => m.verseKey === verseKey && m.type === 'bookmark');
@@ -74,7 +74,6 @@ export function ReaderView({ textId, onBack, marginalia = [], onAddMarginalia, o
               const myMarks = myByVerse[verseKey] || [];
               const isHighlighted = myMarks.some(m => m.type === 'highlight');
               const myNotes = myMarks.filter(m => m.type === 'note');
-              const verseHighlights = HIGHLIGHTS[verseKey];
               const isSelected = selectedVerse === verseKey;
               return (
                 <div key={i} className="relative group">
@@ -126,7 +125,7 @@ export function ReaderView({ textId, onBack, marginalia = [], onAddMarginalia, o
                       )}
                       {myNotes.length > 0 && (
                         <div className="pt-3 border-t border-[#8B6B4A]/20 space-y-2 mb-3">
-                          <div className="text-[10px] uppercase tracking-[0.2em] text-[#8B6B4A]" style={F.scriptureSC}>· your marginalia ·</div>
+                          <div className="text-[10px] uppercase tracking-[0.2em] text-[#8B6B4A]" style={F.scriptureSC}>· your marginalia · only you ·</div>
                           {myNotes.map((m) => (
                             <div key={m.id} className="flex gap-2.5 items-start">
                               <div className="w-7 h-7 rounded-full bg-[#C9A961]/20 border border-[#C9A961]/40 flex items-center justify-center text-sm shrink-0">{m.avatar}</div>
@@ -135,23 +134,6 @@ export function ReaderView({ textId, onBack, marginalia = [], onAddMarginalia, o
                               </div>
                               <button onClick={() => onRemoveMarginalia && onRemoveMarginalia(m.id)}
                                 className="text-[10px] text-[#8B6B4A] hover:text-[#5B0F1A] uppercase tracking-wider" style={F.scriptureSC}>×</button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      {verseHighlights && (
-                        <div className="pt-3 border-t border-[#8B6B4A]/20 space-y-3">
-                          <div className="text-[10px] uppercase tracking-[0.2em] text-[#8B6B4A]" style={F.scriptureSC}>· marginalia from the coven ·</div>
-                          {verseHighlights.map((h, idx) => (
-                            <div key={idx} className="flex gap-2.5">
-                              <div className="w-7 h-7 rounded-full bg-[#5B0F1A]/15 border border-[#5B0F1A]/30 flex items-center justify-center text-sm shrink-0">{h.avatar}</div>
-                              <div className="flex-1">
-                                <div className="text-[#5B0F1A] text-xs" style={F.scriptureSC}>{h.user}</div>
-                                <p className="text-[#2A1808] text-sm italic mt-0.5" style={F.scripture}>"{h.comment}"</p>
-                                <div className="flex items-center gap-2 mt-1 text-[10px] text-[#8B6B4A]" style={F.scriptureSC}>
-                                  <span>♥ {h.likes}</span><span>·</span><span>{h.time}</span>
-                                </div>
-                              </div>
                             </div>
                           ))}
                         </div>

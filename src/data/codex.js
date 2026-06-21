@@ -83,7 +83,7 @@ export const CODEX = [
 
   // === RELIGIOUS ===
   { term: 'Vespers', cat: 'religious', def: 'Evening prayer service in Christian liturgy, traditionally at sunset. The literal "evening star."' },
-  { term: 'Matins', cat: 'religious', def: 'The first canonical hour of the day, traditionally before dawn. Night prayer.' },
+  { term: 'Matins', cat: 'religious', def: 'The first canonical hour of the day, traditionally before dawn. Morning prayer.' },
   { term: 'Compline', cat: 'religious', def: 'The final prayer of the day, before sleep. The most quiet and contemplative office.' },
   { term: 'Liturgy', cat: 'religious', def: 'The structured public worship of a religious community. Includes prayers, readings, hymns.' },
   { term: 'Eucharist', cat: 'religious', def: 'The Christian sacrament of communion — bread and wine as the body and blood of Christ.' },

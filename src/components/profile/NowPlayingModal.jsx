@@ -1,17 +1,6 @@
 import { useState } from 'react';
-import { X, Music, Send } from 'lucide-react';
+import { X, Send } from 'lucide-react';
 import { F } from '../../styles/fonts';
-
-const SUGGESTIONS = [
-  { artist: 'Drab Majesty', track: 'Vanity' },
-  { artist: 'Cold Cave', track: 'Confetti' },
-  { artist: 'Bauhaus', track: 'Bela Lugosi’s Dead' },
-  { artist: 'Joy Division', track: 'Atmosphere' },
-  { artist: 'Boy Harsher', track: 'Tower' },
-  { artist: 'Lebanon Hanover', track: 'Gallowdance' },
-  { artist: 'Molchat Doma', track: 'Sudno' },
-  { artist: 'Soft Kill', track: 'Choke' },
-];
 
 export function NowPlayingModal({ current, onSave, onShare, onClose }) {
   const [artist, setArtist] = useState(current?.artist || '');
@@ -58,21 +47,9 @@ export function NowPlayingModal({ current, onSave, onShare, onClose }) {
           <div>
             <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968]" style={F.scriptureSC}>· track ·</label>
             <input value={track} onChange={e => setTrack(e.target.value.slice(0, 80))}
-              placeholder="Vanity"
+              placeholder="the song on repeat"
               className="w-full mt-1.5 bg-[#0A0A0A] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none p-2.5 text-[#F5F1E8] text-sm italic"
               style={F.serif} />
-          </div>
-          <div>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2" style={F.scriptureSC}>· quick pick ·</div>
-            <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
-              {SUGGESTIONS.map(s => (
-                <button key={s.artist + s.track} onClick={() => { setArtist(s.artist); setTrack(s.track); }}
-                  className="text-[10px] px-2 py-1 border border-[#2A2A2A] text-[#A8A29E] hover:border-[#5B0F1A] hover:text-[#F5F1E8] flex items-center gap-1.5"
-                  style={F.ui}>
-                  <Music size={9} /> {s.artist} · {s.track}
-                </button>
-              ))}
-            </div>
           </div>
         </div>
         <div className="flex items-center gap-2 p-4 border-t border-[#1A1A1A]">

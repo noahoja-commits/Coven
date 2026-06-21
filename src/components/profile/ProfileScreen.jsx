@@ -216,11 +216,21 @@ export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpda
           <Pencil size={11} className="text-[#6B6B6B] group-hover:text-[#A8A29E]" />
         </div>
         {nowPlaying ? (
-          <p className="text-[#F5F1E8] text-sm leading-snug" style={F.serif}>
-            <span className="text-[#C9A961]">{nowPlaying.artist}</span>
-            {nowPlaying.artist && nowPlaying.track && <span className="text-[#A89968]/60"> · </span>}
-            <span className="italic">{nowPlaying.track}</span>
-          </p>
+          <div className="flex items-center gap-2.5">
+            {/* spinning record */}
+            <span className="relative shrink-0 w-7 h-7 rounded-full animate-spin" style={{
+              animationDuration: '3s',
+              background: 'radial-gradient(circle at center, #C9A961 0 14%, #0A0A0A 15% 42%, #1A1A1A 43% 100%)',
+              boxShadow: 'inset 0 0 0 1px rgba(201,169,97,0.25)',
+            }}>
+              <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-1 rounded-full bg-[#0A0A0A]" />
+            </span>
+            <p className="text-[#F5F1E8] text-sm leading-snug min-w-0" style={F.serif}>
+              <span className="text-[#C9A961]">{nowPlaying.artist}</span>
+              {nowPlaying.artist && nowPlaying.track && <span className="text-[#A89968]/60"> · </span>}
+              <span className="italic">{nowPlaying.track}</span>
+            </p>
+          </div>
         ) : (
           <p className="text-[#6B6B6B] text-sm italic" style={F.serif}>tap to set what's on rotation</p>
         )}
