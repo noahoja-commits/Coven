@@ -6,7 +6,7 @@ import { PostImage } from '../shared/Visuals';
 import { fetchCommunityStats } from '../../lib/db/posts';
 import { relativeTime } from '../../lib/time';
 
-export function CommunitiesScreen({ onOpenCommunity, membership = {}, onToggleMembership }) {
+export function CommunitiesScreen({ onOpenCommunity, membership = {}, memberCounts = {}, onToggleMembership }) {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all'); // all | joined
   const [stats, setStats] = useState(null); // real per-scene activity, null = loading
@@ -82,7 +82,10 @@ export function CommunitiesScreen({ onOpenCommunity, membership = {}, onToggleMe
                 </div>
                 <p className="text-[#A8A29E] text-sm leading-snug mb-1.5" style={F.serif}>{c.desc}</p>
                 <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-wider text-[#6B6B6B]" style={F.ui}>
-                  <span><span style={F.mono} className="text-xs text-[#A8A29E]">{!stats ? '·' : postCount}</span> {postCount === 1 ? 'post' : 'posts'}</span>
+                  <div className="flex items-center gap-3">
+                    <span><span style={F.mono} className="text-xs text-[#A8A29E]">{!stats ? '·' : postCount}</span> {postCount === 1 ? 'post' : 'posts'}</span>
+                    <span><span style={F.mono} className="text-xs text-[#A8A29E]">{memberCounts[c.id] || 0}</span> {(memberCounts[c.id] || 0) === 1 ? 'soul' : 'souls'}</span>
+                  </div>
                   <span
                     role="button"
                     tabIndex={0}
@@ -101,7 +104,7 @@ export function CommunitiesScreen({ onOpenCommunity, membership = {}, onToggleMe
   );
 }
 
-export function CommunityDetail({ id, onBack, posts: postsProp, isMember, onToggleMembership }) {
+export function CommunityDetail({ id, onBack, posts: postsProp, loading = false, memberCount = 0, isMember, onToggleMembership, onPostToScene, onOpenUser }) {
   const c = COMMUNITIES.find(x => x.id === id);
   const source = postsProp || [];
   const posts = source.filter(p => p.community === id || id === 'general');
@@ -122,29 +125,37 @@ export function CommunityDetail({ id, onBack, posts: postsProp, isMember, onTogg
             <p className="text-[#A8A29E] text-xs mt-0.5" style={F.serif}>{c.desc}</p>
           </div>
         </div>
-        <div className="relative flex items-center gap-3 mt-4">
+        <div className="relative flex items-center gap-2 mt-4">
           <button onClick={onToggleMembership}
             className={`flex-1 text-xs py-2 border uppercase tracking-wider transition-colors ${isMember ? 'text-[#F5F1E8] border-[#8B0000] bg-[#8B0000]/20 hover:bg-[#8B0000]/30' : 'text-[#A8A29E] border-[#2A2A2A] hover:border-[#5B0F1A] hover:text-[#F5F1E8]'}`}
             style={F.ui}>
             {isMember ? 'joined' : 'join'}
           </button>
+          <button onClick={onPostToScene}
+            className="flex-1 text-xs py-2 border uppercase tracking-wider text-[#A8A29E] border-[#2A2A2A] hover:border-[#5B0F1A] hover:text-[#F5F1E8] transition-colors"
+            style={F.ui}>
+            post to this scene
+          </button>
         </div>
         <div className="relative flex items-center gap-4 mt-4 text-[10px] uppercase tracking-wider text-[#6B6B6B]" style={F.ui}>
+          <span><span style={F.mono} className="text-xs text-[#A8A29E]">{memberCount}</span> {memberCount === 1 ? 'soul' : 'souls'}</span>
           <span><span style={F.mono} className="text-xs text-[#A8A29E]">{posts.length}</span> {posts.length === 1 ? 'post' : 'posts'}</span>
           <span>{posts[0]?.time ? `active ${posts[0].time}` : 'quiet'}</span>
         </div>
       </div>
 
       <div className="divide-y divide-[#1A1A1A]">
-        {posts.length > 0 ? posts.map(post => (
+        {loading ? (
+          <div className="px-4 py-12 text-center text-[#6B6B6B] text-sm italic" style={F.serif}>· gathering the scene ·</div>
+        ) : posts.length > 0 ? posts.map(post => (
           <article key={post.id} className="px-4 py-4">
-            <div className="flex items-center gap-2.5 mb-3">
+            <button onClick={() => !post.anonymous && onOpenUser && onOpenUser(post.user)} className="flex items-center gap-2.5 mb-3 text-left">
               <div className="w-9 h-9 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center">{post.avatar}</div>
               <div className="flex-1">
                 <div className="text-[#F5F1E8] text-sm" style={F.ui}>{post.user}</div>
                 <div className="text-[10px] text-[#6B6B6B]" style={F.mono}>{post.time}</div>
               </div>
-            </div>
+            </button>
             {post.body && <p className="text-[#F5F1E8] text-[15px] leading-relaxed" style={F.serif}>{post.body}</p>}
             {(post.kind === 'photo' || post.kind === 'video') && <div className="mt-3"><PostImage kind={post.img} /></div>}
           </article>

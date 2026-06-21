@@ -4,13 +4,15 @@ import { hydratePost, hydrateComment } from '../hydrate';
 // Recent feed + the current user's own reactions.
 // scope 'everyone' = global; 'following' = posts by people you follow (+ your own).
 // before = ISO timestamp cursor for infinite scroll.
-export async function fetchFeed(myId, { scope = 'everyone', before = null, limit = 20 } = {}) {
+export async function fetchFeed(myId, { scope = 'everyone', before = null, limit = 20, community = null } = {}) {
   let q = supabase
     .from('feed_posts')
     .select('*')
     .order('created_at', { ascending: false })
     .limit(limit);
   if (before) q = q.lt('created_at', before);
+  // A specific scene's feed ('general' is the catch-all → no filter).
+  if (community && community !== 'general') q = q.eq('community', community);
   if (scope === 'following' && myId) {
     const { data: f } = await supabase.from('follows').select('followee_id').eq('follower_id', myId);
     const ids = (f || []).map(r => r.followee_id);

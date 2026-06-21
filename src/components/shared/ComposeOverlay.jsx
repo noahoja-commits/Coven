@@ -4,9 +4,9 @@ import { F } from '../../styles/fonts';
 import { COMMUNITIES } from '../../data/communities';
 import { uploadImage, uploadVideo } from '../../lib/db/storage';
 
-export function ComposeOverlay({ meId, onClose, onPost }) {
+export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
   const [text, setText] = useState('');
-  const [community, setCommunity] = useState('general');
+  const [community, setCommunity] = useState(initialCommunity || 'general');
   const [anonymous, setAnonymous] = useState(false);
   const [poll, setPoll] = useState(null); // null or {options: ['', '']}
   const [mediaFile, setMediaFile] = useState(null);

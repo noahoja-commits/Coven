@@ -8,6 +8,7 @@ import { fetchFeed, createPost, deletePost as dbDeletePost, togglePostReaction, 
 import { insertProfile, updateProfile, getProfileStats, getProfileByHandle } from './lib/db/profiles';
 import { fetchFollowing, fetchFollowers, followUser, unfollowUser } from './lib/db/social';
 import { FollowListOverlay } from './components/profile/FollowListOverlay';
+import { joinCommunity, leaveCommunity, fetchCommunityMemberCounts } from './lib/db/communities';
 import { fetchConversations, getOrCreateDM, createGroup, fetchMessages as fetchDMMessages, sendDM, markRead as dmMarkRead, setBuried as dmSetBuried, subscribeDMs } from './lib/db/dm';
 import { fetchActiveStories, postStory as dbPostStory, deleteStory, reactToStory } from './lib/db/stories';
 import { fetchListings, createListing } from './lib/db/listings';
@@ -154,6 +155,9 @@ export default function App() {
   const activeConversationRef = useRef(null);
   const cloudSyncedRef = useRef(false);
   const [communityMembership, setCommunityMembership] = useLocalStorage('communityMembership', { general: true, goth: true });
+  const [communityCounts, setCommunityCounts] = useState({}); // server-backed member counts per scene
+  const [communityPosts, setCommunityPosts] = useState(null); // real per-scene feed for the open scene
+  const [composeCommunity, setComposeCommunity] = useState(null); // preset scene when composing from a scene
   const [eventRsvp, setEventRsvp] = useState({});
   const [events, setEvents] = useState([]);
   const [showCreateEvent, setShowCreateEvent] = useState(false);
@@ -322,6 +326,7 @@ export default function App() {
     fetchMyTicketEventIds().then(ids => { if (active) setMyTicketEventIds(ids); }).catch(() => {});
     fetchNotifications().then(n => { if (active) setNotifications(n); }).catch(e => console.error('[load] notifications failed:', e));
     fetchBlockedIds().then(ids => { if (active) setBlockedIds(new Set(ids)); }).catch(() => {});
+    fetchCommunityMemberCounts().then(c => { if (active) setCommunityCounts(c); }).catch(() => {});
     cloudSyncedRef.current = false;
     fetchProfileState().then(s => {
       if (!active) return;
@@ -368,6 +373,18 @@ export default function App() {
     }).catch(e => console.error('[load] feed failed:', e));
     return () => { active = false; };
   }, [meId, dbProfile, feedScope]);
+
+  // Real per-scene feed: when a scene is open, fetch its own posts (not just whatever
+  // happens to be in the loaded global feed). Falls back to null (→ client filter) on error.
+  useEffect(() => {
+    if (!community || !meId) { setCommunityPosts(null); return; }
+    let active = true;
+    setCommunityPosts(null);
+    fetchFeed(meId, { scope: 'everyone', community, limit: 40 })
+      .then(rows => { if (active) setCommunityPosts(rows); })
+      .catch(e => { console.error('[load] scene feed failed:', e); });
+    return () => { active = false; };
+  }, [community, meId]);
 
   const loadMoreFeed = () => {
     if (feedLoadingMore || !feedHasMore || !meId) return;
@@ -770,6 +787,9 @@ export default function App() {
   const toggleCommunityMembership = (id) => {
     const wasMember = !!communityMembership[id];
     setCommunityMembership(prev => ({ ...prev, [id]: !wasMember }));
+    // Optimistic count bump + server-backed membership row (migration 0031).
+    setCommunityCounts(prev => ({ ...prev, [id]: Math.max(0, (prev[id] || 0) + (wasMember ? -1 : 1)) }));
+    (wasMember ? leaveCommunity(id) : joinCommunity(id)).catch(() => {});
     if (!wasMember) {
       const c = COMMUNITIES.find(x => x.id === id);
       addNotification({ kind: 'crew', avatar: c?.glyph || '✦', text: `you joined ${c?.name || id}` });
@@ -1360,9 +1380,13 @@ export default function App() {
         <CommunityDetail
           id={community}
           onBack={() => setCommunity(null)}
-          posts={posts.filter(p => !isMutedPost(p) && !hiddenPosts[p.id])}
+          posts={(communityPosts || posts).filter(p => !isMutedPost(p) && !hiddenPosts[p.id])}
+          loading={communityPosts === null}
+          memberCount={communityCounts[community] || 0}
           isMember={!!communityMembership[community]}
           onToggleMembership={() => toggleCommunityMembership(community)}
+          onPostToScene={() => { setComposeCommunity(community); setShowCompose(true); }}
+          onOpenUser={openUserProfile}
         />
       );
     }
@@ -1417,6 +1441,7 @@ export default function App() {
       <CommunitiesScreen
         onOpenCommunity={setCommunity}
         membership={communityMembership}
+        memberCounts={communityCounts}
         onToggleMembership={toggleCommunityMembership}
       />
     );
@@ -1452,6 +1477,8 @@ export default function App() {
         onEditProfile={() => setShowEditProfile(true)}
         onShowFollowers={openFollowers}
         onShowFollowing={openFollowing}
+        joinedScenes={COMMUNITIES.filter(c => communityMembership[c.id])}
+        onOpenScene={(id) => { setTab('communities'); setCommunity(id); }}
         onLightCandle={lightCandle}
         crews={crews.filter(c => c.isMember)}
         onOpenCrew={(id) => openConversation(id)}
@@ -1593,8 +1620,9 @@ export default function App() {
       {showCompose && (
         <ComposeOverlay
           meId={meId}
-          onClose={() => setShowCompose(false)}
-          onPost={(data) => { addPost(data); setShowCompose(false); }}
+          initialCommunity={composeCommunity}
+          onClose={() => { setShowCompose(false); setComposeCommunity(null); }}
+          onPost={(data) => { addPost(data); setShowCompose(false); setComposeCommunity(null); }}
         />
       )}
       {activePostComments && (

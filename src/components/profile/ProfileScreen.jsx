@@ -16,7 +16,7 @@ const SHRINE_THEMES = {
   cathedral: 'linear-gradient(180deg, #1F0810 0%, transparent 100%)',
 };
 
-export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpdateTracker, onOpenTonightStatus, onOpenSettings, mementoMoriOn, settings, onEditProfile, onLightCandle, crews = [], onOpenCrew, onBrowseCrews, onAddGrave, onAddAnniversary, onOpenNowPlaying, onOpenReflections, onOpenTickets, reflectionsCount = 0, nowPlaying, activityLog = [], sigils = [], bookmarks = [], onOpenComments, onOpenPost, ritual, ritualDoneToday, onPerformRitual, crystals = [], onToggleCrystal, pinnedPost, shrineTheme = 'oxblood', onSetShrineTheme, storyHighlights = [], onRemoveHighlight, achievementState = {}, onShowFollowers, onShowFollowing }) {
+export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpdateTracker, onOpenTonightStatus, onOpenSettings, mementoMoriOn, settings, onEditProfile, onLightCandle, crews = [], onOpenCrew, onBrowseCrews, onAddGrave, onAddAnniversary, onOpenNowPlaying, onOpenReflections, onOpenTickets, reflectionsCount = 0, nowPlaying, activityLog = [], sigils = [], bookmarks = [], onOpenComments, onOpenPost, ritual, ritualDoneToday, onPerformRitual, crystals = [], onToggleCrystal, pinnedPost, shrineTheme = 'oxblood', onSetShrineTheme, storyHighlights = [], onRemoveHighlight, achievementState = {}, onShowFollowers, onShowFollowing, joinedScenes = [], onOpenScene }) {
   const earned = earnedAchievements(achievementState);
   const earnedIds = new Set(earned.map(a => a.id));
   const [showThemePicker, setShowThemePicker] = useState(false);
@@ -130,6 +130,21 @@ export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpda
           <button onClick={onShowFollowers} className="text-left hover:opacity-80 transition-opacity"><span className="text-[#F5F1E8] text-base block leading-none" style={F.mono}>{profile.followers}</span><span className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>followers</span></button>
           <button onClick={onShowFollowing} className="text-left hover:opacity-80 transition-opacity"><span className="text-[#F5F1E8] text-base block leading-none" style={F.mono}>{profile.following}</span><span className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>following</span></button>
         </div>
+
+        {/* Scenes you're in */}
+        {joinedScenes.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-[#1A1A1A]">
+            <div className="text-[10px] uppercase tracking-[0.25em] text-[#6B6B6B] mb-2" style={F.ui}>· scenes you're in ·</div>
+            <div className="flex flex-wrap gap-1.5">
+              {joinedScenes.map(s => (
+                <button key={s.id} onClick={() => onOpenScene && onOpenScene(s.id)}
+                  className="flex items-center gap-1.5 px-2 py-1 border border-[#2A2A2A] hover:border-[#5B0F1A] text-[#A8A29E] hover:text-[#F5F1E8] text-[11px] transition-colors" style={F.ui}>
+                  <span>{s.glyph}</span><span>{s.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Pinned post */}
