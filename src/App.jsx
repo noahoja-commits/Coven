@@ -525,10 +525,20 @@ export default function App() {
   // Persist a profile-depth blob (graves/trackers/sigils/reflections) for the logged-in user.
   const persistState = (key, value) => { if (meId) saveProfileState(meId, key, value).catch(() => {}); };
 
-  const updateTracker = (catId, action) => {
-    const cat = TRACKER_CATEGORIES.find(c => c.id === catId);
-    if (!cat) return;
+  const updateTracker = (catId, action, payload) => {
     const next = { ...trackers };
+    // Add a custom tracker the presets don't cover (stored inline w/ its own def).
+    if (action === 'addCustom') {
+      const label = (payload?.label || '').trim().slice(0, 24);
+      if (!label) return;
+      const id = `custom-${Date.now()}`;
+      next[id] = { custom: true, label, glyph: payload?.glyph || '✦', mode: 'last', public: false, lastAt: Date.now() };
+      setTrackers(next); persistState('trackers', next);
+      return;
+    }
+    // Preset categories come from the static list; custom ones carry their def in state.
+    const cat = TRACKER_CATEGORIES.find(c => c.id === catId) || (next[catId]?.custom ? next[catId] : null);
+    if (!cat) return;
     if (action === 'log' || action === 'add') {
       if (cat.mode === 'streak') {
         next[catId] = { ...(next[catId] || { public: cat.defaultPublic }), streakStart: Date.now() };

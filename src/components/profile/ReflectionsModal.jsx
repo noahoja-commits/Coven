@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { X, Send, Lock, Trash2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
-import { timeAgo } from '../../data/helpers';
+
+const journalDate = (ts) => {
+  try { return new Date(ts).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }); }
+  catch { return ''; }
+};
 
 export function ReflectionsModal({ reflections = [], onAdd, onRemove, onClose }) {
   const [draft, setDraft] = useState('');
@@ -42,23 +46,23 @@ export function ReflectionsModal({ reflections = [], onAdd, onRemove, onClose })
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        {/* the journal — aged-paper pages */}
+        <div className="flex-1 overflow-y-auto bg-[#0A0808] p-3 space-y-3">
           {reflections.length === 0 ? (
             <div className="text-center py-12 text-[#6B6B6B] text-sm italic" style={F.serif}>
               · the journal is empty · write your first thought ·
             </div>
           ) : (
-            <div className="divide-y divide-[#1A1A1A]">
-              {reflections.map(r => (
-                <div key={r.id} className="px-4 py-3">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[10px] uppercase tracking-[0.2em] text-[#A89968]" style={F.scriptureSC}>· {timeAgo(r.at)} ago ·</span>
-                    <button onClick={() => onRemove && onRemove(r.id)} className="text-[#6B6B6B] hover:text-[#8B0000] p-1 transition-colors"><Trash2 size={11} /></button>
-                  </div>
-                  <p className="text-[#F5F1E8] text-sm italic leading-relaxed whitespace-pre-wrap" style={F.scripture}>{r.body}</p>
+            reflections.map(r => (
+              <div key={r.id} className="relative p-4 shadow-md"
+                style={{ background: 'linear-gradient(160deg, #ECE0C4 0%, #E2D2AC 100%)', color: '#2A1808', boxShadow: '0 2px 8px rgba(0,0,0,0.45)' }}>
+                <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-[#8B6B4A]/30">
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-[#7A5A35]" style={F.scriptureSC}>{journalDate(r.at)}</span>
+                  <button onClick={() => onRemove && onRemove(r.id)} className="text-[#8B6B4A] hover:text-[#5B0F1A] p-1 transition-colors"><Trash2 size={11} /></button>
                 </div>
-              ))}
-            </div>
+                <p className="text-[15px] italic leading-relaxed whitespace-pre-wrap" style={{ ...F.scripture, color: '#2A1808' }}>{r.body}</p>
+              </div>
+            ))
           )}
         </div>
       </div>

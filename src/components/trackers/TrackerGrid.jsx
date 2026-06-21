@@ -6,11 +6,25 @@ import { timeAgo, daysBetween } from '../../data/helpers';
 
 export function TrackerGrid({ trackers, onUpdate }) {
   const [editing, setEditing] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [customLabel, setCustomLabel] = useState('');
+  const [customGlyph, setCustomGlyph] = useState('✦');
+
+  // Custom trackers carry their own def inline in the trackers state.
+  const customCats = Object.entries(trackers)
+    .filter(([, v]) => v && v.custom)
+    .map(([id, v]) => ({ id, label: v.label, glyph: v.glyph || '✦', mode: v.mode || 'last' }));
+  const allCats = [...TRACKER_CATEGORIES, ...customCats];
 
   // Show only categories that have data, unless editing
-  const visibleCats = editing
-    ? TRACKER_CATEGORIES
-    : TRACKER_CATEGORIES.filter(c => trackers[c.id]);
+  const visibleCats = editing ? allCats : allCats.filter(c => trackers[c.id]);
+
+  const addCustom = () => {
+    const label = customLabel.trim();
+    if (!label) return;
+    onUpdate(null, 'addCustom', { label, glyph: customGlyph.trim().slice(0, 2) || '✦' });
+    setCustomLabel(''); setCustomGlyph('✦'); setAdding(false);
+  };
 
   return (
     <div className="border border-[#2A2A2A] bg-[#0F0F0F]">
@@ -70,6 +84,27 @@ export function TrackerGrid({ trackers, onUpdate }) {
           </div>
         )}
       </div>
+      {editing && (
+        <div className="px-3 py-2.5 border-t border-[#1A1A1A]">
+          {adding ? (
+            <div className="flex items-center gap-2">
+              <input value={customGlyph} onChange={e => setCustomGlyph(e.target.value)} maxLength={2}
+                className="w-9 text-center bg-[#0A0A0A] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none py-1.5 text-[#F5F1E8]" />
+              <input value={customLabel} onChange={e => setCustomLabel(e.target.value.slice(0, 24))} autoFocus
+                placeholder="what do you want to log?"
+                onKeyDown={e => { if (e.key === 'Enter') addCustom(); }}
+                className="flex-1 bg-[#0A0A0A] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none px-2.5 py-1.5 text-[#F5F1E8] text-sm" style={F.serif} />
+              <button onClick={addCustom} disabled={!customLabel.trim()}
+                className="px-3 py-1.5 text-[10px] uppercase tracking-wider bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] disabled:opacity-40" style={F.ui}>add</button>
+            </div>
+          ) : (
+            <button onClick={() => setAdding(true)}
+              className="w-full py-2 flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider text-[#A89968] hover:text-[#C9A961] border border-dashed border-[#3F3F3F] hover:border-[#5B0F1A]" style={F.ui}>
+              <Plus size={11} /> custom tracker
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

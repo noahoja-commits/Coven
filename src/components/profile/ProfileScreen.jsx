@@ -19,6 +19,7 @@ export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpda
   const earned = earnedAchievements(achievementState);
   const earnedIds = new Set(earned.map(a => a.id));
   const [showThemePicker, setShowThemePicker] = useState(false);
+  const [selectedMark, setSelectedMark] = useState(null);
   const [tab, setTab] = useState('grid');
   const [myPosts, setMyPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(true);
@@ -456,15 +457,33 @@ export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpda
         <div className="grid grid-cols-4 gap-px bg-[#1A1A1A]">
           {ACHIEVEMENTS.map(a => {
             const has = earnedIds.has(a.id);
+            const active = selectedMark?.id === a.id;
             return (
-              <div key={a.id}
-                title={`${a.name} — ${a.desc}`}
-                className={`relative aspect-square flex flex-col items-center justify-center p-1 bg-[#0F0F0F] ${has ? '' : 'opacity-25 grayscale'}`}>
+              <button key={a.id}
+                onClick={() => setSelectedMark(active ? null : a)}
+                className={`relative aspect-square flex flex-col items-center justify-center p-1 transition-colors ${active ? 'bg-[#5B0F1A]/20' : 'bg-[#0F0F0F]'} ${has ? '' : 'opacity-25 grayscale'}`}>
                 <span className={`text-2xl ${has ? 'text-[#C9A961]' : 'text-[#6B6B6B]'}`}>{a.glyph}</span>
                 <span className="text-[8px] text-center uppercase tracking-wider mt-0.5 text-[#A8A29E] line-clamp-1" style={F.ui}>{a.name}</span>
-              </div>
+              </button>
             );
           })}
+        </div>
+        {/* tap a mark to see what it is + how to earn it */}
+        <div className="px-3 py-2.5 border-t border-[#1A1A1A]">
+          {selectedMark ? (
+            <div className="flex items-center gap-2.5">
+              <span className={`text-xl ${earnedIds.has(selectedMark.id) ? 'text-[#C9A961]' : 'text-[#6B6B6B]'}`}>{selectedMark.glyph}</span>
+              <div className="flex-1 min-w-0">
+                <div className="text-[#F5F1E8] text-xs uppercase tracking-wider" style={F.ui}>{selectedMark.name}</div>
+                <div className="text-[10px] text-[#A89968]/80 italic" style={F.serif}>{selectedMark.desc}</div>
+              </div>
+              <span className={`text-[9px] uppercase tracking-[0.18em] ${earnedIds.has(selectedMark.id) ? 'text-[#C9A961]' : 'text-[#6B6B6B]'}`} style={F.ui}>
+                {earnedIds.has(selectedMark.id) ? '✓ earned' : 'locked'}
+              </span>
+            </div>
+          ) : (
+            <p className="text-[10px] text-[#6B6B6B] italic text-center" style={F.serif}>tap a mark to see what it means</p>
+          )}
         </div>
       </div>
 
