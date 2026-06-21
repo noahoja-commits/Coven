@@ -6,7 +6,8 @@ import { SignInScreen } from './components/auth/SignInScreen';
 import { ResetPasswordScreen } from './components/auth/ResetPasswordScreen';
 import { fetchFeed, createPost, deletePost as dbDeletePost, togglePostReaction, fetchComments, createComment, castPollVote, clearPollVote } from './lib/db/posts';
 import { insertProfile, updateProfile, getProfileStats, getProfileByHandle } from './lib/db/profiles';
-import { fetchFollowing, followUser, unfollowUser } from './lib/db/social';
+import { fetchFollowing, fetchFollowers, followUser, unfollowUser } from './lib/db/social';
+import { FollowListOverlay } from './components/profile/FollowListOverlay';
 import { fetchConversations, getOrCreateDM, createGroup, fetchMessages as fetchDMMessages, sendDM, markRead as dmMarkRead, setBuried as dmSetBuried, subscribeDMs } from './lib/db/dm';
 import { fetchActiveStories, postStory as dbPostStory, deleteStory, reactToStory } from './lib/db/stories';
 import { fetchListings, createListing } from './lib/db/listings';
@@ -135,6 +136,7 @@ export default function App() {
   const [composeKind, setComposeKind] = useState('sale'); // sale | wanted | commission
   const [shops, setShops] = useState([]);
   const [activePostComments, setActivePostComments] = useState(null);
+  const [followList, setFollowList] = useState(null); // { type:'followers'|'following', people:[] } | null
 
   const [profile, setProfile] = useState(null); // mapped from the Supabase profile row
   const [tonightStatus, setTonightStatus] = useLocalStorage('tonightStatus', { text: '', setAt: Date.now(), expiresAt: Date.now() + 1000 * 60 * 60 * 12 });
@@ -1089,6 +1091,16 @@ export default function App() {
     catch { /* ignore */ }
   };
 
+  // Your own follower / following lists (RLS allows reading your own edges only).
+  const openFollowing = () => setFollowList({ type: 'following', people: followingPeople });
+  const openFollowers = () => {
+    if (!meId) return;
+    setFollowList({ type: 'followers', people: [] });
+    fetchFollowers(meId)
+      .then(people => setFollowList(cur => (cur?.type === 'followers' ? { type: 'followers', people } : cur)))
+      .catch(e => console.error('[load] followers failed:', e));
+  };
+
   const todayKey = new Date().toISOString().slice(0, 10);
   const yesterdayKey = (() => {
     const d = new Date(); d.setDate(d.getDate() - 1);
@@ -1262,7 +1274,7 @@ export default function App() {
     ticketManagerEvent || showCreateEvent || showEditProfile || showSettings || showBlocked ||
     showMyTickets || showReflections || showNowPlaying || showAddGrave || showAddAnniv ||
     showVespersArchive || showNewGroup || showTonightModal || quoteTarget || showOddityCompose ||
-    activeOddity || activeText || activePostComments || activeConversation || activeUserHandle ||
+    activeOddity || activeText || activePostComments || followList || activeConversation || activeUserHandle ||
     showSearch || showCrewBrowse || activeEvent || showCompose || showNotifs || showDMs || activePortal
   );
   // Close the single top-most overlay (z-order priority). Returns true if it closed one.
@@ -1289,6 +1301,7 @@ export default function App() {
     if (activeOddity) { setActiveOddity(null); return true; }
     if (activeText) { setActiveText(null); return true; }
     if (activePostComments) { setActivePostComments(null); return true; }
+    if (followList) { setFollowList(null); return true; }
     if (activeConversation) { setActiveConversation(null); setActiveConvMeta(null); return true; }
     if (activeUserHandle) { setActiveUserHandle(null); return true; }
     if (showSearch) { setShowSearch(false); return true; }
@@ -1435,6 +1448,8 @@ export default function App() {
         onOpenTonightStatus={() => setShowTonightModal(true)}
         onOpenSettings={() => setShowSettings(true)}
         onEditProfile={() => setShowEditProfile(true)}
+        onShowFollowers={openFollowers}
+        onShowFollowing={openFollowing}
         onLightCandle={lightCandle}
         crews={crews.filter(c => c.isMember)}
         onOpenCrew={(id) => openConversation(id)}
@@ -1891,6 +1906,14 @@ export default function App() {
         />
       )}
       </Suspense>
+      {followList && (
+        <FollowListOverlay
+          title={followList.type === 'followers' ? 'followers' : 'following'}
+          people={followList.people}
+          onClose={() => setFollowList(null)}
+          onOpenUser={(h) => { setFollowList(null); if (h && h !== meHandle) setActiveUserHandle(h); }}
+        />
+      )}
       <Toast toast={toast} onDone={() => setToast(null)} />
     </div>
   );

@@ -11,7 +11,7 @@ export async function fetchFollowing(myId) {
   if (!ids.length) return { map: {}, idByHandle: {} };
 
   const { data: profs, error: pErr } = await supabase
-    .from('profiles').select('id, handle, avatar').in('id', ids);
+    .from('profiles').select('id, handle, avatar, avatar_url, bio').in('id', ids);
   if (pErr) throw pErr;
   const byId = Object.fromEntries((profs || []).map(p => [p.id, p]));
 
@@ -21,10 +21,30 @@ export async function fetchFollowing(myId) {
     if (p) {
       map[p.handle] = new Date(r.created_at).getTime();
       idByHandle[p.handle] = r.followee_id;
-      people.push({ id: p.id, handle: p.handle, avatar: p.avatar });
+      people.push({ id: p.id, handle: p.handle, avatar: p.avatar, avatarUrl: p.avatar_url, bio: p.bio });
     }
   });
   return { map, idByHandle, people };
+}
+
+// Who follows ME — your own followers list. RLS (migration 0029) lets you read your own
+// edges (followee_id = you), so this works for the signed-in user only, not for others.
+export async function fetchFollowers(myId) {
+  const { data: rows, error } = await supabase
+    .from('follows').select('follower_id, created_at').eq('followee_id', myId)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  const ids = (rows || []).map(r => r.follower_id);
+  if (!ids.length) return [];
+
+  const { data: profs, error: pErr } = await supabase
+    .from('profiles').select('id, handle, avatar, avatar_url, bio').in('id', ids);
+  if (pErr) throw pErr;
+  const byId = Object.fromEntries((profs || []).map(p => [p.id, p]));
+  return (rows || [])
+    .map(r => byId[r.follower_id])
+    .filter(Boolean)
+    .map(p => ({ id: p.id, handle: p.handle, avatar: p.avatar, avatarUrl: p.avatar_url, bio: p.bio }));
 }
 
 export async function followUser(myId, followeeId) {
