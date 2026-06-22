@@ -15,7 +15,7 @@ const SCENES = [
 ];
 const VIBES = ['romantic', 'darkwave', 'industrial', 'punk', 'witchy', 'religious', 'melancholic', 'theatrical', 'minimal', 'occult', 'queer', 'femme', 'masc', 'androgynous'];
 
-export function OnboardingFlow({ onComplete }) {
+export function OnboardingFlow({ onComplete, onSignOut }) {
   const [step, setStep] = useState(0);
   const [handle, setHandle] = useState('');
   const [glyph, setGlyph] = useState('🦇');
@@ -222,6 +222,18 @@ export function OnboardingFlow({ onComplete }) {
           </div>
         )}
       </div>
+
+      {/* Escape hatch — so a soul whose profile-create keeps failing is never trapped in
+          onboarding (session exists but no profile → this screen would otherwise re-show forever). */}
+      {onSignOut && (
+        <div className="relative z-20 text-center pb-1">
+          <button onClick={() => onSignOut()}
+            className={`text-[10px] uppercase tracking-[0.2em] transition-colors ${error ? 'text-[#8B0000] hover:text-[#C9A961]' : 'text-[#5B5B5B] hover:text-[#A89968]'}`}
+            style={F.ui}>
+            {error ? 'still stuck? · sign out & start over' : 'not you? · leave'}
+          </button>
+        </div>
+      )}
 
       {/* Footer nav — a real flex child (NOT absolute) so the scroll area can never overlay/block the buttons */}
       <div className="relative z-20 bg-[#0A0A0A]/95 backdrop-blur-md border-t border-[#1A1A1A] p-4 safe-pb flex items-center justify-between">
