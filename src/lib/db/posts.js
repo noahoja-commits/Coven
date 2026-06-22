@@ -9,8 +9,16 @@ export async function fetchFeed(myId, { scope = 'everyone', before = null, limit
     .from('feed_posts')
     .select('*')
     .order('created_at', { ascending: false })
+    .order('id', { ascending: false })
     .limit(limit);
-  if (before) q = q.lt('created_at', before);
+  // Keyset cursor on (created_at, id) so rows sharing an exact timestamp are never skipped.
+  // Accepts the new {createdAt, id} shape; still tolerates a legacy bare-timestamp string.
+  if (before) {
+    const c = typeof before === 'string' ? { createdAt: before, id: null } : before;
+    q = c.id
+      ? q.or(`created_at.lt.${c.createdAt},and(created_at.eq.${c.createdAt},id.lt.${c.id})`)
+      : q.lt('created_at', c.createdAt);
+  }
   // A specific scene's feed ('general' is the catch-all → no filter).
   if (community && community !== 'general') q = q.eq('community', community);
   if (scope === 'following' && myId) {

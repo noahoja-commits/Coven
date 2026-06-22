@@ -155,9 +155,7 @@ export function CommentsOverlay({ post, onClose, onComment, onReact, onReactComm
   );
 }
 
-function CommentRow({ c, reply, onOpenUser, onReactComment, onReply }) {
-  const reactions = c.reactions || {};
-  const my = c.myReactions || {};
+function CommentRow({ c, reply, onOpenUser, onReply }) {
   return (
     <div className="flex gap-2.5">
       <button onClick={() => !c.mine && onOpenUser && onOpenUser(c.user, c.avatar)}
@@ -172,16 +170,6 @@ function CommentRow({ c, reply, onOpenUser, onReactComment, onReply }) {
         </div>
         <p className="text-[#F5F1E8] text-sm mt-0.5 leading-relaxed" style={F.serif}>{c.body}</p>
         <div className="flex items-center gap-2 mt-1 -ml-1">
-          <button onClick={() => onReactComment && onReactComment(c.id, 'heart')}
-            className={`flex items-center gap-1 px-1.5 py-0.5 text-xs ${my.heart ? 'text-[#8B0000]' : 'text-[#6B6B6B] hover:text-[#A8A29E]'}`}>
-            <span>♥</span>
-            {reactions.heart > 0 && <span style={F.mono}>{reactions.heart}</span>}
-          </button>
-          <button onClick={() => onReactComment && onReactComment(c.id, 'skull')}
-            className={`flex items-center gap-1 px-1.5 py-0.5 text-xs ${my.skull ? 'text-[#F5F1E8]' : 'text-[#6B6B6B] hover:text-[#A8A29E]'}`}>
-            <span>💀</span>
-            {reactions.skull > 0 && <span style={F.mono}>{reactions.skull}</span>}
-          </button>
           {!reply && (
             <button onClick={onReply}
               className="text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#A8A29E] px-1.5 py-0.5" style={F.ui}>

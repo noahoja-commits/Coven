@@ -407,7 +407,7 @@ export default function App() {
     const last = [...posts].reverse().find(p => p.createdAt);
     if (!last) return;
     setFeedLoadingMore(true);
-    fetchFeed(meId, { scope: feedScope, before: last.createdAt }).then(more => {
+    fetchFeed(meId, { scope: feedScope, before: { createdAt: last.createdAt, id: last.id } }).then(more => {
       setPosts(prev => { const seen = new Set(prev.map(p => p.id)); return [...prev, ...more.filter(p => !seen.has(p.id))]; });
       setFeedHasMore(more.length >= 20);
     }).catch(() => {}).finally(() => setFeedLoadingMore(false));
@@ -467,7 +467,12 @@ export default function App() {
     return unsub;
   }, [meId, dbProfile]);
 
-  // Returning from Stripe (ticket checkout or Connect onboarding) — webhooks are async.
+  // Returning from Stripe (ticket checkout / Connect onboarding) — webhooks are async, and on a
+  // COLD load meId is null on first paint. So parse the URL params ONCE on mount (the params get
+  // cleared here), stash the payment-return intent, and run the meId-gated refreshes in the effect
+  // below once auth has rehydrated — otherwise a cold return from Stripe silently skips the refresh.
+  const [pendingTicketRefresh, setPendingTicketRefresh] = useState(false);
+  const [pendingConnectRefresh, setPendingConnectRefresh] = useState(false);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const t = params.get('ticket');
@@ -483,15 +488,24 @@ export default function App() {
     if (ev) { setActiveEvent(ev); setTab('events'); }
     if (od) { setActiveOddity(od); setActivePortal('oddities'); setPortalFromMenu(false); }
     if (po) setActivePostComments(po);
-    if (t === 'success') {
-      setTicketSuccess(true);
-      if (meId) setTimeout(() => {
+    if (t === 'success') { setTicketSuccess(true); setPendingTicketRefresh(true); }
+    if (connect === 'done') setPendingConnectRefresh(true);
+  }, []);
+
+  // Run the meId-gated post-payment refreshes once auth is ready (covers the cold-load case
+  // where meId was still null when we returned from Stripe). Each fires once, then clears.
+  useEffect(() => {
+    if (!meId) return;
+    if (pendingTicketRefresh) {
+      setPendingTicketRefresh(false);
+      setTimeout(() => {
         fetchEvents(meId).then(({ events, rsvp }) => { setEvents(events); setEventRsvp(rsvp); }).catch(() => {});
       }, 2500);
     }
-    if (connect === 'done' && meId) {
-      // Pull status straight from Stripe for an instant update; retry a couple
-      // times in case the account is still settling, falling back to the DB read.
+    if (pendingConnectRefresh) {
+      setPendingConnectRefresh(false);
+      // Pull status straight from Stripe for an instant update; retry a couple times in case the
+      // account is still settling, falling back to the DB read.
       const refresh = (n) => refreshPayoutStatus().then(p => {
         setPayoutStatus(p);
         if (!p.enabled && n > 0) setTimeout(() => refresh(n - 1), 2500);
@@ -501,7 +515,7 @@ export default function App() {
       });
       refresh(3);
     }
-  }, [meId]);
+  }, [meId, pendingTicketRefresh, pendingConnectRefresh]);
 
   const setupPayouts = () => {
     if (!meId || payoutBusy) return;
@@ -1724,7 +1738,7 @@ export default function App() {
           onMarkAllRead={markAllNotifsRead}
           onMarkRead={markNotifRead}
           onTap={handleNotificationTap}
-          onClearAll={() => { setNotifications([]); clearNotifications().catch(() => {}); }}
+          onClearAll={() => { setNotifications([]); clearNotifications(meId).catch((e) => { console.error('[notifications] clear failed', e); fetchNotifications(meId).then(setNotifications).catch(() => {}); }); }}
         />
       )}
       {showTonightModal && (

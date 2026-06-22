@@ -48,9 +48,13 @@ export async function markAllNotificationsRead() {
   if (error) throw error;
 }
 
-export async function clearNotifications() {
-  // delete all of the caller's notifications (RLS scopes to own rows)
-  await supabase.from('notifications').delete().gte('created_at', '1970-01-01');
+export async function clearNotifications(myId) {
+  // delete the caller's notifications — explicit user_id scope (defense-in-depth over RLS)
+  // and surface failures instead of swallowing them.
+  let q = supabase.from('notifications').delete();
+  q = myId ? q.eq('user_id', myId) : q.gte('created_at', '1970-01-01');
+  const { error } = await q;
+  if (error) throw error;
 }
 
 // Realtime: new notifications for the current user (RLS scopes the stream).
