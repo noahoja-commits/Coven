@@ -10,6 +10,7 @@ import { borderStyle, bannerStyle } from '../../data/decor';
 import { CRYSTAL_OPTIONS } from '../../data/crystals';
 import { SHRINE_OBJECTS, earnedShrine } from '../../data/shrine';
 import { PostGrid } from './PostGrid';
+import { TarotFrame, arcanaFor, Grain } from '../shared/Sigils';
 
 const SHRINE_THEMES = {
   oxblood: 'radial-gradient(ellipse at 50% 0%, #5B0F1A 0%, transparent 60%)',
@@ -62,16 +63,20 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
 
   return (
     <div className="pb-24">
-      {/* Header card */}
+      {/* Header card — framed as a tarot arcana */}
       <div className="relative px-4 pt-4 pb-5 border-b border-[#1A1A1A] overflow-hidden">
         <div className="absolute inset-0 opacity-25" style={{ background: SHRINE_THEMES[shrineTheme] || SHRINE_THEMES.oxblood }} />
+        <Grain opacity={0.06} />
+        <TarotFrame />
         {profile.decor?.banner && profile.decor.banner !== 'none' && (
           <div className="absolute top-0 inset-x-0 h-24 pointer-events-none" style={bannerStyle(profile.decor.banner) || undefined} />
         )}
 
         <div className="relative flex justify-between items-start mb-4">
-          <div className="flex items-center gap-1">
-            <span className="text-[10px] uppercase tracking-[0.25em] text-[#6B6B6B]" style={F.ui}>· self ·</span>
+          <div className="flex items-center gap-1.5 min-w-0 flex-1 mr-2">
+            {(() => { const a = arcanaFor(profile.name); return (
+              <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] truncate" style={F.display}>{a.numeral} · {a.name}</span>
+            ); })()}
           </div>
           <div className="flex items-center gap-2">
             {/* Grave shortcut top-right — surfaces the first PUBLIC memorial only;

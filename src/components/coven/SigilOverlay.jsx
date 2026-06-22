@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { ArrowLeft, Lock, RotateCcw } from 'lucide-react';
 import { F } from '../../styles/fonts';
+import { WaxSeal } from '../shared/Sigils';
 
 // Chaos-magick sigil algorithm:
 // 1. lowercase, strip non-letters
@@ -165,9 +166,12 @@ export function SigilOverlay({ onClose, onSave }) {
           </div>
 
           {sealed && (
-            <p className="mt-6 text-center text-[#A89968]/60 text-xs italic max-w-xs mx-auto" style={F.scripture}>
-              "the sigil is sealed. forget the meaning. let it work in the dark."
-            </p>
+            <div className="mt-6 flex flex-col items-center gap-3 animate-fade-in">
+              <WaxSeal size={52} glyph="⛧" />
+              <p className="text-center text-[#A89968]/60 text-xs italic max-w-xs mx-auto" style={F.scripture}>
+                "the sigil is sealed. forget the meaning. let it work in the dark."
+              </p>
+            </div>
           )}
         </div>
       </div>

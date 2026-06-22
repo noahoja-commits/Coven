@@ -351,6 +351,14 @@ export function HomeScreen({
                   <span className="text-6xl animate-like-burst drop-shadow-[0_0_20px_rgba(139,0,0,0.8)]">🦇</span>
                 </div>
               )}
+              {(bookmarked || pinned) && (
+                <span aria-hidden title={pinned ? 'pinned' : 'saved'}
+                  className="absolute top-0 right-4 w-2.5 h-7 z-10 pointer-events-none"
+                  style={{ background: pinned ? '#8B0000' : '#C9A961', opacity: 0.9,
+                    clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%)',
+                    WebkitClipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%)',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.5)' }} />
+              )}
               <div className="flex items-center gap-2.5 mb-3">
                 <button
                   onClick={() => !mine && !post.anonymous && onOpenUser && onOpenUser(post.user, post.avatar)}

@@ -5,6 +5,7 @@ import { getProfileByHandle, getProfileStats } from '../../lib/db/profiles';
 import { fetchUserPosts } from '../../lib/db/posts';
 import { borderStyle, bannerStyle } from '../../data/decor';
 import { PostGrid } from './PostGrid';
+import { TarotFrame, arcanaFor, Grain } from '../shared/Sigils';
 
 export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], isFollowing, isMuted, onToggleFollow, onToggleMute, onWhisper, onClose, onOpenComments, onReact, onBlock, onReport }) {
   const [profile, setProfile] = useState(null);
@@ -59,12 +60,17 @@ export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], isF
         </div>
       </div>
 
-      {/* Card */}
+      {/* Card — framed as a tarot arcana */}
       <div className="relative px-4 pt-5 pb-5 border-b border-[#1A1A1A] overflow-hidden">
         <div className="absolute inset-0 opacity-15" style={{ background: 'radial-gradient(ellipse at 50% 0%, #5B0F1A 0%, transparent 60%)' }} />
         {user.decor?.banner && user.decor.banner !== 'none' && (
           <div className="absolute top-0 inset-x-0 h-24 pointer-events-none" style={bannerStyle(user.decor.banner) || undefined} />
         )}
+        <Grain opacity={0.06} />
+        <TarotFrame />
+        {(() => { const a = arcanaFor(user.handle); return (
+          <div className="relative mb-3 text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.display}>{a.numeral} · {a.name}</div>
+        ); })()}
         <div className="relative flex items-start gap-4">
           <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#3B0A12] to-[#0A0A0A] border border-[#3F3F3F] flex items-center justify-center text-3xl shrink-0"
             style={borderStyle(user.decor?.border)}>

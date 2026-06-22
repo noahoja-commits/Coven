@@ -83,9 +83,68 @@ const SIGILS = {
   profile: SunMark,
 };
 
+// A wax-seal stamp — an oxblood disc with an embossed sigil, for things that are "sealed".
+export function WaxSeal({ size = 44, glyph = '⛧', className = '' }) {
+  return (
+    <div className={`relative inline-flex items-center justify-center ${className}`} style={{ width: size, height: size }} aria-hidden>
+      <svg viewBox="0 0 44 44" width={size} height={size} className="absolute inset-0"
+        style={{ filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.6))' }}>
+        <circle cx="22" cy="22" r="20" fill="#5B0F1A" />
+        <circle cx="22" cy="22" r="20" fill="none" stroke="#3B0A12" strokeWidth="2" />
+        <circle cx="22" cy="22" r="16" fill="none" stroke="#8B0000" strokeWidth="0.8" strokeDasharray="1.5 2.5" opacity="0.7" />
+      </svg>
+      <span className="relative" style={{ fontSize: size * 0.42, color: '#C9A961', opacity: 0.75 }}>{glyph}</span>
+    </div>
+  );
+}
+
 export function NavSigil({ name, size = 18, ...rest }) {
   const Glyph = SIGILS[name] || Pentacle;
   return <Glyph width={size} height={size} {...rest} />;
+}
+
+// Reusable film/paper grain — the same feTurbulence noise the overlays hand-roll, as
+// one absolute layer. Drop it BEHIND content (it's pointer-events-none, low opacity).
+const GRAIN_URI = "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.85'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>\")";
+export function Grain({ opacity = 0.05, className = '' }) {
+  return <div aria-hidden className={`absolute inset-0 pointer-events-none mix-blend-overlay ${className}`} style={{ opacity, backgroundImage: GRAIN_URI }} />;
+}
+
+// The 22 Major Arcana — each soul is dealt a stable card from their handle, so the
+// profile reads like a tarot card (purely cosmetic, deterministic, no backend).
+const ARCANA = [
+  'THE FOOL', 'THE MAGICIAN', 'THE HIGH PRIESTESS', 'THE EMPRESS', 'THE EMPEROR',
+  'THE HIEROPHANT', 'THE LOVERS', 'THE CHARIOT', 'STRENGTH', 'THE HERMIT',
+  'WHEEL OF FORTUNE', 'JUSTICE', 'THE HANGED MAN', 'DEATH', 'TEMPERANCE',
+  'THE DEVIL', 'THE TOWER', 'THE STAR', 'THE MOON', 'THE SUN',
+  'JUDGEMENT', 'THE WORLD',
+];
+const ROMAN = ['0', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI',
+  'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX', 'XXI'];
+
+export function arcanaFor(seed) {
+  let h = 0;
+  const s = String(seed || 'soul');
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  const idx = Math.abs(h) % ARCANA.length;
+  return { numeral: ROMAN[idx], name: ARCANA[idx] };
+}
+
+// An ornate inset frame that turns a (relative, overflow-hidden) profile header into a
+// tarot arcana card. Purely decorative: pointer-events-none, sits BEHIND the existing
+// buttons/avatar/stats, never alters layout. The arcana numeral/name is surfaced
+// separately by the screen (replacing its '· self ·' label) so it can't collide here.
+export function TarotFrame({ gold = '#C9A961', oxblood = '#5B0F1A' }) {
+  return (
+    <div className="absolute inset-0 z-[1] pointer-events-none" aria-hidden>
+      <div className="absolute inset-[6px]" style={{ border: `1px solid ${gold}55` }} />
+      <div className="absolute inset-[9px]" style={{ border: `1px solid ${oxblood}66` }} />
+      <span className="absolute top-[3px] left-[4px] text-[10px]" style={{ color: `${gold}99` }}>⛧</span>
+      <span className="absolute top-[3px] right-[4px] text-[10px]" style={{ color: `${gold}99` }}>⛧</span>
+      <span className="absolute bottom-[3px] left-[4px] text-[10px]" style={{ color: `${gold}99` }}>⛧</span>
+      <span className="absolute bottom-[3px] right-[4px] text-[10px]" style={{ color: `${gold}99` }}>⛧</span>
+    </div>
+  );
 }
 
 // A horizontal ornamental rule with a centered sigil — replaces plain divider lines

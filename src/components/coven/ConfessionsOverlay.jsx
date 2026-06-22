@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft, Send, Flag } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { Reaction } from '../shared/Reaction';
-import { OrnamentRule } from '../shared/Sigils';
+import { OrnamentRule, Grain } from '../shared/Sigils';
 
 // Confessions are real anonymous posts. `userConfessions` is the live list of the
 // current feed's anonymous posts (author masked server-side); confessing creates a
@@ -77,8 +77,9 @@ export function ConfessionsOverlay({ onClose, userConfessions = [], onConfess, o
               · no confessions yet. be the first to unburden ·
             </p>
           ) : userConfessions.filter(c => !hidden[c.id]).map(c => (
-            <div key={c.id} className="border border-[#7B2CBF]/20 bg-[#0A0204]/60 p-4">
-              <p className="text-[#F5F1E8] text-base italic leading-relaxed mb-3 illuminated" style={F.scripture}>{c.body}</p>
+            <div key={c.id} className="relative overflow-hidden border border-[#7B2CBF]/20 bg-[#0A0204]/60 p-4">
+              <Grain opacity={0.05} />
+              <p className="relative text-[#F5F1E8] text-base italic leading-relaxed mb-3 illuminated" style={F.scripture}>{c.body}</p>
               <div className="flex items-center justify-between">
                 <div className="flex items-center -ml-2">
                   <Reaction icon="🦇" count={c.reactions?.bat || 0} active={!!c.myReactions?.bat} onClick={() => onReact && onReact(c.id, 'bat')} />
