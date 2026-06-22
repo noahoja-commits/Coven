@@ -1,12 +1,67 @@
 import { useMemo, useState } from 'react';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, X, Plus } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { FASHION } from '../../data/fashion';
+
+const PALETTE = {
+  red: 'linear-gradient(135deg, #3B0A12 0%, #1A0408 70%, #0A0204 100%)',
+  black: 'linear-gradient(135deg, #1F1F1F 0%, #0A0A0A 100%)',
+  violet: 'linear-gradient(135deg, #2D0F3F 0%, #14081F 70%, #0A0410 100%)',
+};
+const TILE_COLORS = ['red', 'black', 'violet'];
 
 // Real storefront if we have one, otherwise a web search for the brand.
 function shopUrl(item) {
   if (item.url) return item.url;
   return `https://duckduckgo.com/?q=${encodeURIComponent(item.brand + ' goth clothing')}`;
+}
+
+// Normalize a user-entered link the same way the Oddities ShopsTab does.
+function storeHref(url) {
+  if (!url) return null;
+  return url.startsWith('http') ? url : `https://${url}`;
+}
+
+// Cheap, stable color pick so user-added stores vary without storing a color.
+function colorFor(id) {
+  let h = 0;
+  for (let i = 0; i < String(id).length; i++) h = (h * 31 + String(id).charCodeAt(i)) | 0;
+  return TILE_COLORS[Math.abs(h) % TILE_COLORS.length];
+}
+
+// A community-added store, rendered to match FashionTile but fed from the `shops` shape.
+function StoreTile({ store, onDelete }) {
+  const href = storeHref(store.url);
+  const open = () => href && window.open(href, '_blank', 'noopener,noreferrer');
+  const kindLine = [store.kind, store.neighborhood].filter(Boolean).join(' · ');
+  return (
+    <div className="relative w-full overflow-hidden border border-[#3F2A14] hover:border-[#C9A961]/50 transition-all group"
+      style={{ height: 200, background: PALETTE[colorFor(store.id)] }}>
+      <button onClick={open} disabled={!href} className="absolute inset-0 w-full h-full text-left disabled:cursor-default">
+        <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/45 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 ring-1 ring-inset ring-white/5 pointer-events-none" />
+        <div className="absolute top-2 left-2 text-[9px] uppercase tracking-[0.2em] text-[#C9A961]/80 border border-[#C9A961]/30 px-1.5 py-0.5" style={F.ui}>store</div>
+        {href && (
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <ExternalLink size={13} className="text-[#C9A961]" />
+          </div>
+        )}
+        <div className="absolute inset-x-0 bottom-0 p-3">
+          <div className="flex items-center gap-1.5">
+            <span className="h-3 w-[2px] bg-[#8B0000] group-hover:bg-[#C9A961] transition-colors shrink-0" />
+            <div className="text-[#F5F1E8] text-sm tracking-wide group-hover:text-[#C9A961] transition-colors truncate" style={F.display}>{store.name.toUpperCase()}</div>
+          </div>
+          {kindLine && <div className="text-[#A8A29E] text-[11px] mt-0.5 pl-2.5 truncate" style={F.ui}>{kindLine}</div>}
+          {store.blurb && <div className="text-[#A8A29E] text-[11px] mt-1 pl-2.5 italic line-clamp-2" style={F.serif}>{store.blurb}</div>}
+          {store.owner?.user && <div className="text-[#6B6B6B] text-[10px] mt-1.5 pl-2.5" style={F.ui}>added by @{store.owner.user}</div>}
+        </div>
+      </button>
+      {store.mine && (
+        <button onClick={() => onDelete && onDelete(store.id)} title="remove your store"
+          className="absolute bottom-2 right-2 text-[#6B6B6B] hover:text-[#8B0000] p-1 z-10"><X size={13} /></button>
+      )}
+    </div>
+  );
 }
 
 function FashionTile({ item }) {
@@ -50,13 +105,16 @@ function FashionTile({ item }) {
   );
 }
 
-const FILTERS = ['all', 'mens', 'womens', 'unisex', 'thrift', 'indie'];
+const FILTERS = ['all', 'stores', 'mens', 'womens', 'unisex', 'thrift', 'indie'];
+const EMPTY_STORE = { name: '', kind: '', url: '', blurb: '' };
 
-export function FashionScreen() {
+export function FashionScreen({ shops = [], meId, onAddStore, onDeleteStore }) {
   const [filter, setFilter] = useState('all');
+  const [adding, setAdding] = useState(false);
+  const [form, setForm] = useState(EMPTY_STORE);
 
   const items = useMemo(() => {
-    if (filter === 'all') return FASHION;
+    if (filter === 'all' || filter === 'stores') return FASHION;
     if (filter === 'thrift' || filter === 'indie') {
       return FASHION.filter(i => i.kind.toLowerCase().includes(filter));
     }
@@ -65,6 +123,17 @@ export function FashionScreen() {
 
   const col1 = items.filter((_, i) => i % 2 === 0);
   const col2 = items.filter((_, i) => i % 2 === 1);
+
+  // Stores show in the 'all' and 'stores' views (above the curated brands).
+  const showStores = filter === 'all' || filter === 'stores';
+  const showBrands = filter !== 'stores';
+
+  const submitStore = () => {
+    if (!form.name.trim()) return;
+    onAddStore && onAddStore(form);
+    setForm(EMPTY_STORE);
+    setAdding(false);
+  };
 
   return (
     <div className="pb-24">
@@ -83,13 +152,51 @@ export function FashionScreen() {
           );
         })}
       </div>
-      {items.length === 0 ? (
-        <p className="px-4 py-12 text-center text-[#6B6B6B] text-sm italic" style={F.serif}>· nothing here yet ·</p>
-      ) : (
-        <div className="px-3 grid grid-cols-2 gap-2">
-          <div className="space-y-2">{col1.map(item => <FashionTile key={item.id} item={item} />)}</div>
-          <div className="space-y-2">{col2.map(item => <FashionTile key={item.id} item={item} />)}</div>
+
+      {/* Community stores — a directory of shops / clothing sites souls have found. */}
+      {showStores && (
+        <div className="px-3 mb-3">
+          <div className="flex items-center justify-between px-1 mb-2">
+            <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.ui}>· stores the coven found ·</div>
+            {meId && !adding && (
+              <button onClick={() => setAdding(true)} className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-[#A8A29E] hover:text-[#C9A961]" style={F.ui}>
+                <Plus size={12} /> add a store
+              </button>
+            )}
+          </div>
+
+          {adding && (
+            <div className="border border-[#2A2A2A] bg-[#0F0F0F] p-3 space-y-2 mb-2">
+              {[['name', 'store name'], ['kind', 'kind (e.g. indie · online)'], ['url', 'link (e.g. killstar.com)'], ['blurb', 'one line about it (optional)']].map(([k, ph]) => (
+                <input key={k} value={form[k]} onChange={e => setForm({ ...form, [k]: e.target.value })} placeholder={ph}
+                  className="w-full bg-[#0A0608] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none px-2.5 py-1.5 text-[#F5F1E8] text-sm" style={F.serif} />
+              ))}
+              <div className="flex gap-2 justify-end">
+                <button onClick={() => { setAdding(false); setForm(EMPTY_STORE); }} className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-[#6B6B6B]" style={F.ui}>cancel</button>
+                <button onClick={submitStore} disabled={!form.name.trim()} className="px-3 py-1.5 text-[10px] uppercase tracking-wider bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] disabled:opacity-40" style={F.ui}>add store</button>
+              </div>
+            </div>
+          )}
+
+          {shops.length === 0 ? (
+            !adding && <p className="py-6 text-center text-[#6B6B6B] text-xs italic" style={F.serif}>no stores added yet — be the first to share one.</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              {shops.map(s => <StoreTile key={s.id} store={s} onDelete={onDeleteStore} />)}
+            </div>
+          )}
         </div>
+      )}
+
+      {showBrands && (
+        items.length === 0 ? (
+          <p className="px-4 py-12 text-center text-[#6B6B6B] text-sm italic" style={F.serif}>· nothing here yet ·</p>
+        ) : (
+          <div className="px-3 grid grid-cols-2 gap-2">
+            <div className="space-y-2">{col1.map(item => <FashionTile key={item.id} item={item} />)}</div>
+            <div className="space-y-2">{col2.map(item => <FashionTile key={item.id} item={item} />)}</div>
+          </div>
+        )
       )}
     </div>
   );

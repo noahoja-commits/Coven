@@ -1520,7 +1520,7 @@ export default function App() {
     if (tab === 'events') return (
       <EventsScreen events={events} rsvp={eventRsvp} onToggleRsvp={toggleEventRsvp} onOpenEvent={(id) => setActiveEvent(id)} onCreateEvent={() => setShowCreateEvent(true)} />
     );
-    if (tab === 'fits') return <FashionScreen />;
+    if (tab === 'fits') return <FashionScreen shops={shops} meId={meId} onAddStore={addShop} onDeleteStore={removeShop} />;
     if (tab === 'profile') return (
       <ProfileScreen
         profile={{ ...profile, status: tonightStatus?.text || null }}
