@@ -71,6 +71,8 @@ button:active, [role="button"]:active {
 
 @media (max-width: 640px) {
   .phone-frame {
+    height: 100vh;
+    height: 100dvh; /* old Safari (<15.4) ignores dvh and keeps the 100vh line above */
     min-height: 100vh;
     min-height: 100dvh;
     padding-bottom: env(safe-area-inset-bottom);

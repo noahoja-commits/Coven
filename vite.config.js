@@ -40,6 +40,10 @@ export default defineConfig({
     }),
   ],
   build: {
+    // Broaden device support: esbuild transpiles modern syntax (optional chaining,
+    // nullish coalescing, logical assignment) down so older Android/Samsung browsers
+    // (~2018-19) run the app, not just Vite's default Safari14/Chrome87 floor.
+    target: ['es2019', 'safari12', 'chrome79', 'firefox68', 'edge79'],
     rollupOptions: {
       output: {
         manualChunks: {
