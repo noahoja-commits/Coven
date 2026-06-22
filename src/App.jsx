@@ -2027,7 +2027,7 @@ export default function App() {
           />
         </Suspense>
       )}
-      {settings.familiar !== false && !isInsideOverlay && <FloatingCat active />}
+      {settings.familiar !== false && !anyOverlayOpen && <FloatingCat active />}
       <Toast toast={toast} onDone={() => setToast(null)} />
     </div>
   );
