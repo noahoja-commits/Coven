@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft, Send, Flag } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { Reaction } from '../shared/Reaction';
+import { OrnamentRule } from '../shared/Sigils';
 
 // Confessions are real anonymous posts. `userConfessions` is the live list of the
 // current feed's anonymous posts (author masked server-side); confessing creates a
@@ -68,6 +69,8 @@ export function ConfessionsOverlay({ onClose, userConfessions = [], onConfess, o
           </div>
         </div>
 
+        <OrnamentRule glyph="𖤐" color="#7B2CBF" tint="#A89968" className="mb-5 max-w-md mx-auto" />
+
         <div className="space-y-3 max-w-md mx-auto">
           {userConfessions.length === 0 ? (
             <p className="text-center text-[#A89968]/40 text-xs italic py-8" style={F.scripture}>
@@ -75,7 +78,7 @@ export function ConfessionsOverlay({ onClose, userConfessions = [], onConfess, o
             </p>
           ) : userConfessions.filter(c => !hidden[c.id]).map(c => (
             <div key={c.id} className="border border-[#7B2CBF]/20 bg-[#0A0204]/60 p-4">
-              <p className="text-[#F5F1E8] text-base italic leading-relaxed mb-3" style={F.scripture}>"{c.body}"</p>
+              <p className="text-[#F5F1E8] text-base italic leading-relaxed mb-3 illuminated" style={F.scripture}>{c.body}</p>
               <div className="flex items-center justify-between">
                 <div className="flex items-center -ml-2">
                   <Reaction icon="🦇" count={c.reactions?.bat || 0} active={!!c.myReactions?.bat} onClick={() => onReact && onReact(c.id, 'bat')} />

@@ -160,6 +160,19 @@ button:active, [role="button"]:active {
 }
 .animate-like-burst { animation: likeBurst 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
 
+/* Illuminated drop-cap — a blackletter gold initial for confessions / scripture
+   on the dark surfaces (the parchment reader has its own inline drop-cap). */
+.illuminated::first-letter {
+  font-family: "UnifrakturCook", serif;
+  font-weight: 700;
+  font-size: 3.1em;
+  line-height: 0.7;
+  float: left;
+  margin: 0.06em 0.09em 0 0;
+  color: #C9A961;
+  text-shadow: 0 0 10px rgba(201, 169, 97, 0.25);
+}
+
 /* Parchment mode */
 .parchment-mode {
   background: radial-gradient(ellipse at 50% 30%, #EDE0C2 0%, #DDCDA8 65%, #B8A47C 100%) !important;
