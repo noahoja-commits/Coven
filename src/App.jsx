@@ -1714,6 +1714,8 @@ export default function App() {
   return (
     <div className={`phone-frame max-w-md mx-auto relative overflow-hidden h-[100dvh] text-[#F5F1E8] ${settings.shockMode === 'scream' ? 'shock-shake' : settings.shockMode === 'glitch' ? 'shock-jitter' : ''}`}
       style={{ background: settings.parchmentMode ? '#EDE0C2' : '#0A0A0A' }}>
+      {/* Shock mode — BACK layer: bold occult motifs render BEHIND the app content so it stays readable */}
+      {!settings.parchmentMode && !isInsideOverlay && <ShockOverlay mode={settings.shockMode} layer="back" />}
       {/* Living ambient glow — breathing ember/candle light for depth (behind mood washes) */}
       {settings.ambientGlow !== false && !isInsideOverlay && !settings.parchmentMode && <AmbientGlow />}
       {/* Always-on blood wash — drenches the whole frame in oxblood so the app reads RED, not grey */}
@@ -1765,8 +1767,8 @@ export default function App() {
         }} />
       )}
 
-      {/* Shock mode — selectable full-screen visual mode; renders ON TOP (z-30, pointer-events-none) */}
-      {!settings.parchmentMode && !isInsideOverlay && <ShockOverlay mode={settings.shockMode} />}
+      {/* Shock mode — FRONT layer: only translucent texture/chrome, on top (z-30, pointer-events-none) */}
+      {!settings.parchmentMode && !isInsideOverlay && <ShockOverlay mode={settings.shockMode} layer="front" />}
       {/* Grain — floored so the film texture stays visibly present (still slider-controlled above the floor) */}
       {settings.grainIntensity > 0 && (
         settings.grainStyle === 'print'
