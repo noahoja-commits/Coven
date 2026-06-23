@@ -22,6 +22,7 @@ import { BlockedOverlay } from './components/settings/BlockedOverlay';
 import { LegalScreen } from './components/legal/LegalScreen';
 import { DeleteAccountModal } from './components/settings/DeleteAccountModal';
 import { deleteAccount } from './lib/db/account';
+import { ReportSheet } from './components/shared/ReportSheet';
 import { enablePush, disablePush, pushStatus } from './lib/db/push';
 import { setTonightPin, clearTonightPin, fetchTonightPins, subscribeTonightPins } from './lib/db/tonight';
 import { Toast } from './components/shared/Toast';
@@ -123,6 +124,8 @@ export default function App() {
   const [showBlocked, setShowBlocked] = useState(false);
   const [showLegal, setShowLegal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [reportSheet, setReportSheet] = useState(null); // { kind, id } | null
+  const [legalEscalation, setLegalEscalation] = useState(null); // 'illegal' | 'copyright' | null
   const [showMyTickets, setShowMyTickets] = useState(false);
   const [activeStoryIndex, setActiveStoryIndex] = useState(null);
   const [activeUserHandle, setActiveUserHandle] = useState(null);
@@ -1155,9 +1158,9 @@ export default function App() {
     setBlockedIds(prev => { const n = new Set(prev); n.delete(profileId); return n; });
     fetchFeed(meId, { scope: feedScope }).then(setPosts).catch(() => {});
   };
-  const reportTarget = async (kind, targetId) => {
+  const reportTarget = async (kind, targetId, reason = '') => {
     if (!meId || !targetId) return;
-    try { await reportContent(kind, targetId, ''); addNotification({ kind: 'follow', avatar: '⚑', text: 'reported — thank you' }); }
+    try { await reportContent(kind, targetId, reason); addNotification({ kind: 'follow', avatar: '⚑', text: 'reported — thank you' }); }
     catch { /* ignore */ }
   };
 
@@ -1296,7 +1299,7 @@ export default function App() {
   const anyOverlayOpen = !!(
     showSigilDraw ||
     ticketSuccess || activeStoryIndex !== null || showStoryComposer || venueEditorEvent ||
-    ticketManagerEvent || showCreateEvent || showEditProfile || showSettings || showBlocked || showLegal || showDeleteConfirm ||
+    ticketManagerEvent || showCreateEvent || showEditProfile || showSettings || showBlocked || showLegal || showDeleteConfirm || reportSheet || legalEscalation ||
     showMyTickets || showReflections || showNowPlaying || showAddGrave || showAddAnniv ||
     showVespersArchive || showNewGroup || showTonightModal || quoteTarget || showOddityCompose ||
     activeOddity || activeText || activePostComments || followList || activeConversation || activeUserHandle ||
@@ -1313,6 +1316,8 @@ export default function App() {
     if (showCreateEvent) { setShowCreateEvent(false); return true; }
     if (showEditProfile) { setShowEditProfile(false); return true; }
     if (showSettings) { setShowSettings(false); return true; }
+    if (legalEscalation) { setLegalEscalation(null); return true; }
+    if (reportSheet) { setReportSheet(null); return true; }
     if (showDeleteConfirm) { setShowDeleteConfirm(false); return true; }
     if (showLegal) { setShowLegal(false); return true; }
     if (showBlocked) { setShowBlocked(false); return true; }
@@ -1474,7 +1479,7 @@ export default function App() {
         onSetFeedScope={setFeedScope}
         onLoadMore={loadMoreFeed}
         feedHasMore={feedHasMore}
-        onReportPost={(id) => reportTarget('post', id)}
+        onReportPost={(id) => setReportSheet({ kind: 'post', id })}
         bookmarks={bookmarks}
         onToggleBookmark={toggleBookmark}
         postCandles={postCandles}
@@ -1745,7 +1750,7 @@ export default function App() {
           onOpenComments={(id) => setActivePostComments(id)}
           onReact={reactToPost}
           onBlock={(profileId) => blockUserById(profileId, activeUserHandle)}
-          onReport={(profileId) => reportTarget('user', profileId)}
+          onReport={(profileId) => setReportSheet({ kind: 'user', id: profileId })}
           onClose={() => setActiveUserHandle(null)}
         />
       )}
@@ -1934,6 +1939,30 @@ export default function App() {
           onClose={() => setShowDeleteConfirm(false)}
         />
       )}
+      {reportSheet && (
+        <ReportSheet
+          onClose={() => setReportSheet(null)}
+          onPick={(reason) => {
+            reportTarget(reportSheet.kind, reportSheet.id, reason);
+            const esc = (reason === 'illegal' || reason === 'copyright') ? reason : null;
+            setReportSheet(null);
+            if (esc) setLegalEscalation(esc);
+          }}
+        />
+      )}
+      {legalEscalation && (
+        <div className="fixed inset-0 z-[62] bg-black/85 backdrop-blur-sm flex items-center justify-center p-6 animate-fade-in" onClick={() => setLegalEscalation(null)}>
+          <div className="bg-[#0F0F0F] border border-[#5B0F1A]/40 w-full max-w-xs p-5 animate-slide-up" onClick={e => e.stopPropagation()}>
+            <div className="text-[#C9A961] text-sm tracking-[0.2em] mb-2" style={F.display}>{legalEscalation === 'copyright' ? 'DMCA NOTICE' : 'URGENT REPORT'}</div>
+            <p className="text-[#A8A29E] text-sm leading-relaxed mb-4" style={F.serif}>
+              {legalEscalation === 'copyright'
+                ? 'Thank you. To file a formal copyright takedown, email noahoja@gmail.com with the work, the infringing link, your contact info, and a good-faith statement.'
+                : 'Thank you — we’ll act fast. For urgent or illegal content, email noahoja@gmail.com with a link. (We report content involving minors to NCMEC.)'}
+            </p>
+            <button onClick={() => setLegalEscalation(null)} className="w-full py-2.5 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] text-[10px] uppercase tracking-wider" style={F.ui}>done</button>
+          </div>
+        </div>
+      )}
       {showBlocked && (
         <BlockedOverlay
           onBack={() => setShowBlocked(false)}
@@ -2020,7 +2049,7 @@ export default function App() {
             }))}
             onConfess={(body) => addPost({ body, community: 'general', anonymous: true })}
             onReact={reactToPost}
-            onReport={(id) => reportTarget('post', id)}
+            onReport={(id) => setReportSheet({ kind: 'post', id })}
           />
         ) : (
           <AgeGate minAge={18} label="confessions" onPass={setAgeDob} onClose={closePortal} />
