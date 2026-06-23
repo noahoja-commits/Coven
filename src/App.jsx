@@ -89,7 +89,7 @@ import { AgeGate } from './components/shared/AgeGate';
 import { SettingsScreen, DEFAULT_SETTINGS } from './components/settings/SettingsScreen';
 
 import { COMMUNITIES } from './data/communities';
-import { fetchEvents, createEvent, toggleEventRsvp as dbToggleRsvp, fetchEventAttendees } from './lib/db/events';
+import { fetchEvents, createEvent, toggleEventRsvp as dbToggleRsvp, fetchEventAttendees, deleteEvent as dbDeleteEvent } from './lib/db/events';
 import { CommentsOverlay } from './components/feed/CommentsOverlay';
 import { QuoteModal } from './components/feed/QuoteModal';
 import { VespersArchiveModal } from './components/feed/VespersArchiveModal';
@@ -886,6 +886,14 @@ export default function App() {
       console.error('[checkout] failed:', e);
       addNotification({ kind: 'event', avatar: '✖', text: `checkout unavailable — ${e.message}` });
     });
+  };
+
+  const removeEvent = (eventId) => {
+    const snapshot = events;
+    setEvents(prev => prev.filter(e => e.id !== eventId));
+    setActiveEvent(null);
+    dbDeleteEvent(eventId).then(() => showToast('the rite is undone.'))
+      .catch(() => { setEvents(snapshot); showToast("couldn't delete that rite — try again.", 'error'); });
   };
 
   const deletePost = (postId) => {
@@ -1833,6 +1841,7 @@ export default function App() {
           onManageTickets={(ev) => setTicketManagerEvent(ev)}
           onOpenUser={(h) => { setActiveEvent(null); setActiveUserHandle(h); }}
           onBack={() => setActiveEvent(null)}
+          onDelete={removeEvent}
         />
         );
       })()}

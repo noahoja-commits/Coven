@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ArrowLeft, Check, MapPin, Calendar, Users, Share2, Ticket } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { shareCoven } from '../../lib/share';
@@ -8,7 +9,8 @@ const COVERS = {
   black: 'linear-gradient(135deg, #1F1F1F 0%, #0A0A0A 100%)',
 };
 
-export function EventDetail({ event, isGoing, onToggleRsvp, onBack, onOpenUser, attendees = [], meHandle, onBuy, onManageTickets }) {
+export function EventDetail({ event, isGoing, onToggleRsvp, onBack, onOpenUser, attendees = [], meHandle, onBuy, onManageTickets, onDelete }) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
   if (!event) return null;
 
   const cover = COVERS[event.cover] || COVERS.red;
@@ -134,6 +136,16 @@ export function EventDetail({ event, isGoing, onToggleRsvp, onBack, onOpenUser, 
             style={F.ui}>
             {isGoing ? <><Check size={14} /> going</> : 'rsvp · i’m going'}
           </button>
+        )}
+        {event.mine && (
+          event.sold > 0 ? (
+            <p className="mt-3 text-center text-[10px] text-[#6B6B6B] italic" style={F.serif}>can’t delete — {event.sold} ticket{event.sold === 1 ? '' : 's'} sold.</p>
+          ) : (
+            <button onClick={() => { if (confirmDelete) { onDelete && onDelete(event.id); } else { setConfirmDelete(true); } }}
+              className="w-full mt-2 py-2.5 text-[10px] uppercase tracking-[0.25em] text-[#8B0000] hover:text-[#5B0F1A] transition-colors" style={F.ui}>
+              {confirmDelete ? 'tap again to delete forever' : 'delete event'}
+            </button>
+          )
         )}
       </div>
     </div>

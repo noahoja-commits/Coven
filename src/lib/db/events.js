@@ -83,6 +83,11 @@ export async function createEvent(data, host) {
   return hydrateEvent({ ...row, host_handle: host.handle, host_avatar: host.avatar, going: 0 }, new Set(), host.id);
 }
 
+export async function deleteEvent(eventId) {
+  const { error } = await supabase.from('events').delete().eq('id', eventId);
+  if (error) throw error;
+}
+
 export async function toggleEventRsvp(eventId, userId, wasGoing) {
   if (wasGoing) {
     const { error } = await supabase.from('event_rsvps')
