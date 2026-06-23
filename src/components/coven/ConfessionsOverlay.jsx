@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft, Send, Flag } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { EmptyState } from '../shared/EmptyState';
+import { SacredHeart } from '../shared/Sigils';
 import { Reaction } from '../shared/Reaction';
 import { OrnamentRule, Grain } from '../shared/Sigils';
 
@@ -74,7 +75,7 @@ export function ConfessionsOverlay({ onClose, userConfessions = [], onConfess, o
 
         <div className="space-y-3 max-w-md mx-auto">
           {userConfessions.length === 0 ? (
-            <EmptyState glyph="⛧" text="· no confessions yet. be the first to unburden ·" />
+            <EmptyState glyph={SacredHeart} text="· no confessions yet. be the first to unburden ·" />
           ) : userConfessions.filter(c => !hidden[c.id]).map(c => (
             <div key={c.id} className="relative overflow-hidden border border-[#7B2CBF]/20 bg-[#0A0204]/60 p-4">
               <Grain opacity={0.05} />

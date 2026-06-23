@@ -23,7 +23,7 @@ function Pentacle(p) {
 }
 
 // scenes → triple moon (the coven: a circle flanked by two crescents)
-function TripleMoon(p) {
+export function TripleMoon(p) {
   return (
     <svg {...COMMON} {...p}>
       <circle cx="12" cy="12" r="3.4" />
@@ -81,6 +81,73 @@ const SIGILS = {
   events: Flame,
   fits: Hanger,
   profile: SunMark,
+};
+
+// ── Occult iconography set — custom decorative glyphs drawn from the reference deck.
+// Same 24x24 / currentColor / stroke contract as the nav sigils, so they inherit color
+// and size anywhere and stay visually consistent with the rest of the mark.
+
+// sacred heart pierced with crossed daggers
+export function SacredHeart(p) {
+  return (
+    <svg {...COMMON} {...p}>
+      <path d="M12 20 C 4.5 14, 3.5 8.5, 7.5 6.6 C 9.8 5.5, 11.4 7, 12 8.6 C 12.6 7, 14.2 5.5, 16.5 6.6 C 20.5 8.5, 19.5 14, 12 20 Z" />
+      <path d="M12 2.5 V21.5" strokeWidth="1" opacity="0.7" />
+      <path d="M7 4.5 L17 18.5 M17 4.5 L7 18.5" strokeWidth="1" opacity="0.55" />
+    </svg>
+  );
+}
+
+// crown of thorns — a woven ring with outward barbs
+export function CrownOfThorns(p) {
+  return (
+    <svg {...COMMON} {...p}>
+      <circle cx="12" cy="12" r="7" />
+      <path d="M12 5 L12 2.5 M19 12 L21.5 12 M12 19 L12 21.5 M5 12 L2.5 12 M16.95 7.05 L18.7 5.3 M16.95 16.95 L18.7 18.7 M7.05 16.95 L5.3 18.7 M7.05 7.05 L5.3 5.3" strokeWidth="1" opacity="0.8" />
+    </svg>
+  );
+}
+
+// the all-seeing eye in a radiant triangle
+export function AllSeeingEye(p) {
+  return (
+    <svg {...COMMON} {...p}>
+      <path d="M12 3 L21 19 H3 Z" />
+      <path d="M6.5 14 C 8.6 11, 15.4 11, 17.5 14 C 15.4 17, 8.6 17, 6.5 14 Z" strokeWidth="1.2" />
+      <circle cx="12" cy="14" r="1.6" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+// ouroboros — the serpent devouring its tail (eternity / streak)
+export function Ouroboros(p) {
+  return (
+    <svg {...COMMON} {...p}>
+      <path d="M14 5.2 A 7.5 7.5 0 1 0 19 12.5" strokeWidth="1.4" />
+      <path d="M14 5.2 L17.6 4 L17 7.8 Z" fill="currentColor" stroke="none" opacity="0.9" />
+      <circle cx="18.4" cy="11.3" r="0.9" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+// claw mark — three raking slashes (DMs / whispers ornament)
+export function ClawMark(p) {
+  return (
+    <svg {...COMMON} {...p}>
+      <path d="M7 3 C 8.5 8, 9 13, 8.5 21" />
+      <path d="M12 3 C 13.5 8, 13.5 13, 12.5 21" />
+      <path d="M17 3 C 18 8, 17.5 13, 16 21" />
+    </svg>
+  );
+}
+
+// Lookup registry (mirrors SIGILS) so glyphs can be referenced by name from data.
+export const OCCULT = {
+  sacredHeart: SacredHeart,
+  crownOfThorns: CrownOfThorns,
+  allSeeingEye: AllSeeingEye,
+  ouroboros: Ouroboros,
+  clawMark: ClawMark,
 };
 
 // A wax-seal stamp — an oxblood disc with an embossed sigil, for things that are "sealed".
@@ -149,11 +216,13 @@ export function TarotFrame({ gold = '#C9A961', oxblood = '#5B0F1A' }) {
 
 // A horizontal ornamental rule with a centered sigil — replaces plain divider lines
 // on the dark surfaces to carry the grimoire feel beyond the reader.
+// glyph may be a string (emoji/unicode) OR a sigil component (e.g. SacredHeart).
 export function OrnamentRule({ glyph = '⛧', className = '', color = '#5B0F1A', tint = '#A89968' }) {
+  const Glyph = typeof glyph === 'function' ? glyph : null;
   return (
     <div className={`flex items-center justify-center gap-3 ${className}`} aria-hidden>
       <span className="h-[1px] flex-1 max-w-[80px]" style={{ background: `linear-gradient(to right, transparent, ${color})` }} />
-      <span className="text-[11px]" style={{ color: tint }}>{glyph}</span>
+      {Glyph ? <Glyph width={14} height={14} style={{ color: tint }} /> : <span className="text-[11px]" style={{ color: tint }}>{glyph}</span>}
       <span className="h-[1px] flex-1 max-w-[80px]" style={{ background: `linear-gradient(to left, transparent, ${color})` }} />
     </div>
   );

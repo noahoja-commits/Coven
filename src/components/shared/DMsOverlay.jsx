@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { X, Search, Edit3, Archive } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { EmptyState } from './EmptyState';
+import { ClawMark } from './Sigils';
 
 export function DMsOverlay({ conversations = [], onClose, onOpenConversation, onNewGroup, onBury }) {
   const [query, setQuery] = useState('');
@@ -64,7 +65,7 @@ export function DMsOverlay({ conversations = [], onClose, onOpenConversation, on
         </div>
         <div className="divide-y divide-[#1A1A1A]">
           {filtered.length === 0 && (
-            <EmptyState glyph="✉" text={showBuried ? '· nothing buried ·' : '· no whispers ·'} />
+            <EmptyState glyph={ClawMark} text={showBuried ? '· nothing buried ·' : '· no whispers ·'} />
           )}
           {filtered.map(c => (
             // Archive lives in its own column (a sibling of the open-conversation button)

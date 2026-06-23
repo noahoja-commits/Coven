@@ -5,6 +5,7 @@ import { Reaction } from '../shared/Reaction';
 import { PostImage } from '../shared/Visuals';
 import { renderRichText } from '../shared/RichText';
 import { EmptyState } from '../shared/EmptyState';
+import { AllSeeingEye, TripleMoon } from '../shared/Sigils';
 import { getDailyCard } from '../../data/tarot';
 import { darkDay, todaysVespers, todaysCodex } from '../../data/helpers';
 import { DailyAltar } from './DailyAltar';
@@ -515,10 +516,10 @@ export function HomeScreen({
         })}
         {!feedLoading && sortedPosts.length === 0 && (
           feedScope === 'following' ? (
-            <EmptyState glyph="☾" text="you follow no one yet."
+            <EmptyState glyph={TripleMoon} text="you follow no one yet."
               sub="gather some souls below — or switch to the coven." />
           ) : (
-            <EmptyState glyph="✦" text="the coven is quiet tonight."
+            <EmptyState glyph={AllSeeingEye} text="the coven is quiet tonight."
               sub="be the first flame — speak, or drop a tonight status."
               action="drop a tonight status" onAction={onOpenTonightStatus} />
           )
