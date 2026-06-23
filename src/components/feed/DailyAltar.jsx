@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { buzz } from '../../lib/haptics';
+import { NavSigil } from '../shared/Sigils';
 import { moonPhase, dailyPrompt } from '../../data/helpers';
 import { CRYSTAL_OPTIONS } from '../../data/crystals';
 import { TRACKER_CATEGORIES } from '../../data/profile';
@@ -16,6 +18,21 @@ export function DailyAltar({
   const focus = CRYSTAL_OPTIONS.find(c => crystals.includes(c.id)); // first carried = focus
   const prompt = dailyPrompt();
   const streak = ritual?.streak || 0;
+
+  // Streak ember: grows + glows with the streak; flares when kept; guts low when at risk.
+  const [flare, setFlare] = useState(0);
+  const tier = streak >= 30 ? 4 : streak >= 14 ? 3 : streak >= 7 ? 2 : streak >= 3 ? 1 : 0;
+  const flameSize = [14, 18, 22, 26, 30][tier];
+  const flameGlow = [0.25, 0.4, 0.55, 0.7, 0.9][tier];
+  const flameColor = tier >= 3 ? '#C9A961' : '#C8102E';
+  const atRisk = !ritualDoneToday && streak > 0;
+  const milestone = ritualDoneToday && (streak === 7 || streak === 30);
+  const keepRite = () => {
+    if (ritualDoneToday) return;
+    buzz('rite');
+    setFlare(f => f + 1);
+    onPerformRitual && onPerformRitual();
+  };
 
   // Active trackers → resolve their glyph/label (preset or custom) for the quick-log row.
   const activeTrackers = Object.keys(trackers || {}).map(id => {
@@ -38,10 +55,19 @@ export function DailyAltar({
           </span>
         </button>
         <div className="ml-auto flex items-center gap-2">
-          <span className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>
-            {streak > 0 ? `${streak}d rite` : 'no streak'}
+          {/* Streak ember — sized + glowing by tier, flares on keep, dims when at risk */}
+          <span className="relative inline-flex items-center"
+            style={{ filter: `drop-shadow(0 0 ${6 + tier * 3}px rgba(200,16,46,${flameGlow}))`, opacity: atRisk ? 0.5 : 1 }}>
+            <NavSigil name="events" size={flameSize} className="animate-flicker" style={{ color: flameColor }} />
+            {flare > 0 && (
+              <span key={flare} aria-hidden className="absolute inset-0 animate-like-burst rounded-full"
+                style={{ background: 'radial-gradient(circle, rgba(200,16,46,0.6), transparent 70%)' }} />
+            )}
           </span>
-          <button onClick={() => { if (!ritualDoneToday) { buzz('rite'); onPerformRitual && onPerformRitual(); } }}
+          <span className="text-[10px] uppercase tracking-wider tabular-nums" style={{ ...F.ui, color: streak > 0 ? (tier >= 3 ? '#C9A961' : '#A8A29E') : '#6B6B6B' }}>
+            {streak > 0 ? `${streak}d` : 'no streak'}
+          </span>
+          <button onClick={keepRite}
             disabled={ritualDoneToday}
             className={`text-[10px] uppercase tracking-[0.2em] px-3 py-1.5 border transition-colors ${ritualDoneToday
               ? 'border-[#C9A961]/40 text-[#C9A961]/80 cursor-default'
@@ -51,6 +77,11 @@ export function DailyAltar({
           </button>
         </div>
       </div>
+      {milestone && (
+        <div className="px-4 -mt-1 pb-1.5 text-center text-[10px] uppercase tracking-[0.3em] text-[#C9A961] animate-fade-in" style={F.scriptureSC}>
+          · {streak === 30 ? 'one moon kept' : 'one week kept'} ·
+        </div>
+      )}
 
       {/* Focus + reflection prompt */}
       <div className="px-4 pb-3 space-y-2">
