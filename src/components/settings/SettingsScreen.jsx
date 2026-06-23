@@ -53,7 +53,7 @@ function Row({ label, desc, children }) {
   );
 }
 
-export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLogout, onRerunOnboarding, mutedKeywords = [], onSetMutedKeywords, payoutStatus, payoutBusy = false, onSetupPayouts, pushState = 'off', onEnablePush, onDisablePush, onEditProfile, onOpenBlocked, onOpenLegal }) {
+export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLogout, onRerunOnboarding, mutedKeywords = [], onSetMutedKeywords, payoutStatus, payoutBusy = false, onSetupPayouts, pushState = 'off', onEnablePush, onDisablePush, onEditProfile, onOpenBlocked, onOpenLegal, onDeleteAccount }) {
   const set = (key, value) => onChange({ ...settings, [key]: value });
   const addKeyword = (e) => {
     e.preventDefault();
@@ -245,6 +245,11 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
           <button onClick={onLogout} className="w-full py-3 text-[#5B0F1A] text-xs uppercase tracking-[0.25em] border border-[#2A2A2A] hover:border-[#5B0F1A]" style={F.ui}>
             sign out
           </button>
+          {onDeleteAccount && (
+            <button onClick={onDeleteAccount} className="w-full py-3 text-[#8B0000] text-[10px] uppercase tracking-[0.25em] hover:text-[#5B0F1A]" style={F.ui}>
+              delete account
+            </button>
+          )}
         </div>
 
         <div className="text-center mt-12 mb-8">
