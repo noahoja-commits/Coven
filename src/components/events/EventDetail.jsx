@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft, Check, MapPin, Calendar, Users, Share2, Ticket } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { shareCoven } from '../../lib/share';
+import { downloadICS } from '../../lib/ics';
 
 const COVERS = {
   red: 'linear-gradient(135deg, #5B0F1A 0%, #1A0408 70%, #0A0204 100%)',
@@ -28,8 +29,12 @@ export function EventDetail({ event, isGoing, onToggleRsvp, onBack, onOpenUser, 
         <div className="px-4 h-[60px] flex items-center justify-between">
           <button onClick={onBack} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
           <div className="text-[#F5F1E8] text-sm tracking-[0.25em]" style={F.display}>RITE</div>
-          <button onClick={() => shareCoven({ title: event.name, text: `${event.name} · ${event.date} on Coven`, path: `?event=${event.id}` })}
-            className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors" title="share this rite"><Share2 size={18} /></button>
+          <div className="flex items-center gap-1">
+            <button onClick={() => downloadICS(event)}
+              className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors" title="add to calendar"><Calendar size={18} /></button>
+            <button onClick={() => shareCoven({ title: event.name, text: `${event.name} · ${event.date} on Coven`, path: `?event=${event.id}` })}
+              className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors" title="share this rite"><Share2 size={18} /></button>
+          </div>
         </div>
       </div>
 
