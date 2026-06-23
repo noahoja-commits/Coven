@@ -56,23 +56,23 @@ export function EventDetail({ event, isGoing, onToggleRsvp, onBack, onOpenUser, 
       <div className="px-4 py-4 space-y-2 border-b border-[#1A1A1A]">
         {(event.venue || event.neighborhood) && (
           <div className="flex items-center gap-2 text-sm">
-            <MapPin size={14} className="text-[#A89968]" />
+            <MapPin size={14} className="text-[#C8102E]" />
             {event.venue && <span className="text-[#F5F1E8]" style={F.serif}>{event.venue}</span>}
             {event.neighborhood && <span className="text-[#6B6B6B]" style={F.ui}>· {event.neighborhood}</span>}
           </div>
         )}
         {event.time && (
           <div className="flex items-center gap-2 text-sm">
-            <Calendar size={14} className="text-[#A89968]" />
+            <Calendar size={14} className="text-[#C8102E]" />
             <span className="text-[#A8A29E]" style={F.mono}>{event.time}</span>
           </div>
         )}
         <div className="flex items-center gap-2 text-sm">
-          <Users size={14} className="text-[#A89968]" />
+          <Users size={14} className="text-[#C8102E]" />
           <span className="text-[#A8A29E]" style={F.mono}>{goingCount} going</span>
         </div>
         <button onClick={() => onOpenUser && onOpenUser(event.host)}
-          className="text-[10px] uppercase tracking-wider text-[#A89968] hover:text-[#C9A961]" style={F.ui}>
+          className="text-[10px] uppercase tracking-wider text-[#C8102E] hover:text-[#C9A961]" style={F.ui}>
           · hosted by {event.host} ·
         </button>
       </div>
@@ -95,7 +95,7 @@ export function EventDetail({ event, isGoing, onToggleRsvp, onBack, onOpenUser, 
 
       {/* Going list */}
       <div className="px-4 py-4 border-b border-[#1A1A1A]">
-        <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-3" style={F.scriptureSC}>· souls going ·</div>
+        <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E] mb-3" style={F.scriptureSC}>· souls going ·</div>
         {goingCount === 0 ? (
           <p className="text-[#6B6B6B] text-xs italic" style={F.serif}>· no one yet — be the first ·</p>
         ) : (

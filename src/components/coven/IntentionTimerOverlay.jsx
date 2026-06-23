@@ -54,7 +54,7 @@ export function IntentionTimerOverlay({ intention, onStart, onClear, onClose }) 
 
       <div className="sticky top-0 z-10 bg-[#050204]/95 backdrop-blur-md border-b border-[#A89968]/15 safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onClose} className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
+          <button onClick={onClose} className="text-[#C8102E] hover:text-[#C9A961] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
           <div className="text-[#C9A961] text-base tracking-[0.3em]" style={F.display}>THE WORKING</div>
           <span className="w-8" />
         </div>
@@ -64,7 +64,7 @@ export function IntentionTimerOverlay({ intention, onStart, onClear, onClose }) 
         {intention ? (
           // ── Active: the candle burns ──
           <div className="text-center animate-fade-in">
-            <div className="text-[#A89968]/60 text-[10px] uppercase tracking-[0.4em] mb-6" style={F.scriptureSC}>· the working is lit ·</div>
+            <div className="text-[#C8102E]/60 text-[10px] uppercase tracking-[0.4em] mb-6" style={F.scriptureSC}>· the working is lit ·</div>
 
             {/* Candle: a wax column that shortens as the intention burns down */}
             <div className="relative w-24 mx-auto mb-6 flex flex-col items-center justify-end" style={{ height: 240 }}>
@@ -78,12 +78,12 @@ export function IntentionTimerOverlay({ intention, onStart, onClear, onClose }) 
 
             <div className="text-[#F5F1E8] text-2xl mb-1" style={F.scripture}>{intention.name}</div>
             <div className="text-[#C9A961] text-4xl tabular-nums mb-2" style={F.mono}>{fmt(remaining)}</div>
-            <div className="text-[#A89968]/50 text-[11px] italic mb-8" style={F.scripture}>
+            <div className="text-[#C8102E]/50 text-[11px] italic mb-8" style={F.scripture}>
               {remaining > 0 ? 'hold the intention until the candle is spent.' : 'the working is complete.'}
             </div>
 
             <button onClick={() => onClear && onClear()}
-              className="px-5 py-2.5 border border-[#5B0F1A] text-[#A89968] hover:bg-[#5B0F1A]/20 text-[10px] uppercase tracking-[0.25em] transition-colors" style={F.ui}>
+              className="px-5 py-2.5 border border-[#5B0F1A] text-[#C8102E] hover:bg-[#5B0F1A]/20 text-[10px] uppercase tracking-[0.25em] transition-colors" style={F.ui}>
               extinguish
             </button>
           </div>
@@ -91,18 +91,18 @@ export function IntentionTimerOverlay({ intention, onStart, onClear, onClose }) 
           // ── Setup: name the working, pick a sigil + duration ──
           <div className="animate-fade-in">
             <div className="text-center mb-8">
-              <div className="text-[#A89968]/60 text-[10px] uppercase tracking-[0.4em]" style={F.scriptureSC}>· set an intention ·</div>
-              <p className="text-[#A89968]/50 text-xs italic mt-1" style={F.scripture}>
+              <div className="text-[#C8102E]/60 text-[10px] uppercase tracking-[0.4em]" style={F.scriptureSC}>· set an intention ·</div>
+              <p className="text-[#C8102E]/50 text-xs italic mt-1" style={F.scripture}>
                 name a working, light it, and let it burn.
               </p>
             </div>
 
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-1.5 block" style={F.scriptureSC}>· the working ·</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-1.5 block" style={F.scriptureSC}>· the working ·</label>
             <input value={name} onChange={e => setName(e.target.value.slice(0, 60))}
               placeholder="clarity · protection · release…"
               className="w-full bg-[#0F0F0F] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none p-3 text-[#F5F1E8] mb-5" style={F.serif} />
 
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2 block" style={F.scriptureSC}>· its sigil ·</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-2 block" style={F.scriptureSC}>· its sigil ·</label>
             <div className="grid grid-cols-5 gap-2 mb-5">
               {GLYPHS.map(g => (
                 <button key={g} onClick={() => setGlyph(g)}
@@ -110,7 +110,7 @@ export function IntentionTimerOverlay({ intention, onStart, onClear, onClose }) 
               ))}
             </div>
 
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2 block" style={F.scriptureSC}>· how long it burns ·</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-2 block" style={F.scriptureSC}>· how long it burns ·</label>
             <div className="grid grid-cols-2 gap-2 mb-8">
               {DURATIONS.map(d => (
                 <button key={d.ms} onClick={() => setDurMs(d.ms)}

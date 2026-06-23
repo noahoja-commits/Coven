@@ -21,16 +21,16 @@ export function AgeGate({ minAge = 18, label = 'this part of the coven', onPass,
     <div className="absolute inset-0 z-[60] flex items-center justify-center p-6 animate-fade-in"
       style={{ background: 'radial-gradient(ellipse at 50% 30%, #2A0710 0%, #0A0408 55%, #050204 100%)' }}>
       {onClose && (
-        <button onClick={onClose} className="absolute top-5 right-5 text-[#A89968]/60 hover:text-[#C9A961] safe-pt" aria-label="back"><X size={22} /></button>
+        <button onClick={onClose} className="absolute top-5 right-5 text-[#C8102E]/60 hover:text-[#C9A961] safe-pt" aria-label="back"><X size={22} /></button>
       )}
       <div className="relative w-full max-w-xs text-center">
-        <div className="text-[#A89968] text-[10px] uppercase tracking-[0.5em] mb-3" style={F.scriptureSC}>· the door asks ·</div>
+        <div className="text-[#C8102E] text-[10px] uppercase tracking-[0.5em] mb-3" style={F.scriptureSC}>· the door asks ·</div>
         <div className="text-[#C9A961] text-5xl mb-3" style={F.brand}>{minAge}+</div>
-        <p className="text-[#A89968]/80 text-sm italic mb-6" style={F.scripture}>
+        <p className="text-[#C8102E]/80 text-sm italic mb-6" style={F.scripture}>
           {label} is for those {minAge} and older. enter your date of birth to pass.
         </p>
 
-        <label className="block text-[10px] uppercase tracking-[0.3em] text-[#A89968]/70 mb-2" style={F.scriptureSC}>· date of birth ·</label>
+        <label className="block text-[10px] uppercase tracking-[0.3em] text-[#C8102E]/70 mb-2" style={F.scriptureSC}>· date of birth ·</label>
         <input type="date" value={dob} max="9999-12-31"
           onChange={(e) => { setDob(e.target.value); setDenied(false); }}
           className="w-full bg-[#0A0204] border border-[#5B0F1A]/40 focus:border-[#8B0000] outline-none p-3 text-[#F5F1E8] text-center"

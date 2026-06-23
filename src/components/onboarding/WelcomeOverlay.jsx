@@ -15,12 +15,12 @@ export function WelcomeOverlay({ handle = 'soul', onClose, onDropStatus, onFindS
       style={{ background: 'radial-gradient(ellipse at 50% 30%, #2A0710 0%, #0A0408 55%, #050204 100%)' }}>
       <div className="absolute inset-0 opacity-[0.04] mix-blend-overlay pointer-events-none"
         style={{ backgroundImage: 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><filter id=\'n\'><feTurbulence baseFrequency=\'0.85\'/></filter><rect width=\'200\' height=\'200\' filter=\'url(%23n)\'/></svg>")' }} />
-      <button onClick={onClose} className="absolute top-5 right-5 text-[#A89968]/60 hover:text-[#C9A961] safe-pt" aria-label="enter"><X size={22} /></button>
+      <button onClick={onClose} className="absolute top-5 right-5 text-[#C8102E]/60 hover:text-[#C9A961] safe-pt" aria-label="enter"><X size={22} /></button>
       <div className="relative w-full max-w-xs text-center">
-        <div className="text-[#A89968] text-[10px] uppercase tracking-[0.5em] mb-3" style={F.scriptureSC}>· welcome, {handle} ·</div>
+        <div className="text-[#C8102E] text-[10px] uppercase tracking-[0.5em] mb-3" style={F.scriptureSC}>· welcome, {handle} ·</div>
         <h1 className="text-[#C9A961] text-5xl mb-2" style={F.brand}>Coven</h1>
         <div className="mb-3"><RestrictedStamp /></div>
-        <p className="text-[#A89968]/80 text-sm italic mb-8" style={F.scripture}>
+        <p className="text-[#C8102E]/80 text-sm italic mb-8" style={F.scripture}>
           "you’ve arrived. the coven grows one soul at a time — start with a single rite."
         </p>
         <div className="space-y-2.5">
@@ -32,13 +32,13 @@ export function WelcomeOverlay({ handle = 'soul', onClose, onDropStatus, onFindS
                 <Icon size={18} className="text-[#C9A961] shrink-0" />
                 <span className="flex-1 min-w-0">
                   <span className="block text-[#F5F1E8] text-sm" style={F.ui}>{s.label}</span>
-                  <span className="block text-[10px] text-[#A89968]/60 italic" style={F.serif}>{s.sub}</span>
+                  <span className="block text-[10px] text-[#C8102E]/60 italic" style={F.serif}>{s.sub}</span>
                 </span>
               </button>
             );
           })}
         </div>
-        <button onClick={onClose} className="mt-6 text-[10px] uppercase tracking-[0.3em] text-[#6B6B6B] hover:text-[#A89968]" style={F.ui}>
+        <button onClick={onClose} className="mt-6 text-[10px] uppercase tracking-[0.3em] text-[#6B6B6B] hover:text-[#C8102E]" style={F.ui}>
           enter the coven →
         </button>
       </div>

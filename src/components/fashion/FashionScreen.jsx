@@ -158,7 +158,7 @@ export function FashionScreen({ shops = [], meId, onAddStore, onDeleteStore }) {
       {showStores && (
         <div className="px-3 mb-3">
           <div className="flex items-center justify-between px-1 mb-2">
-            <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.ui}>· stores the coven found ·</div>
+            <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.ui}>· stores the coven found ·</div>
             {meId && !adding && (
               <button onClick={() => setAdding(true)} className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-[#A8A29E] hover:text-[#C9A961]" style={F.ui}>
                 <Plus size={12} /> add a store

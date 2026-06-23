@@ -45,7 +45,7 @@ export function ProfileEditModal({ profile, meId, onSave, onClose }) {
       <div className="bg-[#0F0F0F] border border-[#2A2A2A] w-full sm:max-w-md sm:m-4 max-h-[90dvh] overflow-y-auto safe-pb animate-slide-up">
         <div className="sticky top-0 z-10 bg-[#0F0F0F] flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A]">
           <div>
-            <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· edit ·</span>
+            <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· edit ·</span>
             <h3 className="text-[#F5F1E8] text-lg leading-none mt-1" style={F.display}>YOUR PROFILE</h3>
           </div>
           <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
@@ -54,7 +54,7 @@ export function ProfileEditModal({ profile, meId, onSave, onClose }) {
         <div className="p-4 space-y-5">
           {/* Avatar photo */}
           <div>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2" style={F.scriptureSC}>· portrait ·</div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-2" style={F.scriptureSC}>· portrait ·</div>
             <input ref={fileRef} type="file" accept="image/*" onChange={onPickPhoto} className="hidden" />
             <div className="flex items-center gap-3">
               <button onClick={() => fileRef.current?.click()}
@@ -78,7 +78,7 @@ export function ProfileEditModal({ profile, meId, onSave, onClose }) {
 
           {/* Glyph (used when no photo) */}
           <div className={avatarUrl ? 'opacity-40' : ''}>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2" style={F.scriptureSC}>· your sigil ·</div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-2" style={F.scriptureSC}>· your sigil ·</div>
             <div className="grid grid-cols-6 gap-1.5 p-2 border border-[#1A1A1A] bg-[#0A0204]/60">
               {AVATAR_OPTIONS.map(a => (
                 <button key={a} onClick={() => setAvatar(a)}
@@ -92,7 +92,7 @@ export function ProfileEditModal({ profile, meId, onSave, onClose }) {
 
           {/* Decorations — border + banner */}
           <div>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2" style={F.scriptureSC}>· border ·</div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-2" style={F.scriptureSC}>· border ·</div>
             <div className="flex flex-wrap gap-1.5">
               {BORDERS.map(b => (
                 <button key={b.id} onClick={() => setBorder(b.id)}
@@ -106,7 +106,7 @@ export function ProfileEditModal({ profile, meId, onSave, onClose }) {
             </div>
           </div>
           <div>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2" style={F.scriptureSC}>· banner ·</div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-2" style={F.scriptureSC}>· banner ·</div>
             <div className="flex flex-wrap gap-1.5">
               {BANNERS.map(b => (
                 <button key={b.id} onClick={() => setBanner(b.id)}
@@ -126,7 +126,7 @@ export function ProfileEditModal({ profile, meId, onSave, onClose }) {
 
           {/* Handle */}
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968]" style={F.scriptureSC}>· handle ·</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.scriptureSC}>· handle ·</label>
             <input type="text" value={name} onChange={e => setName(e.target.value.slice(0, 30))}
               placeholder="your_handle"
               className="w-full mt-1.5 bg-[#0A0A0A] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none p-2.5 text-[#F5F1E8] text-base"
@@ -135,7 +135,7 @@ export function ProfileEditModal({ profile, meId, onSave, onClose }) {
 
           {/* Pronouns */}
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968]" style={F.scriptureSC}>· pronouns ·</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.scriptureSC}>· pronouns ·</label>
             <input type="text" value={pronouns} onChange={e => setPronouns(e.target.value.slice(0, 20))}
               placeholder="she / they"
               className="w-full mt-1.5 bg-[#0A0A0A] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none p-2.5 text-[#F5F1E8] text-sm"
@@ -144,7 +144,7 @@ export function ProfileEditModal({ profile, meId, onSave, onClose }) {
 
           {/* Bio */}
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968]" style={F.scriptureSC}>· bio ·</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.scriptureSC}>· bio ·</label>
             <textarea value={bio} onChange={e => setBio(e.target.value.slice(0, 140))}
               placeholder="velvet & venom · brooklyn"
               rows={3}
@@ -155,7 +155,7 @@ export function ProfileEditModal({ profile, meId, onSave, onClose }) {
 
           {/* Birthday */}
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968]" style={F.scriptureSC}>· born ·</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.scriptureSC}>· born ·</label>
             <input type="date" value={birthday} onChange={e => setBirthday(e.target.value)}
               className="w-full mt-1.5 bg-[#0A0A0A] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none p-2.5 text-[#F5F1E8] text-sm"
               style={F.mono} />
@@ -164,7 +164,7 @@ export function ProfileEditModal({ profile, meId, onSave, onClose }) {
 
           {/* Vibes */}
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968]" style={F.scriptureSC}>· vibes · ({tags.length}/6)</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.scriptureSC}>· vibes · ({tags.length}/6)</label>
             <div className="flex flex-wrap gap-1.5 mt-2">
               {VIBE_OPTIONS.map(v => (
                 <button key={v} onClick={() => toggleTag(v)}

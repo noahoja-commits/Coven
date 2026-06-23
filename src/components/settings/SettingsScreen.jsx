@@ -36,7 +36,7 @@ function Segmented({ value, onChange, options }) {
 function Section({ title, children }) {
   return (
     <div className="mb-6">
-      <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] px-4 pb-2" style={F.scriptureSC}>· {title} ·</div>
+      <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E] px-4 pb-2" style={F.scriptureSC}>· {title} ·</div>
       <div className="border-y border-[#1A1A1A] divide-y divide-[#1A1A1A]">{children}</div>
     </div>
   );
@@ -266,7 +266,7 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
         <div className="px-4 mt-4 space-y-2">
           {onRerunOnboarding && (
             <button onClick={onRerunOnboarding}
-              className="w-full py-3 text-[#A89968] text-xs uppercase tracking-[0.25em] border border-[#2A2A2A] hover:border-[#A89968]" style={F.ui}>
+              className="w-full py-3 text-[#C8102E] text-xs uppercase tracking-[0.25em] border border-[#2A2A2A] hover:border-[#A89968]" style={F.ui}>
               re-do onboarding
             </button>
           )}

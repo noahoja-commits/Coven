@@ -52,10 +52,10 @@ function MoonGlyph({ phase }) {
 function Row({ label, value, sub }) {
   return (
     <div className="flex items-baseline justify-between gap-3 px-4 py-3 border-b border-[#A89968]/15">
-      <span className="text-[#A89968]/70 text-[10px] uppercase tracking-[0.3em]" style={F.scriptureSC}>{label}</span>
+      <span className="text-[#C8102E]/70 text-[10px] uppercase tracking-[0.3em]" style={F.scriptureSC}>{label}</span>
       <div className="text-right">
         <div className="text-[#F5F1E8] text-base" style={F.scripture}>{value}</div>
-        {sub && <div className="text-[#A89968]/50 text-[10px]" style={F.mono}>{sub}</div>}
+        {sub && <div className="text-[#C8102E]/50 text-[10px]" style={F.mono}>{sub}</div>}
       </div>
     </div>
   );
@@ -111,7 +111,7 @@ export function EphemerisOverlay({ onClose, profile }) {
 
       <div className="sticky top-0 z-10 bg-[#050204]/95 backdrop-blur-md border-b border-[#A89968]/15 safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onClose} className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
+          <button onClick={onClose} className="text-[#C8102E] hover:text-[#C9A961] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
           <div className="text-[#C9A961] text-base tracking-[0.3em]" style={F.display}>EPHEMERIS</div>
           <span className="w-5" />
         </div>
@@ -119,7 +119,7 @@ export function EphemerisOverlay({ onClose, profile }) {
 
       <div className="relative px-4 pt-6 pb-12">
         <div className="text-center mb-2">
-          <div className="text-[#A89968]/60 text-[10px] uppercase tracking-[0.4em]" style={F.scriptureSC}>· tonight's sky ·</div>
+          <div className="text-[#C8102E]/60 text-[10px] uppercase tracking-[0.4em]" style={F.scriptureSC}>· tonight's sky ·</div>
           <div className="text-[#F5F1E8] text-sm mt-1 italic" style={F.scripture}>{dateStr}</div>
         </div>
 
@@ -128,7 +128,7 @@ export function EphemerisOverlay({ onClose, profile }) {
         </div>
         <div className="text-center mb-6">
           <h2 className="text-[#F5F1E8] text-2xl" style={F.brand}>{phase.name}</h2>
-          <div className="text-[#A89968]/60 text-[10px] uppercase tracking-[0.3em] mt-1" style={F.scriptureSC}>
+          <div className="text-[#C8102E]/60 text-[10px] uppercase tracking-[0.3em] mt-1" style={F.scriptureSC}>
             · {Math.round(phase.illum * 100)}% illuminated ·
           </div>
         </div>
@@ -141,7 +141,7 @@ export function EphemerisOverlay({ onClose, profile }) {
           {sign && <Row label="Your Sun" value={`${sign.glyph} ${sign.name.toLowerCase()}`} />}
         </div>
 
-        <p className="mt-10 text-center text-[#A89968]/40 text-[10px] italic max-w-xs mx-auto" style={F.scripture}>
+        <p className="mt-10 text-center text-[#C8102E]/40 text-[10px] italic max-w-xs mx-auto" style={F.scripture}>
           · as above, so below ·
         </p>
       </div>

@@ -40,7 +40,7 @@ export function OddityCompose({ meId, onClose, onCreate, kind = 'sale' }) {
     <div className="absolute inset-0 z-50 bg-[#0A0608] animate-fade-in flex flex-col">
       <div className="bg-black/60 backdrop-blur-md border-b border-[#5B0F1A]/40 safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={() => step > 1 ? setStep(step - 1) : onClose()} className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors">
+          <button onClick={() => step > 1 ? setStep(step - 1) : onClose()} className="text-[#C8102E] hover:text-[#C9A961] p-2 -m-1 transition-colors">
             <X size={20} />
           </button>
           <div className="text-[#C9A961] text-sm tracking-[0.3em]" style={F.scriptureSC}>{copy.head} — {step}/3</div>
@@ -54,10 +54,10 @@ export function OddityCompose({ meId, onClose, onCreate, kind = 'sale' }) {
         {step === 1 && (
           <div className="space-y-4">
             <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2 block" style={F.scriptureSC}>{copy.img}</label>
+              <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-2 block" style={F.scriptureSC}>{copy.img}</label>
               <input ref={fileRef} type="file" accept="image/*" onChange={onPickImage} className="hidden" />
               <button onClick={() => fileRef.current?.click()}
-                className="w-full aspect-[4/3] border border-dashed border-[#3F3F3F] hover:border-[#5B0F1A] flex flex-col items-center justify-center gap-2 text-[#A89968] overflow-hidden relative">
+                className="w-full aspect-[4/3] border border-dashed border-[#3F3F3F] hover:border-[#5B0F1A] flex flex-col items-center justify-center gap-2 text-[#C8102E] overflow-hidden relative">
                 {uploading ? <Loader2 size={28} className="animate-spin text-[#C9A961]" />
                   : data.image_url ? <img src={data.image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
                   : <><Camera size={28} /><span className="text-xs uppercase tracking-wider" style={F.ui}>tap to add</span></>}
@@ -68,12 +68,12 @@ export function OddityCompose({ meId, onClose, onCreate, kind = 'sale' }) {
               {error && <div className="text-[11px] text-[#8B0000] mt-1" style={F.ui}>{error}</div>}
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-1 block" style={F.scriptureSC}>· title ·</label>
+              <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-1 block" style={F.scriptureSC}>· title ·</label>
               <input value={data.title} onChange={e => setData({ ...data, title: e.target.value })}
                 placeholder={copy.title} className="w-full bg-[#0F0F0F] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none p-3 text-[#F5F1E8]" style={F.serif} />
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-1 block" style={F.scriptureSC}>· category ·</label>
+              <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-1 block" style={F.scriptureSC}>· category ·</label>
               <select value={data.category} onChange={e => setData({ ...data, category: e.target.value })}
                 className="w-full bg-[#0F0F0F] border border-[#2A2A2A] outline-none p-3 text-[#F5F1E8]" style={F.serif}>
                 {ODDITY_CATEGORIES.filter(c => c.id !== 'all').map(c => <option key={c.id} value={c.id} className="bg-[#0F0F0F]">{c.label}</option>)}
@@ -84,14 +84,14 @@ export function OddityCompose({ meId, onClose, onCreate, kind = 'sale' }) {
         {step === 2 && (
           <div className="space-y-4">
             <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-1 block" style={F.scriptureSC}>{copy.price}</label>
+              <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-1 block" style={F.scriptureSC}>{copy.price}</label>
               <input type="number" value={data.price} onChange={e => setData({ ...data, price: e.target.value })}
                 placeholder="0" className="w-full bg-[#0F0F0F] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none p-3 text-[#F5F1E8] text-2xl" style={F.mono} />
             </div>
             {/* terms + condition only make sense for a sale */}
             {kind === 'sale' && (<>
             <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2 block" style={F.scriptureSC}>· terms ·</label>
+              <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-2 block" style={F.scriptureSC}>· terms ·</label>
               <div className="grid grid-cols-3 gap-2">
                 {[{ id: 'firm', label: 'firm' }, { id: 'obo', label: 'or best offer' }, { id: 'trade', label: 'open to trades' }].map(p => (
                   <button key={p.id} onClick={() => setData({ ...data, priceMode: p.id })}
@@ -101,7 +101,7 @@ export function OddityCompose({ meId, onClose, onCreate, kind = 'sale' }) {
               </div>
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2 block" style={F.scriptureSC}>· condition ·</label>
+              <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-2 block" style={F.scriptureSC}>· condition ·</label>
               <div className="grid grid-cols-2 gap-2">
                 {Object.entries(CONDITION_LABELS).map(([k, v]) => (
                   <button key={k} onClick={() => setData({ ...data, condition: k })}
@@ -116,13 +116,13 @@ export function OddityCompose({ meId, onClose, onCreate, kind = 'sale' }) {
         {step === 3 && (
           <div className="space-y-4">
             <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-1 block" style={F.scriptureSC}>· description ·</label>
+              <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-1 block" style={F.scriptureSC}>· description ·</label>
               <textarea value={data.description} onChange={e => setData({ ...data, description: e.target.value })}
                 placeholder="size, condition details, what's included..."
                 className="w-full h-32 bg-[#0F0F0F] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none p-3 text-[#F5F1E8] resize-none" style={F.serif} />
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-1 block" style={F.scriptureSC}>· the story · optional ·</label>
+              <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-1 block" style={F.scriptureSC}>· the story · optional ·</label>
               <textarea value={data.storyBehind} onChange={e => setData({ ...data, storyBehind: e.target.value })}
                 placeholder="anything to share about this piece?"
                 className="w-full h-24 bg-[#0F0F0F] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none p-3 text-[#A8A29E] resize-none italic" style={F.serif} />

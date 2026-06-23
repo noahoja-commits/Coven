@@ -69,7 +69,7 @@ export function NotificationsPanel({ notifications, onClose, onMarkAllRead, onMa
             onMouseLeave={handlePressEnd}
             onTouchStart={handlePressStart}
             onTouchEnd={handlePressEnd}
-            className="text-[#A89968] text-[10px] uppercase tracking-wider"
+            className="text-[#C8102E] text-[10px] uppercase tracking-wider"
             style={F.ui}
             title="long press to mark all read">
             {unread > 0 ? `${unread} new` : '—'}
@@ -77,7 +77,7 @@ export function NotificationsPanel({ notifications, onClose, onMarkAllRead, onMa
         </div>
       </div>
       {unread > 0 && (
-        <div className="px-4 py-2 bg-[#5B0F1A]/10 border-b border-[#5B0F1A]/30 text-[10px] text-[#A89968] uppercase tracking-wider text-center" style={F.ui}>
+        <div className="px-4 py-2 bg-[#5B0F1A]/10 border-b border-[#5B0F1A]/30 text-[10px] text-[#C8102E] uppercase tracking-wider text-center" style={F.ui}>
           long-press "{unread} new" to mark all read
         </div>
       )}
@@ -114,7 +114,7 @@ export function NotificationsPanel({ notifications, onClose, onMarkAllRead, onMa
                   <div className="flex-1 min-w-0">
                     <p className="text-[#F5F1E8] text-sm leading-snug" style={F.serif}>
                       {n.user && <span style={F.ui}>{n.user} </span>}
-                      {extra > 0 && <span style={F.ui} className="text-[#A89968]">and {extra} {extra === 1 ? 'other' : 'others'} </span>}
+                      {extra > 0 && <span style={F.ui} className="text-[#C8102E]">and {extra} {extra === 1 ? 'other' : 'others'} </span>}
                       <span className="text-[#A8A29E]">{n.text}</span>
                     </p>
                     {n.target && <p className="text-[10px] text-[#6B6B6B] truncate mt-0.5" style={F.serif}>"{n.target}"</p>}

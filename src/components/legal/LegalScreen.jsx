@@ -101,7 +101,7 @@ export function LegalScreen({ initialDoc = 'terms', onBack }) {
           <div className="space-y-5">
             {active.sections.map((s, i) => (
               <div key={i}>
-                <h3 className="text-[#A89968] text-[11px] uppercase tracking-[0.2em] mb-1.5" style={F.scriptureSC}>{s.h}</h3>
+                <h3 className="text-[#C8102E] text-[11px] uppercase tracking-[0.2em] mb-1.5" style={F.scriptureSC}>{s.h}</h3>
                 {s.body.map((p, j) => (
                   <p key={j} className="text-[#A8A29E] text-sm leading-relaxed mb-2" style={F.serif}>{p}</p>
                 ))}

@@ -117,8 +117,8 @@ export function CommentsOverlay({ post, onClose, onComment, onReact, onReactComm
       <div className="border-t border-[#1A1A1A] bg-[#0A0A0A] px-3 py-2 pb-3">
         {replyingToComment && (
           <div className="flex items-center gap-2 px-2 py-1 mb-1 bg-[#5B0F1A]/10 border-l-2 border-[#5B0F1A]">
-            <CornerDownRight size={11} className="text-[#A89968]" />
-            <span className="text-[10px] uppercase tracking-wider text-[#A89968]" style={F.ui}>replying to {replyingToComment.user}</span>
+            <CornerDownRight size={11} className="text-[#C8102E]" />
+            <span className="text-[10px] uppercase tracking-wider text-[#C8102E]" style={F.ui}>replying to {replyingToComment.user}</span>
             <button onClick={() => setReplyTo(null)} className="ml-auto text-[#6B6B6B] hover:text-[#A8A29E] text-xs">×</button>
           </div>
         )}

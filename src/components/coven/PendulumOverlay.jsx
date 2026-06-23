@@ -46,16 +46,16 @@ export function PendulumOverlay({ onClose, onLog }) {
 
       <div className="sticky top-0 z-10 bg-[#050204]/95 backdrop-blur-md border-b border-[#A89968]/15 safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onClose} className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
+          <button onClick={onClose} className="text-[#C8102E] hover:text-[#C9A961] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
           <div className="text-[#C9A961] text-base tracking-[0.3em]" style={F.display}>PENDULUM</div>
-          <button onClick={reset} className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors" title="reset"><RotateCcw size={16} /></button>
+          <button onClick={reset} className="text-[#C8102E] hover:text-[#C9A961] p-2 -m-1 transition-colors" title="reset"><RotateCcw size={16} /></button>
         </div>
       </div>
 
       <div className="relative px-6 pt-8 pb-12">
         <div className="text-center mb-6">
-          <div className="text-[#A89968]/60 text-[10px] uppercase tracking-[0.4em]" style={F.scriptureSC}>· consult the line ·</div>
-          <p className="text-[#A89968]/50 text-xs italic mt-1 max-w-xs mx-auto" style={F.scripture}>
+          <div className="text-[#C8102E]/60 text-[10px] uppercase tracking-[0.4em]" style={F.scriptureSC}>· consult the line ·</div>
+          <p className="text-[#C8102E]/50 text-xs italic mt-1 max-w-xs mx-auto" style={F.scripture}>
             ask one yes-or-no question. the pendulum will answer.
           </p>
         </div>
@@ -111,7 +111,7 @@ export function PendulumOverlay({ onClose, onLog }) {
                 style={F.scripture}
               />
               <button onClick={ask} disabled={!question.trim() || swinging}
-                className="mt-3 w-full py-3 border border-[#A89968]/40 text-[#A89968] hover:border-[#C9A961] hover:text-[#C9A961] disabled:opacity-40 disabled:hover:border-[#A89968]/40 disabled:hover:text-[#A89968] text-xs uppercase tracking-[0.3em] transition-colors"
+                className="mt-3 w-full py-3 border border-[#A89968]/40 text-[#C8102E] hover:border-[#C9A961] hover:text-[#C9A961] disabled:opacity-40 disabled:hover:border-[#A89968]/40 disabled:hover:text-[#C8102E] text-xs uppercase tracking-[0.3em] transition-colors"
                 style={F.ui}>
                 {swinging ? '· the line moves ·' : 'ask'}
               </button>
@@ -120,12 +120,12 @@ export function PendulumOverlay({ onClose, onLog }) {
 
           {answer && (
             <div className="text-center">
-              <p className="text-[#A89968]/60 text-xs italic mb-3" style={F.scripture}>"{question}"</p>
+              <p className="text-[#C8102E]/60 text-xs italic mb-3" style={F.scripture}>"{question}"</p>
               <div className="text-7xl mb-2" style={{ color: answer.tone }}>{answer.glyph}</div>
               <div className="text-2xl tracking-[0.4em] uppercase mb-1" style={{ ...F.display, color: answer.tone }}>
                 {answer.label}
               </div>
-              <p className="text-[#A89968]/60 text-xs italic" style={F.scripture}>· {answer.detail} ·</p>
+              <p className="text-[#C8102E]/60 text-xs italic" style={F.scripture}>· {answer.detail} ·</p>
               <button onClick={reset}
                 className="mt-6 px-4 py-2 text-[10px] uppercase tracking-wider border border-[#2A2A2A] text-[#A8A29E] hover:border-[#A89968]" style={F.ui}>
                 ask again

@@ -29,7 +29,7 @@ export function NowPlayingModal({ current, onSave, onShare, onClose }) {
       <div className="bg-[#0F0F0F] border border-[#2A2A2A] w-full sm:max-w-md sm:m-4 animate-slide-up max-h-[90dvh] overflow-y-auto safe-pb">
         <div className="flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A]">
           <div>
-            <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· on rotation ·</span>
+            <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· on rotation ·</span>
             <h3 className="text-[#F5F1E8] text-lg leading-none mt-1" style={F.display}>WHAT YOU'RE SPINNING</h3>
           </div>
           <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
@@ -39,14 +39,14 @@ export function NowPlayingModal({ current, onSave, onShare, onClose }) {
             type in the track you're listening to — Coven doesn't read your music apps, this is yours to set and share.
           </p>
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968]" style={F.scriptureSC}>· artist ·</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.scriptureSC}>· artist ·</label>
             <input value={artist} onChange={e => setArtist(e.target.value.slice(0, 60))}
               placeholder="Drab Majesty"
               className="w-full mt-1.5 bg-[#0A0A0A] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none p-2.5 text-[#F5F1E8] text-sm"
               style={F.serif} />
           </div>
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968]" style={F.scriptureSC}>· track ·</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.scriptureSC}>· track ·</label>
             <input value={track} onChange={e => setTrack(e.target.value.slice(0, 80))}
               placeholder="the song on repeat"
               className="w-full mt-1.5 bg-[#0A0A0A] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none p-2.5 text-[#F5F1E8] text-sm italic"
@@ -54,7 +54,7 @@ export function NowPlayingModal({ current, onSave, onShare, onClose }) {
           </div>
           <button onClick={() => setLoop(l => !l)}
             className={`w-full flex items-center justify-between p-2.5 border transition-colors ${loop ? 'border-[#8B0000] bg-[#5B0F1A]/20' : 'border-[#2A2A2A] hover:border-[#5B0F1A]/60'}`}>
-            <span className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] flex items-center gap-1.5" style={F.ui}>↻ on repeat</span>
+            <span className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] flex items-center gap-1.5" style={F.ui}>↻ on repeat</span>
             <span className={`text-xs ${loop ? 'text-[#C9A961]' : 'text-[#6B6B6B]'}`} style={F.ui}>{loop ? 'looping' : 'off'}</span>
           </button>
         </div>
@@ -66,7 +66,7 @@ export function NowPlayingModal({ current, onSave, onShare, onClose }) {
           <button onClick={onClose}
             className="ml-auto px-3 py-2 text-[10px] uppercase tracking-wider border border-[#2A2A2A] text-[#A8A29E]" style={F.ui}>cancel</button>
           <button onClick={share} disabled={!artist.trim() && !track.trim()}
-            className="px-3 py-2 text-[10px] uppercase tracking-wider border border-[#A89968] text-[#A89968] hover:text-[#C9A961] hover:border-[#C9A961] flex items-center gap-1.5 disabled:opacity-40" style={F.ui}>
+            className="px-3 py-2 text-[10px] uppercase tracking-wider border border-[#A89968] text-[#C8102E] hover:text-[#C9A961] hover:border-[#C9A961] flex items-center gap-1.5 disabled:opacity-40" style={F.ui}>
             <Send size={11} /> share
           </button>
           <button onClick={save}

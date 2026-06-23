@@ -166,7 +166,7 @@ export function SearchOverlay({ posts = [], events = [], onClose, onOpenPost, on
             {results.library.map(t => (
               <button key={t.id} onClick={() => { onOpenLibrary && onOpenLibrary(t.id); onClose(); }}
                 className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-[#0F0F0F] text-left">
-                <BookOpen size={14} className="text-[#A89968] shrink-0" />
+                <BookOpen size={14} className="text-[#C8102E] shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="text-[#F5F1E8] text-sm" style={F.scripture}>{t.title}</div>
                   <div className="text-[10px] text-[#A8A29E]" style={F.serif}>{t.author}</div>
@@ -183,7 +183,7 @@ export function SearchOverlay({ posts = [], events = [], onClose, onOpenPost, on
 function Section({ title, children }) {
   return (
     <div>
-      <div className="px-4 py-2 bg-[#0F0F0F] text-[10px] uppercase tracking-[0.3em] text-[#A89968] sticky top-0" style={F.scriptureSC}>
+      <div className="px-4 py-2 bg-[#0F0F0F] text-[10px] uppercase tracking-[0.3em] text-[#C8102E] sticky top-0" style={F.scriptureSC}>
         · {title} ·
       </div>
       <div className="divide-y divide-[#1A1A1A]">{children}</div>

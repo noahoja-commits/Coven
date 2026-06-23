@@ -53,7 +53,7 @@ export function FloatingCat({ active = true }) {
         filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.7))',
       }}>
       <span style={{ display: 'inline-block', transform: `scaleX(${facing})` }} className={purr ? 'animate-pulse-slow' : ''}>🐈‍⬛</span>
-      {hungry && !purr && <span className="absolute -top-2 -right-1 text-[10px] text-[#A89968]/70">?</span>}
+      {hungry && !purr && <span className="absolute -top-2 -right-1 text-[10px] text-[#C8102E]/70">?</span>}
       {purr && (
         <span key={hearts} className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs animate-fade-in" style={{ animation: 'likeBurst 1.6s ease-out forwards' }}>🤍</span>
       )}

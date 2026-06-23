@@ -149,7 +149,7 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
         </div>
         {pendingDraft && !text && (
           <div className="px-4 py-2 bg-[#5B0F1A]/15 border-b border-[#5B0F1A]/30 flex items-center gap-3 text-[11px]" style={F.ui}>
-            <span className="flex-1 text-[#A89968]">you have an unsent draft.</span>
+            <span className="flex-1 text-[#C8102E]">you have an unsent draft.</span>
             <button onClick={restoreDraft} className="text-[#C9A961] uppercase tracking-wider hover:underline">restore</button>
             <button onClick={discardDraft} className="text-[#6B6B6B] hover:text-[#A8A29E] uppercase tracking-wider">discard</button>
           </div>
@@ -174,7 +174,7 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
             </div>
           )}
           {mediaKind === 'video' && (
-            <p className="mt-1.5 text-[10px] text-[#A89968]/70 italic" style={F.serif}>
+            <p className="mt-1.5 text-[10px] text-[#C8102E]/70 italic" style={F.serif}>
               heads up — camera videos can carry your location; Coven can't strip that from video yet.
             </p>
           )}
@@ -193,7 +193,7 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
                 </div>
               ))}
               {poll.options.length < 4 && (
-                <button onClick={addOption} className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-[#A89968] hover:text-[#C9A961]" style={F.ui}>
+                <button onClick={addOption} className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-[#C8102E] hover:text-[#C9A961]" style={F.ui}>
                   <Plus size={11} /> add option
                 </button>
               )}
@@ -231,7 +231,7 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
           <span className="ml-auto text-[10px] text-[#6B6B6B]" style={F.mono}>{text.length}</span>
         </div>
         {anonymous && (
-          <div className="px-4 py-2 bg-[#7B2CBF]/10 border-t border-[#7B2CBF]/30 text-[10px] text-[#A89968] text-center" style={F.serif}>
+          <div className="px-4 py-2 bg-[#7B2CBF]/10 border-t border-[#7B2CBF]/30 text-[10px] text-[#C8102E] text-center" style={F.serif}>
             · posted as <span className="text-[#7B2CBF]">anonymous · the confessor</span> ·
           </div>
         )}

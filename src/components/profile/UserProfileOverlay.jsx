@@ -69,7 +69,7 @@ export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], isF
         <Grain opacity={0.06} />
         <TarotFrame />
         {(() => { const a = arcanaFor(user.handle); return (
-          <div className="relative mb-3 text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.display}>{a.numeral} · {a.name}</div>
+          <div className="relative mb-3 text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.display}>{a.numeral} · {a.name}</div>
         ); })()}
         <div className="relative flex items-start gap-4">
           <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#3B0A12] to-[#0A0A0A] border border-[#3F3F3F] flex items-center justify-center text-3xl shrink-0"
@@ -118,7 +118,7 @@ export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], isF
           <button onClick={() => { if (profile?.id && confirm(`Block @${user.handle}? You won't see each other.`)) onBlock && onBlock(profile.id); }}
             className="text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#8B0000] transition-colors" style={F.ui}>⛒ block</button>
           <button onClick={() => { if (profile?.id) onReport && onReport(profile.id); }}
-            className="text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#A89968] transition-colors" style={F.ui}>⚑ report</button>
+            className="text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#C8102E] transition-colors" style={F.ui}>⚑ report</button>
         </div>
       </div>
 

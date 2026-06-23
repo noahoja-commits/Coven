@@ -40,23 +40,23 @@ export function LibraryOverlay({ onClose, onOpenText }) {
         style={{ backgroundImage: 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><filter id=\'n\'><feTurbulence baseFrequency=\'0.85\'/></filter><rect width=\'200\' height=\'200\' filter=\'url(%23n)\'/></svg>")' }} />
       <div className="absolute top-0 inset-x-0 z-10 bg-black/60 backdrop-blur-md border-b border-[#5C3A1A]/40 safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onClose} className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors"><X size={20} /></button>
+          <button onClick={onClose} className="text-[#C8102E] hover:text-[#C9A961] p-2 -m-1 transition-colors"><X size={20} /></button>
           <div className="text-[#C9A961] text-base tracking-[0.3em]" style={F.scriptureSC}>THE LIBRARY</div>
-          <BookOpen size={18} className="text-[#A89968]" />
+          <BookOpen size={18} className="text-[#C8102E]" />
         </div>
       </div>
       <div className="absolute inset-0 pt-[60px] pb-8 overflow-y-auto safe-pb">
         <div className="px-4 py-6 text-center">
-          <div className="text-[#A89968] text-[10px] uppercase tracking-[0.4em] mb-3" style={F.scriptureSC}>· of the wisdoms gathered ·</div>
+          <div className="text-[#C8102E] text-[10px] uppercase tracking-[0.4em] mb-3" style={F.scriptureSC}>· of the wisdoms gathered ·</div>
           <h1 className="text-[#C9A961] text-3xl mb-2" style={F.scripture}>The Library</h1>
-          <p className="text-[#A89968]/80 text-sm italic max-w-xs mx-auto" style={F.scripture}>"sacred and profane texts. read freely. tend the marginalia. the dead speak through these pages."</p>
+          <p className="text-[#C8102E]/80 text-sm italic max-w-xs mx-auto" style={F.scripture}>"sacred and profane texts. read freely. tend the marginalia. the dead speak through these pages."</p>
         </div>
         <div className="px-4 grid grid-cols-2 gap-4 pb-12">
           {TEXTS.map(t => (
             <button key={t.id} onClick={() => onOpenText(t.id)} className="group text-left">
               <CoverArt kind={t.cover} sigil={t.sigil} glyph={t.glyph} />
               <div className="mt-2 text-[#C9A961] text-xs leading-tight" style={F.scriptureSC}>{t.shortTitle.toUpperCase()}</div>
-              <div className="text-[#A89968]/70 text-[10px] mt-0.5" style={F.scripture}>{t.author}</div>
+              <div className="text-[#C8102E]/70 text-[10px] mt-0.5" style={F.scripture}>{t.author}</div>
             </button>
           ))}
         </div>

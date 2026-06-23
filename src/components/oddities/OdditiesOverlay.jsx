@@ -51,7 +51,7 @@ function OddityCard({ item, onOpen }) {
         <div className="p-2.5 bg-[#0F0F0F]">
           <div className="flex items-baseline justify-between gap-2 mb-1">
             <span className="text-[#F5F1E8] text-base" style={F.mono}>${item.price}</span>
-            <span className="text-[9px] text-[#A89968] uppercase tracking-wider" style={F.ui}>{CONDITION_LABELS[item.condition]}</span>
+            <span className="text-[9px] text-[#C8102E] uppercase tracking-wider" style={F.ui}>{CONDITION_LABELS[item.condition]}</span>
           </div>
           <p className="text-[#A8A29E] text-xs leading-tight line-clamp-2" style={F.serif}>{item.title}</p>
         </div>
@@ -73,7 +73,7 @@ function UserOddityCard({ item, onOpen }) {
         <div className="p-2.5 bg-[#0F0F0F]">
           <div className="flex items-baseline justify-between gap-2 mb-1">
             <span className="text-[#F5F1E8] text-base" style={F.mono}>${item.price || '—'}</span>
-            <span className="text-[9px] text-[#A89968] uppercase tracking-wider" style={F.ui}>{item.priceMode}</span>
+            <span className="text-[9px] text-[#C8102E] uppercase tracking-wider" style={F.ui}>{item.priceMode}</span>
           </div>
           <p className="text-[#A8A29E] text-xs leading-tight line-clamp-2" style={F.serif}>{item.title}</p>
         </div>
@@ -115,7 +115,7 @@ function MarketplaceTab({ onOpenOddity, onCompose, listings = [] }) {
 function WantedTab({ items, onOpenOddity, onCompose }) {
   return (
     <div className="px-4 pb-12">
-      <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-3" style={F.scriptureSC}>· what the coven is seeking ·</div>
+      <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E] mb-3" style={F.scriptureSC}>· what the coven is seeking ·</div>
       {items.length === 0 ? (
         <div className="py-10 text-center text-[#6B6B6B] text-xs italic" style={F.serif}>no one is seeking anything yet.</div>
       ) : (
@@ -131,7 +131,7 @@ function WantedTab({ items, onOpenOddity, onCompose }) {
 function ParlourTab({ items, onOpenOddity, onCompose }) {
   return (
     <div className="px-4 pb-12">
-      <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-1" style={F.scriptureSC}>· the parlour ·</div>
+      <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E] mb-1" style={F.scriptureSC}>· the parlour ·</div>
       <p className="text-[10px] text-[#6B6B6B] italic mb-3" style={F.serif}>commissions from the coven's artists — tattooers, painters, seamstresses.</p>
       {items.length === 0 ? (
         <div className="py-10 text-center text-[#6B6B6B]" style={F.serif}>
@@ -159,14 +159,14 @@ function ShopsTab({ shops = [], meId, onAddShop, onDeleteShop }) {
   };
   return (
     <div className="px-4 pb-12">
-      <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-3" style={F.scriptureSC}>· the merchants ·</div>
+      <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E] mb-3" style={F.scriptureSC}>· the merchants ·</div>
       {shops.length === 0 ? (
         <div className="py-8 text-center text-[#6B6B6B] text-xs italic" style={F.serif}>no shops listed yet. add yours.</div>
       ) : (
         <div className="space-y-2 mb-3">
           {shops.map(s => (
             <div key={s.id} className="border border-[#2A2A2A] bg-[#0F0F0F] p-3 flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-[#A89968]" style={F.display}>☩</div>
+              <div className="w-10 h-10 bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-[#C8102E]" style={F.display}>☩</div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline justify-between gap-2">
                   {s.url ? (
@@ -174,7 +174,7 @@ function ShopsTab({ shops = [], meId, onAddShop, onDeleteShop }) {
                   ) : (
                     <h4 className="text-[#F5F1E8] text-sm" style={F.display}>{s.name.toUpperCase()}</h4>
                   )}
-                  {s.verified && <span className="text-[9px] text-[#A89968]" style={F.ui}>✓ verified</span>}
+                  {s.verified && <span className="text-[9px] text-[#C8102E]" style={F.ui}>✓ verified</span>}
                 </div>
                 <div className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>{[s.kind, s.neighborhood].filter(Boolean).join(' · ')}</div>
                 {s.blurb && <div className="text-[11px] text-[#A8A29E] italic mt-0.5 truncate" style={F.serif}>{s.blurb}</div>}
@@ -224,10 +224,10 @@ export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, listings = [
       <div className="relative h-full flex flex-col">
         <div className="bg-black/60 backdrop-blur-md border-b border-[#5B0F1A]/40 safe-pt">
           <div className="px-4 h-[60px] flex items-center justify-between">
-            <button onClick={onClose} className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors"><X size={20} /></button>
+            <button onClick={onClose} className="text-[#C8102E] hover:text-[#C9A961] p-2 -m-1 transition-colors"><X size={20} /></button>
             <div className="text-[#C9A961] text-base tracking-[0.3em]" style={F.scriptureSC}>ODDITIES</div>
             <button onClick={() => { setTab('market'); setSearchOpen(o => !o); if (searchOpen) setQuery(''); }}
-              className={`p-2 -m-1 transition-colors ${searchOpen ? 'text-[#C9A961]' : 'text-[#A89968] hover:text-[#C9A961]'}`}><Search size={18} /></button>
+              className={`p-2 -m-1 transition-colors ${searchOpen ? 'text-[#C9A961]' : 'text-[#C8102E] hover:text-[#C9A961]'}`}><Search size={18} /></button>
           </div>
           {searchOpen && (
             <div className="px-4 pb-3">
@@ -253,9 +253,9 @@ export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, listings = [
         <div className="flex-1 overflow-y-auto pt-3 safe-pb">
           {tab === 'market' && (<>
             <div className="px-4 pt-2 pb-3 text-center">
-              <div className="text-[#A89968] text-[10px] uppercase tracking-[0.4em] mb-2" style={F.scriptureSC}>· of curiosities & wares ·</div>
+              <div className="text-[#C8102E] text-[10px] uppercase tracking-[0.4em] mb-2" style={F.scriptureSC}>· of curiosities & wares ·</div>
               <h1 className="text-[#C9A961] text-2xl mb-1" style={F.scripture}>The Marketplace</h1>
-              <p className="text-[#A89968]/80 text-[11px] italic" style={F.scripture}>"objects with stories, sold by those who held them."</p>
+              <p className="text-[#C8102E]/80 text-[11px] italic" style={F.scripture}>"objects with stories, sold by those who held them."</p>
             </div>
             <MarketplaceTab onOpenOddity={onOpenOddity} onCompose={() => onCompose('sale')} listings={wares} />
           </>)}

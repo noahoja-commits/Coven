@@ -10,7 +10,7 @@ const COVERS = [
 ];
 
 const field = 'w-full p-2.5 bg-[#0A0A0A] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none text-[#F5F1E8] text-sm';
-const label = 'text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-1.5 block';
+const label = 'text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-1.5 block';
 
 export function CreateEventModal({ onCreate, onClose }) {
   const [name, setName] = useState('');
@@ -105,7 +105,7 @@ export function CreateEventModal({ onCreate, onClose }) {
               ))}
             </div>
             {ageRestriction !== 'all' && (
-              <p className="text-[10px] text-[#A89968]/60 italic mt-1.5" style={F.serif}>guests confirm their age at the door.</p>
+              <p className="text-[10px] text-[#C8102E]/60 italic mt-1.5" style={F.serif}>guests confirm their age at the door.</p>
             )}
           </div>
 

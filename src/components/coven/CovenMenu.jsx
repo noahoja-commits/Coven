@@ -20,14 +20,14 @@ export function CovenMenu({ onClose, onOpen }) {
       style={{ background: 'radial-gradient(ellipse at 50% 50%, #14080C 0%, #050204 70%)' }}>
       <div className="absolute inset-0 opacity-[0.04] mix-blend-overlay pointer-events-none"
         style={{ backgroundImage: 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><filter id=\'n\'><feTurbulence baseFrequency=\'0.85\'/></filter><rect width=\'200\' height=\'200\' filter=\'url(%23n)\'/></svg>")' }} />
-      <button onClick={onClose} className="absolute top-4 right-4 z-20 text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors safe-pt"><X size={20} /></button>
+      <button onClick={onClose} className="absolute top-4 right-4 z-20 text-[#C8102E] hover:text-[#C9A961] p-2 -m-1 transition-colors safe-pt"><X size={20} /></button>
       {/* start-aligned + padded (NOT justify-center) so all 9 doors scroll into
           reach — centering a taller-than-viewport column clips the top/bottom. */}
       <div className="absolute inset-0 flex flex-col items-center px-6 py-14 safe-pt safe-pb overflow-y-auto">
         <div className="text-center mb-8 animate-fade-in">
-          <div className="text-[#A89968] text-[10px] uppercase tracking-[0.5em] mb-3" style={F.scriptureSC}>· enter the ·</div>
+          <div className="text-[#C8102E] text-[10px] uppercase tracking-[0.5em] mb-3" style={F.scriptureSC}>· enter the ·</div>
           <h1 className="text-[#C9A961] text-5xl mb-3" style={F.brand}>Coven</h1>
-          <p className="text-[#A89968]/70 text-sm italic max-w-xs mx-auto" style={F.scripture}>"choose your door."</p>
+          <p className="text-[#C8102E]/70 text-sm italic max-w-xs mx-auto" style={F.scripture}>"choose your door."</p>
         </div>
         <div className="w-full max-w-sm space-y-2.5">
           {PORTALS.map(p => {
@@ -43,13 +43,13 @@ export function CovenMenu({ onClose, onOpen }) {
                     <h3 className="text-[#F5F1E8] text-base" style={F.scripture}>{p.name}</h3>
                     {p.soon && <span className="text-[8px] uppercase tracking-wider text-[#5B0F1A]" style={F.ui}>soon</span>}
                   </div>
-                  <p className="text-[#A89968]/70 text-[11px] italic" style={F.scripture}>{p.desc}</p>
+                  <p className="text-[#C8102E]/70 text-[11px] italic" style={F.scripture}>{p.desc}</p>
                 </div>
               </button>
             );
           })}
         </div>
-        <div className="mt-8 text-[#A89968]/40 text-xs text-center" style={F.scripture}>· more doors will open ·</div>
+        <div className="mt-8 text-[#C8102E]/40 text-xs text-center" style={F.scripture}>· more doors will open ·</div>
       </div>
     </div>
   );

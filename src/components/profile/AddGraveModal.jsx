@@ -29,14 +29,14 @@ export function AddGraveModal({ onSave, onClose }) {
         </div>
         <div className="p-4 space-y-4">
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968]" style={F.scriptureSC}>· name ·</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.scriptureSC}>· name ·</label>
             <input value={name} onChange={e => setName(e.target.value.slice(0, 40))}
               placeholder="who or what"
               className="w-full mt-1.5 bg-[#0A0A0A] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none p-2.5 text-[#F5F1E8] text-base"
               style={F.display} />
           </div>
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968]" style={F.scriptureSC}>· kind ·</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.scriptureSC}>· kind ·</label>
             <div className="flex flex-wrap gap-1.5 mt-1.5">
               {KINDS.map(k => (
                 <button key={k} onClick={() => setKind(k)}
@@ -46,14 +46,14 @@ export function AddGraveModal({ onSave, onClose }) {
             </div>
           </div>
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968]" style={F.scriptureSC}>· dates ·</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.scriptureSC}>· dates ·</label>
             <input value={dates} onChange={e => setDates(e.target.value.slice(0, 40))}
               placeholder="2021 — 2024"
               className="w-full mt-1.5 bg-[#0A0A0A] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none p-2.5 text-[#F5F1E8] text-sm"
               style={F.mono} />
           </div>
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#A89968]" style={F.scriptureSC}>· epitaph ·</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.scriptureSC}>· epitaph ·</label>
             <textarea value={epitaph} onChange={e => setEpitaph(e.target.value.slice(0, 140))}
               placeholder="what it was. how it ended."
               rows={3}

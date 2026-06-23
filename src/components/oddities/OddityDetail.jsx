@@ -16,10 +16,10 @@ export function OddityDetail({ item, onBack, onWhisper, onOpenUser }) {
       <div className="absolute inset-0 overflow-y-auto pb-32 safe-pb">
         <div className="absolute top-0 inset-x-0 z-10 bg-black/60 backdrop-blur-md border-b border-[#5B0F1A]/40 safe-pt">
           <div className="px-4 h-[60px] flex items-center justify-between">
-            <button onClick={onBack} className="text-[#A89968] hover:text-[#C9A961] flex items-center gap-1 p-2 -m-1 transition-colors" style={F.ui}>
+            <button onClick={onBack} className="text-[#C8102E] hover:text-[#C9A961] flex items-center gap-1 p-2 -m-1 transition-colors" style={F.ui}>
               <ChevronLeft size={20} /><span className="text-xs uppercase tracking-wider">oddities</span>
             </button>
-            <button onClick={share} className="text-[#A89968] hover:text-[#C9A961] p-2 -m-1 transition-colors" title="share"><Share2 size={18} /></button>
+            <button onClick={share} className="text-[#C8102E] hover:text-[#C9A961] p-2 -m-1 transition-colors" title="share"><Share2 size={18} /></button>
           </div>
         </div>
         <div className="pt-[60px] relative">
@@ -28,7 +28,7 @@ export function OddityDetail({ item, onBack, onWhisper, onOpenUser }) {
             <h1 className="text-[#F5F1E8] text-xl mb-1" style={F.display}>{item.title}</h1>
             <div className="flex items-baseline gap-3 mb-3">
               <span className="text-[#C9A961] text-3xl" style={F.mono}>${item.price}</span>
-              <span className="text-[10px] uppercase tracking-wider text-[#A89968]" style={F.ui}>{PRICE_MODE[item.priceMode] || 'firm'}</span>
+              <span className="text-[10px] uppercase tracking-wider text-[#C8102E]" style={F.ui}>{PRICE_MODE[item.priceMode] || 'firm'}</span>
             </div>
             <div className="flex items-center gap-3 text-[10px] uppercase tracking-wider text-[#A8A29E] mb-4" style={F.ui}>
               <span className="px-2 py-0.5 border border-[#2A2A2A]">{CONDITION_LABELS[item.condition] || item.condition}</span>
@@ -37,7 +37,7 @@ export function OddityDetail({ item, onBack, onWhisper, onOpenUser }) {
             {item.description && <p className="text-[#F5F1E8] text-base leading-relaxed mb-4" style={F.serif}>{item.description}</p>}
             {item.storyBehind && (
               <div className="mb-4 p-3 bg-[#5B0F1A]/10 border-l-2 border-[#5B0F1A]/50">
-                <div className="text-[10px] text-[#A89968] uppercase tracking-[0.2em] mb-1" style={F.scriptureSC}>· the story ·</div>
+                <div className="text-[10px] text-[#C8102E] uppercase tracking-[0.2em] mb-1" style={F.scriptureSC}>· the story ·</div>
                 <p className="text-[#A8A29E] text-sm italic leading-relaxed" style={F.serif}>"{item.storyBehind}"</p>
               </div>
             )}
@@ -48,7 +48,7 @@ export function OddityDetail({ item, onBack, onWhisper, onOpenUser }) {
                   <div className="text-[#F5F1E8] text-sm" style={F.ui}>{seller.user}</div>
                   <div className="text-[10px] text-[#6B6B6B]" style={F.ui}>{item.mine ? 'your listing' : 'seller'} · posted {item.posted}</div>
                 </div>
-                <span className="text-[#A89968] text-xs uppercase tracking-wider px-3 py-1.5 border border-[#2A2A2A]" style={F.ui}>profile</span>
+                <span className="text-[#C8102E] text-xs uppercase tracking-wider px-3 py-1.5 border border-[#2A2A2A]" style={F.ui}>profile</span>
               </button>
             </div>
           </div>

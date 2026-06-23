@@ -26,6 +26,10 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: '/index.html',
+        // Never serve the index.html navigation fallback for hashed build assets — if a
+        // precache is mid-update, an asset request must 404/network, never return HTML
+        // (which black-screens the app via a CSS/JS MIME mismatch). Defense-in-depth.
+        navigateFallbackDenylist: [/^\/assets\//, /\.[a-f0-9]{8}\.(css|js)$/, /^\/sw-push\.js$/],
         // Load our push/notificationclick handlers into the generated SW.
         importScripts: ['/sw-push.js'],
         // Precache only the static shell. NEVER cache Supabase auth/API/realtime —

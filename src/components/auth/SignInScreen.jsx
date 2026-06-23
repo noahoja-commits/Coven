@@ -74,7 +74,7 @@ export function SignInScreen() {
         ) : (
           <form onSubmit={submit} className="w-full max-w-xs animate-fade-in">
             {isReset ? (
-              <div className="text-[10px] uppercase tracking-[0.3em] text-[#A89968] mb-4" style={F.scriptureSC}>· reset password ·</div>
+              <div className="text-[10px] uppercase tracking-[0.3em] text-[#C8102E] mb-4" style={F.scriptureSC}>· reset password ·</div>
             ) : (
               <div className="flex border border-[#2A2A2A] mb-5">
                 <button type="button" onClick={() => { setMode('in'); setError(''); }}
@@ -143,8 +143,8 @@ export function SignInScreen() {
             {!isReset && (
               <p className="mt-7 text-[10px] leading-relaxed text-[#6B6B6B]" style={F.ui}>
                 by continuing you agree to our{' '}
-                <button type="button" onClick={() => setLegal('terms')} className="text-[#A89968] underline">Terms</button>{' '}and{' '}
-                <button type="button" onClick={() => setLegal('privacy')} className="text-[#A89968] underline">Privacy Policy</button>.
+                <button type="button" onClick={() => setLegal('terms')} className="text-[#C8102E] underline">Terms</button>{' '}and{' '}
+                <button type="button" onClick={() => setLegal('privacy')} className="text-[#C8102E] underline">Privacy Policy</button>.
               </p>
             )}
           </form>

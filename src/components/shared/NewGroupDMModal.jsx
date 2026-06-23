@@ -28,7 +28,7 @@ export function NewGroupDMModal({ people = [], onCreate, onClose }) {
       <div className="bg-[#0F0F0F] border border-[#2A2A2A] w-full sm:max-w-md sm:m-4 max-h-[90dvh] flex flex-col animate-slide-up safe-pb">
         <div className="flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A]">
           <div>
-            <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] flex items-center gap-1" style={F.scriptureSC}>
+            <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E] flex items-center gap-1" style={F.scriptureSC}>
               <Users size={11} /> · new gathering ·
             </span>
             <h3 className="text-[#F5F1E8] text-lg leading-none mt-1" style={F.display}>WHISPER CIRCLE</h3>
@@ -42,7 +42,7 @@ export function NewGroupDMModal({ people = [], onCreate, onClose }) {
             style={F.serif} />
         </div>
         <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-1">
-          <div className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2" style={F.scriptureSC}>
+          <div className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-2" style={F.scriptureSC}>
             · who you follow · {selected.size} chosen ·
           </div>
           {candidates.length === 0 && (

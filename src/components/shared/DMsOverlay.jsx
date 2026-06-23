@@ -88,7 +88,7 @@ export function DMsOverlay({ conversations = [], onClose, onOpenConversation, on
                 </div>
               </button>
               <button onClick={(e) => { e.stopPropagation(); onBury && onBury(c.id); }}
-                className="shrink-0 px-4 flex items-center text-[#5B5B5B] hover:text-[#A89968] opacity-70 group-hover:opacity-100 transition-opacity"
+                className="shrink-0 px-4 flex items-center text-[#5B5B5B] hover:text-[#C8102E] opacity-70 group-hover:opacity-100 transition-opacity"
                 title={showBuried ? 'restore' : 'bury'} aria-label={showBuried ? 'restore' : 'bury'}>
                 <Archive size={14} />
               </button>

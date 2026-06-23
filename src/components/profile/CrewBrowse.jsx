@@ -33,13 +33,13 @@ export function CrewBrowse({ crews = [], busy = {}, onJoin, onCreate, onOpen, on
 
       {creating && (
         <div className="px-4 py-4 border-b border-[#1A1A1A] bg-[#0F0F0F] space-y-3">
-          <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· conjure a circle ·</div>
+          <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· conjure a circle ·</div>
           <input value={name} onChange={e => setName(e.target.value)} placeholder="crew name"
             className="w-full bg-[#0A0A0A] border border-[#2A2A2A] px-3 py-2 text-[#F5F1E8] text-sm placeholder-[#5B5B5B] focus:border-[#5B0F1A] outline-none" style={F.display} />
           <div className="flex flex-wrap gap-1.5">
             {GLYPHS.map((g, i) => (
               <button key={i} onClick={() => setGlyph(g)}
-                className={`w-9 h-9 border flex items-center justify-center text-lg ${glyph === g ? 'border-[#8B0000] bg-[#8B0000]/15 text-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A89968]'}`}>{g}</button>
+                className={`w-9 h-9 border flex items-center justify-center text-lg ${glyph === g ? 'border-[#8B0000] bg-[#8B0000]/15 text-[#F5F1E8]' : 'border-[#2A2A2A] text-[#C8102E]'}`}>{g}</button>
             ))}
           </div>
           <textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder="what gathers here…" rows={2}
@@ -64,7 +64,7 @@ export function CrewBrowse({ crews = [], busy = {}, onJoin, onCreate, onOpen, on
           return (
             <div key={c.id} className="px-4 py-4 flex items-start gap-3">
               <button onClick={() => isMember && onOpen && onOpen(c.id)}
-                className="w-12 h-12 shrink-0 border border-[#2A2A2A] flex items-center justify-center text-[#A89968] text-xl">
+                className="w-12 h-12 shrink-0 border border-[#2A2A2A] flex items-center justify-center text-[#C8102E] text-xl">
                 {c.glyph}
               </button>
               <div className="flex-1 min-w-0">

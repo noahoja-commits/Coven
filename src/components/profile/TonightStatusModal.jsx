@@ -69,7 +69,7 @@ export function TonightStatusModal({ current, onSave, onClose }) {
           />
 
           <div className="mt-4">
-            <div className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] mb-2" style={F.ui}>· quick fills ·</div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-2" style={F.ui}>· quick fills ·</div>
             <div className="flex flex-wrap gap-1.5">
               {PROMPTS.map(p => (
                 <button key={p} onClick={() => setText(p)}

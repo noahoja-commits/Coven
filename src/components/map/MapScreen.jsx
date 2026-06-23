@@ -122,7 +122,7 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], onOpenUser,
           {/* Empty state — only when no other souls are out */}
           {pins.length === 0 && (
             <div className="absolute top-14 left-1/2 -translate-x-1/2 text-center px-8">
-              <div className="text-[10px] uppercase tracking-[0.3em] text-[#A89968]/70 bg-black/50 backdrop-blur-sm px-3 py-1.5 border border-[#2A2A2A]" style={F.ui}>
+              <div className="text-[10px] uppercase tracking-[0.3em] text-[#C8102E]/70 bg-black/50 backdrop-blur-sm px-3 py-1.5 border border-[#2A2A2A]" style={F.ui}>
                 · the streets are quiet ·
               </div>
               {!ghost && (

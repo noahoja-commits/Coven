@@ -24,10 +24,10 @@ export function DreamJournalModal({ dreams = [], onAdd, onRemove, onClose }) {
       <div className="bg-[#0F0F0F] border border-[#2A2A2A] w-full sm:max-w-md sm:m-4 max-h-[90dvh] flex flex-col animate-slide-up safe-pb">
         <div className="flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A]">
           <div>
-            <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] flex items-center gap-1" style={F.scriptureSC}>
+            <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E] flex items-center gap-1" style={F.scriptureSC}>
               <Lock size={11} /> · only you ·
             </span>
-            <h3 className="text-[#F5F1E8] text-lg leading-none mt-1 flex items-center gap-2" style={F.display}><Moon size={15} className="text-[#A89968]" /> DREAM JOURNAL</h3>
+            <h3 className="text-[#F5F1E8] text-lg leading-none mt-1 flex items-center gap-2" style={F.display}><Moon size={15} className="text-[#C8102E]" /> DREAM JOURNAL</h3>
           </div>
           <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
         </div>

@@ -73,7 +73,7 @@ export function VenueMapEditor({ event, me, onClose, onSaved }) {
       <div className="p-4 space-y-5">
         {/* Doors time */}
         <div>
-          <label className="block text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-1.5" style={F.scriptureSC}>doors / start time</label>
+          <label className="block text-[10px] uppercase tracking-[0.25em] text-[#C8102E] mb-1.5" style={F.scriptureSC}>doors / start time</label>
           <input type="datetime-local" value={startsAt} onChange={e => setStartsAt(e.target.value)}
             className="w-full bg-[#0F0F0F] border border-[#2A2A2A] px-3 py-2 text-[#F5F1E8] text-sm focus:border-[#5B0F1A] outline-none" style={F.ui} />
           <p className="text-[10px] text-[#6B6B6B] mt-1 italic" style={F.serif}>festival mode opens for ticket holders 30 min before this.</p>
@@ -81,7 +81,7 @@ export function VenueMapEditor({ event, me, onClose, onSaved }) {
 
         {/* Image */}
         <div>
-          <label className="block text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-1.5" style={F.scriptureSC}>map image</label>
+          <label className="block text-[10px] uppercase tracking-[0.25em] text-[#C8102E] mb-1.5" style={F.scriptureSC}>map image</label>
           <input ref={fileRef} type="file" accept="image/*" onChange={onPickFile} className="hidden" />
           <button onClick={() => fileRef.current?.click()} disabled={uploading}
             className="w-full border border-dashed border-[#3F3F3F] py-3 text-[#A8A29E] text-xs flex items-center justify-center gap-2 hover:border-[#5B0F1A]" style={F.ui}>
@@ -93,7 +93,7 @@ export function VenueMapEditor({ event, me, onClose, onSaved }) {
         {imageUrl && (
           <>
             <div>
-              <label className="block text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-1.5" style={F.scriptureSC}>tap map to drop a pin</label>
+              <label className="block text-[10px] uppercase tracking-[0.25em] text-[#C8102E] mb-1.5" style={F.scriptureSC}>tap map to drop a pin</label>
               <div className="flex flex-wrap gap-1.5 mb-2">
                 {PIN_KINDS.map(k => (
                   <button key={k.kind} onClick={() => setKind(k.kind)}
@@ -120,7 +120,7 @@ export function VenueMapEditor({ event, me, onClose, onSaved }) {
             {/* Pin list */}
             {pins.length > 0 && (
               <div className="space-y-1.5">
-                <label className="block text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>{pins.length} pins · label them</label>
+                <label className="block text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>{pins.length} pins · label them</label>
                 {pins.map((p, i) => {
                   const m = pinMeta(p.kind);
                   return (
