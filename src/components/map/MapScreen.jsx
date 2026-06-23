@@ -47,6 +47,9 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], onOpenUser,
     groups[key].pins.push(p);
   });
   const grouped = Object.values(groups).sort((a, b) => b.pins.length - a.pins.length);
+  const located = grouped.filter(g => g.key !== '__none__');
+  const maxCount = located[0]?.pins.length || 1;
+  const topArea = located[0];
 
   return (
     <div className="absolute inset-0">
@@ -96,6 +99,25 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], onOpenUser,
             <div className="absolute inset-0 opacity-40 mix-blend-overlay pointer-events-none"
               style={{ backgroundImage: 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'120\' height=\'120\'><filter id=\'n\'><feTurbulence baseFrequency=\'0.85\'/></filter><rect width=\'120\' height=\'120\' filter=\'url(%23n)\' opacity=\'0.3\'/></svg>")' }} />
           </div>
+
+          {/* Area heat — glow intensity scales with how many souls are clustered there */}
+          {located.map(g => {
+            const { cx, cy } = areaCenter(g.key);
+            const size = 16 + Math.min(46, (g.pins.length / maxCount) * 46);
+            const opacity = Math.min(0.5, 0.14 + g.pins.length * 0.08);
+            return (
+              <div key={`heat-${g.key}`} className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
+                style={{ left: `${cx}%`, top: `${cy}%`, width: `${size}%`, height: `${size}%`,
+                  background: `radial-gradient(circle, rgba(139,0,0,${opacity}) 0%, rgba(139,0,0,0) 70%)` }} />
+            );
+          })}
+
+          {/* Hottest area tonight */}
+          {topArea && (
+            <div className="absolute top-2 right-2 z-30 px-2.5 py-1.5 bg-black/70 backdrop-blur-sm border border-[#8B0000]/40 text-[9px] uppercase tracking-[0.15em] text-[#C9A961] pointer-events-none" style={F.ui}>
+              hottest · {topArea.label} · {topArea.pins.length}
+            </div>
+          )}
 
           {/* Empty state — only when no other souls are out */}
           {pins.length === 0 && (
