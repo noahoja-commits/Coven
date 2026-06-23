@@ -168,7 +168,11 @@ export default function App() {
   const [tonightPins, setTonightPins] = useState([]); // DB-backed: other souls out tonight
   const [trackers, setTrackers] = useState({}); // Supabase-backed (profile_state)
   const [notifications, setNotifications] = useState([]); // Supabase-backed (DB triggers + realtime)
-  const [settings, setSettings] = useLocalStorage('settings', DEFAULT_SETTINGS);
+  const [rawSettings, setSettings] = useLocalStorage('settings', DEFAULT_SETTINGS);
+  // Merge in defaults so users with an older persisted settings blob get new keys
+  // (otherwise undefined keys defeat the `!== 'none'` / `!== false` gates — e.g. the
+  // shock-mode fun pack would mount with no mode selected). First render is correct.
+  const settings = { ...DEFAULT_SETTINGS, ...rawSettings };
 
   // Live content state (Supabase-backed)
   const [posts, setPosts] = useState([]);
@@ -980,8 +984,14 @@ export default function App() {
   };
 
   const deletePost = (postId) => {
+    const snapshot = posts;
     setPosts(prev => prev.filter(p => p.id !== postId));
-    if (meId && !String(postId).startsWith('temp-')) dbDeletePost(postId).catch(() => {});
+    if (meId && !String(postId).startsWith('temp-')) {
+      dbDeletePost(postId).catch(() => {
+        setPosts(snapshot);
+        showToast("couldn't remove that — try again.", 'error');
+      });
+    }
   };
 
   const repostPost = async (originalId, commentary = '') => {
@@ -1406,7 +1416,8 @@ export default function App() {
     showMyTickets || showReflections || showDreams || showNowPlaying || showAddGrave || showAddAnniv ||
     showVespersArchive || showNewGroup || showTonightModal || quoteTarget || showOddityCompose ||
     activeOddity || activeText || activePostComments || followList || activeConversation || activeUserHandle ||
-    showSearch || showCrewBrowse || activeEvent || showCompose || showNotifs || showDMs || activePortal
+    showSearch || showCrewBrowse || activeEvent || showCompose || showNotifs || showDMs || activePortal ||
+    showShockPicker
   );
   // Close the single top-most overlay (z-order priority). Returns true if it closed one.
   const closeTopOverlay = () => {

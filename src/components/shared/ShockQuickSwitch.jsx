@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 // A floating sigil shown only while a shock mode is active.
 //   tap        = next mode
@@ -10,6 +10,10 @@ export function ShockQuickSwitch({ onNext, onShuffle, onPicker }) {
   const didLong = useRef(false);
   const lastTap = useRef(0);
   const singleRef = useRef(null);
+
+  // Clear pending tap/long-press timers on unmount (the button unmounts when an overlay
+  // opens) so a stray timer can't fire onNext/onShuffle after the user navigated away.
+  useEffect(() => () => { clearTimeout(longRef.current); clearTimeout(singleRef.current); }, []);
 
   const onDown = (e) => {
     e.stopPropagation();

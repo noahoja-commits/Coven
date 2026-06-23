@@ -39,6 +39,7 @@ function Burst({ x, y, kind }) {
 export function ShockSparks({ mode }) {
   const [sparks, setSparks] = useState([]);
   const idRef = useRef(0);
+  const timers = useRef([]);
   const kind = kindFor(mode);
   useEffect(() => {
     const onDown = (e) => {
@@ -46,10 +47,18 @@ export function ShockSparks({ mode }) {
       if (x == null || y == null) return;
       const id = ++idRef.current;
       setSparks((s) => [...s.slice(-7), { id, x, y }]);
-      setTimeout(() => setSparks((s) => s.filter((p) => p.id !== id)), 850);
+      const t = setTimeout(() => {
+        setSparks((s) => s.filter((p) => p.id !== id));
+        timers.current = timers.current.filter((x) => x !== t);
+      }, 850);
+      timers.current.push(t);
     };
     window.addEventListener('pointerdown', onDown);
-    return () => window.removeEventListener('pointerdown', onDown);
+    return () => {
+      window.removeEventListener('pointerdown', onDown);
+      timers.current.forEach(clearTimeout);
+      timers.current = [];
+    };
   }, []);
   return (
     <div className="fixed inset-0 pointer-events-none z-40" aria-hidden>

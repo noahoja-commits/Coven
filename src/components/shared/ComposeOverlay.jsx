@@ -27,9 +27,12 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
   // Unsent-draft save/restore (captured once on mount so the auto-save below can't wipe it).
   const [pendingDraft, setPendingDraft] = useState(() => loadDraft());
   useEffect(() => {
+    // Don't let the empty-on-mount state's auto-save wipe a restorable draft from
+    // localStorage before the user has decided to restore or discard it.
+    if (pendingDraft && !text.trim() && !poll) return;
     const t = setTimeout(() => saveDraft({ text, community, anonymous, poll }), 600);
     return () => clearTimeout(t);
-  }, [text, community, anonymous, poll]);
+  }, [text, community, anonymous, poll, pendingDraft]);
   const restoreDraft = () => {
     if (!pendingDraft) return;
     setText(pendingDraft.text || '');
