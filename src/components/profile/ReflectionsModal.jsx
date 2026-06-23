@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, Send, Lock, Trash2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
+import { EmptyState } from '../shared/EmptyState';
 
 const journalDate = (ts) => {
   try { return new Date(ts).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }); }
@@ -49,9 +50,7 @@ export function ReflectionsModal({ reflections = [], onAdd, onRemove, onClose })
         {/* the journal — aged-paper pages */}
         <div className="flex-1 overflow-y-auto bg-[#0A0808] p-3 space-y-3">
           {reflections.length === 0 ? (
-            <div className="text-center py-12 text-[#6B6B6B] text-sm italic" style={F.serif}>
-              · the journal is empty · write your first thought ·
-            </div>
+            <EmptyState glyph="✎" text="· the journal is empty · write your first thought ·" />
           ) : (
             reflections.map(r => (
               <div key={r.id} className="relative p-4 shadow-md"

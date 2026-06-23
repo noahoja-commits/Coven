@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Send, Bookmark, CornerDownRight } from 'lucide-react';
 import { F } from '../../styles/fonts';
+import { EmptyState } from '../shared/EmptyState';
 import { Reaction } from '../shared/Reaction';
 import { PostImage } from '../shared/Visuals';
 import { renderRichText } from '../shared/RichText';
@@ -87,9 +88,7 @@ export function CommentsOverlay({ post, onClose, onComment, onReact, onReactComm
 
         {/* Comments */}
         {comments.length === 0 && baseCount === 0 && (
-          <div className="px-4 py-12 text-center text-[#6B6B6B] text-xs italic" style={F.serif}>
-            · no whispers yet · be the first ·
-          </div>
+          <EmptyState glyph="☾" text="· no whispers yet · be the first ·" />
         )}
         {comments.length === 0 && baseCount > 0 && (
           <div className="px-4 py-10 text-center text-[#6B6B6B] text-xs italic" style={F.serif}>

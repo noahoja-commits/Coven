@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, ChevronLeft, X } from 'lucide-react';
 import { F } from '../../styles/fonts';
+import { EmptyState } from '../shared/EmptyState';
 import { COMMUNITIES } from '../../data/communities';
 import { PostImage } from '../shared/Visuals';
 import { fetchCommunityStats } from '../../lib/db/posts';
@@ -160,10 +161,7 @@ export function CommunityDetail({ id, onBack, posts: postsProp, loading = false,
             {(post.kind === 'photo' || post.kind === 'video') && <div className="mt-3"><PostImage kind={post.img} /></div>}
           </article>
         )) : (
-          <div className="px-4 py-12 text-center">
-            <div className="text-[#3F3F3F] text-4xl mb-3" style={F.display}>{c.glyph}</div>
-            <div className="text-[#A8A29E] text-sm" style={F.serif}>quiet in here. be the first to break the silence.</div>
-          </div>
+          <EmptyState glyph={c.glyph} text="quiet in here. be the first to break the silence." />
         )}
       </div>
     </div>

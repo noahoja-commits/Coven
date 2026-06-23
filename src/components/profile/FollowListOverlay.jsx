@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { F } from '../../styles/fonts';
+import { EmptyState } from '../shared/EmptyState';
 import { Avatar } from '../shared/Avatar';
 import { fetchFollowing, fetchFollowers, fetchMutuals } from '../../lib/db/social';
 
@@ -48,7 +49,7 @@ export function FollowListOverlay({ initialTab = 'following', myId, onClose, onO
         {loading && !people.length ? (
           <p className="px-4 py-16 text-center text-[#6B6B6B] text-sm italic" style={F.serif}>· gathering ·</p>
         ) : people.length === 0 ? (
-          <p className="px-4 py-16 text-center text-[#6B6B6B] text-sm italic" style={F.serif}>· no one here yet ·</p>
+          <EmptyState glyph="✦" text="· no one here yet ·" />
         ) : (
           <div className="divide-y divide-[#141414]">
             {people.map(p => (

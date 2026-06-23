@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Check, Plus } from 'lucide-react';
 import { F } from '../../styles/fonts';
+import { EmptyState } from '../shared/EmptyState';
 
 export function EventsScreen({ events = [], rsvp = {}, onToggleRsvp, onOpenEvent, onCreateEvent }) {
   const allTags = useMemo(() => {
@@ -39,11 +40,7 @@ export function EventsScreen({ events = [], rsvp = {}, onToggleRsvp, onOpenEvent
 
       <div className="px-4 space-y-3">
         {events.length === 0 && (
-          <div className="text-center py-16 text-[#6B6B6B]" style={F.serif}>
-            <div className="text-3xl mb-3">◈</div>
-            <p className="text-sm">no rites yet.</p>
-            <button onClick={onCreateEvent} className="mt-3 text-[10px] uppercase tracking-[0.2em] text-[#A89968] hover:text-[#C9A961] transition-colors" style={F.ui}>· host the first one ·</button>
-          </div>
+          <EmptyState glyph="◈" text="no rites yet." action="host the first one" onAction={onCreateEvent} />
         )}
         {events.length > 0 && filtered.length === 0 && (
           <div className="text-center py-8 text-[#6B6B6B] text-xs" style={F.mono}>

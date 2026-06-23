@@ -1,4 +1,5 @@
 import { F } from '../../styles/fonts';
+import { EmptyState } from '../shared/EmptyState';
 
 const GRADS = [
   'linear-gradient(135deg, #3B0A12 0%, #1A0408 70%, #0A0204 100%)',
@@ -12,7 +13,7 @@ const isVideoUrl = (u) => typeof u === 'string' && /\.(mp4|webm|mov|m4v|ogg)(\?|
 // videos show their first frame with a ▶ badge; text/poll posts show a snippet.
 export function PostGrid({ posts = [], loading = false, emptyText = 'no posts yet', onOpen }) {
   if (loading) return <div className="py-12 text-center text-[#6B6B6B] text-xs italic" style={F.serif}>· unrolling ·</div>;
-  if (!posts.length) return <div className="py-16 text-center text-[#6B6B6B] text-sm italic" style={F.serif}>{emptyText}</div>;
+  if (!posts.length) return <EmptyState glyph="☾" text={emptyText} />;
   return (
     <div className="grid grid-cols-3 gap-px bg-[#1A1A1A]">
       {posts.map((p, i) => (

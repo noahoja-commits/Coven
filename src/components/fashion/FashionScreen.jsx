@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ExternalLink, X, Plus } from 'lucide-react';
 import { F } from '../../styles/fonts';
+import { EmptyState } from '../shared/EmptyState';
 import { FASHION } from '../../data/fashion';
 
 const PALETTE = {
@@ -190,7 +191,7 @@ export function FashionScreen({ shops = [], meId, onAddStore, onDeleteStore }) {
 
       {showBrands && (
         items.length === 0 ? (
-          <p className="px-4 py-12 text-center text-[#6B6B6B] text-sm italic" style={F.serif}>· nothing here yet ·</p>
+          <EmptyState glyph="✦" text="· nothing here yet ·" />
         ) : (
           <div className="px-3 grid grid-cols-2 gap-2">
             <div className="space-y-2">{col1.map(item => <FashionTile key={item.id} item={item} />)}</div>

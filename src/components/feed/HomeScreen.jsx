@@ -4,6 +4,7 @@ import { F } from '../../styles/fonts';
 import { Reaction } from '../shared/Reaction';
 import { PostImage } from '../shared/Visuals';
 import { renderRichText } from '../shared/RichText';
+import { EmptyState } from '../shared/EmptyState';
 import { getDailyCard } from '../../data/tarot';
 import { darkDay, todaysVespers, todaysCodex } from '../../data/helpers';
 import { DailyAltar } from './DailyAltar';
@@ -513,20 +514,14 @@ export function HomeScreen({
           );
         })}
         {!feedLoading && sortedPosts.length === 0 && (
-          <div className="py-12 text-center px-8">
-            <div className="text-[#3F3F3F] text-4xl mb-3">{feedScope === 'following' ? '☾' : '✦'}</div>
-            {feedScope === 'following' ? (
-              <>
-                <p className="text-[#A8A29E] text-sm italic" style={F.serif}>you follow no one yet.</p>
-                <p className="text-[#6B6B6B] text-xs mt-1" style={F.ui}>gather some souls below — or switch to the coven.</p>
-              </>
-            ) : (
-              <>
-                <p className="text-[#A8A29E] text-sm italic" style={F.serif}>the coven is quiet tonight.</p>
-                <p className="text-[#6B6B6B] text-xs mt-1" style={F.ui}>be the first flame — speak, or drop a tonight status.</p>
-              </>
-            )}
-          </div>
+          feedScope === 'following' ? (
+            <EmptyState glyph="☾" text="you follow no one yet."
+              sub="gather some souls below — or switch to the coven." />
+          ) : (
+            <EmptyState glyph="✦" text="the coven is quiet tonight."
+              sub="be the first flame — speak, or drop a tonight status."
+              action="drop a tonight status" onAction={onOpenTonightStatus} />
+          )
         )}
         {/* Discover real souls — surfaced when your feed is sparse */}
         {!feedLoading && suggestedSouls.length > 0 && (sortedPosts.length === 0 || feedScope === 'following') && (

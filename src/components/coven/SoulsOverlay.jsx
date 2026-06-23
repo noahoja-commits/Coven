@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Search, X } from 'lucide-react';
 import { F } from '../../styles/fonts';
+import { EmptyState } from '../shared/EmptyState';
 import { fetchProfiles } from '../../lib/db/profiles';
 
 export function SoulsOverlay({ meId, following = {}, onClose, onOpenUser }) {
@@ -60,9 +61,7 @@ export function SoulsOverlay({ meId, following = {}, onClose, onOpenUser }) {
         {loading ? (
           <div className="text-center py-12 text-[#A89968]/40 text-sm italic" style={F.scripture}>· gathering souls ·</div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-12 text-[#A89968]/40 text-sm italic" style={F.scripture}>
-            {allUsers.length === 0 ? '· you are the first soul here ·' : '· no souls match ·'}
-          </div>
+          <EmptyState glyph="✦" text={allUsers.length === 0 ? '· you are the first soul here ·' : '· no souls match ·'} />
         ) : (
           <div className="space-y-1">
             {filtered.map(u => (

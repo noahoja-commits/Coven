@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, Search, Plus } from 'lucide-react';
 import { F } from '../../styles/fonts';
+import { EmptyState } from '../shared/EmptyState';
 import { ODDITY_CATEGORIES, ODDITY_PALETTES, CONDITION_LABELS } from '../../data/oddities';
 
 function OddityImage({ shape, palette, imageUrl, small = false }) {
@@ -95,11 +96,9 @@ function MarketplaceTab({ onOpenOddity, onCompose, listings = [] }) {
         ))}
       </div>
       {filtered.length === 0 ? (
-        <div className="px-4 py-16 text-center text-[#A89968]/70" style={F.serif}>
-          <div className="text-3xl mb-3">⚱</div>
-          <p className="text-sm">{listings.length === 0 ? 'no wares yet.' : `nothing in ${category}.`}</p>
-          <button onClick={onCompose} className="mt-3 text-[10px] uppercase tracking-[0.2em] text-[#C9A961] hover:text-[#F5F1E8] transition-colors" style={F.ui}>· list the first ·</button>
-        </div>
+        <EmptyState glyph="⚱"
+          text={listings.length === 0 ? 'no wares yet.' : `nothing in ${category}.`}
+          action="list the first" onAction={onCompose} />
       ) : (
         <div className="px-3 grid grid-cols-2 gap-2 pb-12">
           {filtered.map(item => <OddityCard key={item.id} item={item} onOpen={onOpenOddity} />)}
