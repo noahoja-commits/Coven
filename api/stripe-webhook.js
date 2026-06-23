@@ -71,6 +71,17 @@ export default async function handler(req, res) {
     await supa.from('payout_accounts')
       .update({ payouts_enabled: enabled, updated_at: new Date().toISOString() })
       .eq('stripe_account_id', acct.id);
+  } else if (event.type === 'charge.refunded') {
+    // A ticket charge was refunded (full or partial) — flip the ticket so it stops
+    // counting as paid / valid at the door. Matched by payment intent.
+    const charge = event.data.object;
+    const pi = typeof charge.payment_intent === 'string' ? charge.payment_intent : charge.payment_intent?.id;
+    if (pi) {
+      const { error } = await supa.from('tickets')
+        .update({ status: 'refunded' })
+        .eq('stripe_payment_intent', pi);
+      if (error) { res.status(500).json({ error: error.message }); return; }
+    }
   }
 
   res.status(200).json({ received: true });
