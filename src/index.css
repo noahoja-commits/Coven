@@ -145,6 +145,15 @@ button:active, [role="button"]:active {
 }
 .animate-flicker { animation: flicker 4s ease-in-out infinite; }
 
+/* Animated profile banner — a slow drifting fog/ember motion (opt-in via decor.animated). */
+@keyframes bannerDrift {
+  0%, 100% { transform: translateX(-2%) scale(1.06); opacity: 0.82; }
+  50%      { transform: translateX(2%) scale(1.06); opacity: 1; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .banner-animated { animation: bannerDrift 14s ease-in-out infinite; transform-origin: center; will-change: transform, opacity; }
+}
+
 /* Portal threshold reveal — scale + clearing blur, for "the coven" doors. */
 @keyframes portalIn {
   0%   { opacity: 0; transform: scale(0.96); filter: blur(6px); }

@@ -18,6 +18,7 @@ export function ProfileEditModal({ profile, meId, onSave, onClose }) {
   const [tags, setTags] = useState(profile.tags || []);
   const [border, setBorder] = useState(profile.decor?.border || 'none');
   const [banner, setBanner] = useState(profile.decor?.banner || 'none');
+  const [bannerAnimated, setBannerAnimated] = useState(!!profile.decor?.animated);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const fileRef = useRef(null);
@@ -35,7 +36,7 @@ export function ProfileEditModal({ profile, meId, onSave, onClose }) {
 
   const save = () => {
     if (uploading) return;
-    onSave({ ...profile, name: name.trim() || profile.name, pronouns, bio, birthday, avatar, avatarUrl, tags, decor: { border, banner } });
+    onSave({ ...profile, name: name.trim() || profile.name, pronouns, bio, birthday, avatar, avatarUrl, tags, decor: { border, banner, animated: bannerAnimated } });
     onClose();
   };
 
@@ -113,7 +114,14 @@ export function ProfileEditModal({ profile, meId, onSave, onClose }) {
                   style={F.ui}>{b.label}</button>
               ))}
             </div>
-            {banner !== 'none' && <div className="mt-2 h-10 border border-[#1A1A1A]" style={bannerStyle(banner) || undefined} />}
+            {banner !== 'none' && (
+              <>
+                <button onClick={() => setBannerAnimated(a => !a)}
+                  className={`mt-2 px-2.5 py-1 text-[10px] uppercase tracking-wider border transition-colors ${bannerAnimated ? 'border-[#8B0000] bg-[#5B0F1A]/25 text-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#5B0F1A]/60'}`}
+                  style={F.ui}>{bannerAnimated ? '✓ animated' : 'animate banner'}</button>
+                <div className={`mt-2 h-10 border border-[#1A1A1A] overflow-hidden ${bannerAnimated ? 'banner-animated' : ''}`} style={bannerStyle(banner) || undefined} />
+              </>
+            )}
           </div>
 
           {/* Handle */}

@@ -64,7 +64,7 @@ export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], isF
       <div className="relative px-4 pt-5 pb-5 border-b border-[#1A1A1A] overflow-hidden">
         <div className="absolute inset-0 opacity-15" style={{ background: 'radial-gradient(ellipse at 50% 0%, #5B0F1A 0%, transparent 60%)' }} />
         {user.decor?.banner && user.decor.banner !== 'none' && (
-          <div className="absolute top-0 inset-x-0 h-24 pointer-events-none" style={bannerStyle(user.decor.banner) || undefined} />
+          <div className={`absolute top-0 inset-x-0 h-24 pointer-events-none ${user.decor?.animated ? 'banner-animated' : ''}`} style={bannerStyle(user.decor.banner) || undefined} />
         )}
         <Grain opacity={0.06} />
         <TarotFrame />

@@ -82,7 +82,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
         <Grain opacity={0.06} />
         <TarotFrame />
         {profile.decor?.banner && profile.decor.banner !== 'none' && (
-          <div className="absolute top-0 inset-x-0 h-24 pointer-events-none" style={bannerStyle(profile.decor.banner) || undefined} />
+          <div className={`absolute top-0 inset-x-0 h-24 pointer-events-none ${profile.decor?.animated ? 'banner-animated' : ''}`} style={bannerStyle(profile.decor.banner) || undefined} />
         )}
 
         <div className="relative flex justify-between items-start mb-4">
