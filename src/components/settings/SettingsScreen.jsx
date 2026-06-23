@@ -85,6 +85,10 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
           <Row label="Film grain" desc="texture overlay. atmospheric.">
             <Slider value={settings.grainIntensity} onChange={v => set('grainIntensity', v)} min={0} max={0.2} step={0.01} />
           </Row>
+          <Row label="Grain style" desc="fine film noise, or a coarse halftone print screen.">
+            <Segmented value={settings.grainStyle || 'fine'} onChange={v => set('grainStyle', v)}
+              options={[['fine', 'fine'], ['print', 'print']]} />
+          </Row>
           <Row label="Vignette" desc="dark edges around the screen.">
             <Toggle on={settings.vignette} onChange={v => set('vignette', v)} />
           </Row>
@@ -285,6 +289,7 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
 export const DEFAULT_SETTINGS = {
   parchmentMode: false,
   grainIntensity: 0.07,
+  grainStyle: 'fine',
   vignette: true,
   colorMood: 'none',
   weatherMood: false,

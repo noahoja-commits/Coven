@@ -36,7 +36,7 @@ import { DMsOverlay } from './components/shared/DMsOverlay';
 import { ChatThread } from './components/shared/ChatThread';
 import { ComposeOverlay } from './components/shared/ComposeOverlay';
 import { NotificationsPanel } from './components/shared/NotificationsPanel';
-import { GrainOverlay, AmbientGlow } from './components/shared/Visuals';
+import { GrainOverlay, AmbientGlow, HalftoneOverlay } from './components/shared/Visuals';
 import { startAmbient, stopAmbient } from './lib/ambient';
 import { fetchWeatherTint } from './lib/weather';
 import { InstallPrompt } from './components/shared/InstallPrompt';
@@ -1733,7 +1733,11 @@ export default function App() {
       )}
 
       {/* Grain */}
-      {settings.grainIntensity > 0 && <GrainOverlay opacity={settings.grainIntensity} />}
+      {settings.grainIntensity > 0 && (
+        settings.grainStyle === 'print'
+          ? <HalftoneOverlay opacity={settings.grainIntensity * 1.6} />
+          : <GrainOverlay opacity={settings.grainIntensity} />
+      )}
 
       {/* Fixed header (pinned to the viewport frame) */}
       <Header

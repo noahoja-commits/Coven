@@ -88,6 +88,22 @@ export function GrainOverlay({ opacity = 0.07 }) {
   );
 }
 
+// Coarse halftone "print" texture — riso/xerox feel, a sibling to GrainOverlay.
+// Two offset dot screens via CSS gradients (no external assets). pointer-events-none.
+export function HalftoneOverlay({ opacity = 0.12 }) {
+  return (
+    <div className="absolute inset-0 pointer-events-none mix-blend-overlay"
+      style={{
+        opacity,
+        backgroundImage:
+          'radial-gradient(rgba(255,255,255,0.9) 0.6px, transparent 0.9px), radial-gradient(rgba(0,0,0,0.6) 0.5px, transparent 0.8px)',
+        backgroundSize: '4px 4px, 4px 4px',
+        backgroundPosition: '0 0, 2px 2px',
+        transform: 'translateZ(0)',
+      }} />
+  );
+}
+
 // Living ember/candle glow — a slow breathing light behind everything, for depth.
 // Self-contained: rides the time-of-day curve internally so it stays in sync with the
 // app's "vampire hours" without depending on the livingTheme setting. No App.jsx hooks.
