@@ -11,6 +11,7 @@ import { CRYSTAL_OPTIONS } from '../../data/crystals';
 import { SHRINE_OBJECTS, earnedShrine } from '../../data/shrine';
 import { PostGrid } from './PostGrid';
 import { TarotFrame, arcanaFor, Grain } from '../shared/Sigils';
+import { ArcanaCard } from './ArcanaCard';
 import { DarkRecapModal } from './DarkRecapModal';
 
 const SHRINE_THEMES = {
@@ -30,6 +31,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
   const [tab, setTab] = useState('grid');
   const [nudgeHidden, setNudgeHidden] = useState(false);
   const [showRecap, setShowRecap] = useState(false);
+  const [showArcana, setShowArcana] = useState(false);
   const recapStats = {
     posts: profile.posts || 0,
     streak: ritual?.streak || 0,
@@ -84,7 +86,8 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
         )}
 
         <div className="relative flex justify-between items-start mb-4">
-          <div className="flex items-center gap-1.5 min-w-0 flex-1 mr-2">
+          <div className="flex items-center gap-2 min-w-0 flex-1 mr-2">
+            <ArcanaCard handle={profile.name} onTap={() => setShowArcana(true)} />
             {(() => { const a = arcanaFor(profile.name); return (
               <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] truncate" style={F.display}>{a.numeral} · {a.name}</span>
             ); })()}
@@ -158,6 +161,16 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
           ✦ your dark recap
         </button>
         {showRecap && <DarkRecapModal stats={recapStats} onClose={() => setShowRecap(false)} />}
+        {showArcana && (
+          <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center animate-fade-in p-6"
+            onClick={() => setShowArcana(false)}>
+            <div onClick={e => e.stopPropagation()}>
+              <ArcanaCard handle={profile.name} mode="full" />
+              <button onClick={() => setShowArcana(false)}
+                className="mt-4 mx-auto block text-[10px] uppercase tracking-[0.3em] text-[#A89968]/70 hover:text-[#C9A961]" style={F.ui}>· close ·</button>
+            </div>
+          </div>
+        )}
 
         {/* Scenes you're in */}
         {joinedScenes.length > 0 && (
