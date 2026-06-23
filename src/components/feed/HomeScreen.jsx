@@ -173,11 +173,11 @@ export function HomeScreen({
             <span className="text-[#C9A961] text-xl">{daily.card.symbol || '✦'}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-[10px] uppercase tracking-[0.3em] text-[#A89968]/70" style={F.scriptureSC}>· today's pull ·</div>
+            <div className="text-[10px] uppercase tracking-[0.3em] text-[#C8102E]/70" style={F.scriptureSC}>· today's pull ·</div>
             <div className="text-[#F5F1E8] text-sm mt-0.5 truncate" style={F.scripture}>
               {daily.card.name}{daily.reversed && ' · reversed'}
             </div>
-            <div className="text-[10px] text-[#A89968]/50 italic truncate" style={F.scripture}>
+            <div className="text-[10px] text-[#C8102E]/50 italic truncate" style={F.scripture}>
               "{daily.reversed ? daily.card.reversed : daily.card.upright}"
             </div>
           </div>
@@ -191,12 +191,12 @@ export function HomeScreen({
           className="w-full text-left border-b border-[#1A1A1A] hover:bg-[#0F0F0F] transition-colors group">
           <div className="px-4 py-3">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[#A89968]">⌬</span>
-              <span className="text-[10px] uppercase tracking-[0.3em] text-[#A89968]" style={F.scriptureSC}>· word of the day ·</span>
+              <span className="text-[#C8102E]">⌬</span>
+              <span className="text-[10px] uppercase tracking-[0.3em] text-[#C8102E]" style={F.scriptureSC}>· word of the day ·</span>
             </div>
             <div className="flex items-baseline gap-2">
               <span className="text-[#F5F1E8] text-base" style={F.scripture}>{codexToday.term}</span>
-              <span className="text-[10px] text-[#A89968]/60 uppercase tracking-wider" style={F.scriptureSC}>{codexToday.category}</span>
+              <span className="text-[10px] text-[#C8102E]/60 uppercase tracking-wider" style={F.scriptureSC}>{codexToday.category}</span>
             </div>
             <p className="text-[#A8A29E] text-xs italic mt-0.5 line-clamp-2" style={F.serif}>{codexToday.def}</p>
           </div>
@@ -210,19 +210,19 @@ export function HomeScreen({
             className="flex-1 text-left hover:bg-[#0F0F0F] transition-colors">
             <div className="px-4 py-3">
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-[#A89968]" style={F.scriptureSC}>✟</span>
-                <span className="text-[10px] uppercase tracking-[0.3em] text-[#A89968]" style={F.scriptureSC}>· today's vespers ·</span>
+                <span className="text-[#C8102E]" style={F.scriptureSC}>✟</span>
+                <span className="text-[10px] uppercase tracking-[0.3em] text-[#C8102E]" style={F.scriptureSC}>· today's vespers ·</span>
               </div>
               <p className="text-[#F5F1E8] text-sm italic leading-snug line-clamp-2" style={F.scripture}>
                 "{vespers.verse.text}"
               </p>
-              <p className="text-[10px] text-[#A89968]/70 mt-1" style={F.scriptureSC}>
+              <p className="text-[10px] text-[#C8102E]/70 mt-1" style={F.scriptureSC}>
                 · {vespers.chapterTitle} ·
               </p>
             </div>
           </button>
           <button onClick={onOpenVespersArchive} title="archive"
-            className="px-3 border-l border-[#1A1A1A] text-[10px] uppercase tracking-wider text-[#A89968] hover:text-[#C9A961] hover:bg-[#0F0F0F]"
+            className="px-3 border-l border-[#1A1A1A] text-[10px] uppercase tracking-wider text-[#C8102E] hover:text-[#C9A961] hover:bg-[#0F0F0F]"
             style={F.scriptureSC}>
             past ·
           </button>
@@ -256,13 +256,13 @@ export function HomeScreen({
       {/* Trending hashtags */}
       {trendingTags.length > 0 && (
         <div className="px-4 pt-3 pb-3 border-b border-[#1A1A1A]">
-          <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-2" style={F.ui}>· trending ·</div>
+          <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E] mb-2" style={F.ui}>· trending ·</div>
           <div className="flex flex-wrap gap-1.5">
             {trendingTags.map(([tag, count]) => (
               <button key={tag} onClick={() => setActiveTag(tag)}
                 className="flex items-center gap-1.5 px-2 py-1 border border-[#2A2A2A] text-[#A8A29E] hover:text-[#F5F1E8] hover:border-[#A89968]"
                 style={F.ui}>
-                <span className="text-[#A89968] text-xs">#{tag}</span>
+                <span className="text-[#C8102E] text-xs">#{tag}</span>
                 <span className="text-[9px] text-[#6B6B6B]" style={F.mono}>{count}</span>
               </button>
             ))}
@@ -278,7 +278,7 @@ export function HomeScreen({
           <span className="text-[10px] uppercase tracking-[0.2em] text-[#8B0000]" style={F.ui}>your tonight</span>
           <span className="text-[#F5F1E8] text-sm flex-1 truncate ml-2" style={F.serif}>"{tonightStatus.text}"</span>
           {witnesses > 0 && (
-            <span className="flex items-center gap-1 text-[10px] text-[#A89968]" style={F.mono} title="witnesses">
+            <span className="flex items-center gap-1 text-[10px] text-[#C8102E]" style={F.mono} title="witnesses">
               <Eye size={11} /> {witnesses}
             </span>
           )}
@@ -309,7 +309,7 @@ export function HomeScreen({
           const random = pool[Math.floor(Math.random() * pool.length)];
           onOpenComments && onOpenComments(random.id);
         }}
-          className="ml-auto text-[10px] uppercase tracking-wider text-[#A89968] hover:text-[#C9A961] px-2 py-1"
+          className="ml-auto text-[10px] uppercase tracking-wider text-[#C8102E] hover:text-[#C9A961] px-2 py-1"
           style={F.ui}>
           ⚄ feeling lucky
         </button>
@@ -321,7 +321,7 @@ export function HomeScreen({
       {/* Active hashtag filter */}
       {activeTag && (
         <div className="px-4 py-2 border-b border-[#1A1A1A] bg-[#A89968]/5 flex items-center gap-2">
-          <span className="text-[10px] uppercase tracking-wider text-[#A89968]" style={F.ui}>filtering by</span>
+          <span className="text-[10px] uppercase tracking-wider text-[#C8102E]" style={F.ui}>filtering by</span>
           <span className="text-[#C9A961] text-sm" style={F.scripture}>#{activeTag}</span>
           <span className="text-[10px] text-[#6B6B6B] ml-1" style={F.mono}>{tagFilteredPosts.length}</span>
           <button onClick={() => setActiveTag(null)} className="ml-auto text-[#A8A29E] hover:text-[#F5F1E8] text-xs">×</button>
@@ -385,7 +385,7 @@ export function HomeScreen({
                   <button
                     onClick={() => !mine && !post.anonymous && onOpenUser && onOpenUser(post.user, post.avatar)}
                     disabled={!!post.anonymous}
-                    className={`text-[#F5F1E8] text-sm ${post.anonymous ? 'italic text-[#A89968]' : 'hover:underline'}`}
+                    className={`text-[#F5F1E8] text-sm ${post.anonymous ? 'italic text-[#C8102E]' : 'hover:underline'}`}
                     style={F.ui}>{post.user}</button>
                   <div className="flex items-center gap-1.5 text-[10px] text-[#6B6B6B]" style={F.ui}>
                     <span style={F.mono} className="text-xs">{post.time}</span>
@@ -438,7 +438,7 @@ export function HomeScreen({
               </div>
 
               {post.kind === 'repost' && (
-                <div className="text-[10px] uppercase tracking-wider text-[#A89968] mb-2 flex items-center gap-1" style={F.ui}>
+                <div className="text-[10px] uppercase tracking-wider text-[#C8102E] mb-2 flex items-center gap-1" style={F.ui}>
                   <Repeat size={11} /> reposted from {post.quoted?.user}
                 </div>
               )}
@@ -500,7 +500,7 @@ export function HomeScreen({
                     </div>
                     <div className="mt-3 pt-3 border-t border-[#1A1A1A] flex items-center justify-between">
                       <span className="text-[#A8A29E] text-xs" style={F.ui}>{post.event.going} going</span>
-                      <span className="text-[10px] uppercase tracking-wider text-[#A89968]" style={F.ui}>open →</span>
+                      <span className="text-[10px] uppercase tracking-wider text-[#C8102E]" style={F.ui}>open →</span>
                     </div>
                   </div>
                 </button>
@@ -515,7 +515,7 @@ export function HomeScreen({
                 </div>
                 <div className="flex items-center gap-1">
                   <button onClick={() => onToggleCandle && onToggleCandle(post.id)}
-                    className={`p-2 transition-colors ${candled ? 'text-[#C9A961]' : 'text-[#6B6B6B] hover:text-[#A89968]'}`}
+                    className={`p-2 transition-colors ${candled ? 'text-[#C9A961]' : 'text-[#6B6B6B] hover:text-[#C8102E]'}`}
                     title={candled ? 'candle lit' : 'light a candle'}>
                     <Flame size={14} fill={candled ? '#C9A961' : 'none'} />
                   </button>
@@ -549,7 +549,7 @@ export function HomeScreen({
         {/* Discover real souls — surfaced when your feed is sparse */}
         {!feedLoading && suggestedSouls.length > 0 && (sortedPosts.length === 0 || feedScope === 'following') && (
           <div className="px-4 py-4 bg-[#0A0204]/40">
-            <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-3" style={F.ui}>· souls who've gathered ·</div>
+            <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E] mb-3" style={F.ui}>· souls who've gathered ·</div>
             <div className="space-y-2">
               {suggestedSouls.slice(0, 6).map(s => {
                 const followed = !!following[s.handle];

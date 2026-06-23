@@ -1695,12 +1695,19 @@ export default function App() {
       style={{ background: settings.parchmentMode ? '#EDE0C2' : '#0A0A0A' }}>
       {/* Living ambient glow — breathing ember/candle light for depth (behind mood washes) */}
       {settings.ambientGlow !== false && !isInsideOverlay && !settings.parchmentMode && <AmbientGlow />}
-      {/* Vignette */}
+      {/* Always-on blood wash — drenches the whole frame in oxblood so the app reads RED, not grey */}
+      {!settings.parchmentMode && (
+        <div className="absolute inset-0 pointer-events-none z-10" aria-hidden style={{
+          background: 'radial-gradient(ellipse at 50% 8%, rgba(139,0,0,0.30), transparent 55%), radial-gradient(ellipse at 50% 108%, rgba(91,15,26,0.42), transparent 60%)',
+          mixBlendMode: 'soft-light',
+        }} />
+      )}
+      {/* Vignette — heavy crimson-black falloff at the edges (brutalist frame) */}
       {settings.vignette && !isInsideOverlay && (
         <div className="absolute inset-0 pointer-events-none z-10" style={{
           background: settings.parchmentMode
             ? 'radial-gradient(ellipse at center, transparent 60%, rgba(58, 34, 12, 0.25) 100%)'
-            : 'radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.55) 100%)'
+            : 'radial-gradient(ellipse at center, transparent 48%, rgba(40,0,6,0.5) 82%, rgba(0,0,0,0.8) 100%)'
         }} />
       )}
 

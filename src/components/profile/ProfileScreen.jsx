@@ -89,7 +89,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
           <div className="flex items-center gap-2 min-w-0 flex-1 mr-2">
             <ArcanaCard handle={profile.name} onTap={() => setShowArcana(true)} />
             {(() => { const a = arcanaFor(profile.name); return (
-              <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] truncate" style={F.display}>{a.numeral} · {a.name}</span>
+              <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E] truncate" style={F.display}>{a.numeral} · {a.name}</span>
             ); })()}
           </div>
           <div className="flex items-center gap-2">
@@ -130,7 +130,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
               <h2 className="text-[#F5F1E8] text-xl truncate" style={F.brand}>{profile.name}</h2>
             </div>
             <div className="text-[#6B6B6B] text-[10px] uppercase tracking-wider mb-1" style={F.ui}>
-              {profile.pronouns} {sign && <span className="ml-2 text-[#A89968]">{sign.glyph} {sign.name.toLowerCase()}</span>}
+              {profile.pronouns} {sign && <span className="ml-2 text-[#C8102E]">{sign.glyph} {sign.name.toLowerCase()}</span>}
             </div>
             <p className="text-[#A8A29E] text-sm leading-snug" style={F.serif}>{profile.bio}</p>
             <div className="flex flex-wrap items-center gap-1.5 mt-2">
@@ -143,7 +143,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
 
         {/* Candle attribution */}
         {candleActive && (
-          <div className="relative mt-3 text-[10px] text-[#A89968] flex items-center gap-1.5" style={F.serif}>
+          <div className="relative mt-3 text-[10px] text-[#C8102E] flex items-center gap-1.5" style={F.serif}>
             <span className="opacity-60">🕯</span>
             <span><span style={F.ui} className="text-[#6B6B6B] uppercase tracking-wider mr-1">last lit by</span>{profile.candleLit.lastBy} · {timeAgo(profile.candleLit.at)}</span>
           </div>
@@ -157,7 +157,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
         </div>
 
         <button onClick={() => setShowRecap(true)}
-          className="relative w-full mt-3 py-2 text-[10px] uppercase tracking-[0.25em] text-[#A89968] border border-[#2A2A2A] hover:border-[#5B0F1A] hover:text-[#C9A961] transition-colors" style={F.ui}>
+          className="relative w-full mt-3 py-2 text-[10px] uppercase tracking-[0.25em] text-[#C8102E] border border-[#2A2A2A] hover:border-[#5B0F1A] hover:text-[#C9A961] transition-colors" style={F.ui}>
           ✦ your dark recap
         </button>
         {showRecap && <DarkRecapModal stats={recapStats} onClose={() => setShowRecap(false)} />}
@@ -167,7 +167,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
             <div onClick={e => e.stopPropagation()}>
               <ArcanaCard handle={profile.name} mode="full" />
               <button onClick={() => setShowArcana(false)}
-                className="mt-4 mx-auto block text-[10px] uppercase tracking-[0.3em] text-[#A89968]/70 hover:text-[#C9A961]" style={F.ui}>· close ·</button>
+                className="mt-4 mx-auto block text-[10px] uppercase tracking-[0.3em] text-[#C8102E]/70 hover:text-[#C9A961]" style={F.ui}>· close ·</button>
             </div>
           </div>
         )}
@@ -196,7 +196,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
             <span>📌</span> · pinned to the shrine ·
           </div>
           {pinnedPost.body && <p className="text-[#F5F1E8] text-sm leading-snug italic line-clamp-3" style={F.serif}>"{pinnedPost.body}"</p>}
-          <div className="text-[10px] text-[#A89968] mt-1" style={F.mono}>{pinnedPost.time}</div>
+          <div className="text-[10px] text-[#C8102E] mt-1" style={F.mono}>{pinnedPost.time}</div>
         </button>
       )}
 
@@ -204,7 +204,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
       {storyHighlights.length > 0 && (
         <div className="mx-4 mt-3 border border-[#2A2A2A] bg-[#0F0F0F]" style={{ width: 'calc(100% - 2rem)' }}>
           <div className="px-3 py-2 border-b border-[#1A1A1A] flex items-center justify-between">
-            <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· kept stories ·</span>
+            <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· kept stories ·</span>
             <span className="text-[10px] text-[#6B6B6B]" style={F.mono}>{storyHighlights.length}</span>
           </div>
           <div className="flex gap-2 p-3 overflow-x-auto no-scrollbar">
@@ -237,7 +237,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
           <div className="bg-[#0F0F0F] border border-[#2A2A2A] w-full sm:max-w-md sm:m-4 animate-slide-up" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A]">
               <div>
-                <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· tint your shrine ·</span>
+                <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· tint your shrine ·</span>
                 <h3 className="text-[#F5F1E8] text-lg leading-none mt-1" style={F.display}>THEME</h3>
               </div>
               <button onClick={() => setShowThemePicker(false)} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
@@ -260,12 +260,12 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
       <div className="mx-4 mt-4 grid grid-cols-2 gap-2" style={{ width: 'calc(100% - 2rem)' }}>
         <button onClick={onPerformRitual} disabled={ritualDoneToday}
           className={`p-3 border text-left transition-colors ${ritualDoneToday ? 'border-[#C9A961]/40 bg-[#C9A961]/5' : 'border-[#2A2A2A] hover:border-[#A89968]/40 bg-[#0F0F0F]'}`}>
-          <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-1" style={F.ui}>· daily ritual ·</div>
+          <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E] mb-1" style={F.ui}>· daily ritual ·</div>
           <div className="flex items-baseline gap-2">
             <span className="text-[#C9A961] text-2xl leading-none" style={F.mono}>{ritual?.streak || 0}</span>
             <span className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>{(ritual?.streak || 0) === 1 ? 'day' : 'days'}</span>
           </div>
-          <div className="text-[10px] text-[#A89968] mt-0.5 italic" style={F.serif}>
+          <div className="text-[10px] text-[#C8102E] mt-0.5 italic" style={F.serif}>
             {ritualDoneToday ? '· marked for today ·' : 'tap to mark'}
           </div>
         </button>
@@ -279,7 +279,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
       {/* Now playing */}
       <button onClick={onOpenNowPlaying} className="w-full text-left mx-4 mt-4 p-3 border border-[#2A2A2A] bg-gradient-to-br from-[#A89968]/10 to-transparent hover:border-[#A89968]/50 transition-colors group" style={{ width: 'calc(100% - 2rem)' }}>
         <div className="flex items-center justify-between mb-1">
-          <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] flex items-center gap-1.5" style={F.ui}>
+          <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E] flex items-center gap-1.5" style={F.ui}>
             <Music size={11} /> · now playing ·
           </span>
           <Pencil size={11} className="text-[#6B6B6B] group-hover:text-[#A8A29E]" />
@@ -296,7 +296,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
             </span>
             <p className="text-[#F5F1E8] text-sm leading-snug min-w-0" style={F.serif}>
               <span className="text-[#C9A961]">{nowPlaying.artist}</span>
-              {nowPlaying.artist && nowPlaying.track && <span className="text-[#A89968]/60"> · </span>}
+              {nowPlaying.artist && nowPlaying.track && <span className="text-[#C8102E]/60"> · </span>}
               <span className="italic">{nowPlaying.track}</span>
               {nowPlaying.loop && <span className="ml-1.5 align-middle text-[9px] uppercase tracking-wider text-[#C9A961] border border-[#C9A961]/40 px-1 py-0.5" style={F.ui}>↻ repeat</span>}
             </p>
@@ -308,9 +308,9 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
 
       {/* Reflections (private) */}
       <button onClick={onOpenReflections} className="w-full text-left mx-4 mt-3 p-3 border border-[#2A2A2A] bg-[#0F0F0F] hover:border-[#A89968]/40 transition-colors group flex items-center gap-2" style={{ width: 'calc(100% - 2rem)' }}>
-        <span className="text-[#A89968] text-base">✎</span>
+        <span className="text-[#C8102E] text-base">✎</span>
         <span className="flex-1">
-          <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.ui}>· reflections · only you ·</span>
+          <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.ui}>· reflections · only you ·</span>
           <span className="block text-[#A8A29E] text-xs italic" style={F.serif}>
             {reflectionsCount > 0 ? `${reflectionsCount} ${reflectionsCount === 1 ? 'entry' : 'entries'}` : 'write to yourself'}
           </span>
@@ -330,9 +330,9 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
 
       {/* Your tickets (rites you've bought into) */}
       <button onClick={onOpenTickets} className="w-full text-left mx-4 mt-3 p-3 border border-[#2A2A2A] bg-[#0F0F0F] hover:border-[#A89968]/40 transition-colors group flex items-center gap-2" style={{ width: 'calc(100% - 2rem)' }}>
-        <span className="text-[#A89968] text-base">𖤐</span>
+        <span className="text-[#C8102E] text-base">𖤐</span>
         <span className="flex-1">
-          <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.ui}>· your tickets ·</span>
+          <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.ui}>· your tickets ·</span>
           <span className="block text-[#A8A29E] text-xs italic" style={F.serif}>rites you've paid into</span>
         </span>
         <ChevronRight size={16} className="text-[#3F3F3F]" />
@@ -360,7 +360,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
       {mementoMoriOn !== false && (
         <div className="mx-4 mb-4 p-3 border border-[#2A2A2A] bg-[#0F0F0F]">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· memento mori ·</span>
+            <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· memento mori ·</span>
             <span className="text-[#6B6B6B] text-base">☠</span>
           </div>
           {daysLived == null ? (
@@ -373,7 +373,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
               </div>
               {settings?.mementoExpected !== false && (
                 <div>
-                  <div className="text-[#A89968] text-2xl leading-none" style={F.mono}>~{daysExpected.toLocaleString()}</div>
+                  <div className="text-[#C8102E] text-2xl leading-none" style={F.mono}>~{daysExpected.toLocaleString()}</div>
                   <div className="text-[10px] text-[#6B6B6B] uppercase tracking-wider mt-1" style={F.ui}>days left · est</div>
                 </div>
               )}
@@ -386,8 +386,8 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
       {/* Graves */}
       <div className="mx-4 mb-4 border border-[#2A2A2A] bg-[#0F0F0F]">
         <div className="px-3 py-2 border-b border-[#1A1A1A] flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· in memoriam ·</span>
-          <button onClick={onAddGrave} className="text-[10px] uppercase tracking-wider text-[#A89968] hover:text-[#C9A961]" style={F.ui}>+ add</button>
+          <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· in memoriam ·</span>
+          <button onClick={onAddGrave} className="text-[10px] uppercase tracking-wider text-[#C8102E] hover:text-[#C9A961]" style={F.ui}>+ add</button>
         </div>
         {graves.length > 0 ? (
           <div className="divide-y divide-[#1A1A1A]">
@@ -406,7 +406,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
                         {g.name}
                         {g.private && <Lock size={11} className="text-[#6B6B6B] shrink-0" title="private — only you can see this" />}
                       </h4>
-                      <span className="text-[10px] text-[#A89968] uppercase tracking-wider shrink-0" style={F.ui}>{g.kind}</span>
+                      <span className="text-[10px] text-[#C8102E] uppercase tracking-wider shrink-0" style={F.ui}>{g.kind}</span>
                     </div>
                     <div className="text-[10px] text-[#6B6B6B]" style={F.mono}>{g.dates}</div>
                     <p className="text-[#A8A29E] text-sm mt-1 italic leading-snug" style={F.serif}>"{g.epitaph}"</p>
@@ -417,7 +417,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
                       </div>
                       <button onClick={() => onLightCandle && onLightCandle(g.id)}
                         disabled={candleBurning}
-                        className={`text-[10px] uppercase tracking-wider px-2 py-0.5 border transition-colors ${candleBurning ? 'border-[#C9A961]/40 text-[#C9A961]/80 cursor-default' : 'border-[#2A2A2A] text-[#A89968] hover:border-[#C9A961] hover:text-[#C9A961]'}`}
+                        className={`text-[10px] uppercase tracking-wider px-2 py-0.5 border transition-colors ${candleBurning ? 'border-[#C9A961]/40 text-[#C9A961]/80 cursor-default' : 'border-[#2A2A2A] text-[#C8102E] hover:border-[#C9A961] hover:text-[#C9A961]'}`}
                         style={F.ui}>
                         {candleBurning ? '🕯 lit' : '🕯 light a candle'}
                       </button>
@@ -438,7 +438,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
       {sigils.length > 0 && (
         <div className="mx-4 mb-4 border border-[#2A2A2A] bg-[#0F0F0F]">
           <div className="px-3 py-2 border-b border-[#1A1A1A] flex items-center justify-between">
-            <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· sealed sigils ·</span>
+            <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· sealed sigils ·</span>
             <span className="text-[10px] text-[#6B6B6B]" style={F.mono}>{sigils.length}</span>
           </div>
           <div className="grid grid-cols-3 gap-px bg-[#1A1A1A]">
@@ -471,15 +471,15 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
       {/* Crews */}
       <div className="mx-4 mb-4 border border-[#2A2A2A] bg-[#0F0F0F]">
         <div className="px-3 py-2 border-b border-[#1A1A1A] flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· your crews ·</span>
-          <button onClick={onBrowseCrews} className="text-[10px] uppercase tracking-wider text-[#A89968] hover:text-[#C9A961]" style={F.ui}>browse</button>
+          <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· your crews ·</span>
+          <button onClick={onBrowseCrews} className="text-[10px] uppercase tracking-wider text-[#C8102E] hover:text-[#C9A961]" style={F.ui}>browse</button>
         </div>
         {crews.length > 0 ? (
           <div className="divide-y divide-[#1A1A1A]">
             {crews.map(c => (
               <button key={c.id} onClick={() => onOpenCrew && onOpenCrew(c.id)}
                 className="w-full text-left px-3 py-3 flex items-start gap-3 hover:bg-[#0A0A0A] transition-colors">
-                <div className="w-10 h-10 shrink-0 border border-[#2A2A2A] flex items-center justify-center text-[#A89968] text-lg">{c.glyph}</div>
+                <div className="w-10 h-10 shrink-0 border border-[#2A2A2A] flex items-center justify-center text-[#C8102E] text-lg">{c.glyph}</div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline justify-between gap-2 mb-0.5">
                     <h4 className="text-[#F5F1E8] text-sm truncate" style={F.display}>{c.name}</h4>
@@ -500,9 +500,9 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
       {/* Anniversaries */}
       <div className="mx-4 mb-4 border border-[#2A2A2A] bg-[#0F0F0F]">
         <div className="px-3 py-2 border-b border-[#1A1A1A] flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· anniversaries ·</span>
+          <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· anniversaries ·</span>
           <div className="flex items-center gap-3">
-            <button onClick={onAddAnniversary} className="text-[10px] uppercase tracking-wider text-[#A89968] hover:text-[#C9A961]" style={F.ui}>+ add</button>
+            <button onClick={onAddAnniversary} className="text-[10px] uppercase tracking-wider text-[#C8102E] hover:text-[#C9A961]" style={F.ui}>+ add</button>
             {anniversaries.length > 0 && (
               <button onClick={() => setShowAllAnniv(!showAllAnniv)} className="text-[10px] uppercase tracking-wider text-[#6B6B6B]" style={F.ui}>
                 {showAllAnniv ? 'less' : 'all'}
@@ -516,7 +516,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
               const years = (days / 365).toFixed(1);
               return (
                 <div key={a.id} className="px-3 py-2.5 flex items-center gap-3">
-                  <span className="text-[#A89968] text-base shrink-0">✦</span>
+                  <span className="text-[#C8102E] text-base shrink-0">✦</span>
                   <div className="flex-1 min-w-0">
                     <div className="text-[#F5F1E8] text-sm" style={F.serif}>{a.label}</div>
                     {a.description && <div className="text-[10px] text-[#6B6B6B]" style={F.ui}>{a.description}</div>}
@@ -534,7 +534,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
       {/* Achievements */}
       <div className="mx-4 mb-4 border border-[#2A2A2A] bg-[#0F0F0F]">
         <div className="px-3 py-2 border-b border-[#1A1A1A] flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· marks earned ·</span>
+          <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· marks earned ·</span>
           <span className="text-[10px] text-[#6B6B6B]" style={F.mono}>{earned.length}/{ACHIEVEMENTS.length}</span>
         </div>
         <div className="grid grid-cols-4 gap-px bg-[#1A1A1A]">
@@ -558,7 +558,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
               <span className={`text-xl ${earnedIds.has(selectedMark.id) ? 'text-[#C9A961]' : 'text-[#6B6B6B]'}`}>{selectedMark.glyph}</span>
               <div className="flex-1 min-w-0">
                 <div className="text-[#F5F1E8] text-xs uppercase tracking-wider" style={F.ui}>{selectedMark.name}</div>
-                <div className="text-[10px] text-[#A89968]/80 italic" style={F.serif}>{selectedMark.desc}</div>
+                <div className="text-[10px] text-[#C8102E]/80 italic" style={F.serif}>{selectedMark.desc}</div>
               </div>
               <span className={`text-[9px] uppercase tracking-[0.18em] ${earnedIds.has(selectedMark.id) ? 'text-[#C9A961]' : 'text-[#6B6B6B]'}`} style={F.ui}>
                 {earnedIds.has(selectedMark.id) ? '✓ earned' : 'locked'}
@@ -617,7 +617,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
                     <span className="text-[10px] text-[#6B6B6B]" style={F.mono}>{post.time}</span>
                   </div>
                   {post.body && <p className="text-[#A8A29E] text-sm mt-1 line-clamp-2" style={F.serif}>{post.body}</p>}
-                  {post.kind === 'event' && <p className="text-[#A89968] text-sm mt-1" style={F.display}>{post.event.name}</p>}
+                  {post.kind === 'event' && <p className="text-[#C8102E] text-sm mt-1" style={F.display}>{post.event.name}</p>}
                 </div>
               </button>
             ))}
@@ -634,7 +634,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
           <div className="divide-y divide-[#1A1A1A]">
             {activityLog.map(entry => (
               <div key={entry.id} className="px-4 py-3 flex items-start gap-3">
-                <span className="text-[#A89968] text-base shrink-0 w-6 text-center">{entry.glyph || '\u00b7'}</span>
+                <span className="text-[#C8102E] text-base shrink-0 w-6 text-center">{entry.glyph || '\u00b7'}</span>
                 <div className="flex-1 min-w-0">
                   <div className="text-[#F5F1E8] text-sm" style={F.serif}>{entry.label}</div>
                   {entry.detail && <div className="text-[11px] text-[#A8A29E] italic line-clamp-2 mt-0.5" style={F.serif}>{entry.detail}</div>}
@@ -662,7 +662,7 @@ function SelfFlame({ flameLitAt = 0, onTend }) {
       style={{ width: 'calc(100% - 2rem)' }}>
       <span className={`text-2xl ${lit ? 'animate-flicker' : 'opacity-40 grayscale'}`}>🕯</span>
       <div className="flex-1 min-w-0">
-        <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.ui}>· your flame ·</div>
+        <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.ui}>· your flame ·</div>
         <div className="text-[#A8A29E] text-xs italic mt-0.5" style={F.serif}>
           {!lit ? 'your flame has gone out — tap to light it' : low ? 'guttering — tend it before it dies' : 'burning. return to tend it.'}
         </div>
@@ -670,7 +670,7 @@ function SelfFlame({ flameLitAt = 0, onTend }) {
           <div className="h-full transition-all" style={{ width: `${Math.round(pct * 100)}%`, background: low ? '#8B0000' : '#C9A961' }} />
         </div>
       </div>
-      <span className="text-[10px] uppercase tracking-wider text-[#A89968] shrink-0" style={F.ui}>{lit ? 'tend' : 'light'}</span>
+      <span className="text-[10px] uppercase tracking-wider text-[#C8102E] shrink-0" style={F.ui}>{lit ? 'tend' : 'light'}</span>
     </button>
   );
 }
@@ -691,7 +691,7 @@ function ShrineBlock({ shrine = [], onSetShrine, state = {} }) {
       <button onClick={() => setOpen(true)}
         className="w-full text-left mx-4 mt-4 p-3 border border-[#2A2A2A] bg-[#0F0F0F] hover:border-[#A89968]/40 transition-colors" style={{ width: 'calc(100% - 2rem)' }}>
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.ui}>· the altar ·</span>
+          <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.ui}>· the altar ·</span>
           <span className="text-[10px] text-[#6B6B6B]" style={F.ui}>{earned.size}/{SHRINE_OBJECTS.length} earned</span>
         </div>
         <div className="flex items-center gap-2">
@@ -708,7 +708,7 @@ function ShrineBlock({ shrine = [], onSetShrine, state = {} }) {
           <div className="bg-[#0F0F0F] border border-[#2A2A2A] w-full sm:max-w-md sm:m-4 animate-slide-up max-h-[90dvh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A]">
               <div>
-                <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· place up to 5 · earned by practice ·</span>
+                <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· place up to 5 · earned by practice ·</span>
                 <h3 className="text-[#F5F1E8] text-lg leading-none mt-1" style={F.display}>THE ALTAR</h3>
               </div>
               <button onClick={() => setOpen(false)} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1"><X size={20} /></button>
@@ -745,7 +745,7 @@ function CrystalsBlock({ crystals, onToggleCrystal }) {
     <>
       <button onClick={() => setOpen(true)}
         className="p-3 border border-[#2A2A2A] hover:border-[#A89968]/40 bg-[#0F0F0F] text-left transition-colors">
-        <div className="text-[10px] uppercase tracking-[0.25em] text-[#A89968] mb-1" style={F.ui}>· crystals carried ·</div>
+        <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E] mb-1" style={F.ui}>· crystals carried ·</div>
         {carried.length === 0 ? (
           <div className="text-[#6B6B6B] text-sm italic" style={F.serif}>none yet — carry a stone, set an intention</div>
         ) : (
@@ -756,7 +756,7 @@ function CrystalsBlock({ crystals, onToggleCrystal }) {
               ))}
             </div>
             {focus && (
-              <div className="text-[10px] text-[#A89968]/80 mt-1.5 italic" style={F.serif}>· focus: {focus.intention} ·</div>
+              <div className="text-[10px] text-[#C8102E]/80 mt-1.5 italic" style={F.serif}>· focus: {focus.intention} ·</div>
             )}
           </>
         )}
@@ -767,7 +767,7 @@ function CrystalsBlock({ crystals, onToggleCrystal }) {
           <div className="bg-[#0F0F0F] border border-[#2A2A2A] w-full sm:max-w-md sm:m-4 animate-slide-up" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A]">
               <div>
-                <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>· choose up to 6 · first sets your focus ·</span>
+                <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· choose up to 6 · first sets your focus ·</span>
                 <h3 className="text-[#F5F1E8] text-lg leading-none mt-1" style={F.display}>STONES CARRIED</h3>
               </div>
               <button onClick={() => setOpen(false)} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
@@ -781,7 +781,7 @@ function CrystalsBlock({ crystals, onToggleCrystal }) {
                     <span className="text-2xl shrink-0 leading-none mt-0.5" style={{ color: c.tint }}>{c.glyph}</span>
                     <span className="min-w-0">
                       <span className="block text-[#F5F1E8] text-sm" style={F.serif}>{c.name}</span>
-                      <span className="block text-[10px] text-[#A89968]/80 uppercase tracking-wider" style={F.ui}>{c.intention}</span>
+                      <span className="block text-[10px] text-[#C8102E]/80 uppercase tracking-wider" style={F.ui}>{c.intention}</span>
                       <span className="block text-[10px] text-[#6B6B6B] italic mt-0.5 leading-snug" style={F.serif}>{c.meaning}</span>
                     </span>
                   </button>

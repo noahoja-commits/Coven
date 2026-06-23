@@ -50,7 +50,7 @@ export function DailyAltar({
         <button onClick={onOpenEphemeris} className="flex items-center gap-2 group" title="the heavens">
           <span className="text-[#C9A961] text-2xl leading-none group-hover:text-[#F5F1E8] transition-colors">{moon.glyph}</span>
           <span className="text-left">
-            <span className="block text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.scriptureSC}>{moon.name}</span>
+            <span className="block text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>{moon.name}</span>
             <span className="block text-[10px] text-[#6B6B6B]" style={F.mono}>{Math.round(moon.illum * 100)}% lit</span>
           </span>
         </button>
@@ -88,15 +88,15 @@ export function DailyAltar({
         {focus && (
           <div className="flex items-center gap-2 text-[11px]" style={F.serif}>
             <span style={{ color: focus.tint }} className="text-sm">{focus.glyph}</span>
-            <span className="text-[#A89968] uppercase tracking-wider text-[10px]" style={F.ui}>focus</span>
+            <span className="text-[#C8102E] uppercase tracking-wider text-[10px]" style={F.ui}>focus</span>
             <span className="text-[#A8A29E]">{focus.intention} — <span className="italic text-[#6B6B6B]">{focus.meaning}</span></span>
           </div>
         )}
         <button onClick={onOpenReflections}
           className="w-full text-left flex items-start gap-2 p-2.5 border border-[#2A2A2A] hover:border-[#A89968]/40 bg-[#0A0204]/40 transition-colors group">
-          <span className="text-[#A89968] text-sm mt-0.5">✎</span>
+          <span className="text-[#C8102E] text-sm mt-0.5">✎</span>
           <span className="flex-1 min-w-0">
-            <span className="block text-[9px] uppercase tracking-[0.3em] text-[#A89968]/70 mb-0.5" style={F.scriptureSC}>· reflect ·</span>
+            <span className="block text-[9px] uppercase tracking-[0.3em] text-[#C8102E]/70 mb-0.5" style={F.scriptureSC}>· reflect ·</span>
             <span className="block text-[#F5F1E8] text-sm italic leading-snug" style={F.scripture}>{prompt}</span>
           </span>
           <span className="text-[9px] uppercase tracking-wider text-[#6B6B6B] group-hover:text-[#C9A961] self-center" style={F.ui}>write</span>
