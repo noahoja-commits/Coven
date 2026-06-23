@@ -250,18 +250,21 @@ export default function App() {
     else if (settings.mediaTreatment === 'oxblood') document.body.classList.add('media-oxblood');
     // Per-shock-mode GOTHIC typography retheme — a different gothic face per mode, forced across the UI.
     const SHOCK_FONT = {
-      insomnia: 'shock-type-grenze', emergency: 'shock-type-grenze',
-      'dead-channel': 'shock-type-pirata', glitch: 'shock-type-pirata',
+      insomnia: 'shock-type-grenze', emergency: 'shock-type-grenze', requiem: 'shock-type-grenze',
+      'dead-channel': 'shock-type-pirata', glitch: 'shock-type-pirata', alchemy: 'shock-type-pirata',
       scream: 'shock-type-metal', inferno: 'shock-type-metal',
-      spatter: 'shock-type-unifraktur', void: 'shock-type-unifraktur',
-      rebirth: 'shock-type-rocker', cathedral: 'shock-type-rocker',
+      spatter: 'shock-type-unifraktur', void: 'shock-type-unifraktur', reliquary: 'shock-type-unifraktur',
+      rebirth: 'shock-type-rocker', cathedral: 'shock-type-rocker', mist: 'shock-type-rocker',
     };
     document.body.classList.remove('shock-type-grenze', 'shock-type-pirata', 'shock-type-metal', 'shock-type-unifraktur', 'shock-type-rocker');
     const fc = SHOCK_FONT[settings.shockMode];
     if (fc && !settings.parchmentMode) document.body.classList.add(fc);
-    // Insomnia recolours the WHOLE app to electric blue via a reliable element filter (backdrop-filter
-    // wouldn't override the red base). Applied to .phone-frame through a body class.
-    document.body.classList.toggle('shock-duo-blue', settings.shockMode === 'insomnia' && !settings.parchmentMode);
+    // Some modes recolour the WHOLE app via a reliable element filter on .phone-frame (backdrop-filter
+    // wouldn't override the red base): insomnia=electric blue, requiem=stark B&W, mist=sepia.
+    const SHOCK_DUO = { insomnia: 'shock-duo-blue', requiem: 'shock-duo-bw', mist: 'shock-duo-sepia' };
+    document.body.classList.remove('shock-duo-blue', 'shock-duo-bw', 'shock-duo-sepia');
+    const dc = SHOCK_DUO[settings.shockMode];
+    if (dc && !settings.parchmentMode) document.body.classList.add(dc);
   }, [settings.parchmentMode, settings.mediaTreatment, settings.shockMode]);
 
   // Ambient drone. The AudioContext MUST be started/resumed synchronously inside

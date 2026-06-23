@@ -4,6 +4,14 @@
 // the 'scream'/'glitch' frame-shake itself is a class on the phone-frame (App.jsx).
 
 const WRAP = 'absolute inset-0 pointer-events-none z-30 overflow-hidden';
+const GRAIN = "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>\")";
+// scattered alchemical / astronomical glyphs for the Alchemy mode
+const ALCHEMY_GLYPHS = [
+  { g: '☉', t: '8%', l: '12%' }, { g: '☽', t: '22%', l: '78%' }, { g: '☿', t: '40%', l: '20%' },
+  { g: '♀', t: '14%', l: '52%' }, { g: '♂', t: '60%', l: '70%' }, { g: '♃', t: '74%', l: '30%' },
+  { g: '♄', t: '52%', l: '88%' }, { g: '🜂', t: '86%', l: '60%' }, { g: '🜄', t: '34%', l: '60%' },
+  { g: '⚹', t: '68%', l: '10%' }, { g: '🜔', t: '90%', l: '24%' }, { g: '☊', t: '6%', l: '84%' },
+];
 
 // Deterministic ember field for the Pyre.
 const EMBERS = Array.from({ length: 26 }, (_, i) => ({
@@ -186,6 +194,73 @@ CPU 18% · PROC 107
     );
   }
 
+  // ── REQUIEM — stark 1-bit B&W (filter via .shock-duo-bw) + heavy grain + vignette ──
+  if (mode === 'requiem') {
+    return (
+      <div className={WRAP} aria-hidden>
+        <div className="absolute inset-0" style={{ backgroundImage: GRAIN, backgroundSize: '140px 140px', mixBlendMode: 'overlay', opacity: 0.55 }} />
+        <div className="absolute inset-0 opacity-30" style={{ background: 'repeating-linear-gradient(to bottom, rgba(0,0,0,0.4) 0 1px, transparent 1px 3px)' }} />
+        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 130px 36px rgba(0,0,0,0.85)' }} />
+      </div>
+    );
+  }
+
+  // ── MIST — warm sepia fog drifting (filter via .shock-duo-sepia) ──
+  if (mode === 'mist') {
+    return (
+      <div className={WRAP} aria-hidden>
+        <div className="absolute -inset-1/3 shock-fog" style={{ background: 'radial-gradient(ellipse at 30% 38%, rgba(225,205,165,0.4), transparent 55%)' }} />
+        <div className="absolute -inset-1/3 shock-fog2" style={{ background: 'radial-gradient(ellipse at 72% 64%, rgba(205,180,145,0.36), transparent 55%)' }} />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(150,130,95,0.35), transparent 45%), linear-gradient(to bottom, rgba(180,160,120,0.25), transparent 40%)' }} />
+        <div className="absolute inset-0" style={{ backgroundImage: GRAIN, backgroundSize: '140px 140px', mixBlendMode: 'overlay', opacity: 0.25 }} />
+      </div>
+    );
+  }
+
+  // ── RELIQUARY — ornate gothic cathedral arch + tracery frame (silver on black) ──
+  if (mode === 'reliquary') {
+    return (
+      <div className={`${WRAP} text-[#d6cfc0]`} aria-hidden>
+        <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 200" style={{ opacity: 0.85 }}>
+          <rect x="3" y="3" width="94" height="194" fill="none" stroke="currentColor" strokeWidth="0.5" />
+          <rect x="5.5" y="5.5" width="89" height="189" fill="none" stroke="currentColor" strokeWidth="0.25" opacity="0.7" />
+          {/* gothic pointed arch near the top */}
+          <path d="M10 40 Q10 12 50 9 Q90 12 90 40" fill="none" stroke="currentColor" strokeWidth="0.5" />
+          <path d="M14 40 Q14 16 50 13 Q86 16 86 40" fill="none" stroke="currentColor" strokeWidth="0.25" opacity="0.7" />
+          {/* tracery cusps along the arch */}
+          {[22, 34, 50, 66, 78].map((x, i) => <path key={i} d={`M${x - 4} 20 Q${x} 12 ${x + 4} 20`} fill="none" stroke="currentColor" strokeWidth="0.3" opacity="0.6" />)}
+          {/* bottom pendant */}
+          <path d="M50 188 l-4 -6 h8 z M50 182 v-6" fill="none" stroke="currentColor" strokeWidth="0.4" />
+        </svg>
+        {/* corner fleurons */}
+        {['top-1.5 left-1.5', 'top-1.5 right-1.5', 'bottom-1.5 left-1.5', 'bottom-1.5 right-1.5'].map((p, i) => (
+          <span key={i} className={`absolute ${p} text-base opacity-80`}>⛧</span>
+        ))}
+        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 90px 26px rgba(0,0,0,0.7)' }} />
+      </div>
+    );
+  }
+
+  // ── ALCHEMY — drifting astronomical rings + alchemical glyphs + kanji (dark academia) ──
+  if (mode === 'alchemy') {
+    return (
+      <div className={`${WRAP} text-[#bcb4a2]`} aria-hidden>
+        <div className="absolute inset-0" style={{ background: 'rgba(6,6,10,0.4)' }} />
+        <svg viewBox="0 0 200 200" className="absolute left-1/2 top-1/2 w-[150%] h-[150%] shock-orbit" style={{ opacity: 0.16 }}>
+          {[34, 56, 78, 96].map(r => <circle key={r} cx="100" cy="100" r={r} fill="none" stroke="currentColor" strokeWidth="0.4" />)}
+          <ellipse cx="100" cy="100" rx="96" ry="46" fill="none" stroke="currentColor" strokeWidth="0.4" />
+          <circle cx="100" cy="44" r="2" fill="currentColor" /><circle cx="156" cy="100" r="1.6" fill="currentColor" />
+        </svg>
+        {ALCHEMY_GLYPHS.map((a, i) => (
+          <span key={i} className="absolute text-lg shock-twinkle" style={{ top: a.t, left: a.l, opacity: 0.4, animationDelay: `${(i % 6) * 0.5}s` }}>{a.g}</span>
+        ))}
+        <div className="absolute left-2 top-[18%] text-[10px] leading-[1.8] opacity-25" style={{ writingMode: 'vertical-rl', fontFamily: '"Shippori Mincho", serif' }}>生流転死再生</div>
+        <div className="absolute inset-0" style={{ backgroundImage: GRAIN, backgroundSize: '140px 140px', mixBlendMode: 'overlay', opacity: 0.3 }} />
+        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 110px 28px rgba(0,2,8,0.8)' }} />
+      </div>
+    );
+  }
+
   return null;
 }
 
@@ -202,4 +277,8 @@ export const SHOCK_MODES = [
   { id: 'void', label: 'Black Mass', desc: 'crushed to black' },
   { id: 'cathedral', label: 'Sanctum', desc: 'god-ray light shafts' },
   { id: 'rebirth', label: 'Rebirth', desc: 'poster · red corners · chevrons' },
+  { id: 'requiem', label: 'Requiem', desc: 'stark 1-bit black & white' },
+  { id: 'mist', label: 'Mist', desc: 'warm sepia fog' },
+  { id: 'reliquary', label: 'Reliquary', desc: 'gothic cathedral arch frame' },
+  { id: 'alchemy', label: 'Alchemy', desc: 'astral rings · glyphs · kanji' },
 ];

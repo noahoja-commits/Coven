@@ -15,6 +15,10 @@ const SWATCH = {
   void: 'radial-gradient(ellipse at center, #1A0408 4%, #000 70%)',
   cathedral: 'repeating-linear-gradient(72deg, transparent 0 6px, rgba(201,169,97,0.4) 6px 8px, transparent 8px 14px), #0A0204',
   rebirth: 'linear-gradient(135deg, #C8102E 0 12%, #0A0204 12%)',
+  requiem: 'linear-gradient(180deg, #fff 0 50%, #000 50%)',
+  mist: 'linear-gradient(160deg, #e1cda5, #6b5a3c)',
+  reliquary: 'radial-gradient(ellipse at 50% 30%, #2a2a30, #0A0A0A), repeating-radial-gradient(#d6cfc0 0 0.5px, transparent 1px 7px)',
+  alchemy: 'radial-gradient(circle at 50% 50%, #14141a, #050508), repeating-radial-gradient(#bcb4a2 0 0.4px, transparent 1px 9px)',
 };
 
 // Live mode picker — translucent so the effect plays behind it while you try modes.
