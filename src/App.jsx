@@ -259,6 +259,9 @@ export default function App() {
     document.body.classList.remove('shock-type-grenze', 'shock-type-pirata', 'shock-type-metal', 'shock-type-unifraktur', 'shock-type-rocker');
     const fc = SHOCK_FONT[settings.shockMode];
     if (fc && !settings.parchmentMode) document.body.classList.add(fc);
+    // Insomnia recolours the WHOLE app to electric blue via a reliable element filter (backdrop-filter
+    // wouldn't override the red base). Applied to .phone-frame through a body class.
+    document.body.classList.toggle('shock-duo-blue', settings.shockMode === 'insomnia' && !settings.parchmentMode);
   }, [settings.parchmentMode, settings.mediaTreatment, settings.shockMode]);
 
   // Ambient drone. The AudioContext MUST be started/resumed synchronously inside
