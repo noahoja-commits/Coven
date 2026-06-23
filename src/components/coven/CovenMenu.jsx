@@ -9,6 +9,7 @@ const PORTALS = [
   { id: 'codex', name: 'The Codex', desc: 'a dictionary. goth, occult, scene, sacred.', glyph: '⌬', tone: 'gold', enabled: true },
   { id: 'sigils', name: 'Sigils', desc: 'give your intention a body. line, circle, sealed.', glyph: '⛧', tone: 'red', enabled: true },
   { id: 'pendulum', name: 'The Pendulum', desc: 'ask once. yes, no, or ask again.', glyph: '◯', tone: 'silver', enabled: true },
+  { id: 'intention', name: 'The Working', desc: 'set an intention. light it. let it burn.', glyph: '🕯', tone: 'gold', enabled: true },
   { id: 'confessions', name: 'Confessions', desc: 'speak without your name. no replies.', glyph: '☩', tone: 'red', enabled: true },
   { id: 'souls', name: 'Souls', desc: 'the directory. who is counted.', glyph: '☥', tone: 'silver', enabled: true },
 ];

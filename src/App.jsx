@@ -82,6 +82,7 @@ const PendulumOverlay = lazy(() => import('./components/coven/PendulumOverlay').
 const ConfessionsOverlay = lazy(() => import('./components/coven/ConfessionsOverlay').then(m => ({ default: m.ConfessionsOverlay })));
 const SoulsOverlay = lazy(() => import('./components/coven/SoulsOverlay').then(m => ({ default: m.SoulsOverlay })));
 const SigilDrawOverlay = lazy(() => import('./components/coven/SigilDrawOverlay').then(m => ({ default: m.SigilDrawOverlay })));
+const IntentionTimerOverlay = lazy(() => import('./components/coven/IntentionTimerOverlay').then(m => ({ default: m.IntentionTimerOverlay })));
 import { FashionScreen } from './components/fashion/FashionScreen';
 
 import { OnboardingFlow } from './components/onboarding/OnboardingFlow';
@@ -205,6 +206,7 @@ export default function App() {
   const [activityLog, setActivityLog] = useLocalStorage('activityLog', []);
   const [reflections, setReflections] = useState([]); // Supabase-backed (profile_state)
   const [dreams, setDreams] = useState([]); // private dream journal (profile_state)
+  const [activeIntention, setActiveIntention] = useState(null); // spell/intention timer (profile_state)
   const [mutedKeywords, setMutedKeywords] = useLocalStorage('mutedKeywords', []);
   const [hiddenPosts, setHiddenPosts] = useLocalStorage('hiddenPosts', {});
   const [ritual, setRitual] = useLocalStorage('ritual', { streak: 0, lastDay: null });
@@ -362,6 +364,7 @@ export default function App() {
       if (s.sigils) setSigils(s.sigils);
       if (s.reflections) setReflections(s.reflections);
       if (s.dreamJournal) setDreams(s.dreamJournal);
+      if (s.intention) setActiveIntention(s.intention);
       // Cross-device personal layer: hydrate from the cloud blob (cloud wins on login).
       const cs = s.clientSync;
       if (cs) {
@@ -620,6 +623,23 @@ export default function App() {
   // === HANDLERS ===
   // Persist a profile-depth blob (graves/trackers/sigils/reflections) for the logged-in user.
   const persistState = (key, value) => { if (meId) saveProfileState(meId, key, value).catch(() => {}); };
+
+  // Spell / intention timer — one active "working" at a time, persisted in profile_state.
+  const startIntention = (obj) => { setActiveIntention(obj); persistState('intention', obj); };
+  const clearIntention = () => { setActiveIntention(null); persistState('intention', null); };
+  // Completion watcher (above the render gate): when the candle is spent, toast + clear.
+  useEffect(() => {
+    if (!activeIntention) return;
+    const check = () => {
+      if (Date.now() >= activeIntention.endsAt) {
+        showToast('the working is complete · ' + activeIntention.name, 'success');
+        clearIntention();
+      }
+    };
+    check(); // catch a working that finished while the app was closed
+    const t = setInterval(check, 1000);
+    return () => clearInterval(t);
+  }, [activeIntention]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateTracker = (catId, action, payload) => {
     const next = { ...trackers };
@@ -2099,6 +2119,14 @@ export default function App() {
       )}
       {activePortal === 'pendulum' && (
         <PendulumOverlay onClose={closePortal} onLog={logDivination} />
+      )}
+      {activePortal === 'intention' && (
+        <IntentionTimerOverlay
+          intention={activeIntention}
+          onStart={startIntention}
+          onClear={clearIntention}
+          onClose={closePortal}
+        />
       )}
       {activePortal === 'souls' && (
         <SoulsOverlay
