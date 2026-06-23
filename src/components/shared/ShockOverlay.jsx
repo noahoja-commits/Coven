@@ -16,16 +16,18 @@ const WAVE = [22, 60, 14, 80, 35, 95, 50, 70, 12, 88, 40, 66, 18, 100, 30, 75, 5
 export function ShockOverlay({ mode = 'none' }) {
   if (!mode || mode === 'none') return null;
 
-  // ── INSOMNIA — electric-blue duotone takeover + halftone + light sweep ──
+  // ── INSOMNIA — electric-blue DUOTONE of the content (text stays legible) + halftone + sweep ──
   if (mode === 'insomnia') {
+    const duo = 'grayscale(1) sepia(1) hue-rotate(185deg) saturate(5) brightness(1.05) contrast(1.05)';
     return (
       <div className={WRAP} aria-hidden>
-        <div className="absolute inset-0" style={{ backdropFilter: 'grayscale(1) contrast(1.15) brightness(1.05)', WebkitBackdropFilter: 'grayscale(1) contrast(1.15) brightness(1.05)' }} />
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, #0a1cff 0%, #1030ff 40%, #0814a0 100%)', mixBlendMode: 'multiply' }} />
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 16%, rgba(60,110,255,0.85), rgba(20,40,200,0.4) 45%, transparent 75%)', mixBlendMode: 'screen' }} />
-        <div className="absolute inset-0 shock-halftone-drift" style={{ backgroundImage: 'radial-gradient(rgba(120,170,255,0.9) 0.8px, transparent 1.3px)', backgroundSize: '5px 5px', mixBlendMode: 'screen', opacity: 0.5 }} />
-        <div className="absolute -inset-1/4 shock-sheen" style={{ background: 'linear-gradient(115deg, transparent 40%, rgba(160,200,255,0.5) 50%, transparent 60%)' }} />
-        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 140px 40px rgba(0,6,80,0.85)' }} />
+        {/* recolour the real content toward electric blue — keeps light text light, dark bg dark */}
+        <div className="absolute inset-0" style={{ backdropFilter: duo, WebkitBackdropFilter: duo }} />
+        {/* gentle blue bloom (screen = lifts, doesn't cover) */}
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 14%, rgba(40,90,255,0.35), transparent 72%)', mixBlendMode: 'screen' }} />
+        {/* subtle halftone + light sweep */}
+        <div className="absolute inset-0 shock-halftone-drift" style={{ backgroundImage: 'radial-gradient(rgba(130,175,255,0.7) 0.7px, transparent 1.2px)', backgroundSize: '5px 5px', mixBlendMode: 'screen', opacity: 0.3 }} />
+        <div className="absolute -inset-1/4 shock-sheen" style={{ background: 'linear-gradient(115deg, transparent 43%, rgba(180,210,255,0.3) 50%, transparent 57%)' }} />
       </div>
     );
   }
@@ -149,7 +151,7 @@ CPU 18% · PROC 107
   if (mode === 'void') {
     return (
       <div className={WRAP} aria-hidden>
-        <div className="absolute inset-0 shock-void" style={{ background: 'radial-gradient(ellipse at 50% 45%, transparent 8%, rgba(0,0,0,0.7) 38%, rgba(0,0,0,0.94) 100%)' }} />
+        <div className="absolute inset-0 shock-void" style={{ background: 'radial-gradient(ellipse at 50% 45%, transparent 22%, rgba(0,0,0,0.55) 48%, rgba(0,0,0,0.86) 100%)' }} />
         <div className="absolute inset-0 animate-flicker" style={{ background: 'radial-gradient(ellipse at 50% 45%, rgba(120,0,0,0.25), transparent 28%)' }} />
       </div>
     );
