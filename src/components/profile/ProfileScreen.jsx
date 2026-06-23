@@ -27,6 +27,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
   const [showThemePicker, setShowThemePicker] = useState(false);
   const [selectedMark, setSelectedMark] = useState(null);
   const [tab, setTab] = useState('grid');
+  const [nudgeHidden, setNudgeHidden] = useState(false);
   const [myPosts, setMyPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(true);
   useEffect(() => {
@@ -527,6 +528,19 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
           )}
         </div>
       </div>
+
+      {/* Finish-your-shrine nudge (own profile, no portrait yet) */}
+      {!profile?.avatarUrl && !nudgeHidden && (
+        <div className="mx-4 my-3 border border-[#3F2A14] bg-[#0F0A06]/60 p-3 flex items-center gap-3">
+          <span className="text-2xl shrink-0">🕯</span>
+          <div className="flex-1 min-w-0">
+            <div className="text-[#C9A961] text-[11px] uppercase tracking-[0.25em]" style={F.scriptureSC}>· your shrine is unfinished ·</div>
+            <p className="text-[#A8A29E] text-xs italic mt-0.5" style={F.serif}>add a portrait so souls recognize you.</p>
+          </div>
+          <button onClick={onEditProfile} className="shrink-0 px-3 py-1.5 text-[9px] uppercase tracking-wider bg-[#5B0F1A] hover:bg-[#8B0000] text-[#F5F1E8]" style={F.ui}>tend it</button>
+          <button onClick={() => setNudgeHidden(true)} className="shrink-0 text-[#6B6B6B] hover:text-[#A8A29E] p-1 -m-1" title="dismiss"><X size={14} /></button>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="border-y border-[#1A1A1A] flex">
