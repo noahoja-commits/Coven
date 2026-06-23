@@ -38,18 +38,31 @@ function pinPos(pin) {
 
 export function MapScreen({ tonightStatus, ghost = false, pins = [], onOpenUser, onOpenTonightStatus, festivalEvent = null, onEnterFestival }) {
   const [view, setView] = useState('map'); // 'map' | 'list'
+  const [query, setQuery] = useState('');
+  const [activeArea, setActiveArea] = useState(null); // filter to one area cluster
+  const [sort, setSort] = useState('active'); // 'active' | 'az'
 
-  // Group souls by area (for the cluster headings + the by-area list).
+  // Filter the souls by the search box + selected area.
+  const q = query.trim().toLowerCase();
+  const filtered = pins.filter(p => {
+    if (activeArea && (areaKey(p) || '__none__') !== activeArea) return false;
+    if (!q) return true;
+    return (p.handle || '').toLowerCase().includes(q) || (p.text || '').toLowerCase().includes(q);
+  });
+  const filtering = !!(q || activeArea);
+
+  // Group the (filtered) souls by area — for cluster headings + the by-area list.
   const groups = {};
-  pins.forEach(p => {
+  filtered.forEach(p => {
     const key = areaKey(p) || '__none__';
     if (!groups[key]) groups[key] = { label: areaLabel(p), key, pins: [] };
     groups[key].pins.push(p);
   });
-  const grouped = Object.values(groups).sort((a, b) => b.pins.length - a.pins.length);
+  const grouped = Object.values(groups).sort((a, b) => sort === 'az' ? a.label.localeCompare(b.label) : b.pins.length - a.pins.length);
   const located = grouped.filter(g => g.key !== '__none__');
   const maxCount = located[0]?.pins.length || 1;
   const topArea = located[0];
+  const activeAreaLabel = activeArea ? (groups[activeArea]?.label || activeArea) : null;
 
   return (
     <div className="absolute inset-0">
@@ -60,16 +73,36 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], onOpenUser,
         </button>
       )}
 
-      {/* map / by-area toggle */}
-      <div className="absolute top-2 left-2 z-30 flex border border-[#2A2A2A] bg-black/70 backdrop-blur-sm">
-        {[['map', MapIcon], ['list', List]].map(([v, Icon]) => (
-          <button key={v} onClick={() => setView(v)}
-            className={`flex items-center gap-1 px-2.5 py-1.5 text-[9px] uppercase tracking-[0.18em] transition-colors ${view === v ? 'bg-[#8B0000] text-[#F5F1E8]' : 'text-[#A8A29E] hover:text-[#F5F1E8]'}`}
-            style={F.ui}>
-            <Icon size={11} /> {v === 'map' ? 'map' : 'by area'}
-          </button>
-        ))}
+      {/* map / by-area toggle + sort */}
+      <div className="absolute top-2 left-2 z-30 flex items-center gap-1.5">
+        <div className="flex border border-[#2A2A2A] bg-black/70 backdrop-blur-sm">
+          {[['map', MapIcon], ['list', List]].map(([v, Icon]) => (
+            <button key={v} onClick={() => setView(v)}
+              className={`flex items-center gap-1 px-2.5 py-1.5 text-[9px] uppercase tracking-[0.18em] transition-colors ${view === v ? 'bg-[#8B0000] text-[#F5F1E8]' : 'text-[#A8A29E] hover:text-[#F5F1E8]'}`}
+              style={F.ui}>
+              <Icon size={11} /> {v === 'map' ? 'map' : 'by area'}
+            </button>
+          ))}
+        </div>
+        <button onClick={() => setSort(s => s === 'active' ? 'az' : 'active')}
+          className="px-2.5 py-1.5 border border-[#2A2A2A] bg-black/70 backdrop-blur-sm text-[9px] uppercase tracking-[0.18em] text-[#A8A29E] hover:text-[#F5F1E8] transition-colors" style={F.ui}
+          title="sort">{sort === 'active' ? 'active' : 'a–z'}</button>
       </div>
+
+      {/* search */}
+      <div className="absolute top-11 left-2 right-2 z-30">
+        <input value={query} onChange={e => setQuery(e.target.value)}
+          placeholder="search souls or status…"
+          className="w-full bg-black/70 backdrop-blur-sm border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none px-2.5 py-1.5 text-[11px] text-[#F5F1E8] placeholder:text-[#6B6B6B]" style={F.ui} />
+      </div>
+
+      {/* filter chip + counter */}
+      {filtering && (
+        <div className="absolute top-[78px] left-2 right-2 z-30 flex items-center gap-1.5 text-[9px] uppercase tracking-[0.15em]" style={F.ui}>
+          <span className="text-[#C9A961] bg-black/75 px-2 py-1 border border-[#5B0F1A]/50">{filtered.length} of {pins.length}{activeAreaLabel ? ` · ${activeAreaLabel}` : ''}</span>
+          <button onClick={() => { setQuery(''); setActiveArea(null); }} className="text-[#A8A29E] hover:text-[#F5F1E8] bg-black/75 px-2 py-1 border border-[#2A2A2A]">clear ✕</button>
+        </div>
+      )}
 
       {view === 'map' ? (
         <>
@@ -132,22 +165,28 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], onOpenUser,
               )}
             </div>
           )}
+          {pins.length > 0 && filtering && filtered.length === 0 && (
+            <div className="absolute top-[112px] left-1/2 -translate-x-1/2 text-center px-8">
+              <div className="text-[10px] uppercase tracking-[0.3em] text-[#C8102E]/70 bg-black/60 backdrop-blur-sm px-3 py-1.5 border border-[#2A2A2A]" style={F.ui}>· no souls match ·</div>
+            </div>
+          )}
 
-          {/* Faint area headings over each known cluster */}
-          {grouped.filter(g => g.key !== '__none__').map(g => {
+          {/* Area headings — tap to filter the map to that cluster */}
+          {located.map(g => {
             const { cx, cy } = areaCenter(g.key);
+            const on = activeArea === g.key;
             return (
-              <div key={`lbl-${g.key}`} className="absolute pointer-events-none -translate-x-1/2"
-                style={{ left: `${cx}%`, top: `${Math.max(14, cy - 11)}%` }}>
-                <div className="text-[8px] uppercase tracking-[0.25em] text-[#C9A961]/60 whitespace-nowrap" style={F.ui}>
+              <button key={`lbl-${g.key}`} onClick={() => setActiveArea(on ? null : g.key)}
+                className="absolute -translate-x-1/2" style={{ left: `${cx}%`, top: `${Math.max(14, cy - 11)}%` }}>
+                <div className={`text-[8px] uppercase tracking-[0.25em] whitespace-nowrap px-1 py-0.5 border transition-colors ${on ? 'text-[#F5F1E8] border-[#C9A961] bg-[#8B0000]/50' : 'text-[#C9A961]/70 border-transparent hover:text-[#C9A961]'}`} style={F.ui}>
                   {g.label} · {g.pins.length}
                 </div>
-              </div>
+              </button>
             );
           })}
 
-          {/* Other souls out tonight */}
-          {pins.map(p => {
+          {/* Other souls out tonight (respecting search + area filter) */}
+          {filtered.map(p => {
             const pos = pinPos(p);
             return (
               <button key={p.userId} onClick={() => onOpenUser && onOpenUser(p.handle)}
@@ -184,11 +223,11 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], onOpenUser,
         </>
       ) : (
         /* By-area list */
-        <div className="absolute inset-0 top-12 bottom-0 overflow-y-auto bg-[#070708] safe-pb">
-          {pins.length === 0 ? (
+        <div className="absolute inset-0 top-[100px] bottom-0 overflow-y-auto bg-[#070708] safe-pb">
+          {filtered.length === 0 ? (
             <div className="text-center py-20 text-[#6B6B6B]" style={F.serif}>
               <div className="text-3xl mb-3">🜨</div>
-              <p className="text-sm italic px-8">no souls out near you. drop your own pin and someone may find you.</p>
+              <p className="text-sm italic px-8">{pins.length === 0 ? 'no souls out near you. drop your own pin and someone may find you.' : 'no souls match your search.'}</p>
             </div>
           ) : (
             grouped.map(g => (
