@@ -26,7 +26,7 @@ export function SoulsOverlay({ meId, following = {}, onClose, onOpenUser }) {
   });
 
   return (
-    <div className="absolute inset-0 z-30 overflow-y-auto safe-pb"
+    <div className="animate-portal-in absolute inset-0 z-30 overflow-y-auto safe-pb"
       style={{ background: 'radial-gradient(ellipse at 50% 20%, #14080C 0%, #050204 80%)' }}>
       <div className="sticky top-0 z-10 bg-[#050204]/95 backdrop-blur-md border-b border-[#A89968]/15 safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">

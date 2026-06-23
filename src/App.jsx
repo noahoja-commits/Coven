@@ -1944,8 +1944,8 @@ export default function App() {
         />
       )}
       {ticketSuccess && (
-        <div className="absolute inset-0 z-[60] bg-black/80 flex items-center justify-center p-8" onClick={() => setTicketSuccess(false)}>
-          <div className="bg-[#0F0F0F] border border-[#2A2A2A] p-8 text-center max-w-xs" onClick={e => e.stopPropagation()}>
+        <div className="animate-fade-in absolute inset-0 z-[60] bg-black/80 flex items-center justify-center p-8" onClick={() => setTicketSuccess(false)}>
+          <div className="animate-card-flip bg-[#0F0F0F] border border-[#2A2A2A] p-8 text-center max-w-xs" onClick={e => e.stopPropagation()}>
             <div className="text-5xl mb-3">🎟</div>
             <div className="text-[#C9A961] text-lg mb-1" style={F.display}>TICKET SECURED</div>
             <p className="text-[#A8A29E] text-sm" style={F.serif}>your spot is held. see you in the dark.</p>

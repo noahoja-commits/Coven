@@ -145,6 +145,15 @@ button:active, [role="button"]:active {
 }
 .animate-flicker { animation: flicker 4s ease-in-out infinite; }
 
+/* Portal threshold reveal — scale + clearing blur, for "the coven" doors. */
+@keyframes portalIn {
+  0%   { opacity: 0; transform: scale(0.96); filter: blur(6px); }
+  60%  { opacity: 1; filter: blur(0); }
+  100% { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+.animate-portal-in { animation: portalIn 0.42s cubic-bezier(0.22, 1, 0.36, 1); }
+@media (prefers-reduced-motion: reduce) { .animate-portal-in { animation: none; } }
+
 /* Global media treatment — a lookbook filter on user photos/videos (.post-media). */
 .media-noir .post-media { filter: grayscale(1) contrast(1.12) brightness(0.96); }
 .media-oxblood .post-media { filter: grayscale(1) contrast(1.1) sepia(0.55) hue-rotate(-25deg) saturate(2.2) brightness(0.92); }

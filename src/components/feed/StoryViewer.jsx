@@ -78,7 +78,7 @@ export function StoryViewer({ stories = [], startIndex = 0, onReply, onReactStor
   };
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black" style={{ background: BG_STYLES[story.bg] || BG_STYLES.red }}
+    <div className="animate-fade-in fixed inset-0 z-[60] bg-black" style={{ background: BG_STYLES[story.bg] || BG_STYLES.red }}
       onMouseDown={hold(true)} onMouseUp={hold(false)} onMouseLeave={hold(false)}
       onTouchStart={hold(true)} onTouchEnd={hold(false)}>
 
