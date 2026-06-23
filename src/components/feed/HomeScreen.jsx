@@ -57,11 +57,10 @@ export function HomeScreen({
     ? posts.filter(p => p.body && p.body.toLowerCase().includes(`#${activeTag.toLowerCase()}`))
     : posts;
 
+  // Heat score (reactions + weighted comments). Reused for trending sort + the "hot" marker.
+  const postScore = (p) => Object.values(p.reactions || {}).reduce((s, v) => s + v, 0) + (Array.isArray(p.comments) ? p.comments.length * 2 : 0);
   const sortedPosts = feedSort === 'trending'
-    ? [...tagFilteredPosts].sort((a, b) => {
-        const score = (p) => Object.values(p.reactions || {}).reduce((s, v) => s + v, 0) + (Array.isArray(p.comments) ? p.comments.length * 2 : 0);
-        return score(b) - score(a);
-      })
+    ? [...tagFilteredPosts].sort((a, b) => postScore(b) - postScore(a))
     : tagFilteredPosts;
 
   // Double-tap to like (IG-style): bat-react + a burst animation.
@@ -290,7 +289,7 @@ export function HomeScreen({
       <div className="px-4 py-2 border-b border-[#1A1A1A] flex items-center gap-3">
         {['latest', 'trending'].map(s => (
           <button key={s} onClick={() => onSetFeedSort && onSetFeedSort(s)}
-            className={`text-[10px] uppercase tracking-[0.25em] py-1 ${feedSort === s ? 'text-[#F5F1E8] border-b border-[#8B0000]' : 'text-[#6B6B6B]'}`}
+            className={`text-[10px] uppercase tracking-[0.25em] py-1 ${feedSort === s ? (s === 'trending' ? 'text-[#F5F1E8] border-b border-[#C8102E]' : 'text-[#F5F1E8] border-b border-[#8B0000]') : 'text-[#6B6B6B]'}`}
             style={F.ui}>
             {s}
           </button>
@@ -339,12 +338,21 @@ export function HomeScreen({
           const bookmarked = !!bookmarks[post.id];
           const candled = !!postCandles[post.id];
           const pinned = pinnedPostId === post.id;
+          // "Hot" heat marker — only in trending, only for genuinely high-score posts.
+          const isHot = feedSort === 'trending' && postScore(post) >= 8;
           return (
             <article key={post.id} className="px-4 py-4 relative select-none" style={postAgeStyle(post.createdAt)} onDoubleClick={() => doubleTapLike(post)}>
               {burst === post.id && (
                 <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
-                  <span className="text-6xl animate-like-burst drop-shadow-[0_0_20px_rgba(139,0,0,0.8)]">🦇</span>
+                  <span className="absolute w-40 h-40 rounded-full animate-heat-flash"
+                    style={{ background: 'radial-gradient(circle, rgba(200,16,46,0.55), transparent 70%)' }} />
+                  <span className="text-6xl animate-like-burst drop-shadow-[0_0_24px_rgba(200,16,46,0.95)]">🦇</span>
                 </div>
+              )}
+              {isHot && (
+                <span aria-hidden className="absolute left-0 top-2 bottom-2 w-[3px] pointer-events-none"
+                  style={{ background: 'linear-gradient(180deg, transparent, #C8102E 35%, #C8102E 65%, transparent)',
+                    boxShadow: '0 0 10px rgba(200,16,46,0.6)' }} />
               )}
               {(bookmarked || pinned) && (
                 <span aria-hidden title={pinned ? 'pinned' : 'saved'}

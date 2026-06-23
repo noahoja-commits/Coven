@@ -25,6 +25,8 @@ export const C = {
   textFaint: '#6B6B6B',
   oxblood: '#8B0000',
   oxbloodDark: '#5B0F1A',
+  blood: '#C8102E',                  // bright crimson — HEAT/desire (vs structural oxblood)
+  bloodGlow: 'rgba(200,16,46,0.85)',
   violet: '#7B2CBF',
   gold: '#C9A961',
   goldDark: '#A89968',

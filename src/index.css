@@ -185,6 +185,14 @@ button:active, [role="button"]:active {
 }
 .animate-like-burst { animation: likeBurst 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
 
+/* Crimson heat-flash that blooms behind the bat on double-tap like */
+@keyframes heatFlash {
+  0%   { transform: scale(0.2); opacity: 0; }
+  30%  { transform: scale(1.1); opacity: 0.9; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+.animate-heat-flash { animation: heatFlash 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+
 /* Illuminated drop-cap — a blackletter gold initial for confessions / scripture
    on the dark surfaces (the parchment reader has its own inline drop-cap). */
 .illuminated::first-letter {

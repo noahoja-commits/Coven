@@ -12,7 +12,7 @@ export function Reaction({ icon, count, onClick, active }) {
   };
   return (
     <button onClick={handle}
-      className={`flex items-center gap-1 px-2 py-1 transition-colors ${active ? 'text-[#F5F1E8]' : 'text-[#6B6B6B] hover:text-[#A8A29E]'}`}>
+      className={`flex items-center gap-1 px-2 py-1 transition-colors ${active ? 'text-[#C8102E] drop-shadow-[0_0_6px_rgba(200,16,46,0.5)]' : 'text-[#6B6B6B] hover:text-[#A8A29E]'}`}>
       <span className={`text-sm leading-none ${animate ? 'flutter' : ''}`}>{icon}</span>
       <span className="text-xs" style={F.mono}>{count}</span>
     </button>
