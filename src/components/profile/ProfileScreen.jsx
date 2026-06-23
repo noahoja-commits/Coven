@@ -11,6 +11,7 @@ import { CRYSTAL_OPTIONS } from '../../data/crystals';
 import { SHRINE_OBJECTS, earnedShrine } from '../../data/shrine';
 import { PostGrid } from './PostGrid';
 import { TarotFrame, arcanaFor, Grain } from '../shared/Sigils';
+import { DarkRecapModal } from './DarkRecapModal';
 
 const SHRINE_THEMES = {
   oxblood: 'radial-gradient(ellipse at 50% 0%, #5B0F1A 0%, transparent 60%)',
@@ -28,6 +29,15 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
   const [selectedMark, setSelectedMark] = useState(null);
   const [tab, setTab] = useState('grid');
   const [nudgeHidden, setNudgeHidden] = useState(false);
+  const [showRecap, setShowRecap] = useState(false);
+  const recapStats = {
+    posts: profile.posts || 0,
+    streak: ritual?.streak || 0,
+    sigils: sigils.length,
+    achievementsEarned: earned.length,
+    achievementsTotal: ACHIEVEMENTS.length,
+    topScene: joinedScenes[0]?.name || '',
+  };
   const [myPosts, setMyPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(true);
   useEffect(() => {
@@ -142,6 +152,12 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
           <button onClick={onShowFollowers} className="text-left hover:opacity-80 transition-opacity"><span className="text-[#F5F1E8] text-base block leading-none" style={F.mono}>{profile.followers}</span><span className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>followers</span></button>
           <button onClick={onShowFollowing} className="text-left hover:opacity-80 transition-opacity"><span className="text-[#F5F1E8] text-base block leading-none" style={F.mono}>{profile.following}</span><span className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>following</span></button>
         </div>
+
+        <button onClick={() => setShowRecap(true)}
+          className="relative w-full mt-3 py-2 text-[10px] uppercase tracking-[0.25em] text-[#A89968] border border-[#2A2A2A] hover:border-[#5B0F1A] hover:text-[#C9A961] transition-colors" style={F.ui}>
+          ✦ your dark recap
+        </button>
+        {showRecap && <DarkRecapModal stats={recapStats} onClose={() => setShowRecap(false)} />}
 
         {/* Scenes you're in */}
         {joinedScenes.length > 0 && (
