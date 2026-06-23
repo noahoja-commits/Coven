@@ -16,18 +16,17 @@ const WAVE = [22, 60, 14, 80, 35, 95, 50, 70, 12, 88, 40, 66, 18, 100, 30, 75, 5
 export function ShockOverlay({ mode = 'none' }) {
   if (!mode || mode === 'none') return null;
 
-  // ── INSOMNIA — electric-blue DUOTONE of the content (text stays legible) + halftone + sweep ──
+  // ── INSOMNIA — vivid electric-blue (mix-blend color keeps text luminance/legible) + halftone + sweep ──
   if (mode === 'insomnia') {
-    const duo = 'grayscale(1) sepia(1) hue-rotate(185deg) saturate(5) brightness(1.05) contrast(1.05)';
     return (
       <div className={WRAP} aria-hidden>
-        {/* recolour the real content toward electric blue — keeps light text light, dark bg dark */}
-        <div className="absolute inset-0" style={{ backdropFilter: duo, WebkitBackdropFilter: duo }} />
-        {/* gentle blue bloom (screen = lifts, doesn't cover) */}
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 14%, rgba(40,90,255,0.35), transparent 72%)', mixBlendMode: 'screen' }} />
-        {/* subtle halftone + light sweep */}
-        <div className="absolute inset-0 shock-halftone-drift" style={{ backgroundImage: 'radial-gradient(rgba(130,175,255,0.7) 0.7px, transparent 1.2px)', backgroundSize: '5px 5px', mixBlendMode: 'screen', opacity: 0.3 }} />
-        <div className="absolute -inset-1/4 shock-sheen" style={{ background: 'linear-gradient(115deg, transparent 43%, rgba(180,210,255,0.3) 50%, transparent 57%)' }} />
+        {/* desaturate the content first so the colour-blend reads as pure electric blue, not muddy purple */}
+        <div className="absolute inset-0" style={{ backdropFilter: 'grayscale(1) brightness(1.08) contrast(1.05)', WebkitBackdropFilter: 'grayscale(1) brightness(1.08) contrast(1.05)' }} />
+        {/* force an electric-blue hue while preserving luminance → text stays readable */}
+        <div className="absolute inset-0" style={{ background: '#1736ff', mixBlendMode: 'color' }} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 14%, rgba(40,90,255,0.5), transparent 72%)', mixBlendMode: 'screen' }} />
+        <div className="absolute inset-0 shock-halftone-drift" style={{ backgroundImage: 'radial-gradient(rgba(150,190,255,0.7) 0.7px, transparent 1.2px)', backgroundSize: '5px 5px', mixBlendMode: 'screen', opacity: 0.28 }} />
+        <div className="absolute -inset-1/4 shock-sheen" style={{ background: 'linear-gradient(115deg, transparent 43%, rgba(190,215,255,0.35) 50%, transparent 57%)' }} />
       </div>
     );
   }
@@ -38,7 +37,7 @@ export function ShockOverlay({ mode = 'none' }) {
       <div className={WRAP} aria-hidden>
         <div className="absolute inset-0" style={{ backdropFilter: 'grayscale(1) contrast(1.6) brightness(0.95)', WebkitBackdropFilter: 'grayscale(1) contrast(1.6) brightness(0.95)' }} />
         <div className="absolute inset-0 opacity-40" style={{ backgroundImage: 'radial-gradient(#fff 0.7px, transparent 1.1px)', backgroundSize: '3px 3px' }} />
-        <div className="absolute inset-0 shock-scanroll opacity-60" style={{ backgroundImage: 'repeating-linear-gradient(to bottom, rgba(0,0,0,0.85) 0 2px, transparent 2px 4px)' }} />
+        <div className="absolute inset-0 shock-scanroll opacity-40" style={{ backgroundImage: 'repeating-linear-gradient(to bottom, rgba(0,0,0,0.8) 0 1px, transparent 1px 4px)' }} />
         <div className="absolute top-10 left-0 right-0 text-center text-[#cfcfcf] text-[9px] leading-[1.7] opacity-30 shock-blink" style={{ fontFamily: '"VT323", monospace', letterSpacing: '0.3em' }}>
           QUEEN IS DEAD · QUEEN IS DEAD · QUEEN IS DEAD<br />QUEEN IS DEAD · LONG LIVE THE QUEEN
         </div>

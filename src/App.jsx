@@ -248,14 +248,15 @@ export default function App() {
     document.body.classList.remove('media-noir', 'media-oxblood');
     if (settings.mediaTreatment === 'noir') document.body.classList.add('media-noir');
     else if (settings.mediaTreatment === 'oxblood') document.body.classList.add('media-oxblood');
-    // Per-shock-mode typography retheme — one legible themed font forced across the UI.
+    // Per-shock-mode GOTHIC typography retheme — a different gothic face per mode, forced across the UI.
     const SHOCK_FONT = {
-      insomnia: 'shock-type-oswald', scream: 'shock-type-oswald', glitch: 'shock-type-vt323',
-      'dead-channel': 'shock-type-vt323', emergency: 'shock-type-vt323', spatter: 'shock-type-cinzel',
-      inferno: 'shock-type-cinzel', rebirth: 'shock-type-cinzel', void: 'shock-type-cormorant',
-      cathedral: 'shock-type-cormorant',
+      insomnia: 'shock-type-grenze', emergency: 'shock-type-grenze',
+      'dead-channel': 'shock-type-pirata', glitch: 'shock-type-pirata',
+      scream: 'shock-type-metal', inferno: 'shock-type-metal',
+      spatter: 'shock-type-unifraktur', void: 'shock-type-unifraktur',
+      rebirth: 'shock-type-rocker', cathedral: 'shock-type-rocker',
     };
-    document.body.classList.remove('shock-type-oswald', 'shock-type-vt323', 'shock-type-cinzel', 'shock-type-cormorant');
+    document.body.classList.remove('shock-type-grenze', 'shock-type-pirata', 'shock-type-metal', 'shock-type-unifraktur', 'shock-type-rocker');
     const fc = SHOCK_FONT[settings.shockMode];
     if (fc && !settings.parchmentMode) document.body.classList.add(fc);
   }, [settings.parchmentMode, settings.mediaTreatment, settings.shockMode]);
