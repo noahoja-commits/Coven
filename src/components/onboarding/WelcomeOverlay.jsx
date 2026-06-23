@@ -1,5 +1,6 @@
 import { Moon, Users, Feather, X } from 'lucide-react';
 import { F } from '../../styles/fonts';
+import { RestrictedStamp } from '../shared/Sigils';
 
 // Shown once after a soul first enters — turns the empty-feed moment into a
 // "here's what to do" welcome. Each step does the thing, then dismisses.
@@ -17,7 +18,8 @@ export function WelcomeOverlay({ handle = 'soul', onClose, onDropStatus, onFindS
       <button onClick={onClose} className="absolute top-5 right-5 text-[#A89968]/60 hover:text-[#C9A961] safe-pt" aria-label="enter"><X size={22} /></button>
       <div className="relative w-full max-w-xs text-center">
         <div className="text-[#A89968] text-[10px] uppercase tracking-[0.5em] mb-3" style={F.scriptureSC}>· welcome, {handle} ·</div>
-        <h1 className="text-[#C9A961] text-5xl mb-3" style={F.brand}>Coven</h1>
+        <h1 className="text-[#C9A961] text-5xl mb-2" style={F.brand}>Coven</h1>
+        <div className="mb-3"><RestrictedStamp /></div>
         <p className="text-[#A89968]/80 text-sm italic mb-8" style={F.scripture}>
           "you’ve arrived. the coven grows one soul at a time — start with a single rite."
         </p>

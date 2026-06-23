@@ -38,8 +38,8 @@ export function Header({ tab, onDMs, onCompose, onLibrary, onLogo, onNotificatio
               style={F.brand} title="The Library">Coven</button>
           ) : (
             <button onClick={onLogo}
-              className={`${textColor} text-base tracking-[0.3em] hover:text-[#C9A961] transition-colors`}
-              style={F.display}>
+              className={`${textColor} text-base tracking-[0.2em] hover:text-[#C9A961] transition-colors`}
+              style={F.displayOrnate}>
               {(titles[tab] || tab.toUpperCase())}
             </button>
           )}

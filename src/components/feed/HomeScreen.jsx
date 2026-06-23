@@ -5,7 +5,7 @@ import { Reaction } from '../shared/Reaction';
 import { PostImage } from '../shared/Visuals';
 import { renderRichText } from '../shared/RichText';
 import { EmptyState } from '../shared/EmptyState';
-import { AllSeeingEye, TripleMoon } from '../shared/Sigils';
+import { AllSeeingEye, TripleMoon, BarcodeDivider } from '../shared/Sigils';
 import { buzz } from '../../lib/haptics';
 import { getDailyCard } from '../../data/tarot';
 import { darkDay, todaysVespers, todaysCodex } from '../../data/helpers';
@@ -305,6 +305,9 @@ export function HomeScreen({
           ⚄ feeling lucky
         </button>
       </div>
+
+      {/* Editorial barcode divider — a thin zine seam below the sort row */}
+      <BarcodeDivider seed={feedSort} className="justify-center px-4 py-1.5 opacity-50" />
 
       {/* Active hashtag filter */}
       {activeTag && (

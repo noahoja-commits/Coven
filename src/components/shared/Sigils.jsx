@@ -1,3 +1,5 @@
+import { F } from '../../styles/fonts';
+
 // Hand-built occult sigils — used for the bottom nav and as ornamental rules.
 // All are stroke-based on a 24x24 grid (lucide-compatible) and use currentColor,
 // so they inherit text color + size and render identically on every device
@@ -237,6 +239,28 @@ export function OrnateFrame({ gold = '#C9A961', oxblood = '#5B0F1A', inset = 6, 
       <svg className="absolute top-0 right-0" width="30" height="30" viewBox="0 0 28 28"><FiligreeCorner gold={gold} transform="scale(-1,1) translate(-28,0)" /></svg>
       <svg className="absolute bottom-0 left-0" width="30" height="30" viewBox="0 0 28 28"><FiligreeCorner gold={gold} transform="scale(1,-1) translate(0,-28)" /></svg>
       <svg className="absolute bottom-0 right-0" width="30" height="30" viewBox="0 0 28 28"><FiligreeCorner gold={gold} transform="scale(-1,-1) translate(-28,-28)" /></svg>
+    </div>
+  );
+}
+
+// Editorial censor stamp — purely cosmetic zine chrome (NOT an age check; see AgeGate for that).
+export function RestrictedStamp({ label = 'RESTRICTED', age = '18+', color = '#8B0000', rotate = -6, className = '' }) {
+  return (
+    <span aria-hidden className={`inline-flex items-center gap-1 px-1.5 py-0.5 align-middle ${className}`}
+      style={{ border: `1.5px solid ${color}`, color, transform: `rotate(${rotate}deg)`, opacity: 0.9 }}>
+      <span className="text-[9px] font-bold leading-none" style={F.ui}>R</span>
+      <span className="text-[7px] tracking-[0.2em] leading-none" style={F.ui}>{label} · {age}</span>
+    </span>
+  );
+}
+
+// Editorial barcode divider — deterministic bar widths from a seed. Sibling to OrnamentRule.
+export function BarcodeDivider({ seed = 'coven', className = '', color = '#6B6B6B' }) {
+  let h = 0; const s = String(seed); for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  const bars = Array.from({ length: 28 }, (_, i) => 1 + (Math.abs(h >> i) % 3));
+  return (
+    <div className={`flex items-end gap-[2px] h-4 ${className}`} aria-hidden>
+      {bars.map((w, i) => <span key={i} style={{ width: w, height: i % 4 ? '100%' : '70%', background: color, opacity: 0.5 }} />)}
     </div>
   );
 }

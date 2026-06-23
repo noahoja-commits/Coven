@@ -1,11 +1,13 @@
 // Font stack and design tokens for Coven
 
 export const FONT_HREF =
-  'https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Manrope:wght@300;400;500;600;700&family=VT323&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap';
+  'https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=Cinzel:wght@400;500;600;700&family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Manrope:wght@300;400;500;600;700&family=Shippori+Mincho:wght@400;600&family=VT323&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap';
 
 export const F = {
   brand: { fontFamily: '"UnifrakturCook", serif', fontWeight: 700 },
   display: { fontFamily: '"Cinzel", serif', letterSpacing: '0.08em' },
+  displayOrnate: { fontFamily: '"Cinzel Decorative", "Cinzel", serif', letterSpacing: '0.04em' },
+  kanji: { fontFamily: '"Shippori Mincho", serif' },
   serif: { fontFamily: '"Cormorant Garamond", serif' },
   ui: { fontFamily: '"Manrope", sans-serif' },
   mono: { fontFamily: '"VT323", monospace', letterSpacing: '0.04em' },
