@@ -3,6 +3,7 @@ import { ArrowLeft, Check, MapPin, Calendar, Users, Share2, Ticket } from 'lucid
 import { F } from '../../styles/fonts';
 import { shareCoven } from '../../lib/share';
 import { downloadICS } from '../../lib/ics';
+import { EventInviteCard } from './EventInviteCard';
 
 const COVERS = {
   red: 'linear-gradient(135deg, #5B0F1A 0%, #1A0408 70%, #0A0204 100%)',
@@ -118,6 +119,8 @@ export function EventDetail({ event, isGoing, onToggleRsvp, onBack, onOpenUser, 
           </div>
         )}
       </div>
+
+      <EventInviteCard event={event} goingCount={goingCount} />
 
       {/* CTA */}
       <div className="px-4 pt-4 sticky bottom-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A] to-transparent pb-4">
