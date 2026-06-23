@@ -1,5 +1,6 @@
 import { Plus } from 'lucide-react';
 import { F } from '../../styles/fonts';
+import { buzz } from '../../lib/haptics';
 import { moonPhase, dailyPrompt } from '../../data/helpers';
 import { CRYSTAL_OPTIONS } from '../../data/crystals';
 import { TRACKER_CATEGORIES } from '../../data/profile';
@@ -40,7 +41,7 @@ export function DailyAltar({
           <span className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>
             {streak > 0 ? `${streak}d rite` : 'no streak'}
           </span>
-          <button onClick={() => !ritualDoneToday && onPerformRitual && onPerformRitual()}
+          <button onClick={() => { if (!ritualDoneToday) { buzz('rite'); onPerformRitual && onPerformRitual(); } }}
             disabled={ritualDoneToday}
             className={`text-[10px] uppercase tracking-[0.2em] px-3 py-1.5 border transition-colors ${ritualDoneToday
               ? 'border-[#C9A961]/40 text-[#C9A961]/80 cursor-default'

@@ -6,6 +6,7 @@ import { PostImage } from '../shared/Visuals';
 import { renderRichText } from '../shared/RichText';
 import { EmptyState } from '../shared/EmptyState';
 import { AllSeeingEye, TripleMoon } from '../shared/Sigils';
+import { buzz } from '../../lib/haptics';
 import { getDailyCard } from '../../data/tarot';
 import { darkDay, todaysVespers, todaysCodex } from '../../data/helpers';
 import { DailyAltar } from './DailyAltar';
@@ -66,6 +67,7 @@ export function HomeScreen({
   // Double-tap to like (IG-style): bat-react + a burst animation.
   const [burst, setBurst] = useState(null);
   const doubleTapLike = (post) => {
+    buzz('like');
     if (!post.myReactions?.bat) onReact && onReact(post.id, 'bat');
     setBurst(post.id);
     setTimeout(() => setBurst(b => (b === post.id ? null : b)), 800);
@@ -319,7 +321,7 @@ export function HomeScreen({
       <div className="divide-y divide-[#1A1A1A]">
         {feedLoading && sortedPosts.length === 0 && (
           [0, 1, 2, 3].map(i => (
-            <div key={`sk${i}`} className="px-4 py-4 animate-pulse">
+            <div key={`sk${i}`} className="px-4 py-4 animate-pulse skeleton-shimmer">
               <div className="flex items-center gap-2.5 mb-3">
                 <div className="w-9 h-9 rounded-full bg-[#141414]" />
                 <div className="flex-1">

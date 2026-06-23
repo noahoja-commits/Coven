@@ -1,5 +1,6 @@
 import { F } from '../../styles/fonts';
 import { NavSigil } from './Sigils';
+import { buzz } from '../../lib/haptics';
 
 export function BottomNav({ tab, onChange, parchment = false }) {
   const items = [
@@ -22,7 +23,7 @@ export function BottomNav({ tab, onChange, parchment = false }) {
         {items.map(it => {
           const active = tab === it.id;
           return (
-            <button key={it.id} onClick={() => onChange(it.id)}
+            <button key={it.id} onClick={() => { buzz('nav'); onChange(it.id); }}
               className={`relative flex flex-col items-center justify-center gap-1 transition-colors ${active ? activeColor : inactiveColor}`}>
               <div className="relative">
                 {active && <span className="absolute inset-0 -m-1.5 bg-[#8B0000]/20 blur-md rounded-full" />}

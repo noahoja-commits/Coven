@@ -145,6 +145,16 @@ button:active, [role="button"]:active {
 }
 .animate-flicker { animation: flicker 4s ease-in-out infinite; }
 
+/* Loading shimmer — a gold sweep across skeleton blocks (layered over animate-pulse). */
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+.skeleton-shimmer { position: relative; overflow: hidden; }
+.skeleton-shimmer::after {
+  content: ''; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(201,169,97,0.06), transparent);
+  animation: shimmer 1.6s infinite;
+}
+@media (prefers-reduced-motion: reduce) { .skeleton-shimmer::after { animation: none; } }
+
 @keyframes cardFlip {
   0% { transform: rotateY(180deg); }
   100% { transform: rotateY(0deg); }

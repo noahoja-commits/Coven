@@ -1,13 +1,14 @@
 import { useRef } from 'react';
 import { Plus, MessageCircle, Bell, Search, Sparkles } from 'lucide-react';
 import { F } from '../../styles/fonts';
+import { buzz } from '../../lib/haptics';
 
 export function Header({ tab, onDMs, onCompose, onLibrary, onLogo, onNotifications, onSearch, onSecret, communityName, unreadNotifications = 0, unreadDMs = 0, parchment = false }) {
   // Long-press the wordmark to summon the sigil canvas (hidden lore). A normal tap still
   // opens the Library; the long-press suppresses that tap.
   const pressTimer = useRef(null);
   const fired = useRef(false);
-  const startPress = () => { fired.current = false; pressTimer.current = setTimeout(() => { fired.current = true; onSecret && onSecret(); }, 650); };
+  const startPress = () => { fired.current = false; pressTimer.current = setTimeout(() => { fired.current = true; buzz('secret'); onSecret && onSecret(); }, 650); };
   const endPress = () => clearTimeout(pressTimer.current);
   const logoTap = () => { if (!fired.current) onLogo && onLogo(); };
   const titles = {

@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { F } from '../../styles/fonts';
+import { buzz } from '../../lib/haptics';
 
 export function Reaction({ icon, count, onClick, active }) {
   const [animate, setAnimate] = useState(false);
   const handle = () => {
+    buzz('react');
     setAnimate(true);
     setTimeout(() => setAnimate(false), 600);
     onClick && onClick();

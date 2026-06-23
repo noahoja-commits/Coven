@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { F } from '../../styles/fonts';
+import { setHaptics } from '../../lib/haptics';
 
 function Toggle({ on, onChange }) {
   return (
@@ -108,6 +109,9 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
           </Row>
           <Row label="Sound on" desc="a low ambient drone while you wander. turn up your volume — on iPhone, flip the side silent switch off.">
             <Toggle on={settings.soundOn} onChange={v => (onToggleSound ? onToggleSound(v) : set('soundOn', v))} />
+          </Row>
+          <Row label="Haptics" desc="a faint buzz when you react, like, or keep the rite. (android/chrome; iphone ignores it.)">
+            <Toggle on={settings.haptics !== false} onChange={v => { set('haptics', v); setHaptics(v); }} />
           </Row>
         </Section>
 
@@ -288,5 +292,6 @@ export const DEFAULT_SETTINGS = {
   mementoMori: true,
   mementoExpected: false,
   ghostMode: false,
+  haptics: true,
   quietHours: { enabled: false, start: '22:00', end: '08:00' },
 };
