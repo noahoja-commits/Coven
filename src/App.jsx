@@ -96,6 +96,7 @@ import { VespersArchiveModal } from './components/feed/VespersArchiveModal';
 import { TRACKER_CATEGORIES } from './data/profile';
 import { livingTheme, meetsAge } from './data/helpers';
 import { earnedAchievements } from './data/achievements';
+import { inQuietHours } from './lib/quietHours';
 import { FloatingCat } from './components/shared/FloatingCat';
 
 export default function App() {
@@ -442,15 +443,20 @@ export default function App() {
       marginalia, postCandles, nowPlaying, activityLog, mutedKeywords, hiddenPosts,
       ritual, crystals, pinnedPostId, shrineTheme, divinationLog, storyHighlights, shrine, flameLitAt, ageDob]);
 
+  // Latest quiet-hours setting for the realtime closure below (avoids a stale capture).
+  const quietHoursRef = useRef(settings.quietHours);
+  quietHoursRef.current = settings.quietHours;
+
   // Live notifications: a new row (follow/react/comment/dm) → refetch so the
   // bell updates in real time, with the actor's profile joined in.
   useEffect(() => {
     if (!meId || !dbProfile) return;
     const unsub = subscribeNotifications((row) => {
       fetchNotifications().then(setNotifications).catch(() => {});
-      // OS notification banner when the app is open/backgrounded (not killed)
+      // OS notification banner when the app is open/backgrounded (not killed) —
+      // suppressed during quiet hours (the bell badge above still updates).
       try {
-        if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && document.hidden) {
+        if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && document.hidden && !inQuietHours(quietHoursRef.current)) {
           const n = hydrateRealtime(row);
           new Notification('Coven', { body: `someone ${n.text}`, icon: '/pwa-192.png', tag: row.id });
         }

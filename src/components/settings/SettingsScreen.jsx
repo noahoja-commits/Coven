@@ -197,6 +197,19 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
               </Row>
             );
           })}
+          <Row label="Quiet hours">
+            <Toggle on={settings.quietHours?.enabled || false} onChange={v => set('quietHours', { ...(settings.quietHours || { start: '22:00', end: '08:00' }), enabled: v })} />
+          </Row>
+          {settings.quietHours?.enabled && (
+            <div className="px-4 pb-3 flex items-center gap-2 text-[11px] text-[#A8A29E]" style={F.ui}>
+              <span>from</span>
+              <input type="time" value={settings.quietHours?.start || '22:00'} onChange={e => set('quietHours', { ...settings.quietHours, start: e.target.value })}
+                className="bg-[#0A0A0A] border border-[#2A2A2A] px-2 py-1 text-[#F5F1E8]" />
+              <span>to</span>
+              <input type="time" value={settings.quietHours?.end || '08:00'} onChange={e => set('quietHours', { ...settings.quietHours, end: e.target.value })}
+                className="bg-[#0A0A0A] border border-[#2A2A2A] px-2 py-1 text-[#F5F1E8]" />
+            </div>
+          )}
         </Section>
 
         <Section title="get paid">
@@ -275,4 +288,5 @@ export const DEFAULT_SETTINGS = {
   mementoMori: true,
   mementoExpected: false,
   ghostMode: false,
+  quietHours: { enabled: false, start: '22:00', end: '08:00' },
 };
