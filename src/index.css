@@ -215,45 +215,82 @@ button:active, [role="button"]:active {
 }
 .animate-heat-flash { animation: heatFlash 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
 
-/* ── Shock modes — selectable full-screen visual modes (ShockOverlay) ── */
-@keyframes shockDrip { 0% { transform: scaleY(0); opacity: 0; } 10% { opacity: 1; } 80% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(1); opacity: 0; } }
-.shock-drip { transform-origin: top; animation: shockDrip 5s ease-in infinite; }
+/* ── Shock modes — selectable full-screen visual modes (ShockOverlay), opt-in so motion stays on ── */
+/* Blood Rite: a drip slides down and resets */
+@keyframes shockDrip { 0% { transform: scaleY(0); opacity: 0; } 8% { opacity: 1; } 70% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(1.05); opacity: 0; } }
+.shock-drip { transform-origin: top; animation: shockDrip 3.2s ease-in infinite; }
 
-@keyframes shockScreamFlash { 0% { opacity: 0.9; } 4% { opacity: 0.1; } 8% { opacity: 0.7; } 14% { opacity: 0; } 100% { opacity: 0; } }
-.shock-scream-flash { animation: shockScreamFlash 5.5s ease-out infinite; }
+/* The Scream: hard red strobe + breathing vignette */
+@keyframes shockScreamFlash { 0% { opacity: 0; } 3% { opacity: 1; } 9% { opacity: 0.1; } 13% { opacity: 0.8; } 20% { opacity: 0; } 100% { opacity: 0; } }
+.shock-scream-flash { animation: shockScreamFlash 4s ease-out infinite; }
+@keyframes shockScreamVig { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+.shock-scream-vig { animation: shockScreamVig 4s ease-in-out infinite; }
 
-/* violent burst-shake on the phone-frame for The Scream */
+/* frame shake (The Scream) — violent bursts */
 @keyframes shockShake {
-  0%, 12%, 100% { transform: translate(0, 0) rotate(0); }
-  2% { transform: translate(-5px, 2px) rotate(-0.5deg); }
-  4% { transform: translate(5px, -3px) rotate(0.6deg); }
-  6% { transform: translate(-6px, 1px) rotate(-0.4deg); }
-  8% { transform: translate(4px, 3px) rotate(0.5deg); }
-  10% { transform: translate(-3px, -2px) rotate(-0.3deg); }
+  0%, 16%, 100% { transform: translate(0, 0) rotate(0); }
+  2% { transform: translate(-7px, 3px) rotate(-0.7deg); } 4% { transform: translate(7px, -4px) rotate(0.8deg); }
+  6% { transform: translate(-8px, 2px) rotate(-0.6deg); } 8% { transform: translate(6px, 4px) rotate(0.7deg); }
+  10% { transform: translate(-5px, -3px) rotate(-0.5deg); } 12% { transform: translate(4px, 2px) rotate(0.4deg); } 14% { transform: translate(-2px, -1px) rotate(-0.2deg); }
 }
-.shock-shake { animation: shockShake 5.5s ease-in-out infinite; }
+.shock-shake { animation: shockShake 4s ease-in-out infinite; }
 
-/* constant micro-jitter on the frame for Corruption */
-@keyframes shockJitter { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-1.5px); } 50% { transform: translateX(1.5px); } 75% { transform: translateX(-1px); } }
-.shock-jitter { animation: shockJitter 0.2s steps(2) infinite; }
+/* frame jitter (Corruption) — constant glitch tremor */
+@keyframes shockJitter { 0%, 100% { transform: translate(0,0); } 20% { transform: translate(-2px,1px); } 40% { transform: translate(2px,-1px); } 60% { transform: translate(-1px,-1px); } 80% { transform: translate(1px,1px); } }
+.shock-jitter { animation: shockJitter 0.18s steps(2) infinite; }
 
-@keyframes shockGlitchBar { 0%, 100% { transform: translateY(0); opacity: 0.85; } 20% { transform: translateY(-28px); opacity: 0.3; } 21% { transform: translateY(38px); opacity: 0.95; } 50% { transform: translateY(6px); } 70% { opacity: 0.15; } 71% { opacity: 0.9; } }
-.shock-glitch-bar { animation: shockGlitchBar 1.4s infinite; }
-.shock-glitch-bar2 { animation: shockGlitchBar 0.9s infinite reverse; }
+/* Corruption: RGB split jitter + shudder bars */
+@keyframes shockRgbR { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 26% { transform: translateX(4px); } 60% { transform: translateX(-3px); } }
+@keyframes shockRgbC { 0%,100% { transform: translateX(0); } 25% { transform: translateX(6px); } 26% { transform: translateX(-4px); } 60% { transform: translateX(3px); } }
+.shock-rgb-r { animation: shockRgbR 0.4s steps(2) infinite; }
+.shock-rgb-c { animation: shockRgbC 0.4s steps(2) infinite; }
+@keyframes shockGlitchBar { 0%,100% { transform: translateY(0); opacity: 0.85; } 18% { transform: translateY(-40px); opacity: 0.2; } 19% { transform: translateY(50px); opacity: 1; } 50% { transform: translateY(8px); } 70% { opacity: 0.1; } 71% { opacity: 0.95; } }
+.shock-glitch-bar { animation: shockGlitchBar 1.1s steps(6) infinite; }
+.shock-glitch-bar2 { animation: shockGlitchBar 0.7s steps(5) infinite reverse; }
 
-@keyframes shockEmber { 0% { transform: translateY(0) translateX(0); opacity: 0; } 12% { opacity: 1; } 88% { opacity: 0.8; } 100% { transform: translateY(-92vh) translateX(14px); opacity: 0; } }
+/* Pyre: streaming embers + fire flicker */
+@keyframes shockEmber { 0% { transform: translateY(0) translateX(0) scale(1); opacity: 0; } 12% { opacity: 1; } 88% { opacity: 0.7; } 100% { transform: translateY(-95vh) translateX(18px) scale(0.4); opacity: 0; } }
 .shock-ember { animation-name: shockEmber; animation-timing-function: ease-out; animation-iteration-count: infinite; }
+@keyframes shockFire { 0%,100% { opacity: 0.78; transform: scaleY(1); } 25% { opacity: 1; transform: scaleY(1.06); } 50% { opacity: 0.7; transform: scaleY(0.96); } 75% { opacity: 0.95; } }
+.shock-fire { transform-origin: bottom; animation: shockFire 0.45s ease-in-out infinite; }
 
-@keyframes shockGodray { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-30px); } }
-.shock-godray { animation: shockGodray 14s ease-in-out infinite; }
-.shock-godray2 { animation: shockGodray 20s ease-in-out infinite reverse; }
+/* Sanctum: god-rays sweep */
+@keyframes shockGodray { 0%,100% { transform: translateX(0); } 50% { transform: translateX(60px); } }
+.shock-godray { animation: shockGodray 9s ease-in-out infinite; }
+.shock-godray2 { animation: shockGodray 13s ease-in-out infinite reverse; }
 
+/* Emergency: orbit spin + radar sweep + HUD blink */
 @keyframes shockOrbit { from { transform: translate(-50%, -50%) rotate(0); } to { transform: translate(-50%, -50%) rotate(360deg); } }
-.shock-orbit { animation: shockOrbit 90s linear infinite; }
+.shock-orbit { transform: translate(-50%, -50%); animation: shockOrbit 60s linear infinite; }
+@keyframes shockRadar { from { transform: translate(-50%, -50%) rotate(0); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+.shock-radar { animation: shockRadar 4s linear infinite; }
+@keyframes shockBlink { 0%,100% { opacity: 0.85; } 48% { opacity: 0.85; } 50% { opacity: 0.2; } 52% { opacity: 0.85; } }
+.shock-blink { animation: shockBlink 1.3s steps(1) infinite; }
 
+/* Dead Channel: scanlines roll + waveform bounce */
+@keyframes shockScanroll { from { background-position-y: 0; } to { background-position-y: 4px; } }
+.shock-scanroll { animation: shockScanroll 0.25s linear infinite; }
+@keyframes shockWave { 0%,100% { transform: scaleY(0.4); } 50% { transform: scaleY(1); } }
+.shock-wave { transform-origin: bottom; animation: shockWave 0.5s ease-in-out infinite; }
+
+/* Insomnia: halftone drift + light sheen sweep */
+@keyframes shockHalftone { from { background-position: 0 0; } to { background-position: 60px 60px; } }
+.shock-halftone-drift { animation: shockHalftone 6s linear infinite; }
+@keyframes shockSheen { 0% { transform: translateX(-60%); } 100% { transform: translateX(60%); } }
+.shock-sheen { animation: shockSheen 5s ease-in-out infinite; }
+
+/* Black Mass: darkness breathes inward */
+@keyframes shockVoid { 0%,100% { opacity: 0.85; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } }
+.shock-void { animation: shockVoid 5s ease-in-out infinite; }
+
+/* Rebirth: chevrons march */
+@keyframes shockChevron { 0% { transform: translateY(0); } 100% { transform: translateY(18px); } }
+.shock-chevron { animation: shockChevron 0.8s steps(3) infinite; }
+
+/* Opt-in shock modes keep their motion even under reduced-motion; only soften the frame shake. */
 @media (prefers-reduced-motion: reduce) {
-  .shock-drip, .shock-scream-flash, .shock-shake, .shock-jitter, .shock-glitch-bar,
-  .shock-glitch-bar2, .shock-ember, .shock-godray, .shock-godray2, .shock-orbit { animation: none !important; }
+  .shock-shake { animation-duration: 6s; }
+  @keyframes shockShake { 0%,16%,100% { transform: translate(0,0); } 4% { transform: translate(-2px,1px); } 8% { transform: translate(2px,-1px); } 12% { transform: translate(-1px,1px); } }
 }
 
 /* Illuminated drop-cap — a blackletter gold initial for confessions / scripture

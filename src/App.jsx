@@ -1748,8 +1748,8 @@ export default function App() {
         }} />
       )}
 
-      {/* Shock mode — selectable full-screen visual mode layered over the base */}
-      {!settings.parchmentMode && <ShockOverlay mode={settings.shockMode} />}
+      {/* Shock mode — selectable full-screen visual mode; renders ON TOP (z-30, pointer-events-none) */}
+      {!settings.parchmentMode && !isInsideOverlay && <ShockOverlay mode={settings.shockMode} />}
       {/* Grain — floored so the film texture stays visibly present (still slider-controlled above the floor) */}
       {settings.grainIntensity > 0 && (
         settings.grainStyle === 'print'

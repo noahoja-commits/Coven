@@ -1,193 +1,190 @@
-// Selectable full-screen "shock" visual modes — distinct aesthetics layered over the app.
-// One mode at a time (settings.shockMode). Every layer is absolute inset-0 pointer-events-none and
-// sits at z-10 (behind content, like the other washes) so the app stays fully usable underneath.
-// Motion is guarded by prefers-reduced-motion in index.css. The 'scream' frame-shake itself is a
-// class on the phone-frame (App.jsx); here we render the colour/light/texture layers per mode.
+// Selectable full-screen "shock" visual modes. Renders ON TOP of the app at z-30 and is
+// pointer-events-none, so each mode dominates the screen while the app stays fully tappable.
+// One mode at a time (settings.shockMode). Motion is real (see index.css .shock-* keyframes);
+// the 'scream'/'glitch' frame-shake itself is a class on the phone-frame (App.jsx).
 
-// Deterministic ember field for the Pyre — fixed so it doesn't re-randomise each render.
-const EMBERS = [
-  { l: '12%', d: '0s', s: 5, dur: '4.2s' }, { l: '26%', d: '1.1s', s: 3, dur: '5.1s' },
-  { l: '38%', d: '2.3s', s: 6, dur: '3.8s' }, { l: '51%', d: '0.6s', s: 4, dur: '4.8s' },
-  { l: '63%', d: '1.8s', s: 5, dur: '4.0s' }, { l: '74%', d: '3.0s', s: 3, dur: '5.4s' },
-  { l: '85%', d: '0.3s', s: 6, dur: '3.6s' }, { l: '45%', d: '2.7s', s: 4, dur: '4.6s' },
-  { l: '19%', d: '3.4s', s: 4, dur: '5.0s' }, { l: '69%', d: '1.4s', s: 5, dur: '4.4s' },
-];
-// Deterministic jagged waveform heights for Dead Channel (QUEEN IS DEAD).
+const WRAP = 'absolute inset-0 pointer-events-none z-30 overflow-hidden';
+
+// Deterministic ember field for the Pyre.
+const EMBERS = Array.from({ length: 26 }, (_, i) => ({
+  l: (i * 37) % 100, d: ((i * 7) % 50) / 10, s: 3 + (i % 4) * 2, dur: 3 + (i % 5) * 0.6,
+}));
+// Deterministic jagged waveform for Dead Channel.
 const WAVE = [22, 60, 14, 80, 35, 95, 50, 70, 12, 88, 40, 66, 18, 100, 30, 75, 55, 90, 25, 62,
-  44, 84, 16, 72, 38, 96, 48, 68, 20, 82, 33, 58, 28, 92, 46, 78, 24, 64, 52, 86, 15, 70];
-
-const HALFTONE = 'radial-gradient(currentColor 0.7px, transparent 1.1px)';
+  44, 84, 16, 72, 38, 96, 48, 68, 20, 82, 33, 58, 28, 92, 46, 78];
 
 export function ShockOverlay({ mode = 'none' }) {
   if (!mode || mode === 'none') return null;
 
-  // ── INSOMNIA — electric-blue duotone + halftone + distress ──
+  // ── INSOMNIA — electric-blue duotone takeover + halftone + light sweep ──
   if (mode === 'insomnia') {
     return (
-      <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden" aria-hidden>
-        {/* drench in electric blue */}
-        <div className="absolute inset-0" style={{ background: 'rgba(20,40,255,0.32)', mixBlendMode: 'overlay' }} />
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 18%, rgba(40,80,255,0.5), rgba(10,20,120,0.35) 45%, transparent 72%)', mixBlendMode: 'screen' }} />
-        {/* halftone dots in blue */}
-        <div className="absolute inset-0 text-[#2748ff] opacity-40" style={{ backgroundImage: HALFTONE, backgroundSize: '4px 4px', mixBlendMode: 'screen' }} />
-        {/* distress scratches */}
-        <div className="absolute inset-0 opacity-20" style={{ background: 'repeating-linear-gradient(96deg, transparent 0 40px, rgba(120,160,255,0.4) 40px 41px, transparent 41px 90px)' }} />
-        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 120px 30px rgba(0,8,60,0.7)' }} />
+      <div className={WRAP} aria-hidden>
+        <div className="absolute inset-0" style={{ backdropFilter: 'grayscale(1) contrast(1.15) brightness(1.05)', WebkitBackdropFilter: 'grayscale(1) contrast(1.15) brightness(1.05)' }} />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, #0a1cff 0%, #1030ff 40%, #0814a0 100%)', mixBlendMode: 'multiply' }} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 16%, rgba(60,110,255,0.85), rgba(20,40,200,0.4) 45%, transparent 75%)', mixBlendMode: 'screen' }} />
+        <div className="absolute inset-0 shock-halftone-drift" style={{ backgroundImage: 'radial-gradient(rgba(120,170,255,0.9) 0.8px, transparent 1.3px)', backgroundSize: '5px 5px', mixBlendMode: 'screen', opacity: 0.5 }} />
+        <div className="absolute -inset-1/4 shock-sheen" style={{ background: 'linear-gradient(115deg, transparent 40%, rgba(160,200,255,0.5) 50%, transparent 60%)' }} />
+        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 140px 40px rgba(0,6,80,0.85)' }} />
       </div>
     );
   }
 
-  // ── DEAD CHANNEL — 1-bit dither + scanlines + waveform (QUEEN IS DEAD) ──
+  // ── DEAD CHANNEL — 1-bit dither + rolling scanlines + bouncing waveform ──
   if (mode === 'dead-channel') {
     return (
-      <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden" aria-hidden>
-        {/* desaturate everything underneath */}
-        <div className="absolute inset-0" style={{ backdropFilter: 'grayscale(1) contrast(1.3)', WebkitBackdropFilter: 'grayscale(1) contrast(1.3)' }} />
-        {/* dither dot screen */}
-        <div className="absolute inset-0 text-white opacity-25" style={{ backgroundImage: HALFTONE, backgroundSize: '3px 3px' }} />
-        {/* dense scanlines */}
-        <div className="absolute inset-0 opacity-40" style={{ background: 'repeating-linear-gradient(to bottom, rgba(0,0,0,0.7) 0 1px, transparent 1px 2.5px)' }} />
-        {/* jagged waveform along the bottom */}
-        <div className="absolute bottom-0 inset-x-0 h-[16%] flex items-end justify-between px-1 gap-[1px] opacity-70">
-          {WAVE.map((h, i) => <span key={i} className="flex-1 bg-[#E8E8E8]" style={{ height: `${h}%` }} />)}
+      <div className={WRAP} aria-hidden>
+        <div className="absolute inset-0" style={{ backdropFilter: 'grayscale(1) contrast(1.6) brightness(0.95)', WebkitBackdropFilter: 'grayscale(1) contrast(1.6) brightness(0.95)' }} />
+        <div className="absolute inset-0 opacity-40" style={{ backgroundImage: 'radial-gradient(#fff 0.7px, transparent 1.1px)', backgroundSize: '3px 3px' }} />
+        <div className="absolute inset-0 shock-scanroll opacity-60" style={{ backgroundImage: 'repeating-linear-gradient(to bottom, rgba(0,0,0,0.85) 0 2px, transparent 2px 4px)' }} />
+        <div className="absolute top-10 left-0 right-0 text-center text-[#cfcfcf] text-[9px] leading-[1.7] opacity-30 shock-blink" style={{ fontFamily: '"VT323", monospace', letterSpacing: '0.3em' }}>
+          QUEEN IS DEAD · QUEEN IS DEAD · QUEEN IS DEAD<br />QUEEN IS DEAD · LONG LIVE THE QUEEN
+        </div>
+        <div className="absolute bottom-0 inset-x-0 h-[20%] flex items-end justify-between px-1 gap-[1px]">
+          {WAVE.map((h, i) => (
+            <span key={i} className="flex-1 bg-[#EDEDED] shock-wave" style={{ height: `${h}%`, animationDelay: `${(i % 9) * 0.08}s` }} />
+          ))}
         </div>
       </div>
     );
   }
 
-  // ── EMERGENCY — orbital blueprint HUD + terminal readout (W.H. BEEHLER) ──
+  // ── EMERGENCY — rotating orbital HUD + radar sweep + blinking readout ──
   if (mode === 'emergency') {
     return (
-      <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden text-[#9fb4d4]" aria-hidden>
-        {/* slowly rotating orbital rings */}
-        <svg viewBox="0 0 200 200" className="absolute left-1/2 top-1/2 w-[150%] h-[150%] -translate-x-1/2 -translate-y-1/2 shock-orbit" style={{ opacity: 0.22 }}>
-          {[30, 48, 66, 84].map(r => <circle key={r} cx="100" cy="100" r={r} fill="none" stroke="currentColor" strokeWidth="0.4" />)}
-          <ellipse cx="100" cy="100" rx="84" ry="40" fill="none" stroke="currentColor" strokeWidth="0.4" />
-          <ellipse cx="100" cy="100" rx="40" ry="84" fill="none" stroke="currentColor" strokeWidth="0.4" />
-          <line x1="0" y1="100" x2="200" y2="100" stroke="currentColor" strokeWidth="0.3" />
-          <line x1="100" y1="0" x2="100" y2="200" stroke="currentColor" strokeWidth="0.3" />
+      <div className={`${WRAP} text-[#bcd2f0]`} aria-hidden>
+        <div className="absolute inset-0" style={{ background: 'rgba(2,8,18,0.5)' }} />
+        <svg viewBox="0 0 200 200" className="absolute left-1/2 top-1/2 w-[170%] h-[170%] shock-orbit" style={{ opacity: 0.6 }}>
+          {[26, 44, 62, 80, 96].map(r => <circle key={r} cx="100" cy="100" r={r} fill="none" stroke="currentColor" strokeWidth="0.5" />)}
+          <ellipse cx="100" cy="100" rx="96" ry="42" fill="none" stroke="currentColor" strokeWidth="0.5" />
+          <ellipse cx="100" cy="100" rx="42" ry="96" fill="none" stroke="currentColor" strokeWidth="0.5" />
+          {[0, 30, 60, 90, 120, 150].map(a => (
+            <line key={a} x1="100" y1="100" x2={100 + 96 * Math.cos(a * Math.PI / 180)} y2={100 + 96 * Math.sin(a * Math.PI / 180)} stroke="currentColor" strokeWidth="0.3" opacity="0.5" />
+          ))}
         </svg>
-        {/* crosshair + corner ticks */}
-        <div className="absolute inset-3 opacity-25" style={{ background:
-          'linear-gradient(to right, currentColor 0 14px, transparent 14px) 0 0 / 14px 1px no-repeat,' +
-          'linear-gradient(to bottom, currentColor 0 14px, transparent 14px) 0 0 / 1px 14px no-repeat' }} />
-        {/* terminal readout, top-right */}
-        <pre className="absolute top-14 right-3 text-[7px] leading-[1.5] opacity-50 text-right" style={{ fontFamily: '"VT323", monospace' }}>{`localdomain · LI
+        {/* radar sweep */}
+        <div className="absolute left-1/2 top-1/2 w-[170%] h-[170%] -translate-x-1/2 -translate-y-1/2 shock-radar" style={{ background: 'conic-gradient(from 0deg, rgba(120,200,255,0.35), transparent 25%)', borderRadius: '50%' }} />
+        <pre className="absolute top-16 right-3 text-[8px] leading-[1.6] opacity-80 text-right shock-blink" style={{ fontFamily: '"VT323", monospace' }}>{`localdomain · LI
 UPTIME 8h44m4s
 FREQ 2.00 MHz
 RAM 563MiB/1.95GiB
 CPU 18% · PROC 107
-EMERGENCY · EARLY WARNING`}</pre>
-        {/* scanline + dark frame */}
-        <div className="absolute inset-0 opacity-25" style={{ background: 'repeating-linear-gradient(to bottom, rgba(0,0,0,0.5) 0 1px, transparent 1px 4px)' }} />
-        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 100px 20px rgba(0,4,20,0.7)' }} />
+>> EMERGENCY EARLY WARNING`}</pre>
+        <div className="absolute inset-4 opacity-40" style={{ background:
+          'linear-gradient(to right, currentColor 0 18px, transparent 18px) 0 0 / 18px 1px no-repeat,' +
+          'linear-gradient(to bottom, currentColor 0 18px, transparent 18px) 0 0 / 1px 18px no-repeat,' +
+          'linear-gradient(to left, currentColor 0 18px, transparent 18px) 100% 100% / 18px 1px no-repeat,' +
+          'linear-gradient(to top, currentColor 0 18px, transparent 18px) 100% 100% / 1px 18px no-repeat' }} />
+        <div className="absolute inset-0 opacity-30" style={{ background: 'repeating-linear-gradient(to bottom, rgba(0,0,0,0.6) 0 1px, transparent 1px 4px)' }} />
+        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 120px 30px rgba(0,4,20,0.85)' }} />
       </div>
     );
   }
 
-  // ── BLOOD RITE — oxblood spatter that drips ──
+  // ── BLOOD RITE — irregular SVG blots + drips that fall ──
   if (mode === 'spatter') {
     return (
-      <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden" aria-hidden>
-        <div className="absolute inset-0" style={{
-          background:
-            'radial-gradient(circle at 14% 6%, rgba(120,0,0,0.85) 0 3%, transparent 7%),' +
-            'radial-gradient(circle at 22% 10%, rgba(91,15,26,0.7) 0 1.4%, transparent 4%),' +
-            'radial-gradient(circle at 84% 4%, rgba(120,0,0,0.8) 0 2.6%, transparent 7%),' +
-            'radial-gradient(circle at 92% 12%, rgba(91,15,26,0.6) 0 1.2%, transparent 4%),' +
-            'radial-gradient(circle at 50% 2%, rgba(139,0,0,0.6) 0 2%, transparent 6%),' +
-            'radial-gradient(circle at 6% 40%, rgba(91,15,26,0.5) 0 1.4%, transparent 5%),' +
-            'radial-gradient(circle at 96% 52%, rgba(120,0,0,0.5) 0 1.6%, transparent 5%)',
-        }} />
-        {[['13%', '0s'], ['23%', '1.6s'], ['50%', '0.8s'], ['84%', '0.4s'], ['92%', '2.2s']].map(([l, d], i) => (
-          <span key={i} className="absolute top-0 w-[2px] shock-drip"
-            style={{ left: l, animationDelay: d, height: '22%',
-              background: 'linear-gradient(to bottom, rgba(120,0,0,0.9), rgba(91,15,26,0.2) 80%, transparent)' }} />
+      <div className={WRAP} aria-hidden>
+        <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 180">
+          <g fill="#6e0000">
+            <path d="M12 4 C 20 -2, 26 6, 22 12 C 28 14, 24 22, 16 20 C 10 26, 2 20, 6 12 C 0 10, 4 2, 12 4 Z" />
+            <path d="M84 2 C 92 0, 96 8, 90 12 C 96 18, 88 24, 82 18 C 74 22, 72 12, 78 8 C 76 2, 80 2, 84 2 Z" />
+            <path d="M48 0 C 54 0, 56 6, 52 9 C 57 12, 51 17, 46 13 C 41 16, 40 8, 45 6 Z" opacity="0.85" />
+            <circle cx="30" cy="60" r="2.4" /><circle cx="70" cy="48" r="3" /><circle cx="92" cy="80" r="2" />
+            <circle cx="8" cy="92" r="2.6" /><circle cx="58" cy="120" r="1.8" /><circle cx="22" cy="150" r="2.2" />
+          </g>
+        </svg>
+        {[[13, 0], [23, 1.4], [49, 0.7], [85, 0.3], [91, 2.1], [62, 1.1]].map(([l, d], i) => (
+          <span key={i} className="absolute top-0 w-[3px] shock-drip"
+            style={{ left: `${l}%`, animationDelay: `${d}s`, height: '34%',
+              background: 'linear-gradient(to bottom, #8b0000, #5b0f1a 75%, transparent)' }}>
+            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[7px] h-[7px] rounded-full" style={{ background: '#8b0000' }} />
+          </span>
         ))}
       </div>
     );
   }
 
-  // ── THE SCREAM — crimson flash synced with the phone-frame shake (App.jsx) ──
+  // ── THE SCREAM — frame-shake (App.jsx) + violent red strobe + closing vignette ──
   if (mode === 'scream') {
     return (
-      <div className="absolute inset-0 pointer-events-none z-10 shock-scream-flash" aria-hidden
-        style={{ background: 'radial-gradient(ellipse at center, transparent 30%, rgba(200,16,46,0.55) 100%)', mixBlendMode: 'screen' }} />
-    );
-  }
-
-  // ── CORRUPTION — RGB-split shudder bands + scanlines ──
-  if (mode === 'glitch') {
-    return (
-      <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden" aria-hidden>
-        <div className="absolute inset-x-0 h-[7%] shock-glitch-bar" style={{ top: '18%', background: 'rgba(200,16,46,0.22)', mixBlendMode: 'screen' }} />
-        <div className="absolute inset-x-0 h-[4%] shock-glitch-bar2" style={{ top: '46%', background: 'rgba(0,200,200,0.16)', mixBlendMode: 'screen' }} />
-        <div className="absolute inset-x-0 h-[9%] shock-glitch-bar" style={{ top: '70%', background: 'rgba(123,44,191,0.2)', mixBlendMode: 'screen', animationDelay: '0.5s' }} />
-        <div className="absolute inset-0 opacity-30" style={{ background: 'repeating-linear-gradient(to bottom, rgba(0,0,0,0.5) 0 1px, transparent 1px 3px)' }} />
+      <div className={WRAP} aria-hidden>
+        <div className="absolute inset-0 shock-scream-flash" style={{ background: 'rgba(200,16,46,0.5)', mixBlendMode: 'screen' }} />
+        <div className="absolute inset-0 shock-scream-vig" style={{ boxShadow: 'inset 0 0 100px 40px rgba(120,0,0,0.9)' }} />
       </div>
     );
   }
 
-  // ── PYRE — fire glow from below + rising embers ──
+  // ── CORRUPTION — RGB split + violent shudder bands + scanline tear ──
+  if (mode === 'glitch') {
+    return (
+      <div className={WRAP} aria-hidden>
+        <div className="absolute inset-0 shock-rgb-r" style={{ backdropFilter: 'brightness(1.1)', background: 'rgba(255,0,40,0.18)', mixBlendMode: 'screen' }} />
+        <div className="absolute inset-0 shock-rgb-c" style={{ background: 'rgba(0,255,230,0.16)', mixBlendMode: 'screen' }} />
+        <div className="absolute inset-x-0 h-[8%] shock-glitch-bar" style={{ top: '16%', background: 'rgba(255,255,255,0.12)', mixBlendMode: 'overlay' }} />
+        <div className="absolute inset-x-0 h-[5%] shock-glitch-bar2" style={{ top: '44%', background: 'rgba(0,255,230,0.2)', mixBlendMode: 'screen' }} />
+        <div className="absolute inset-x-0 h-[11%] shock-glitch-bar" style={{ top: '68%', background: 'rgba(200,16,46,0.28)', mixBlendMode: 'screen', animationDelay: '0.4s' }} />
+        <div className="absolute inset-0 opacity-40" style={{ background: 'repeating-linear-gradient(to bottom, rgba(0,0,0,0.55) 0 1px, transparent 1px 3px)' }} />
+      </div>
+    );
+  }
+
+  // ── PYRE — flickering fire + dense streaming embers ──
   if (mode === 'inferno') {
     return (
-      <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden" aria-hidden>
-        <div className="absolute inset-0 animate-flicker" style={{
-          background: 'radial-gradient(ellipse at 50% 118%, rgba(255,90,0,0.55), rgba(200,16,46,0.4) 35%, rgba(91,15,26,0.2) 55%, transparent 72%)',
+      <div className={WRAP} aria-hidden>
+        <div className="absolute inset-x-0 bottom-0 h-3/4 shock-fire" style={{
+          background: 'radial-gradient(ellipse at 50% 110%, rgba(255,140,0,0.8), rgba(255,40,0,0.55) 35%, rgba(139,0,0,0.3) 58%, transparent 78%)',
           mixBlendMode: 'screen' }} />
         {EMBERS.map((e, i) => (
           <span key={i} className="absolute bottom-0 rounded-full shock-ember"
-            style={{ left: e.l, width: e.s, height: e.s, animationDelay: e.d, animationDuration: e.dur,
-              background: 'radial-gradient(circle, #ffcc66, #ff5a00 60%, transparent)' }} />
+            style={{ left: `${e.l}%`, width: e.s, height: e.s, animationDelay: `${e.d}s`, animationDuration: `${e.dur}s`,
+              background: 'radial-gradient(circle, #ffdf80, #ff5a00 55%, transparent)', boxShadow: '0 0 6px #ff7a00' }} />
         ))}
       </div>
     );
   }
 
-  // ── BLACK MASS — crush to near-black ──
+  // ── BLACK MASS — darkness breathing inward ──
   if (mode === 'void') {
     return (
-      <div className="absolute inset-0 pointer-events-none z-10" aria-hidden
-        style={{ background: 'radial-gradient(ellipse at 50% 45%, transparent 6%, rgba(0,0,0,0.55) 40%, rgba(0,0,0,0.82) 100%)' }}>
-        <div className="absolute inset-0 animate-flicker" style={{ background: 'radial-gradient(ellipse at 50% 45%, rgba(91,15,26,0.18), transparent 30%)' }} />
+      <div className={WRAP} aria-hidden>
+        <div className="absolute inset-0 shock-void" style={{ background: 'radial-gradient(ellipse at 50% 45%, transparent 8%, rgba(0,0,0,0.7) 38%, rgba(0,0,0,0.94) 100%)' }} />
+        <div className="absolute inset-0 animate-flicker" style={{ background: 'radial-gradient(ellipse at 50% 45%, rgba(120,0,0,0.25), transparent 28%)' }} />
       </div>
     );
   }
 
-  // ── SANCTUM — gothic god-ray light shafts ──
+  // ── SANCTUM — sweeping god-ray shafts ──
   if (mode === 'cathedral') {
     return (
-      <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden" aria-hidden>
-        <div className="absolute inset-0 shock-godray" style={{
-          background: 'repeating-linear-gradient(72deg, transparent 0 26px, rgba(201,169,97,0.05) 26px 30px, transparent 30px 60px)',
+      <div className={WRAP} aria-hidden>
+        <div className="absolute -inset-1/3 shock-godray" style={{
+          background: 'repeating-linear-gradient(74deg, transparent 0 22px, rgba(201,169,97,0.12) 22px 28px, transparent 28px 56px)',
           mixBlendMode: 'screen' }} />
-        <div className="absolute inset-0 shock-godray2" style={{
-          background: 'repeating-linear-gradient(108deg, transparent 0 34px, rgba(123,44,191,0.06) 34px 38px, transparent 38px 72px)',
+        <div className="absolute -inset-1/3 shock-godray2" style={{
+          background: 'repeating-linear-gradient(106deg, transparent 0 30px, rgba(123,44,191,0.13) 30px 36px, transparent 36px 70px)',
           mixBlendMode: 'screen' }} />
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% -10%, rgba(91,15,26,0.35), transparent 60%)' }} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% -15%, rgba(91,15,26,0.5), transparent 62%)' }} />
       </div>
     );
   }
 
-  // ── REBIRTH — editorial poster frame: red corner blocks + chevrons + registration chrome ──
+  // ── REBIRTH — bold red corner blocks + marching chevrons + chrome ──
   if (mode === 'rebirth') {
     return (
-      <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden text-[#C8102E]" aria-hidden>
-        {/* red color-block corners (REBIRTH) */}
-        <div className="absolute top-0 right-0 w-[22%] h-[12%]" style={{ background: 'linear-gradient(135deg, #C8102E, #5B0F1A)' }} />
-        <div className="absolute bottom-0 left-0 w-[22%] h-[12%]" style={{ background: 'linear-gradient(135deg, #5B0F1A, #C8102E)' }} />
-        {/* chevron stack, top-left */}
-        <div className="absolute top-2 left-2 flex flex-col gap-1 text-[13px] leading-none opacity-90" style={{ fontFamily: '"Manrope", sans-serif' }}>
-          {Array.from({ length: 6 }).map((_, i) => <span key={i}>❯</span>)}
+      <div className={`${WRAP} text-[#C8102E]`} aria-hidden>
+        <div className="absolute top-0 right-0 w-[30%] h-[16%]" style={{ background: 'linear-gradient(135deg, #ff0a2e, #5B0F1A)' }} />
+        <div className="absolute bottom-0 left-0 w-[30%] h-[16%]" style={{ background: 'linear-gradient(135deg, #5B0F1A, #ff0a2e)' }} />
+        <div className="absolute top-3 left-2 flex flex-col text-[18px] leading-[0.8] font-bold shock-chevron" style={{ fontFamily: '"Manrope", sans-serif' }}>
+          {Array.from({ length: 7 }).map((_, i) => <span key={i}>❯</span>)}
         </div>
-        {/* vertical date, left edge */}
-        <div className="absolute left-2 bottom-[16%] text-[8px] tracking-[0.2em] opacity-70" style={{ writingMode: 'vertical-rl', fontFamily: '"VT323", monospace' }}>MMXXVI · COVEN</div>
-        {/* registration crosses */}
-        {[['top-2 right-[24%]'], ['bottom-[14%] right-3'], ['top-[14%] left-[24%]']].map(([pos], i) => (
-          <span key={i} className={`absolute ${pos} text-[10px] opacity-60`}>✛</span>
+        <div className="absolute left-2 bottom-[20%] text-[9px] tracking-[0.25em] opacity-80" style={{ writingMode: 'vertical-rl', fontFamily: '"VT323", monospace' }}>MMXXVI · COVEN</div>
+        {[['top-3 right-[32%]'], ['bottom-[18%] right-4'], ['top-[18%] left-[32%]'], ['bottom-3 right-[10%]']].map(([pos], i) => (
+          <span key={i} className={`absolute ${pos} text-[13px] opacity-70`}>✛</span>
         ))}
-        {/* faint red wash from the corners */}
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 100% 0%, rgba(200,16,46,0.18), transparent 45%), radial-gradient(ellipse at 0% 100%, rgba(200,16,46,0.18), transparent 45%)', mixBlendMode: 'screen' }} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 100% 0%, rgba(255,10,46,0.3), transparent 42%), radial-gradient(ellipse at 0% 100%, rgba(255,10,46,0.3), transparent 42%)', mixBlendMode: 'screen' }} />
+        <div className="absolute inset-0 border-[3px] border-[#C8102E]/40" />
       </div>
     );
   }
