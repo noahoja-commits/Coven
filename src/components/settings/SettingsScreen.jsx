@@ -314,5 +314,7 @@ export const DEFAULT_SETTINGS = {
   ghostMode: false,
   haptics: true,
   ambientGlow: true,
+  livingTheme: true,
+  familiar: true,
   quietHours: { enabled: false, start: '22:00', end: '08:00' },
 };
