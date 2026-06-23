@@ -1173,14 +1173,8 @@ export default function App() {
   };
 
   // Your own follower / following lists (RLS allows reading your own edges only).
-  const openFollowing = () => setFollowList({ type: 'following', people: followingPeople });
-  const openFollowers = () => {
-    if (!meId) return;
-    setFollowList({ type: 'followers', people: [] });
-    fetchFollowers(meId)
-      .then(people => setFollowList(cur => (cur?.type === 'followers' ? { type: 'followers', people } : cur)))
-      .catch(e => console.error('[load] followers failed:', e));
-  };
+  const openFollowing = () => setFollowList({ tab: 'following' });
+  const openFollowers = () => { if (meId) setFollowList({ tab: 'followers' }); };
 
   const todayKey = new Date().toISOString().slice(0, 10);
   const yesterdayKey = (() => {
@@ -2099,8 +2093,8 @@ export default function App() {
       </Suspense>
       {followList && (
         <FollowListOverlay
-          title={followList.type === 'followers' ? 'followers' : 'following'}
-          people={followList.people}
+          initialTab={followList.tab}
+          myId={meId}
           onClose={() => setFollowList(null)}
           onOpenUser={(h) => { setFollowList(null); if (h && h !== meHandle) setActiveUserHandle(h); }}
         />

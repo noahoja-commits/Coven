@@ -47,6 +47,13 @@ export async function fetchFollowers(myId) {
     .map(p => ({ id: p.id, handle: p.handle, avatar: p.avatar, avatarUrl: p.avatar_url, bio: p.bio }));
 }
 
+// People you follow who also follow you back (intersection by id).
+export async function fetchMutuals(myId) {
+  const [following, followers] = await Promise.all([fetchFollowing(myId), fetchFollowers(myId)]);
+  const followerIds = new Set((followers || []).map(p => p.id));
+  return (following.people || []).filter(p => followerIds.has(p.id));
+}
+
 export async function followUser(myId, followeeId) {
   const { error } = await supabase.from('follows')
     .insert({ follower_id: myId, followee_id: followeeId });
