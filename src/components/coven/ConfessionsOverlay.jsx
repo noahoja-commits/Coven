@@ -4,7 +4,7 @@ import { F } from '../../styles/fonts';
 import { EmptyState } from '../shared/EmptyState';
 import { SacredHeart } from '../shared/Sigils';
 import { Reaction } from '../shared/Reaction';
-import { OrnamentRule, Grain } from '../shared/Sigils';
+import { OrnamentRule, Grain, OrnateFrame } from '../shared/Sigils';
 
 // Confessions are real anonymous posts. `userConfessions` is the live list of the
 // current feed's anonymous posts (author masked server-side); confessing creates a
@@ -77,7 +77,8 @@ export function ConfessionsOverlay({ onClose, userConfessions = [], onConfess, o
           {userConfessions.length === 0 ? (
             <EmptyState glyph={SacredHeart} text="· no confessions yet. be the first to unburden ·" />
           ) : userConfessions.filter(c => !hidden[c.id]).map(c => (
-            <div key={c.id} className="relative overflow-hidden border border-[#7B2CBF]/20 bg-[#0A0204]/60 p-4">
+            <div key={c.id} className="relative overflow-hidden border border-[#7B2CBF]/20 bg-[#0A0204]/60 p-5">
+              <OrnateFrame glow />
               <Grain opacity={0.05} />
               <p className="relative text-[#F5F1E8] text-base italic leading-relaxed mb-3 illuminated" style={F.scripture}>{c.body}</p>
               <div className="flex items-center justify-between">

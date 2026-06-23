@@ -214,6 +214,33 @@ export function TarotFrame({ gold = '#C9A961', oxblood = '#5B0F1A' }) {
   );
 }
 
+// An engraved filigree frame — a richer sibling to TarotFrame. Four mirrored
+// scrollwork corners + a faint inner liner. Decorative only: pointer-events-none,
+// sits BEHIND content, never alters layout. Hand-drawn SVG (no external assets).
+function FiligreeCorner({ gold, transform }) {
+  return (
+    <g transform={transform} fill="none" stroke={gold} strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" opacity="0.85">
+      <path d="M2 16 C 2 7, 7 2, 16 2" />
+      <path d="M2 10 C 2 5, 5 2, 10 2" opacity="0.55" />
+      <path d="M6 16 C 6 10, 10 6, 16 6 C 12 6, 9 9, 9 13" />
+      <circle cx="3.4" cy="3.4" r="1.2" fill={gold} stroke="none" />
+    </g>
+  );
+}
+export function OrnateFrame({ gold = '#C9A961', oxblood = '#5B0F1A', inset = 6, glow = false }) {
+  return (
+    <div className="absolute inset-0 z-[1] pointer-events-none" aria-hidden
+      style={glow ? { filter: `drop-shadow(0 0 6px ${gold}40)` } : undefined}>
+      <div className="absolute" style={{ inset, border: `1px solid ${gold}40` }} />
+      <div className="absolute" style={{ inset: inset + 3, border: `1px solid ${oxblood}66` }} />
+      <svg className="absolute top-0 left-0" width="30" height="30" viewBox="0 0 28 28"><FiligreeCorner gold={gold} /></svg>
+      <svg className="absolute top-0 right-0" width="30" height="30" viewBox="0 0 28 28"><FiligreeCorner gold={gold} transform="scale(-1,1) translate(-28,0)" /></svg>
+      <svg className="absolute bottom-0 left-0" width="30" height="30" viewBox="0 0 28 28"><FiligreeCorner gold={gold} transform="scale(1,-1) translate(0,-28)" /></svg>
+      <svg className="absolute bottom-0 right-0" width="30" height="30" viewBox="0 0 28 28"><FiligreeCorner gold={gold} transform="scale(-1,-1) translate(-28,-28)" /></svg>
+    </div>
+  );
+}
+
 // A horizontal ornamental rule with a centered sigil — replaces plain divider lines
 // on the dark surfaces to carry the grimoire feel beyond the reader.
 // glyph may be a string (emoji/unicode) OR a sigil component (e.g. SacredHeart).
