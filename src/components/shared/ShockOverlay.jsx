@@ -16,17 +16,16 @@ const WAVE = [22, 60, 14, 80, 35, 95, 50, 70, 12, 88, 40, 66, 18, 100, 30, 75, 5
 export function ShockOverlay({ mode = 'none' }) {
   if (!mode || mode === 'none') return null;
 
-  // ── INSOMNIA — vivid electric-blue (mix-blend color keeps text luminance/legible) + halftone + sweep ──
+  // ── INSOMNIA — vivid electric-blue duotone of the content (backdrop-filter preserves text luminance) ──
   if (mode === 'insomnia') {
+    // grayscale → sepia → rotate the hue onto pure blue → saturate. Recolours the real content to
+    // electric blue while keeping its light/dark structure, so text stays readable (like Dead Channel's grayscale).
+    const duo = 'grayscale(1) sepia(1) hue-rotate(206deg) saturate(7) brightness(1.12) contrast(1.05)';
     return (
       <div className={WRAP} aria-hidden>
-        {/* desaturate the content first so the colour-blend reads as pure electric blue, not muddy purple */}
-        <div className="absolute inset-0" style={{ backdropFilter: 'grayscale(1) brightness(1.08) contrast(1.05)', WebkitBackdropFilter: 'grayscale(1) brightness(1.08) contrast(1.05)' }} />
-        {/* force an electric-blue hue while preserving luminance → text stays readable */}
-        <div className="absolute inset-0" style={{ background: '#1736ff', mixBlendMode: 'color' }} />
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 14%, rgba(40,90,255,0.5), transparent 72%)', mixBlendMode: 'screen' }} />
-        <div className="absolute inset-0 shock-halftone-drift" style={{ backgroundImage: 'radial-gradient(rgba(150,190,255,0.7) 0.7px, transparent 1.2px)', backgroundSize: '5px 5px', mixBlendMode: 'screen', opacity: 0.28 }} />
-        <div className="absolute -inset-1/4 shock-sheen" style={{ background: 'linear-gradient(115deg, transparent 43%, rgba(190,215,255,0.35) 50%, transparent 57%)' }} />
+        <div className="absolute inset-0" style={{ backdropFilter: duo, WebkitBackdropFilter: duo }} />
+        <div className="absolute inset-0 shock-halftone-drift" style={{ backgroundImage: 'radial-gradient(rgba(150,190,255,0.55) 0.6px, transparent 1.1px)', backgroundSize: '5px 5px', mixBlendMode: 'overlay', opacity: 0.3 }} />
+        <div className="absolute -inset-1/4 shock-sheen" style={{ background: 'linear-gradient(115deg, transparent 44%, rgba(190,215,255,0.28) 50%, transparent 56%)' }} />
       </div>
     );
   }
