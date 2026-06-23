@@ -286,9 +286,9 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
         </div>
         {nowPlaying ? (
           <div className="flex items-center gap-2.5">
-            {/* spinning record */}
+            {/* spinning record — faster + emphasized when on repeat */}
             <span className="relative shrink-0 w-7 h-7 rounded-full animate-spin" style={{
-              animationDuration: '3s',
+              animationDuration: nowPlaying.loop ? '1.8s' : '3s',
               background: 'radial-gradient(circle at center, #C9A961 0 14%, #0A0A0A 15% 42%, #1A1A1A 43% 100%)',
               boxShadow: 'inset 0 0 0 1px rgba(201,169,97,0.25)',
             }}>
@@ -298,6 +298,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
               <span className="text-[#C9A961]">{nowPlaying.artist}</span>
               {nowPlaying.artist && nowPlaying.track && <span className="text-[#A89968]/60"> · </span>}
               <span className="italic">{nowPlaying.track}</span>
+              {nowPlaying.loop && <span className="ml-1.5 align-middle text-[9px] uppercase tracking-wider text-[#C9A961] border border-[#C9A961]/40 px-1 py-0.5" style={F.ui}>↻ repeat</span>}
             </p>
           </div>
         ) : (

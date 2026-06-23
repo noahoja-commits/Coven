@@ -5,19 +5,20 @@ import { F } from '../../styles/fonts';
 export function NowPlayingModal({ current, onSave, onShare, onClose }) {
   const [artist, setArtist] = useState(current?.artist || '');
   const [track, setTrack] = useState(current?.track || '');
+  const [loop, setLoop] = useState(!!current?.loop);
 
   const save = () => {
     const a = artist.trim();
     const t = track.trim();
     if (!a && !t) { onSave(null); return; }
-    onSave({ artist: a, track: t, setAt: Date.now() });
+    onSave({ artist: a, track: t, loop, setAt: Date.now() });
   };
 
   const share = () => {
     const a = artist.trim();
     const t = track.trim();
     if (!a && !t) return;
-    onSave({ artist: a, track: t, setAt: Date.now() });
+    onSave({ artist: a, track: t, loop, setAt: Date.now() });
     onShare && onShare({ artist: a, track: t });
   };
 
@@ -51,6 +52,11 @@ export function NowPlayingModal({ current, onSave, onShare, onClose }) {
               className="w-full mt-1.5 bg-[#0A0A0A] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none p-2.5 text-[#F5F1E8] text-sm italic"
               style={F.serif} />
           </div>
+          <button onClick={() => setLoop(l => !l)}
+            className={`w-full flex items-center justify-between p-2.5 border transition-colors ${loop ? 'border-[#8B0000] bg-[#5B0F1A]/20' : 'border-[#2A2A2A] hover:border-[#5B0F1A]/60'}`}>
+            <span className="text-[10px] uppercase tracking-[0.2em] text-[#A89968] flex items-center gap-1.5" style={F.ui}>↻ on repeat</span>
+            <span className={`text-xs ${loop ? 'text-[#C9A961]' : 'text-[#6B6B6B]'}`} style={F.ui}>{loop ? 'looping' : 'off'}</span>
+          </button>
         </div>
         <div className="flex items-center gap-2 p-4 border-t border-[#1A1A1A]">
           {current && (
