@@ -63,6 +63,7 @@ import { startCheckout } from './lib/db/tickets';
 import { NowPlayingModal } from './components/profile/NowPlayingModal';
 import { NewGroupDMModal } from './components/shared/NewGroupDMModal';
 import { ReflectionsModal } from './components/profile/ReflectionsModal';
+import { DreamJournalModal } from './components/profile/DreamJournalModal';
 
 import { CovenMenu } from './components/coven/CovenMenu';
 // Lazy — the Library carries the full text of every book; keep it out of the initial bundle.
@@ -140,6 +141,7 @@ export default function App() {
   const [showNowPlaying, setShowNowPlaying] = useState(false);
   const [showNewGroup, setShowNewGroup] = useState(false);
   const [showReflections, setShowReflections] = useState(false);
+  const [showDreams, setShowDreams] = useState(false);
   const [quoteTarget, setQuoteTarget] = useState(null);
   const [showVespersArchive, setShowVespersArchive] = useState(false);
 
@@ -202,6 +204,7 @@ export default function App() {
   const [nowPlaying, setNowPlaying] = useLocalStorage('nowPlaying', null);
   const [activityLog, setActivityLog] = useLocalStorage('activityLog', []);
   const [reflections, setReflections] = useState([]); // Supabase-backed (profile_state)
+  const [dreams, setDreams] = useState([]); // private dream journal (profile_state)
   const [mutedKeywords, setMutedKeywords] = useLocalStorage('mutedKeywords', []);
   const [hiddenPosts, setHiddenPosts] = useLocalStorage('hiddenPosts', {});
   const [ritual, setRitual] = useLocalStorage('ritual', { streak: 0, lastDay: null });
@@ -274,11 +277,11 @@ export default function App() {
   useEffect(() => {
     const anyModal = showEditProfile || showTonightModal || showSettings || showNotifs
       || showCompose || showStoryComposer || showSearch || showVespersArchive
-      || showAddGrave || showAddAnniv || showNewGroup || showReflections || showCrewBrowse
+      || showAddGrave || showAddAnniv || showNewGroup || showReflections || showDreams || showCrewBrowse
       || showNowPlaying || showBlocked || showLegal || showDeleteConfirm || showMyTickets || quoteTarget || activeStoryIndex !== null;
     document.body.style.overflow = anyModal ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
-  }, [showEditProfile, showTonightModal, showSettings, showNotifs, showCompose, showStoryComposer, showSearch, showVespersArchive, showAddGrave, showAddAnniv, showNewGroup, showReflections, showCrewBrowse, showNowPlaying, showBlocked, showLegal, showDeleteConfirm, showMyTickets, quoteTarget, activeStoryIndex]);
+  }, [showEditProfile, showTonightModal, showSettings, showNotifs, showCompose, showStoryComposer, showSearch, showVespersArchive, showAddGrave, showAddAnniv, showNewGroup, showReflections, showDreams, showCrewBrowse, showNowPlaying, showBlocked, showLegal, showDeleteConfirm, showMyTickets, quoteTarget, activeStoryIndex]);
 
   // Auto-expire tonight status after 12h
   useEffect(() => {
@@ -358,6 +361,7 @@ export default function App() {
       if (s.trackers) setTrackers(s.trackers);
       if (s.sigils) setSigils(s.sigils);
       if (s.reflections) setReflections(s.reflections);
+      if (s.dreamJournal) setDreams(s.dreamJournal);
       // Cross-device personal layer: hydrate from the cloud blob (cloud wins on login).
       const cs = s.clientSync;
       if (cs) {
@@ -1258,6 +1262,17 @@ export default function App() {
     persistState('reflections', next);
   };
 
+  const addDream = (title, body) => {
+    const next = [{ id: `dr${Date.now()}`, title: title || '', body, at: Date.now() }, ...dreams];
+    setDreams(next);
+    persistState('dreamJournal', next);
+  };
+  const removeDream = (id) => {
+    const next = dreams.filter(d => d.id !== id);
+    setDreams(next);
+    persistState('dreamJournal', next);
+  };
+
   const togglePostCandle = (postId) => {
     setPostCandles(prev => {
       const next = { ...prev };
@@ -1336,7 +1351,7 @@ export default function App() {
     showSigilDraw ||
     ticketSuccess || activeStoryIndex !== null || showStoryComposer || venueEditorEvent ||
     ticketManagerEvent || showCreateEvent || showEditProfile || showSettings || showBlocked || showLegal || showDeleteConfirm || reportSheet || legalEscalation ||
-    showMyTickets || showReflections || showNowPlaying || showAddGrave || showAddAnniv ||
+    showMyTickets || showReflections || showDreams || showNowPlaying || showAddGrave || showAddAnniv ||
     showVespersArchive || showNewGroup || showTonightModal || quoteTarget || showOddityCompose ||
     activeOddity || activeText || activePostComments || followList || activeConversation || activeUserHandle ||
     showSearch || showCrewBrowse || activeEvent || showCompose || showNotifs || showDMs || activePortal
@@ -1359,6 +1374,7 @@ export default function App() {
     if (showBlocked) { setShowBlocked(false); return true; }
     if (showMyTickets) { setShowMyTickets(false); return true; }
     if (showReflections) { setShowReflections(false); return true; }
+    if (showDreams) { setShowDreams(false); return true; }
     if (showNowPlaying) { setShowNowPlaying(false); return true; }
     if (showAddGrave) { setShowAddGrave(false); return true; }
     if (showAddAnniv) { setShowAddAnniv(false); return true; }
@@ -1609,6 +1625,8 @@ export default function App() {
         activityLog={activityLog}
         reflectionsCount={reflections.length}
         onOpenReflections={() => setShowReflections(true)}
+        dreamsCount={dreams.length}
+        onOpenDreams={() => setShowDreams(true)}
         onOpenTickets={() => setShowMyTickets(true)}
         ritual={ritual}
         ritualDoneToday={ritualDoneToday}
@@ -1920,6 +1938,14 @@ export default function App() {
           onAdd={addReflection}
           onRemove={removeReflection}
           onClose={() => setShowReflections(false)}
+        />
+      )}
+      {showDreams && (
+        <DreamJournalModal
+          dreams={dreams}
+          onAdd={addDream}
+          onRemove={removeDream}
+          onClose={() => setShowDreams(false)}
         />
       )}
       {showNowPlaying && (

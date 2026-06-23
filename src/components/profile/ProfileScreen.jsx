@@ -21,7 +21,7 @@ const SHRINE_THEMES = {
   cathedral: 'linear-gradient(180deg, #1F0810 0%, transparent 100%)',
 };
 
-export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpdateTracker, onOpenTonightStatus, onOpenSettings, mementoMoriOn, settings, onEditProfile, onLightCandle, crews = [], onOpenCrew, onBrowseCrews, onAddGrave, onAddAnniversary, onOpenNowPlaying, onOpenReflections, onOpenTickets, reflectionsCount = 0, nowPlaying, activityLog = [], sigils = [], bookmarks = [], onOpenComments, onOpenPost, ritual, ritualDoneToday, onPerformRitual, crystals = [], onToggleCrystal, pinnedPost, shrineTheme = 'oxblood', onSetShrineTheme, storyHighlights = [], onRemoveHighlight, achievementState = {}, onShowFollowers, onShowFollowing, joinedScenes = [], onOpenScene,
+export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpdateTracker, onOpenTonightStatus, onOpenSettings, mementoMoriOn, settings, onEditProfile, onLightCandle, crews = [], onOpenCrew, onBrowseCrews, onAddGrave, onAddAnniversary, onOpenNowPlaying, onOpenReflections, onOpenDreams, dreamsCount = 0, onOpenTickets, reflectionsCount = 0, nowPlaying, activityLog = [], sigils = [], bookmarks = [], onOpenComments, onOpenPost, ritual, ritualDoneToday, onPerformRitual, crystals = [], onToggleCrystal, pinnedPost, shrineTheme = 'oxblood', onSetShrineTheme, storyHighlights = [], onRemoveHighlight, achievementState = {}, onShowFollowers, onShowFollowing, joinedScenes = [], onOpenScene,
 shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
   const earned = earnedAchievements(achievementState);
   const earnedIds = new Set(earned.map(a => a.id));
@@ -299,6 +299,17 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
           <span className="text-[10px] uppercase tracking-[0.25em] text-[#A89968]" style={F.ui}>· reflections · only you ·</span>
           <span className="block text-[#A8A29E] text-xs italic" style={F.serif}>
             {reflectionsCount > 0 ? `${reflectionsCount} ${reflectionsCount === 1 ? 'entry' : 'entries'}` : 'write to yourself'}
+          </span>
+        </span>
+      </button>
+
+      {/* Dream journal (private) */}
+      <button onClick={onOpenDreams} className="w-full text-left mx-4 mt-3 p-3 border border-[#2A2A2A] bg-[#0F0F0F] hover:border-[#5C5C8A]/50 transition-colors group flex items-center gap-2" style={{ width: 'calc(100% - 2rem)' }}>
+        <span className="text-[#A6A6D0] text-base">☾</span>
+        <span className="flex-1">
+          <span className="text-[10px] uppercase tracking-[0.25em] text-[#A6A6D0]" style={F.ui}>· dream journal · only you ·</span>
+          <span className="block text-[#A8A29E] text-xs italic" style={F.serif}>
+            {dreamsCount > 0 ? `${dreamsCount} ${dreamsCount === 1 ? 'dream' : 'dreams'} recorded` : 'what did you see in the dark'}
           </span>
         </span>
       </button>
