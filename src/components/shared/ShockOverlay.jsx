@@ -74,7 +74,7 @@ export function ShockOverlay({ mode = 'none' }) {
   if (mode === 'emergency') {
     return (
       <div className={`${WRAP} text-[#bcd2f0]`} aria-hidden>
-        <div className="absolute inset-0" style={{ background: 'rgba(2,8,18,0.5)' }} />
+        <div className="absolute inset-0" style={{ background: 'rgba(2,8,18,0.22)' }} />
         <svg viewBox="0 0 200 200" className="absolute left-1/2 top-1/2 w-[170%] h-[170%] shock-orbit" style={{ opacity: 0.6 }}>
           {[26, 44, 62, 80, 96].map(r => <circle key={r} cx="100" cy="100" r={r} fill="none" stroke="currentColor" strokeWidth="0.5" />)}
           <ellipse cx="100" cy="100" rx="96" ry="42" fill="none" stroke="currentColor" strokeWidth="0.5" />
@@ -92,7 +92,7 @@ CPU ${18 + (tick % 7)}% · PROC 6${6 + (tick % 4)}
           <span className="w-1.5 h-1.5 rounded-full bg-[#ff2a2a]" style={{ opacity: tick % 2 ? 1 : 0.2 }} /> REC
         </div>
         <div className="absolute inset-4 opacity-40" style={{ background: 'linear-gradient(to right, currentColor 0 18px, transparent 18px) 0 0 / 18px 1px no-repeat, linear-gradient(to bottom, currentColor 0 18px, transparent 18px) 0 0 / 1px 18px no-repeat, linear-gradient(to left, currentColor 0 18px, transparent 18px) 100% 100% / 18px 1px no-repeat, linear-gradient(to top, currentColor 0 18px, transparent 18px) 100% 100% / 1px 18px no-repeat' }} />
-        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 120px 30px rgba(0,4,20,0.85)' }} />
+        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 80px 12px rgba(0,4,20,0.45)' }} />
       </div>
     );
   }
@@ -128,7 +128,7 @@ CPU ${18 + (tick % 7)}% · PROC 6${6 + (tick % 4)}
       <div className={WRAP} aria-hidden>
         <div className="absolute inset-0 shock-scream-flash" style={{ background: 'rgba(200,16,46,0.5)', mixBlendMode: 'screen' }} />
         <InvPentagram className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] shock-scream-flash" color="#ff1030" circle={false} sw={0.8} />
-        <div className="absolute inset-0 shock-scream-vig" style={{ boxShadow: 'inset 0 0 100px 40px rgba(120,0,0,0.9)' }} />
+        <div className="absolute inset-0 shock-scream-vig" style={{ boxShadow: 'inset 0 0 70px 18px rgba(120,0,0,0.55)' }} />
       </div>
     );
   }
@@ -166,7 +166,7 @@ CPU ${18 + (tick % 7)}% · PROC 6${6 + (tick % 4)}
     const candles = Array.from({ length: 9 }, (_, i) => { const a = (i / 9) * Math.PI * 2 - Math.PI / 2; return { x: 50 + 33 * Math.cos(a), y: 50 + 33 * Math.sin(a) }; });
     return (
       <div className={WRAP} aria-hidden>
-        <div className="absolute inset-0 shock-void" style={{ background: 'radial-gradient(ellipse at 50% 48%, transparent 14%, rgba(0,0,0,0.7) 44%, rgba(0,0,0,0.95) 100%)' }} />
+        <div className="absolute inset-0 shock-void" style={{ background: 'radial-gradient(ellipse at 50% 48%, transparent 32%, rgba(0,0,0,0.45) 56%, rgba(0,0,0,0.8) 100%)' }} />
         <InvPentagram className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-52 h-52 shock-summon" color="#C8102E" sw={1.1} />
         {candles.map((c, i) => (
           <span key={i} className="absolute w-1 h-1 rounded-full animate-flicker" style={{ left: `${c.x}%`, top: `${c.y}%`, background: '#ffb14a', boxShadow: '0 0 8px 2px #ff7a00', animationDelay: `${i * 0.3}s` }} />
@@ -214,14 +214,14 @@ CPU ${18 + (tick % 7)}% · PROC 6${6 + (tick % 4)}
   if (mode === 'requiem') {
     return (
       <div className={WRAP} aria-hidden>
-        <div className="absolute inset-0" style={{ backgroundImage: GRAIN, backgroundSize: '140px 140px', mixBlendMode: 'overlay', opacity: 0.55 }} />
-        <div className="absolute inset-0 opacity-30" style={{ background: 'repeating-linear-gradient(to bottom, rgba(0,0,0,0.4) 0 1px, transparent 1px 3px)' }} />
+        <div className="absolute inset-0" style={{ backgroundImage: GRAIN, backgroundSize: '140px 140px', mixBlendMode: 'overlay', opacity: 0.4 }} />
+        <div className="absolute inset-0 opacity-25" style={{ background: 'repeating-linear-gradient(to bottom, rgba(0,0,0,0.4) 0 1px, transparent 1px 3px)' }} />
         <svg viewBox="0 0 100 100" className="absolute left-1/2 top-[30%] -translate-x-1/2 w-28 h-28 opacity-25" fill="none" stroke="#fff" strokeWidth="2">
           <path d="M4 50 Q50 14 96 50 Q50 86 4 50 Z" />
           <circle cx="50" cy="50" r="18" />
           <circle cx="50" cy="50" r="8" fill="#fff" className="shock-summon" />
         </svg>
-        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 130px 36px rgba(0,0,0,0.85)' }} />
+        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 85px 16px rgba(0,0,0,0.5)' }} />
       </div>
     );
   }
@@ -260,7 +260,7 @@ CPU ${18 + (tick % 7)}% · PROC 6${6 + (tick % 4)}
         </div>
         <div className="absolute left-0 right-0 top-[2px] text-center text-[9px] tracking-[0.3em] opacity-70" style={{ fontFamily: '"UnifrakturCook", serif' }}>· OVR · POWER · IS · INFINITE ·</div>
         {['top-1.5 left-1.5', 'top-1.5 right-1.5', 'bottom-1.5 left-1.5', 'bottom-1.5 right-1.5'].map((p, i) => <span key={i} className={`absolute ${p} text-base opacity-80`}>⛧</span>)}
-        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 90px 26px rgba(0,0,0,0.7)' }} />
+        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 65px 12px rgba(0,0,0,0.42)' }} />
       </div>
     );
   }
@@ -269,7 +269,7 @@ CPU ${18 + (tick % 7)}% · PROC 6${6 + (tick % 4)}
   if (mode === 'alchemy') {
     return (
       <div className={`${WRAP} text-[#bcb4a2]`} aria-hidden>
-        <div className="absolute inset-0" style={{ background: 'rgba(6,6,10,0.4)' }} />
+        <div className="absolute inset-0" style={{ background: 'rgba(6,6,10,0.2)' }} />
         <svg viewBox="0 0 200 200" className="absolute left-1/2 top-1/2 w-[150%] h-[150%] shock-orbit" style={{ opacity: 0.16 }}>
           {[34, 56, 78, 96].map(r => <circle key={r} cx="100" cy="100" r={r} fill="none" stroke="currentColor" strokeWidth="0.4" />)}
           <ellipse cx="100" cy="100" rx="96" ry="46" fill="none" stroke="currentColor" strokeWidth="0.4" />
@@ -284,7 +284,7 @@ CPU ${18 + (tick % 7)}% · PROC 6${6 + (tick % 4)}
         {ALCHEMY_GLYPHS.map((a, i) => <span key={i} className="absolute text-lg shock-twinkle" style={{ top: a.t, left: a.l, opacity: 0.4, animationDelay: `${(i % 6) * 0.5}s` }}>{a.g}</span>)}
         <div className="absolute left-2 top-[18%] text-[10px] leading-[1.8] opacity-25" style={{ writingMode: 'vertical-rl', fontFamily: '"Shippori Mincho", serif' }}>生流転死再生</div>
         <div className="absolute inset-0" style={{ backgroundImage: GRAIN, backgroundSize: '140px 140px', mixBlendMode: 'overlay', opacity: 0.3 }} />
-        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 110px 28px rgba(0,2,8,0.8)' }} />
+        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 75px 12px rgba(0,2,8,0.45)' }} />
       </div>
     );
   }
