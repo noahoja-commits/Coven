@@ -1278,6 +1278,8 @@ export default function App() {
       setActivePostComments(n.postId);
     } else if (n.kind === 'event' || n.kind === 'rsvp') {
       setTab('events');
+    } else if (n.kind === 'story_react' && n.user && n.user !== 'someone') {
+      setActiveUserHandle(n.user); // the story may have expired — go to the reactor
     }
   };
 
