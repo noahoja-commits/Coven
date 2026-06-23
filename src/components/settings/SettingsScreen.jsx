@@ -53,7 +53,7 @@ function Row({ label, desc, children }) {
   );
 }
 
-export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLogout, onRerunOnboarding, mutedKeywords = [], onSetMutedKeywords, payoutStatus, payoutBusy = false, onSetupPayouts, pushState = 'off', onEnablePush, onDisablePush, onEditProfile, onOpenBlocked }) {
+export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLogout, onRerunOnboarding, mutedKeywords = [], onSetMutedKeywords, payoutStatus, payoutBusy = false, onSetupPayouts, pushState = 'off', onEnablePush, onDisablePush, onEditProfile, onOpenBlocked, onOpenLegal }) {
   const set = (key, value) => onChange({ ...settings, [key]: value });
   const addKeyword = (e) => {
     e.preventDefault();
@@ -224,6 +224,7 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
           {[
             { label: 'Edit profile', onClick: onEditProfile },
             { label: 'Privacy & blocked', onClick: onOpenBlocked },
+            { label: 'Terms, Privacy & Guidelines', onClick: onOpenLegal },
             { label: 'Help & feedback', onClick: () => { window.location.href = 'mailto:noahoja@gmail.com?subject=Coven%20feedback'; } },
           ].map(item => (
             <button key={item.label} onClick={item.onClick}

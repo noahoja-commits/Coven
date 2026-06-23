@@ -3,6 +3,7 @@ import { Mail, Lock, Loader2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { GrainOverlay } from '../shared/Visuals';
 import { useAuth } from '../../auth/AuthProvider';
+import { LegalScreen } from '../legal/LegalScreen';
 
 export function SignInScreen() {
   const { signInWithPassword, signUpWithPassword, resetPasswordForEmail } = useAuth();
@@ -11,6 +12,7 @@ export function SignInScreen() {
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState('idle'); // idle | working | confirm | sent
   const [error, setError] = useState('');
+  const [legal, setLegal] = useState(null); // null | 'terms' | 'privacy'
 
   const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const passOk = password.length >= 6;
@@ -137,9 +139,18 @@ export function SignInScreen() {
                 back to sign in
               </button>
             )}
+
+            {!isReset && (
+              <p className="mt-7 text-[10px] leading-relaxed text-[#6B6B6B]" style={F.ui}>
+                by continuing you agree to our{' '}
+                <button type="button" onClick={() => setLegal('terms')} className="text-[#A89968] underline">Terms</button>{' '}and{' '}
+                <button type="button" onClick={() => setLegal('privacy')} className="text-[#A89968] underline">Privacy Policy</button>.
+              </p>
+            )}
           </form>
         )}
       </div>
+      {legal && <LegalScreen initialDoc={legal} onBack={() => setLegal(null)} />}
     </div>
   );
 }

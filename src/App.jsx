@@ -19,6 +19,7 @@ import { fetchProfileState, saveProfileState } from './lib/db/profileState';
 import { fetchNotifications, markNotificationRead, markAllNotificationsRead, clearNotifications, subscribeNotifications, hydrateRealtime } from './lib/db/notifications';
 import { fetchBlockedIds, blockUser as dbBlockUser, unblockUser as dbUnblockUser, reportContent } from './lib/db/moderation';
 import { BlockedOverlay } from './components/settings/BlockedOverlay';
+import { LegalScreen } from './components/legal/LegalScreen';
 import { enablePush, disablePush, pushStatus } from './lib/db/push';
 import { setTonightPin, clearTonightPin, fetchTonightPins, subscribeTonightPins } from './lib/db/tonight';
 import { Toast } from './components/shared/Toast';
@@ -118,6 +119,7 @@ export default function App() {
   const [showTonightModal, setShowTonightModal] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showBlocked, setShowBlocked] = useState(false);
+  const [showLegal, setShowLegal] = useState(false);
   const [showMyTickets, setShowMyTickets] = useState(false);
   const [activeStoryIndex, setActiveStoryIndex] = useState(null);
   const [activeUserHandle, setActiveUserHandle] = useState(null);
@@ -265,10 +267,10 @@ export default function App() {
     const anyModal = showEditProfile || showTonightModal || showSettings || showNotifs
       || showCompose || showStoryComposer || showSearch || showVespersArchive
       || showAddGrave || showAddAnniv || showNewGroup || showReflections || showCrewBrowse
-      || showNowPlaying || showBlocked || showMyTickets || quoteTarget || activeStoryIndex !== null;
+      || showNowPlaying || showBlocked || showLegal || showMyTickets || quoteTarget || activeStoryIndex !== null;
     document.body.style.overflow = anyModal ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
-  }, [showEditProfile, showTonightModal, showSettings, showNotifs, showCompose, showStoryComposer, showSearch, showVespersArchive, showAddGrave, showAddAnniv, showNewGroup, showReflections, showCrewBrowse, showNowPlaying, showBlocked, showMyTickets, quoteTarget, activeStoryIndex]);
+  }, [showEditProfile, showTonightModal, showSettings, showNotifs, showCompose, showStoryComposer, showSearch, showVespersArchive, showAddGrave, showAddAnniv, showNewGroup, showReflections, showCrewBrowse, showNowPlaying, showBlocked, showLegal, showMyTickets, quoteTarget, activeStoryIndex]);
 
   // Auto-expire tonight status after 12h
   useEffect(() => {
@@ -1291,7 +1293,7 @@ export default function App() {
   const anyOverlayOpen = !!(
     showSigilDraw ||
     ticketSuccess || activeStoryIndex !== null || showStoryComposer || venueEditorEvent ||
-    ticketManagerEvent || showCreateEvent || showEditProfile || showSettings || showBlocked ||
+    ticketManagerEvent || showCreateEvent || showEditProfile || showSettings || showBlocked || showLegal ||
     showMyTickets || showReflections || showNowPlaying || showAddGrave || showAddAnniv ||
     showVespersArchive || showNewGroup || showTonightModal || quoteTarget || showOddityCompose ||
     activeOddity || activeText || activePostComments || followList || activeConversation || activeUserHandle ||
@@ -1308,6 +1310,7 @@ export default function App() {
     if (showCreateEvent) { setShowCreateEvent(false); return true; }
     if (showEditProfile) { setShowEditProfile(false); return true; }
     if (showSettings) { setShowSettings(false); return true; }
+    if (showLegal) { setShowLegal(false); return true; }
     if (showBlocked) { setShowBlocked(false); return true; }
     if (showMyTickets) { setShowMyTickets(false); return true; }
     if (showReflections) { setShowReflections(false); return true; }
@@ -1914,7 +1917,11 @@ export default function App() {
           onDisablePush={turnPushOff}
           onEditProfile={() => setShowEditProfile(true)}
           onOpenBlocked={() => setShowBlocked(true)}
+          onOpenLegal={() => setShowLegal(true)}
         />
+      )}
+      {showLegal && (
+        <LegalScreen onBack={() => setShowLegal(false)} />
       )}
       {showBlocked && (
         <BlockedOverlay
