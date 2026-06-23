@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, Loader2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
+import { getVenues, addVenue } from '../../lib/venues';
 
 const COVERS = [
   { id: 'red', grad: 'linear-gradient(135deg, #5B0F1A 0%, #1A0408 70%, #0A0204 100%)' },
@@ -26,6 +27,7 @@ export function CreateEventModal({ onCreate, onClose }) {
   const [ageRestriction, setAgeRestriction] = useState('all'); // 'all' | '18' | '21'
   const [attested, setAttested] = useState(false); // Stripe-safe: not paid metaphysical services
   const [saving, setSaving] = useState(false);
+  const [savedVenues] = useState(() => getVenues());
 
   const priceNum = parseFloat(price || '0');
   const valid = name.trim().length > 1 && (!ticketed || (priceNum > 0 && attested));
@@ -48,6 +50,7 @@ export function CreateEventModal({ onCreate, onClose }) {
         capacity: capacity ? parseInt(capacity, 10) : null,
         ageRestriction: ageRestriction === 'all' ? null : ageRestriction,
       });
+      if (venue.trim()) addVenue(venue.trim());
       onClose();
     } catch {
       setSaving(false);
@@ -80,7 +83,8 @@ export function CreateEventModal({ onCreate, onClose }) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={label} style={F.scriptureSC}>· venue ·</label>
-              <input value={venue} onChange={e => setVenue(e.target.value.slice(0, 60))} placeholder="The Parish" className={field} style={F.serif} />
+              <input value={venue} onChange={e => setVenue(e.target.value.slice(0, 60))} placeholder="The Parish" list="coven-venues" className={field} style={F.serif} />
+              {savedVenues.length > 0 && <datalist id="coven-venues">{savedVenues.map(v => <option key={v.name} value={v.name} />)}</datalist>}
             </div>
             <div>
               <label className={label} style={F.scriptureSC}>· neighborhood ·</label>
