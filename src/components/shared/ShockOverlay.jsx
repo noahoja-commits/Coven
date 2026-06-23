@@ -101,11 +101,11 @@ CPU ${18 + (tick % 7)}% · PROC 6${6 + (tick % 4)}
     );
   }
 
-  // ── BLOOD RITE — pentagram (back) + blots/drips/pool (front) ──
+  // ── BLOOD RITE — pentagram + blots + pool (back, behind content so buttons stay clear) + thin translucent drips (front) ──
   if (mode === 'spatter') {
-    if (back) return (<div className={BWRAP} aria-hidden><InvPentagram className="absolute left-1/2 top-[40%] -translate-x-1/2 w-44 h-44 opacity-30 shock-summon" color="#8b0000" sw={1.2} /></div>);
-    return (
-      <div className={FWRAP} aria-hidden>
+    if (back) return (
+      <div className={BWRAP} aria-hidden>
+        <InvPentagram className="absolute left-1/2 top-[40%] -translate-x-1/2 w-44 h-44 opacity-30 shock-summon" color="#8b0000" sw={1.2} />
         <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 180">
           <g fill="#6e0000">
             <path d="M12 4 C 20 -2, 26 6, 22 12 C 28 14, 24 22, 16 20 C 10 26, 2 20, 6 12 C 0 10, 4 2, 12 4 Z" />
@@ -114,12 +114,16 @@ CPU ${18 + (tick % 7)}% · PROC 6${6 + (tick % 4)}
             <circle cx="30" cy="60" r="2.4" /><circle cx="70" cy="48" r="3" /><circle cx="92" cy="80" r="2" /><circle cx="8" cy="92" r="2.6" />
           </g>
         </svg>
+        <div className="absolute bottom-0 inset-x-0 h-[8%] shock-pool" style={{ background: 'linear-gradient(to top, #4a0000, #6e0000 60%, transparent)' }} />
+      </div>
+    );
+    return (
+      <div className={FWRAP} aria-hidden>
         {[[13, 0], [23, 1.4], [49, 0.7], [85, 0.3], [91, 2.1]].map(([l, d], i) => (
-          <span key={i} className="absolute top-0 w-[3px] shock-drip" style={{ left: `${l}%`, animationDelay: `${d}s`, height: '30%', background: 'linear-gradient(to bottom, #8b0000, #5b0f1a 75%, transparent)' }}>
-            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[7px] h-[7px] rounded-full" style={{ background: '#8b0000' }} />
+          <span key={i} className="absolute top-0 w-[2px] shock-drip" style={{ left: `${l}%`, animationDelay: `${d}s`, height: '22%', opacity: 0.5, background: 'linear-gradient(to bottom, #8b0000, #5b0f1a 75%, transparent)' }}>
+            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[6px] h-[6px] rounded-full" style={{ background: '#8b0000' }} />
           </span>
         ))}
-        <div className="absolute bottom-0 inset-x-0 h-[8%] shock-pool" style={{ background: 'linear-gradient(to top, #4a0000, #6e0000 60%, transparent)' }} />
       </div>
     );
   }
