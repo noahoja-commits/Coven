@@ -292,7 +292,7 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
 
 export const DEFAULT_SETTINGS = {
   parchmentMode: false,
-  grainIntensity: 0.07,
+  grainIntensity: 0.12,
   grainStyle: 'fine',
   mediaTreatment: 'none',
   vignette: true,

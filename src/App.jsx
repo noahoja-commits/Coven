@@ -1737,11 +1737,11 @@ export default function App() {
         }} />
       )}
 
-      {/* Grain */}
+      {/* Grain — floored so the film texture stays visibly present (still slider-controlled above the floor) */}
       {settings.grainIntensity > 0 && (
         settings.grainStyle === 'print'
-          ? <HalftoneOverlay opacity={settings.grainIntensity * 1.6} />
-          : <GrainOverlay opacity={settings.grainIntensity} />
+          ? <HalftoneOverlay opacity={Math.max(settings.grainIntensity, 0.12) * 1.6} />
+          : <GrainOverlay opacity={Math.max(settings.grainIntensity, 0.12)} />
       )}
 
       {/* Fixed header (pinned to the viewport frame) */}
