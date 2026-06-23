@@ -95,6 +95,7 @@ import { QuoteModal } from './components/feed/QuoteModal';
 import { VespersArchiveModal } from './components/feed/VespersArchiveModal';
 import { TRACKER_CATEGORIES } from './data/profile';
 import { livingTheme, meetsAge } from './data/helpers';
+import { earnedAchievements } from './data/achievements';
 import { FloatingCat } from './components/shared/FloatingCat';
 
 export default function App() {
@@ -665,6 +666,31 @@ export default function App() {
   const meHandle = profile?.name || 'you';
   const meAvatar = profile?.avatar || '✟';
   const meAvatarUrl = profile?.avatarUrl || null;
+
+  // Celebrate a newly-earned achievement with a toast. Seeded from localStorage + armed
+  // only AFTER the cold load settles, so data streaming in on login isn't mistaken for
+  // fresh earns (no retroactive spam). All deps are declared above; gate is far below.
+  const seenAchRef = useRef(null);
+  const achArmedRef = useRef(false);
+  useEffect(() => {
+    if (!meId) return;
+    const lsKey = 'coven:v1:seenAchievements:' + meId;
+    const earned = earnedAchievements({ posts, me: meHandle, sigils, crystals, ritual, communityMembership, reflections, graves, bookmarks, divinationLog, following });
+    if (seenAchRef.current === null) {
+      let seen = [];
+      try { const raw = localStorage.getItem(lsKey); if (raw) seen = JSON.parse(raw); } catch { /* noop */ }
+      seenAchRef.current = new Set(seen);
+      setTimeout(() => { achArmedRef.current = true; }, 5000);
+    }
+    if (!achArmedRef.current) {
+      earned.forEach(a => seenAchRef.current.add(a.id)); // absorb during cold load
+    } else {
+      const fresh = earned.filter(a => !seenAchRef.current.has(a.id));
+      fresh.forEach((a, i) => setTimeout(() => showToast('a mark earned ✦ — ' + a.name), i * 1400));
+      fresh.forEach(a => seenAchRef.current.add(a.id));
+    }
+    try { localStorage.setItem(lsKey, JSON.stringify([...seenAchRef.current])); } catch { /* noop */ }
+  }, [meId, posts, meHandle, sigils, crystals, ritual, communityMembership, reflections, graves, bookmarks, divinationLog, following]);
 
   const addPost = async ({ body, community, anonymous, poll, img, kind }) => {
     if (!meId) return;
