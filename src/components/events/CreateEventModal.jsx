@@ -23,6 +23,7 @@ export function CreateEventModal({ onCreate, onClose }) {
   const [ticketed, setTicketed] = useState(false);
   const [price, setPrice] = useState('');
   const [capacity, setCapacity] = useState('');
+  const [ageRestriction, setAgeRestriction] = useState('all'); // 'all' | '18' | '21'
   const [saving, setSaving] = useState(false);
 
   const priceNum = parseFloat(price || '0');
@@ -44,6 +45,7 @@ export function CreateEventModal({ onCreate, onClose }) {
         ticketed,
         priceCents: ticketed ? Math.round(priceNum * 100) : 0,
         capacity: capacity ? parseInt(capacity, 10) : null,
+        ageRestriction: ageRestriction === 'all' ? null : ageRestriction,
       });
       onClose();
     } catch {
@@ -87,6 +89,19 @@ export function CreateEventModal({ onCreate, onClose }) {
           <div>
             <label className={label} style={F.scriptureSC}>· tags · (comma separated)</label>
             <input value={tags} onChange={e => setTags(e.target.value)} placeholder="darkwave, goth, 18+" className={field} style={F.serif} />
+          </div>
+          <div>
+            <label className={label} style={F.scriptureSC}>· the door ·</label>
+            <div className="flex gap-2">
+              {[['all', 'all ages'], ['18', '18+'], ['21', '21+']].map(([v, lbl]) => (
+                <button key={v} type="button" onClick={() => setAgeRestriction(v)}
+                  className={`flex-1 py-2 text-[11px] uppercase tracking-wider border transition-colors ${ageRestriction === v ? 'border-[#8B0000] bg-[#5B0F1A]/25 text-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#5B0F1A]/60'}`}
+                  style={F.ui}>{lbl}</button>
+              ))}
+            </div>
+            {ageRestriction !== 'all' && (
+              <p className="text-[10px] text-[#A89968]/60 italic mt-1.5" style={F.serif}>guests confirm their age at the door.</p>
+            )}
           </div>
 
           <div className="border border-[#2A2A2A] p-3 space-y-3">

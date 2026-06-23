@@ -36,6 +36,9 @@ function hydrateEvent(row, myRsvpSet, myId) {
     sold: row.sold || 0,
     starts_at: row.starts_at || null,
     ends_at: row.ends_at || null,
+    // Door policy: '18' / '21' gate the event; anything else (incl. missing column
+    // pre-migration) = all ages.
+    ageRestriction: (row.age_restriction === '18' || row.age_restriction === '21') ? row.age_restriction : 'all',
   };
 }
 
@@ -73,6 +76,7 @@ export async function createEvent(data, host) {
     price_cents: data.ticketed ? (data.priceCents || 0) : 0,
     currency: data.currency || 'usd',
     capacity: data.capacity ?? null,
+    age_restriction: (data.ageRestriction === '18' || data.ageRestriction === '21') ? data.ageRestriction : null,
   };
   const { data: row, error } = await supabase.from('events').insert(insert).select().single();
   if (error) throw error;

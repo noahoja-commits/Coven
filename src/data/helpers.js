@@ -235,3 +235,24 @@ export function sunSign(birthday) {
   }
   return signs[0];
 }
+
+// Whole years old from an ISO 'YYYY-MM-DD' DOB, parsed as LOCAL midnight (no UTC
+// off-by-one). Returns null for a missing/invalid date.
+export function ageFromDob(dob) {
+  if (!dob) return null;
+  const [y, m, d] = String(dob).split('-').map(Number);
+  if (!y || !m || !d) return null;
+  const birth = new Date(y, m - 1, d);
+  if (isNaN(birth)) return null;
+  const now = new Date();
+  let age = now.getFullYear() - birth.getFullYear();
+  const mo = now.getMonth() - birth.getMonth();
+  if (mo < 0 || (mo === 0 && now.getDate() < birth.getDate())) age--;
+  return age;
+}
+
+// Does this DOB meet a minimum age? Unknown DOB → false (must verify).
+export function meetsAge(dob, min) {
+  const a = ageFromDob(dob);
+  return a != null && a >= min;
+}

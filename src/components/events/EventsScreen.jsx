@@ -66,6 +66,9 @@ export function EventsScreen({ events = [], rsvp = {}, onToggleRsvp, onOpenEvent
                   <path d="M 0 60 L 30 30 L 50 45 L 80 15 L 110 35 L 140 10 L 170 30 L 200 20 L 200 60 Z" fill="rgba(0,0,0,0.6)" />
                 </svg>
                 <div className="absolute top-3 left-3 px-2 py-0.5 bg-black/60 backdrop-blur-sm text-[10px] uppercase tracking-wider text-[#F5F1E8]" style={F.ui}>{e.date}</div>
+                {(e.ageRestriction === '18' || e.ageRestriction === '21') && (
+                  <div className="absolute top-3 right-3 px-2 py-0.5 bg-[#8B0000]/85 backdrop-blur-sm text-[10px] uppercase tracking-wider text-[#F5F1E8]" style={F.ui}>{e.ageRestriction}+</div>
+                )}
                 <div className="absolute bottom-3 left-3 right-3">
                   <h3 className="text-[#F5F1E8] text-xl leading-tight" style={F.display}>{e.name.toUpperCase()}</h3>
                 </div>

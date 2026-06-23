@@ -81,6 +81,7 @@ import { FashionScreen } from './components/fashion/FashionScreen';
 
 import { OnboardingFlow } from './components/onboarding/OnboardingFlow';
 import { WelcomeOverlay } from './components/onboarding/WelcomeOverlay';
+import { AgeGate } from './components/shared/AgeGate';
 import { SettingsScreen, DEFAULT_SETTINGS } from './components/settings/SettingsScreen';
 
 import { COMMUNITIES } from './data/communities';
@@ -89,7 +90,7 @@ import { CommentsOverlay } from './components/feed/CommentsOverlay';
 import { QuoteModal } from './components/feed/QuoteModal';
 import { VespersArchiveModal } from './components/feed/VespersArchiveModal';
 import { TRACKER_CATEGORIES } from './data/profile';
-import { livingTheme } from './data/helpers';
+import { livingTheme, meetsAge } from './data/helpers';
 import { FloatingCat } from './components/shared/FloatingCat';
 
 export default function App() {
@@ -159,6 +160,7 @@ export default function App() {
   const activeConversationRef = useRef(null);
   const cloudSyncedRef = useRef(false);
   const [communityMembership, setCommunityMembership] = useLocalStorage('communityMembership', { general: true, goth: true });
+  const [ageDob, setAgeDob] = useLocalStorage('ageDob', ''); // DOB attested at an age-gated door (synced to cloud)
   const [communityCounts, setCommunityCounts] = useState({}); // server-backed member counts per scene
   const [communityPosts, setCommunityPosts] = useState(null); // real per-scene feed for the open scene
   const [composeCommunity, setComposeCommunity] = useState(null); // preset scene when composing from a scene
@@ -369,6 +371,7 @@ export default function App() {
         if (cs.storyHighlights !== undefined) setStoryHighlights(cs.storyHighlights);
         if (cs.shrine !== undefined) setShrine(cs.shrine);
         if (cs.flameLitAt !== undefined) setFlameLitAt(cs.flameLitAt);
+        if (cs.ageDob !== undefined && cs.ageDob) setAgeDob(cs.ageDob);
       }
       cloudSyncedRef.current = true;
     }).catch(() => { cloudSyncedRef.current = true; });
@@ -422,12 +425,13 @@ export default function App() {
       tonightStatus, communityMembership, bookmarks, muted, anniversaries, cardHistory,
       marginalia, postCandles, nowPlaying, activityLog, mutedKeywords, hiddenPosts,
       ritual, crystals, pinnedPostId, shrineTheme, divinationLog, storyHighlights, shrine, flameLitAt,
+      ageDob,
     };
     const t = setTimeout(() => { saveProfileState(meId, 'clientSync', blob).catch(() => {}); }, 800);
     return () => clearTimeout(t);
   }, [meId, tonightStatus, communityMembership, bookmarks, muted, anniversaries, cardHistory,
       marginalia, postCandles, nowPlaying, activityLog, mutedKeywords, hiddenPosts,
-      ritual, crystals, pinnedPostId, shrineTheme, divinationLog, storyHighlights, shrine, flameLitAt]);
+      ritual, crystals, pinnedPostId, shrineTheme, divinationLog, storyHighlights, shrine, flameLitAt, ageDob]);
 
   // Live notifications: a new row (follow/react/comment/dm) → refetch so the
   // bell updates in real time, with the actor's profile joined in.
@@ -1418,8 +1422,19 @@ export default function App() {
   // came from, otherwise all the way out to where the user was (home).
   const closePortal = () => setActivePortal(portalFromMenu ? 'menu' : null);
 
+  // Age gate — the vice scenes + confessions are 18+; events carry their own door
+  // policy (all-ages / 18+ / 21+). knownDob comes from a prior gate pass (synced) or
+  // the user's own profile birthday; ageOk(min) is the verdict (unknown DOB → false).
+  const VICE_SCENES = new Set(['drinking', 'smoking', 'gambling', 'partying']);
+  const knownDob = ageDob || profile?.birthday || '';
+  const ageOk = (min) => meetsAge(knownDob, min);
+  const eventMinAge = (ev) => ev?.ageRestriction === '21' ? 21 : ev?.ageRestriction === '18' ? 18 : 0;
+
   const renderTab = () => {
     if (community) {
+      if (VICE_SCENES.has(community) && !ageOk(18)) {
+        return <AgeGate minAge={18} label="this scene" onPass={setAgeDob} onClose={() => setCommunity(null)} />;
+      }
       return (
         <CommunityDetail
           id={community}
@@ -1789,9 +1804,15 @@ export default function App() {
       {showAddAnniv && (
         <AddAnniversaryModal onSave={addAnniversary} onClose={() => setShowAddAnniv(false)} />
       )}
-      {activeEvent && (
+      {activeEvent && (() => {
+        const _ev = events.find(e => e.id === activeEvent);
+        const _min = eventMinAge(_ev);
+        if (_min && !ageOk(_min)) {
+          return <AgeGate minAge={_min} label="this rite" onPass={setAgeDob} onClose={() => setActiveEvent(null)} />;
+        }
+        return (
         <EventDetail
-          event={events.find(e => e.id === activeEvent)}
+          event={_ev}
           isGoing={!!eventRsvp[activeEvent]}
           onToggleRsvp={toggleEventRsvp}
           attendees={activeEventAttendees}
@@ -1801,7 +1822,8 @@ export default function App() {
           onOpenUser={(h) => { setActiveEvent(null); setActiveUserHandle(h); }}
           onBack={() => setActiveEvent(null)}
         />
-      )}
+        );
+      })()}
       {showCreateEvent && (
         <CreateEventModal onCreate={addEvent} onClose={() => setShowCreateEvent(false)} />
       )}
@@ -1972,15 +1994,19 @@ export default function App() {
         />
       )}
       {activePortal === 'confessions' && (
-        <ConfessionsOverlay onClose={closePortal}
-          userConfessions={posts.filter(p => p.anonymous).map(p => ({
-            id: p.id, body: p.body, time: p.time,
-            reactions: p.reactions, myReactions: p.myReactions || {},
-          }))}
-          onConfess={(body) => addPost({ body, community: 'general', anonymous: true })}
-          onReact={reactToPost}
-          onReport={(id) => reportTarget('post', id)}
-        />
+        ageOk(18) ? (
+          <ConfessionsOverlay onClose={closePortal}
+            userConfessions={posts.filter(p => p.anonymous).map(p => ({
+              id: p.id, body: p.body, time: p.time,
+              reactions: p.reactions, myReactions: p.myReactions || {},
+            }))}
+            onConfess={(body) => addPost({ body, community: 'general', anonymous: true })}
+            onReact={reactToPost}
+            onReport={(id) => reportTarget('post', id)}
+          />
+        ) : (
+          <AgeGate minAge={18} label="confessions" onPass={setAgeDob} onClose={closePortal} />
+        )
       )}
       {activePortal === 'oddities' && !activeOddity && !showOddityCompose && (
         <OdditiesOverlay
