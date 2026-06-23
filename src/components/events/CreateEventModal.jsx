@@ -24,10 +24,11 @@ export function CreateEventModal({ onCreate, onClose }) {
   const [price, setPrice] = useState('');
   const [capacity, setCapacity] = useState('');
   const [ageRestriction, setAgeRestriction] = useState('all'); // 'all' | '18' | '21'
+  const [attested, setAttested] = useState(false); // Stripe-safe: not paid metaphysical services
   const [saving, setSaving] = useState(false);
 
   const priceNum = parseFloat(price || '0');
-  const valid = name.trim().length > 1 && (!ticketed || priceNum > 0);
+  const valid = name.trim().length > 1 && (!ticketed || (priceNum > 0 && attested));
 
   const submit = async () => {
     if (!valid || saving) return;
@@ -113,19 +114,27 @@ export function CreateEventModal({ onCreate, onClose }) {
               </button>
             </div>
             {ticketed && (
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className={label} style={F.scriptureSC}>· price (USD) ·</label>
-                  <div className="flex items-center bg-[#0A0A0A] border border-[#2A2A2A] focus-within:border-[#5B0F1A]">
-                    <span className="pl-2.5 text-[#6B6B6B]" style={F.mono}>$</span>
-                    <input type="number" min="0" step="1" value={price} onChange={e => setPrice(e.target.value)} placeholder="15" className="flex-1 bg-transparent outline-none p-2.5 text-[#F5F1E8] text-sm" style={F.serif} />
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className={label} style={F.scriptureSC}>· price (USD) ·</label>
+                    <div className="flex items-center bg-[#0A0A0A] border border-[#2A2A2A] focus-within:border-[#5B0F1A]">
+                      <span className="pl-2.5 text-[#6B6B6B]" style={F.mono}>$</span>
+                      <input type="number" min="0" step="1" value={price} onChange={e => setPrice(e.target.value)} placeholder="15" className="flex-1 bg-transparent outline-none p-2.5 text-[#F5F1E8] text-sm" style={F.serif} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className={label} style={F.scriptureSC}>· capacity ·</label>
+                    <input type="number" min="1" value={capacity} onChange={e => setCapacity(e.target.value)} placeholder="∞" className={field} style={F.serif} />
                   </div>
                 </div>
-                <div>
-                  <label className={label} style={F.scriptureSC}>· capacity ·</label>
-                  <input type="number" min="1" value={capacity} onChange={e => setCapacity(e.target.value)} placeholder="∞" className={field} style={F.serif} />
-                </div>
-              </div>
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input type="checkbox" checked={attested} onChange={e => setAttested(e.target.checked)} className="mt-0.5 accent-[#5B0F1A] shrink-0" />
+                  <span className="text-[11px] leading-relaxed text-[#A8A29E]" style={F.serif}>
+                    I'm selling tickets to an event, gathering, or art — not paid psychic, tarot, spell, or other metaphysical services.
+                  </span>
+                </label>
+              </>
             )}
           </div>
           <div>
