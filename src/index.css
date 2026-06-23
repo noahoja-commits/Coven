@@ -311,6 +311,22 @@ body.shock-duo-sepia .phone-frame { filter: sepia(0.8) saturate(1.4) contrast(0.
 @keyframes shockTwinkle { 0%,100% { opacity: 0.2; } 50% { opacity: 0.6; } }
 .shock-twinkle { animation: shockTwinkle 3s ease-in-out infinite; }
 
+/* Fleshed-out detail keyframes */
+@keyframes shockPool { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+.shock-pool { transform-origin: bottom; animation: shockPool 9s ease-out forwards; }
+@keyframes shockScanV { 0% { top: -4%; } 100% { top: 104%; } }
+.shock-scan-v { animation: shockScanV 3.5s linear infinite; }
+@keyframes shockBurst { 0% { opacity: 1; } 100% { opacity: 0; } }
+.shock-burst { animation: shockBurst 0.6s ease-out forwards; }
+@keyframes shockSummon { 0%,100% { opacity: 0.5; filter: drop-shadow(0 0 5px rgba(200,16,46,0.6)); } 50% { opacity: 0.9; filter: drop-shadow(0 0 16px rgba(200,16,46,0.95)); } }
+.shock-summon { animation: shockSummon 3s ease-in-out infinite; }
+@keyframes shockRise { 0% { transform: translateY(10px); opacity: 0; } 30% { opacity: 0.8; } 100% { transform: translateY(-6px); opacity: 0; } }
+.shock-rise { animation: shockRise 5s ease-out infinite; }
+@keyframes shockLeaf { 0% { transform: translateY(-6%) translateX(0) rotate(0); opacity: 0; } 10% { opacity: 0.7; } 100% { transform: translateY(108vh) translateX(34px) rotate(220deg); opacity: 0; } }
+.shock-leaf { animation-name: shockLeaf; animation-timing-function: linear; animation-iteration-count: infinite; }
+@keyframes shockOrbitSlow { from { transform: translate(-50%,-50%) rotate(0); } to { transform: translate(-50%,-50%) rotate(-360deg); } }
+.shock-orbit-slow { animation: shockOrbitSlow 100s linear infinite; }
+
 /* Opt-in shock modes keep their motion even under reduced-motion; only soften the frame shake. */
 @media (prefers-reduced-motion: reduce) {
   .shock-shake { animation-duration: 6s; }
