@@ -89,6 +89,10 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
             <Segmented value={settings.grainStyle || 'fine'} onChange={v => set('grainStyle', v)}
               options={[['fine', 'fine'], ['print', 'print']]} />
           </Row>
+          <Row label="Media treatment" desc="filter photos like a lookbook. noir, or oxblood duotone.">
+            <Segmented value={settings.mediaTreatment || 'none'} onChange={v => set('mediaTreatment', v)}
+              options={[['none', 'none'], ['noir', 'noir'], ['oxblood', 'blood']]} />
+          </Row>
           <Row label="Vignette" desc="dark edges around the screen.">
             <Toggle on={settings.vignette} onChange={v => set('vignette', v)} />
           </Row>
@@ -290,6 +294,7 @@ export const DEFAULT_SETTINGS = {
   parchmentMode: false,
   grainIntensity: 0.07,
   grainStyle: 'fine',
+  mediaTreatment: 'none',
   vignette: true,
   colorMood: 'none',
   weatherMood: false,

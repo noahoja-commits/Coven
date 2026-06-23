@@ -110,7 +110,7 @@ export function StoryViewer({ stories = [], startIndex = 0, onReply, onReactStor
 
       {/* Photo, or glyph backdrop */}
       {story.imageUrl ? (
-        <img src={story.imageUrl} alt="" className="absolute inset-0 w-full h-full object-contain" />
+        <img src={story.imageUrl} alt="" className="post-media absolute inset-0 w-full h-full object-contain" />
       ) : (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-[200px] opacity-20" style={{ textShadow: '0 0 60px rgba(0,0,0,0.5)' }}>{story.glyph}</div>

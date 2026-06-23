@@ -238,11 +238,14 @@ export default function App() {
     }
   }, []);
 
-  // Apply parchment mode
+  // Apply parchment mode + global media treatment (one effect, no extra hook)
   useEffect(() => {
     if (settings.parchmentMode) document.body.classList.add('parchment-mode');
     else document.body.classList.remove('parchment-mode');
-  }, [settings.parchmentMode]);
+    document.body.classList.remove('media-noir', 'media-oxblood');
+    if (settings.mediaTreatment === 'noir') document.body.classList.add('media-noir');
+    else if (settings.mediaTreatment === 'oxblood') document.body.classList.add('media-oxblood');
+  }, [settings.parchmentMode, settings.mediaTreatment]);
 
   // Ambient drone. The AudioContext MUST be started/resumed synchronously inside
   // the user's tap (toggleSound, called straight from the toggle) — iOS drops audio

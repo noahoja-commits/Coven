@@ -9,9 +9,9 @@ export function PostImage({ kind }) {
     return (
       <div className="relative w-full overflow-hidden bg-[#0A0608] border border-[#1A1A1A]">
         {isVideo ? (
-          <video src={kind} controls playsInline preload="metadata" className="w-full h-auto max-h-[80vh] object-contain bg-black" />
+          <video src={kind} controls playsInline preload="metadata" className="post-media w-full h-auto max-h-[80vh] object-contain bg-black" />
         ) : (
-          <img src={kind} alt="" loading="lazy" className="w-full h-auto max-h-[80vh] object-contain" />
+          <img src={kind} alt="" loading="lazy" className="post-media w-full h-auto max-h-[80vh] object-contain" />
         )}
       </div>
     );
