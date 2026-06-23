@@ -287,6 +287,15 @@ button:active, [role="button"]:active {
 @keyframes shockChevron { 0% { transform: translateY(0); } 100% { transform: translateY(18px); } }
 .shock-chevron { animation: shockChevron 0.8s steps(3) infinite; }
 
+/* Per-mode typography retheme — one legible themed font forced across the whole UI */
+body.shock-type-oswald { font-family: 'Oswald', sans-serif; }
+body.shock-type-vt323 { font-family: 'VT323', monospace; }
+body.shock-type-cinzel { font-family: 'Cinzel', serif; }
+body.shock-type-cormorant { font-family: 'Cormorant Garamond', serif; }
+body[class*="shock-type-"] * { font-family: inherit !important; }
+/* keep text legible above the busy shock overlays */
+body[class*="shock-type-"] .phone-frame { text-shadow: 0 1px 2px rgba(0,0,0,0.85); }
+
 /* Opt-in shock modes keep their motion even under reduced-motion; only soften the frame shake. */
 @media (prefers-reduced-motion: reduce) {
   .shock-shake { animation-duration: 6s; }
