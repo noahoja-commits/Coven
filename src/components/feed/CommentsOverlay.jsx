@@ -3,6 +3,7 @@ import { ArrowLeft, Send, Bookmark, CornerDownRight } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { Reaction } from '../shared/Reaction';
 import { PostImage } from '../shared/Visuals';
+import { renderRichText } from '../shared/RichText';
 
 export function CommentsOverlay({ post, onClose, onComment, onReact, onReactComment, isBookmarked, onToggleBookmark, onOpenUser }) {
   const [draft, setDraft] = useState('');
@@ -68,7 +69,7 @@ export function CommentsOverlay({ post, onClose, onComment, onReact, onReactComm
               <div className="text-[10px] text-[#6B6B6B]" style={F.mono}>{post.time}</div>
             </div>
           </div>
-          {post.body && <p className="text-[#F5F1E8] text-[15px] leading-relaxed mb-3" style={F.serif}>{post.body}</p>}
+          {post.body && <p className="text-[#F5F1E8] text-[15px] leading-relaxed mb-3" style={F.serif}>{renderRichText(post.body, { onOpenUser })}</p>}
           {(post.kind === 'photo' || post.kind === 'video') && <div className="mb-3"><PostImage kind={post.img} /></div>}
           {post.kind === 'event' && (
             <div className="mb-3 border border-[#2A2A2A] bg-[#0F0F0F] p-3">
@@ -168,7 +169,7 @@ function CommentRow({ c, reply, onOpenUser, onReply }) {
             className="text-[#F5F1E8] text-sm hover:underline" style={F.ui}>{c.user}</button>
           <span className="text-[9px] text-[#6B6B6B]" style={F.mono}>{c.time}</span>
         </div>
-        <p className="text-[#F5F1E8] text-sm mt-0.5 leading-relaxed" style={F.serif}>{c.body}</p>
+        <p className="text-[#F5F1E8] text-sm mt-0.5 leading-relaxed" style={F.serif}>{renderRichText(c.body, { onOpenUser })}</p>
         <div className="flex items-center gap-2 mt-1 -ml-1">
           {!reply && (
             <button onClick={onReply}

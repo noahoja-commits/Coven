@@ -3,6 +3,7 @@ import { MessageCircle, MoreHorizontal, Eye, Bookmark, Trash2, Flame, EyeOff, Re
 import { F } from '../../styles/fonts';
 import { Reaction } from '../shared/Reaction';
 import { PostImage } from '../shared/Visuals';
+import { renderRichText } from '../shared/RichText';
 import { getDailyCard } from '../../data/tarot';
 import { darkDay, todaysVespers, todaysCodex } from '../../data/helpers';
 import { DailyAltar } from './DailyAltar';
@@ -42,22 +43,12 @@ export function HomeScreen({
   const [openMenu, setOpenMenu] = useState(null);
   const [activeTag, setActiveTag] = useState(null);
 
-  const renderBody = (body) => {
-    if (!body) return null;
-    const parts = body.split(/(#[a-zA-Z0-9_]+)/g);
-    return parts.map((part, i) => {
-      if (/^#[a-zA-Z0-9_]+$/.test(part)) {
-        const tag = part.slice(1);
-        return (
-          <button key={i} onClick={(e) => { e.stopPropagation(); setActiveTag(tag); onOpenHashtag && onOpenHashtag(tag); }}
-            className="text-[#A89968] hover:text-[#C9A961] hover:underline">
-            {part}
-          </button>
-        );
-      }
-      return <span key={i}>{part}</span>;
-    });
-  };
+  const renderBody = (body) => body
+    ? renderRichText(body, {
+        onOpenUser,
+        onOpenHashtag: (tag) => { setActiveTag(tag); onOpenHashtag && onOpenHashtag(tag); },
+      })
+    : null;
 
   const tagFilteredPosts = activeTag
     ? posts.filter(p => p.body && p.body.toLowerCase().includes(`#${activeTag.toLowerCase()}`))

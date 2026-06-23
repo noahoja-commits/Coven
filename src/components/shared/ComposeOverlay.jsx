@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { X, Image as ImageIcon, Hash, EyeOff, Eye, BarChart2, Plus, Minus, Loader2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { COMMUNITIES } from '../../data/communities';
 import { uploadImage, uploadVideo } from '../../lib/db/storage';
+import { searchProfiles } from '../../lib/db/profiles';
 
 export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
   const [text, setText] = useState('');
@@ -15,6 +16,48 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const fileRef = useRef(null);
+  const taRef = useRef(null);
+
+  // @-autocomplete (self-contained — no App.jsx state).
+  const [mentionQuery, setMentionQuery] = useState(null); // the @frag after the caret, or null
+  const [mentionResults, setMentionResults] = useState([]);
+  const [mentionIndex, setMentionIndex] = useState(0);
+
+  const syncMention = () => {
+    const ta = taRef.current; if (!ta) return;
+    const before = ta.value.slice(0, ta.selectionStart);
+    const m = before.match(/@([a-zA-Z0-9_.]*)$/);
+    setMentionQuery(m ? m[1] : null);
+  };
+
+  useEffect(() => {
+    if (mentionQuery == null || mentionQuery.length < 1) { setMentionResults([]); return; }
+    let on = true;
+    const t = setTimeout(() => {
+      searchProfiles(mentionQuery, { limit: 6 })
+        .then(rows => { if (on) { setMentionResults(rows || []); setMentionIndex(0); } })
+        .catch(() => { if (on) setMentionResults([]); });
+    }, 180);
+    return () => { on = false; clearTimeout(t); };
+  }, [mentionQuery]);
+
+  const insertMention = (handle) => {
+    const ta = taRef.current;
+    const caret = ta ? ta.selectionStart : text.length;
+    const before = text.slice(0, caret).replace(/@([a-zA-Z0-9_.]*)$/, `@${handle} `);
+    const next = (before + text.slice(caret)).slice(0, 2000);
+    setText(next);
+    setMentionQuery(null); setMentionResults([]);
+    requestAnimationFrame(() => { if (ta) { ta.focus(); ta.setSelectionRange(before.length, before.length); } });
+  };
+
+  const onTextKeyDown = (e) => {
+    if (!mentionResults.length) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); setMentionIndex(i => (i + 1) % mentionResults.length); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setMentionIndex(i => (i - 1 + mentionResults.length) % mentionResults.length); }
+    else if (e.key === 'Enter') { e.preventDefault(); insertMention(mentionResults[mentionIndex].handle); }
+    else if (e.key === 'Escape') { setMentionQuery(null); setMentionResults([]); }
+  };
 
   const pollOk = !poll || poll.options.filter(o => o.trim()).length >= 2;
   const canPost = (text.trim().length > 0 || mediaFile) && pollOk && !busy;
@@ -88,7 +131,10 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
           </select>
         </div>
         <div className="flex-1 px-4 py-4 overflow-y-auto">
-          <textarea value={text} onChange={e => setText(e.target.value.slice(0, 2000))} maxLength={2000}
+          <textarea ref={taRef} value={text}
+            onChange={e => { setText(e.target.value.slice(0, 2000)); syncMention(); }}
+            onKeyUp={syncMention} onClick={syncMention} onKeyDown={onTextKeyDown}
+            maxLength={2000}
             placeholder="speak..."
             className="w-full bg-transparent text-[#F5F1E8] text-base outline-none resize-none placeholder:text-[#3F3F3F]"
             style={{ ...F.serif, minHeight: poll ? '120px' : (mediaPreview ? '120px' : '60vh') }}
@@ -130,6 +176,22 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
             </div>
           )}
         </div>
+        {mentionResults.length > 0 && (
+          <div className="border-t border-[#2A2A2A] bg-[#141414] max-h-44 overflow-y-auto">
+            {mentionResults.map((u, i) => (
+              <button key={u.id} onMouseDown={(e) => { e.preventDefault(); insertMention(u.handle); }}
+                className={`w-full px-4 py-2 flex items-center gap-2.5 text-left ${i === mentionIndex ? 'bg-[#5B0F1A]/20' : 'hover:bg-[#0F0F0F]'}`}>
+                <span className="w-7 h-7 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-sm overflow-hidden shrink-0">
+                  {u.avatar_url ? <img src={u.avatar_url} alt="" className="w-full h-full object-cover" /> : u.avatar}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[#F5F1E8] text-sm truncate" style={F.ui}>@{u.handle}</span>
+                  {u.bio && <span className="block text-[10px] text-[#6B6B6B] truncate" style={F.serif}>{u.bio}</span>}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
         {error && <div className="px-4 py-2 text-[11px] text-[#8B0000] text-center" style={F.ui}>{error}</div>}
         <div className="border-t border-[#1A1A1A] px-4 py-3 flex items-center gap-4">
           <input ref={fileRef} type="file" accept="image/*,video/*" onChange={onPickMedia} className="hidden" />
