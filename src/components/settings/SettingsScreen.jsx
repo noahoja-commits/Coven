@@ -109,6 +109,15 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
               {(settings.shockMode && settings.shockMode !== 'none') ? settings.shockMode : 'choose'} ›
             </button>
           </Row>
+          <Row label="Quick-switch sigil" desc="a floating sigil while a mode is on — tap to cycle, double-tap for the picker, hold to shuffle.">
+            <Toggle on={settings.quickSwitch !== false} onChange={v => set('quickSwitch', v)} />
+          </Row>
+          <Row label="Shake to shuffle" desc="a hard shake throws you into a random shock mode. (android/chrome.)">
+            <Toggle on={settings.shakeShuffle !== false} onChange={v => set('shakeShuffle', v)} />
+          </Row>
+          <Row label="Reactive taps" desc="every tap leaves a mark — blood, embers, glitch, a sigil — themed to the mode.">
+            <Toggle on={settings.reactiveTaps !== false} onChange={v => set('reactiveTaps', v)} />
+          </Row>
         </Section>
 
         <Section title="atmosphere">
@@ -304,6 +313,9 @@ export const DEFAULT_SETTINGS = {
   vignette: true,
   colorMood: 'none',
   shockMode: 'none',
+  quickSwitch: true,
+  shakeShuffle: true,
+  reactiveTaps: true,
   weatherMood: false,
   soundOn: false,
   tarotEnabled: true,

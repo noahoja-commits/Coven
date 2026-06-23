@@ -37,7 +37,7 @@ import { ChatThread } from './components/shared/ChatThread';
 import { ComposeOverlay } from './components/shared/ComposeOverlay';
 import { NotificationsPanel } from './components/shared/NotificationsPanel';
 import { GrainOverlay, AmbientGlow, HalftoneOverlay } from './components/shared/Visuals';
-import { ShockOverlay } from './components/shared/ShockOverlay';
+import { ShockOverlay, SHOCK_MODES } from './components/shared/ShockOverlay';
 import { ShockModePicker } from './components/settings/ShockModePicker';
 import { startAmbient, stopAmbient } from './lib/ambient';
 import { fetchWeatherTint } from './lib/weather';
@@ -102,6 +102,8 @@ import { livingTheme, meetsAge, isVigil } from './data/helpers';
 import { earnedAchievements } from './data/achievements';
 import { inQuietHours } from './lib/quietHours';
 import { FloatingCat } from './components/shared/FloatingCat';
+import { ShockQuickSwitch } from './components/shared/ShockQuickSwitch';
+import { ShockSparks } from './components/shared/ShockSparks';
 
 export default function App() {
   // === AUTH ===
@@ -1488,6 +1490,32 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
+  // ── Shock-mode fun pack: quick-switch handlers + shake-to-shuffle (hooks ABOVE the render gate) ──
+  const ACTIVE_SHOCK_IDS = SHOCK_MODES.map((m) => m.id).filter((id) => id !== 'none');
+  const nextShock = () => setSettings((s) => {
+    const i = ACTIVE_SHOCK_IDS.indexOf(s.shockMode);
+    return { ...s, shockMode: ACTIVE_SHOCK_IDS[(i + 1) % ACTIVE_SHOCK_IDS.length] };
+  });
+  const shuffleShock = () => setSettings((s) => {
+    const pool = ACTIVE_SHOCK_IDS.filter((id) => id !== s.shockMode);
+    return { ...s, shockMode: pool[Math.floor(Math.random() * pool.length)] || s.shockMode };
+  });
+  const shakeAt = useRef(0);
+  useEffect(() => {
+    if (settings.shakeShuffle === false || settings.shockMode === 'none') return;
+    let last = 0, px = 0, py = 0, pz = 0, primed = false;
+    const onMotion = (e) => {
+      const a = e.accelerationIncludingGravity; if (!a) return;
+      const now = Date.now(); if (now - last < 110) return; last = now;
+      const d = Math.abs((a.x || 0) - px) + Math.abs((a.y || 0) - py) + Math.abs((a.z || 0) - pz);
+      px = a.x || 0; py = a.y || 0; pz = a.z || 0;
+      if (!primed) { primed = true; return; }
+      if (d > 42 && now - shakeAt.current > 1200) { shakeAt.current = now; shuffleShock(); }
+    };
+    window.addEventListener('devicemotion', onMotion);
+    return () => window.removeEventListener('devicemotion', onMotion);
+  }, [settings.shakeShuffle, settings.shockMode]);
+
   // === RENDER ===
   if (!isSupabaseConfigured) {
     return (
@@ -2264,6 +2292,12 @@ export default function App() {
         </Suspense>
       )}
       {settings.familiar !== false && !anyOverlayOpen && <FloatingCat active />}
+      {settings.shockMode !== 'none' && settings.reactiveTaps !== false && !anyOverlayOpen && !settings.parchmentMode && (
+        <ShockSparks mode={settings.shockMode} />
+      )}
+      {settings.shockMode !== 'none' && settings.quickSwitch !== false && !anyOverlayOpen && !settings.parchmentMode && (
+        <ShockQuickSwitch onNext={nextShock} onShuffle={shuffleShock} onPicker={() => setShowShockPicker(true)} />
+      )}
       <Toast toast={toast} onDone={() => setToast(null)} />
     </div>
   );

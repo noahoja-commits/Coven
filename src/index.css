@@ -220,6 +220,25 @@ button:active, [role="button"]:active {
 @keyframes shockDrip { 0% { transform: scaleY(0); opacity: 0; } 8% { opacity: 1; } 70% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(1.05); opacity: 0; } }
 .shock-drip { transform-origin: top; animation: shockDrip 3.2s ease-in infinite; }
 
+/* Fun pack — quick-switch sigil pulse + reactive-tap sparks */
+@keyframes shockQsPulse {
+  0%, 100% { box-shadow: 0 0 14px rgba(200, 16, 46, 0.5), inset 0 0 8px rgba(200, 16, 46, 0.22); }
+  50%      { box-shadow: 0 0 22px rgba(200, 16, 46, 0.85), inset 0 0 10px rgba(200, 16, 46, 0.38); }
+}
+.shock-qs { animation: shockQsPulse 3.2s ease-in-out infinite; }
+.shock-qs:active { transform: scale(0.9); }
+@keyframes shockSparkBurst {
+  from { transform: rotate(var(--a)) translateY(2px); opacity: 0.85; }
+  to   { transform: rotate(var(--a)) translateY(-26px); opacity: 0; }
+}
+.shock-spark-burst { animation: shockSparkBurst 0.8s cubic-bezier(0.2, 0.7, 0.3, 1) forwards; }
+@keyframes shockSparkPop {
+  0%   { transform: translate(-50%, -50%) scale(0.4); opacity: 0; }
+  25%  { opacity: 0.95; }
+  100% { transform: translate(-50%, -50%) scale(1.8) rotate(20deg); opacity: 0; }
+}
+.shock-spark-pop { animation: shockSparkPop 0.82s ease-out forwards; }
+
 /* The Scream: hard red strobe + breathing vignette */
 @keyframes shockScreamFlash { 0% { opacity: 0; } 3% { opacity: 1; } 9% { opacity: 0.1; } 13% { opacity: 0.8; } 20% { opacity: 0; } 100% { opacity: 0; } }
 .shock-scream-flash { animation: shockScreamFlash 4s ease-out infinite; }
