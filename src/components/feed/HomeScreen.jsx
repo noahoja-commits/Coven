@@ -20,7 +20,7 @@ export function HomeScreen({
   onOpenStory, onCreateStory, stories = [], meHandle = 'you', meAvatar = '🦇',
   tonightStatus, onOpenTonightStatus, onOpenTarot, onOpenEphemeris, onOpenLibrary, onOpenCodex, onOpenHashtag, onOpenVespersArchive,
   ritual, ritualDoneToday, onPerformRitual, crystals = [], trackers = {}, onUpdateTracker, onOpenReflections,
-  feedLoading = false, suggestedSouls = [], following = {}, onFollow, witching = false,
+  feedLoading = false, suggestedSouls = [], following = {}, onFollow, witching = false, vigil = false,
   settings = {},
 }) {
   // Posts fade + desaturate with age (only when the living theme is on).
@@ -123,6 +123,15 @@ export function HomeScreen({
           <span className="text-[#C9A961]">⛧</span>
           <span className="text-[10px] uppercase tracking-[0.4em] text-[#C9A961]" style={F.scriptureSC}>the witching hour · reflect</span>
           <span className="text-[#C9A961]">⛧</span>
+        </button>
+      )}
+      {vigil && (
+        <button onClick={onOpenReflections}
+          className="w-full px-4 py-2.5 border-b border-[#7B2CBF]/40 flex items-center justify-center gap-2 animate-pulse-slow"
+          style={{ background: 'linear-gradient(90deg, rgba(45,15,63,0.45), rgba(10,4,16,0.6), rgba(45,15,63,0.45))' }}>
+          <span className="text-[#C9A961]">☩</span>
+          <span className="text-[10px] uppercase tracking-[0.4em] text-[#C9A961]" style={F.scriptureSC}>the vigil · souls keep watch</span>
+          <span className="text-[#C9A961]">☩</span>
         </button>
       )}
 

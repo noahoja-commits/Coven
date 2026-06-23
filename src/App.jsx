@@ -96,7 +96,7 @@ import { CommentsOverlay } from './components/feed/CommentsOverlay';
 import { QuoteModal } from './components/feed/QuoteModal';
 import { VespersArchiveModal } from './components/feed/VespersArchiveModal';
 import { TRACKER_CATEGORIES } from './data/profile';
-import { livingTheme, meetsAge } from './data/helpers';
+import { livingTheme, meetsAge, isVigil } from './data/helpers';
 import { earnedAchievements } from './data/achievements';
 import { inQuietHours } from './lib/quietHours';
 import { FloatingCat } from './components/shared/FloatingCat';
@@ -1597,6 +1597,7 @@ export default function App() {
         following={following}
         onFollow={toggleFollow}
         witching={!!living?.witching}
+        vigil={vigil}
         settings={settings}
       />
     );
@@ -1687,6 +1688,7 @@ export default function App() {
 
   // Living theme — a tint that follows the local hour (festTick re-renders us every 60s).
   const living = (settings.livingTheme !== false && !settings.parchmentMode) ? livingTheme() : null;
+  const vigil = settings.vigilEnabled !== false && !settings.parchmentMode && isVigil();
 
   return (
     <div className="phone-frame max-w-md mx-auto relative overflow-hidden h-[100dvh] text-[#F5F1E8]"

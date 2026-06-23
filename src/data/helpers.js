@@ -256,3 +256,10 @@ export function meetsAge(dob, min) {
   const a = ageFromDob(dob);
   return a != null && a >= min;
 }
+
+// The Vigil — a weekly threshold. Sunday night into the small hours (local time).
+export function isVigil(date = new Date()) {
+  const day = date.getDay();              // 0 = Sunday, 1 = Monday
+  const h = date.getHours() + date.getMinutes() / 60;
+  return (day === 0 && h >= 22) || (day === 1 && h < 0.5); // Sun 22:00 → Mon 00:30
+}
