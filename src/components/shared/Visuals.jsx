@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { F } from '../../styles/fonts';
 
 // Renders real uploaded media (when `kind` is a URL — image or video) or one of
@@ -84,5 +85,37 @@ export function GrainOverlay({ opacity = 0.07 }) {
         opacity,
         backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>")`,
       }} />
+  );
+}
+
+// Living ember/candle glow — a slow breathing light behind everything, for depth.
+// Self-contained: rides the time-of-day curve internally so it stays in sync with the
+// app's "vampire hours" without depending on the livingTheme setting. No App.jsx hooks.
+export function AmbientGlow() {
+  const [hour, setHour] = useState(() => new Date().getHours() + new Date().getMinutes() / 60);
+  useEffect(() => {
+    const t = setInterval(() => setHour(new Date().getHours() + new Date().getMinutes() / 60), 5 * 60 * 1000);
+    return () => clearInterval(t);
+  }, []);
+  // 0..1 intensity: peak through the witching hours, near-zero at midday.
+  const witching = hour >= 2.5 && hour < 4.5;
+  let intensity;
+  if (witching) intensity = 1;
+  else if (hour < 5) intensity = 0.85;   // deep night
+  else if (hour < 7) intensity = 0.45;   // dawn
+  else if (hour < 17) intensity = 0.18;  // day — barely there
+  else if (hour < 20) intensity = 0.5;   // dusk
+  else intensity = 0.8;                  // evening into night
+
+  return (
+    <div className="ambient-glow absolute inset-0 pointer-events-none z-10 overflow-hidden"
+      style={{ opacity: 0.30 * intensity, mixBlendMode: 'screen' }}>
+      {/* warm ember, lower-left, breathing */}
+      <div className="absolute -left-[20%] bottom-[8%] w-[80%] h-[60%] ambient-breathe"
+        style={{ background: 'radial-gradient(ellipse at center, rgba(139,0,0,0.55), rgba(91,15,26,0.18) 45%, transparent 70%)' }} />
+      {/* cool violet counter-light, upper-right, drifting + offset phase */}
+      <div className="absolute -right-[15%] top-[6%] w-[70%] h-[55%] ambient-drift"
+        style={{ background: 'radial-gradient(ellipse at center, rgba(123,44,191,0.30), rgba(43,7,16,0.10) 50%, transparent 72%)' }} />
+    </div>
   );
 }

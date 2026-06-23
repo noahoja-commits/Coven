@@ -36,7 +36,7 @@ import { DMsOverlay } from './components/shared/DMsOverlay';
 import { ChatThread } from './components/shared/ChatThread';
 import { ComposeOverlay } from './components/shared/ComposeOverlay';
 import { NotificationsPanel } from './components/shared/NotificationsPanel';
-import { GrainOverlay } from './components/shared/Visuals';
+import { GrainOverlay, AmbientGlow } from './components/shared/Visuals';
 import { startAmbient, stopAmbient } from './lib/ambient';
 import { fetchWeatherTint } from './lib/weather';
 import { InstallPrompt } from './components/shared/InstallPrompt';
@@ -1688,6 +1688,8 @@ export default function App() {
   return (
     <div className="phone-frame max-w-md mx-auto relative overflow-hidden h-[100dvh] text-[#F5F1E8]"
       style={{ background: settings.parchmentMode ? '#EDE0C2' : '#0A0A0A' }}>
+      {/* Living ambient glow — breathing ember/candle light for depth (behind mood washes) */}
+      {settings.ambientGlow !== false && !isInsideOverlay && !settings.parchmentMode && <AmbientGlow />}
       {/* Vignette */}
       {settings.vignette && !isInsideOverlay && (
         <div className="absolute inset-0 pointer-events-none z-10" style={{

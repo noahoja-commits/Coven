@@ -145,6 +145,21 @@ button:active, [role="button"]:active {
 }
 .animate-flicker { animation: flicker 4s ease-in-out infinite; }
 
+/* Living ambient glow — a slow breathing ember + drifting counter-light. */
+@keyframes ambientBreathe {
+  0%, 100% { transform: scale(1) translateY(0); opacity: 0.9; }
+  50%      { transform: scale(1.12) translateY(-2%); opacity: 1; }
+}
+.ambient-breathe { animation: ambientBreathe 16s ease-in-out infinite; }
+@keyframes ambientDrift {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+  50%      { transform: translate(-3%, 3%) scale(1.08); opacity: 1; }
+}
+.ambient-drift { animation: ambientDrift 22s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .ambient-breathe, .ambient-drift { animation: none; }
+}
+
 /* Loading shimmer — a gold sweep across skeleton blocks (layered over animate-pulse). */
 @keyframes shimmer { 100% { transform: translateX(100%); } }
 .skeleton-shimmer { position: relative; overflow: hidden; }

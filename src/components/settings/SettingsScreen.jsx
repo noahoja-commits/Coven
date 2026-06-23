@@ -101,6 +101,9 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
           <Row label="Living theme" desc="the app keeps vampire hours — darker after midnight, faint grey at dawn, deepest at 3am. posts fade as they age.">
             <Toggle on={settings.livingTheme !== false} onChange={v => set('livingTheme', v)} />
           </Row>
+          <Row label="Ambient glow" desc="a slow ember light breathes behind the dark. candlelit.">
+            <Toggle on={settings.ambientGlow !== false} onChange={v => set('ambientGlow', v)} />
+          </Row>
           <Row label="The familiar" desc="a small black cat pads around the screen. tap to feed it.">
             <Toggle on={settings.familiar !== false} onChange={v => set('familiar', v)} />
           </Row>
@@ -293,5 +296,6 @@ export const DEFAULT_SETTINGS = {
   mementoExpected: false,
   ghostMode: false,
   haptics: true,
+  ambientGlow: true,
   quietHours: { enabled: false, start: '22:00', end: '08:00' },
 };
