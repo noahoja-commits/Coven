@@ -1316,6 +1316,11 @@ export default function App() {
       throw e;
     }
     await refreshProfile();
+    // First-follows from onboarding — run AFTER the profile exists so follower_id=auth.uid()
+    // passes the follows RLS insert policy. allSettled so one failure can't block entry.
+    if (Array.isArray(data.follows) && data.follows.length) {
+      await Promise.allSettled(data.follows.map(id => followUser(userId, id)));
+    }
   };
 
   const saveProfile = async (next) => {

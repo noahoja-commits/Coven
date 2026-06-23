@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { ChevronRight, ChevronLeft, Loader2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
-import { checkHandleAvailable } from '../../lib/db/profiles';
+import { checkHandleAvailable, fetchProfiles } from '../../lib/db/profiles';
 
 const GLYPHS = ['🦇', '✟', '☠', '🌹', '🩸', '⚰', '✶', '⛧', '☩', '⚱', '✦', '⌬', '☾', '✽', '⚜'];
 const SCENES = [
@@ -23,12 +23,26 @@ export function OnboardingFlow({ onComplete, onSignOut }) {
   const [birthday, setBirthday] = useState('');
   const [scenes, setScenes] = useState([]);
   const [vibes, setVibes] = useState([]);
+  const [follows, setFollows] = useState([]); // soul ids to follow on entry (optional)
+  const [souls, setSouls] = useState([]); // real profiles to choose from
+  const [soulsLoading, setSoulsLoading] = useState(false);
   const [adult, setAdult] = useState(false); // 18+ self-attestation, gates entry
   const [handleStatus, setHandleStatus] = useState('idle'); // idle|checking|free|taken
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const checkSeq = useRef(0);
-  const totalSteps = 5;
+  const totalSteps = 6;
+
+  // Lazily load real souls when the user reaches the final "summon" step.
+  useEffect(() => {
+    if (step === 5 && souls.length === 0 && !soulsLoading) {
+      setSoulsLoading(true);
+      fetchProfiles({ limit: 12 })
+        .then(rows => setSouls(rows || []))
+        .catch(() => {})
+        .finally(() => setSoulsLoading(false));
+    }
+  }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Debounced live handle-availability check.
   useEffect(() => {
@@ -73,7 +87,7 @@ export function OnboardingFlow({ onComplete, onSignOut }) {
     if (isUnder18(birthday)) { setError('you must be 18 or older to enter the Coven'); setStep(3); return; }
     setSubmitting(true); setError('');
     try {
-      await onComplete({ handle: handle.trim().toLowerCase().replace(/\s/g, '_'), glyph, city: city.trim(), birthday, scenes, vibes });
+      await onComplete({ handle: handle.trim().toLowerCase().replace(/\s/g, '_'), glyph, city: city.trim(), birthday, scenes, vibes, follows });
     } catch (e) {
       setError(e?.message === 'handle taken' ? 'that handle was just taken — pick another' : (e?.message || 'something went wrong'));
       setHandleStatus('taken');
@@ -219,6 +233,40 @@ export function OnboardingFlow({ onComplete, onSignOut }) {
                 );
               })}
             </div>
+          </div>
+        )}
+
+        {step === 5 && (
+          <div className="max-w-sm mx-auto pt-8 animate-fade-in">
+            <div className="text-center mb-8">
+              <div className="text-[#A89968] text-[10px] uppercase tracking-[0.4em] mb-2" style={F.scriptureSC}>· chapter the fifth ·</div>
+              <h2 className="text-[#F5F1E8] text-3xl mb-2" style={F.scripture}>Summon your first souls.</h2>
+              <p className="text-[#A89968]/70 text-sm italic" style={F.scripture}>"optional — follow a few to fill your feed."</p>
+            </div>
+            {soulsLoading ? (
+              <div className="text-center py-12 text-[#6B6B6B] text-sm italic" style={F.scripture}>· gathering souls ·</div>
+            ) : souls.length === 0 ? (
+              <div className="text-center py-12 text-[#6B6B6B] text-sm italic" style={F.scripture}>· you are among the first here · the coven awaits you ·</div>
+            ) : (
+              <div className="space-y-2">
+                {souls.map(p => {
+                  const active = follows.includes(p.id);
+                  return (
+                    <button key={p.id} onClick={() => toggle(follows, setFollows, p.id)}
+                      className={`w-full text-left p-3 border transition-all flex items-center gap-3 ${active ? 'border-[#8B0000] bg-[#5B0F1A]/20' : 'border-[#2A2A2A]'}`}>
+                      <div className="w-10 h-10 rounded-full overflow-hidden bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-base shrink-0">
+                        {p.avatar_url ? <img src={p.avatar_url} alt="" className="w-full h-full object-cover" /> : (p.avatar || '✦')}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className={`text-sm truncate ${active ? 'text-[#F5F1E8]' : 'text-[#A8A29E]'}`} style={F.ui}>@{p.handle}</div>
+                        {p.bio && <div className="text-[11px] text-[#6B6B6B] truncate" style={F.serif}>{p.bio}</div>}
+                      </div>
+                      {active && <span className="text-[#C9A961] text-sm shrink-0">✓</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>
