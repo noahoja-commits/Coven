@@ -16,13 +16,13 @@ const WAVE = [22, 60, 14, 80, 35, 95, 50, 70, 12, 88, 40, 66, 18, 100, 30, 75, 5
 export function ShockOverlay({ mode = 'none' }) {
   if (!mode || mode === 'none') return null;
 
-  // ── INSOMNIA — vivid electric-blue + legible: grayscale the content (kills the red base), then a
-  //    blue `screen` layer that lifts the dark bg to blue while keeping bright text bright/readable ──
+  // ── INSOMNIA — single backdrop-filter duotone (this provably recolours + keeps text legible);
+  //    hue-rotated onto electric blue. saturate hard so it's vivid, not muddy. ──
   if (mode === 'insomnia') {
+    const duo = 'grayscale(1) sepia(1) hue-rotate(135deg) saturate(9) brightness(1.15) contrast(1.05)';
     return (
       <div className={WRAP} aria-hidden>
-        <div className="absolute inset-0" style={{ backdropFilter: 'grayscale(1) contrast(1.12)', WebkitBackdropFilter: 'grayscale(1) contrast(1.12)' }} />
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(165deg, #1c3cff 0%, #0c1ed0 100%)', mixBlendMode: 'screen' }} />
+        <div className="absolute inset-0" style={{ backdropFilter: duo, WebkitBackdropFilter: duo }} />
         <div className="absolute inset-0 shock-halftone-drift" style={{ backgroundImage: 'radial-gradient(rgba(150,190,255,0.5) 0.6px, transparent 1.1px)', backgroundSize: '5px 5px', mixBlendMode: 'overlay', opacity: 0.3 }} />
         <div className="absolute -inset-1/4 shock-sheen" style={{ background: 'linear-gradient(115deg, transparent 44%, rgba(200,222,255,0.3) 50%, transparent 56%)' }} />
       </div>
