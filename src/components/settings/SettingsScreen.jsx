@@ -54,7 +54,7 @@ function Row({ label, desc, children }) {
   );
 }
 
-export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLogout, onRerunOnboarding, mutedKeywords = [], onSetMutedKeywords, payoutStatus, payoutBusy = false, onSetupPayouts, pushState = 'off', onEnablePush, onDisablePush, onEditProfile, onOpenBlocked, onOpenLegal, onDeleteAccount }) {
+export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLogout, onRerunOnboarding, mutedKeywords = [], onSetMutedKeywords, payoutStatus, payoutBusy = false, onSetupPayouts, pushState = 'off', onEnablePush, onDisablePush, onEditProfile, onOpenBlocked, onOpenLegal, onDeleteAccount, onOpenShockPicker }) {
   const set = (key, value) => onChange({ ...settings, [key]: value });
   const addKeyword = (e) => {
     e.preventDefault();
@@ -102,6 +102,12 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
               onChange={v => set('colorMood', v)}
               options={[['none', 'none'], ['bloodMoon', 'blood'], ['ash', 'ash']]}
             />
+          </Row>
+          <Row label="Shock mode" desc="how the dark manifests — blood spatter, the scream, glitch, insomnia blue, dead channel, pyre, sanctum & more.">
+            <button onClick={onOpenShockPicker}
+              className="px-3 py-1.5 text-[10px] uppercase tracking-wider border border-[#5B0F1A] text-[#C8102E] hover:bg-[#5B0F1A]/20 transition-colors" style={F.ui}>
+              {(settings.shockMode && settings.shockMode !== 'none') ? settings.shockMode : 'choose'} ›
+            </button>
           </Row>
         </Section>
 
@@ -297,6 +303,7 @@ export const DEFAULT_SETTINGS = {
   mediaTreatment: 'none',
   vignette: true,
   colorMood: 'none',
+  shockMode: 'none',
   weatherMood: false,
   soundOn: false,
   tarotEnabled: true,

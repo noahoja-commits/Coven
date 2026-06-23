@@ -215,6 +215,47 @@ button:active, [role="button"]:active {
 }
 .animate-heat-flash { animation: heatFlash 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
 
+/* ── Shock modes — selectable full-screen visual modes (ShockOverlay) ── */
+@keyframes shockDrip { 0% { transform: scaleY(0); opacity: 0; } 10% { opacity: 1; } 80% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(1); opacity: 0; } }
+.shock-drip { transform-origin: top; animation: shockDrip 5s ease-in infinite; }
+
+@keyframes shockScreamFlash { 0% { opacity: 0.9; } 4% { opacity: 0.1; } 8% { opacity: 0.7; } 14% { opacity: 0; } 100% { opacity: 0; } }
+.shock-scream-flash { animation: shockScreamFlash 5.5s ease-out infinite; }
+
+/* violent burst-shake on the phone-frame for The Scream */
+@keyframes shockShake {
+  0%, 12%, 100% { transform: translate(0, 0) rotate(0); }
+  2% { transform: translate(-5px, 2px) rotate(-0.5deg); }
+  4% { transform: translate(5px, -3px) rotate(0.6deg); }
+  6% { transform: translate(-6px, 1px) rotate(-0.4deg); }
+  8% { transform: translate(4px, 3px) rotate(0.5deg); }
+  10% { transform: translate(-3px, -2px) rotate(-0.3deg); }
+}
+.shock-shake { animation: shockShake 5.5s ease-in-out infinite; }
+
+/* constant micro-jitter on the frame for Corruption */
+@keyframes shockJitter { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-1.5px); } 50% { transform: translateX(1.5px); } 75% { transform: translateX(-1px); } }
+.shock-jitter { animation: shockJitter 0.2s steps(2) infinite; }
+
+@keyframes shockGlitchBar { 0%, 100% { transform: translateY(0); opacity: 0.85; } 20% { transform: translateY(-28px); opacity: 0.3; } 21% { transform: translateY(38px); opacity: 0.95; } 50% { transform: translateY(6px); } 70% { opacity: 0.15; } 71% { opacity: 0.9; } }
+.shock-glitch-bar { animation: shockGlitchBar 1.4s infinite; }
+.shock-glitch-bar2 { animation: shockGlitchBar 0.9s infinite reverse; }
+
+@keyframes shockEmber { 0% { transform: translateY(0) translateX(0); opacity: 0; } 12% { opacity: 1; } 88% { opacity: 0.8; } 100% { transform: translateY(-92vh) translateX(14px); opacity: 0; } }
+.shock-ember { animation-name: shockEmber; animation-timing-function: ease-out; animation-iteration-count: infinite; }
+
+@keyframes shockGodray { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-30px); } }
+.shock-godray { animation: shockGodray 14s ease-in-out infinite; }
+.shock-godray2 { animation: shockGodray 20s ease-in-out infinite reverse; }
+
+@keyframes shockOrbit { from { transform: translate(-50%, -50%) rotate(0); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+.shock-orbit { animation: shockOrbit 90s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .shock-drip, .shock-scream-flash, .shock-shake, .shock-jitter, .shock-glitch-bar,
+  .shock-glitch-bar2, .shock-ember, .shock-godray, .shock-godray2, .shock-orbit { animation: none !important; }
+}
+
 /* Illuminated drop-cap — a blackletter gold initial for confessions / scripture
    on the dark surfaces (the parchment reader has its own inline drop-cap). */
 .illuminated::first-letter {

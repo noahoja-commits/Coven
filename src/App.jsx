@@ -37,6 +37,8 @@ import { ChatThread } from './components/shared/ChatThread';
 import { ComposeOverlay } from './components/shared/ComposeOverlay';
 import { NotificationsPanel } from './components/shared/NotificationsPanel';
 import { GrainOverlay, AmbientGlow, HalftoneOverlay } from './components/shared/Visuals';
+import { ShockOverlay } from './components/shared/ShockOverlay';
+import { ShockModePicker } from './components/settings/ShockModePicker';
 import { startAmbient, stopAmbient } from './lib/ambient';
 import { fetchWeatherTint } from './lib/weather';
 import { InstallPrompt } from './components/shared/InstallPrompt';
@@ -143,6 +145,7 @@ export default function App() {
   const [showNewGroup, setShowNewGroup] = useState(false);
   const [showReflections, setShowReflections] = useState(false);
   const [showDreams, setShowDreams] = useState(false);
+  const [showShockPicker, setShowShockPicker] = useState(false);
   const [quoteTarget, setQuoteTarget] = useState(null);
   const [showVespersArchive, setShowVespersArchive] = useState(false);
 
@@ -1403,6 +1406,7 @@ export default function App() {
     if (showMyTickets) { setShowMyTickets(false); return true; }
     if (showReflections) { setShowReflections(false); return true; }
     if (showDreams) { setShowDreams(false); return true; }
+    if (showShockPicker) { setShowShockPicker(false); return true; }
     if (showNowPlaying) { setShowNowPlaying(false); return true; }
     if (showAddGrave) { setShowAddGrave(false); return true; }
     if (showAddAnniv) { setShowAddAnniv(false); return true; }
@@ -1691,7 +1695,7 @@ export default function App() {
   const vigil = settings.vigilEnabled !== false && !settings.parchmentMode && isVigil();
 
   return (
-    <div className="phone-frame max-w-md mx-auto relative overflow-hidden h-[100dvh] text-[#F5F1E8]"
+    <div className={`phone-frame max-w-md mx-auto relative overflow-hidden h-[100dvh] text-[#F5F1E8] ${settings.shockMode === 'scream' ? 'shock-shake' : settings.shockMode === 'glitch' ? 'shock-jitter' : ''}`}
       style={{ background: settings.parchmentMode ? '#EDE0C2' : '#0A0A0A' }}>
       {/* Living ambient glow — breathing ember/candle light for depth (behind mood washes) */}
       {settings.ambientGlow !== false && !isInsideOverlay && !settings.parchmentMode && <AmbientGlow />}
@@ -1744,6 +1748,8 @@ export default function App() {
         }} />
       )}
 
+      {/* Shock mode — selectable full-screen visual mode layered over the base */}
+      {!settings.parchmentMode && <ShockOverlay mode={settings.shockMode} />}
       {/* Grain — floored so the film texture stays visibly present (still slider-controlled above the floor) */}
       {settings.grainIntensity > 0 && (
         settings.grainStyle === 'print'
@@ -2034,6 +2040,14 @@ export default function App() {
           onOpenBlocked={() => setShowBlocked(true)}
           onOpenLegal={() => setShowLegal(true)}
           onDeleteAccount={() => setShowDeleteConfirm(true)}
+          onOpenShockPicker={() => { setShowSettings(false); setShowShockPicker(true); }}
+        />
+      )}
+      {showShockPicker && (
+        <ShockModePicker
+          current={settings.shockMode}
+          onPick={(id) => setSettings({ ...settings, shockMode: id })}
+          onClose={() => setShowShockPicker(false)}
         />
       )}
       {showLegal && (
