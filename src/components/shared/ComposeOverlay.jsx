@@ -4,6 +4,7 @@ import { F } from '../../styles/fonts';
 import { COMMUNITIES } from '../../data/communities';
 import { uploadImage, uploadVideo } from '../../lib/db/storage';
 import { searchProfiles } from '../../lib/db/profiles';
+import { saveDraft, loadDraft, clearDraft } from '../../lib/drafts';
 
 export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
   const [text, setText] = useState('');
@@ -22,6 +23,22 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
   const [mentionQuery, setMentionQuery] = useState(null); // the @frag after the caret, or null
   const [mentionResults, setMentionResults] = useState([]);
   const [mentionIndex, setMentionIndex] = useState(0);
+
+  // Unsent-draft save/restore (captured once on mount so the auto-save below can't wipe it).
+  const [pendingDraft, setPendingDraft] = useState(() => loadDraft());
+  useEffect(() => {
+    const t = setTimeout(() => saveDraft({ text, community, anonymous, poll }), 600);
+    return () => clearTimeout(t);
+  }, [text, community, anonymous, poll]);
+  const restoreDraft = () => {
+    if (!pendingDraft) return;
+    setText(pendingDraft.text || '');
+    if (pendingDraft.community) setCommunity(pendingDraft.community);
+    setAnonymous(!!pendingDraft.anonymous);
+    setPoll(pendingDraft.poll || null);
+    setPendingDraft(null);
+  };
+  const discardDraft = () => { clearDraft(); setPendingDraft(null); };
 
   const syncMention = () => {
     const ta = taRef.current; if (!ta) return;
@@ -99,7 +116,7 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
         }
       }
       onPost && onPost(payload);
-      setText(''); clearMedia();
+      setText(''); clearMedia(); clearDraft(); setPendingDraft(null);
     } catch (err) {
       setError(err?.message || 'could not post — try again');
       setBusy(false);
@@ -130,6 +147,13 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
             {COMMUNITIES.map(c => <option key={c.id} value={c.id} className="bg-[#0A0A0A]">{c.name}</option>)}
           </select>
         </div>
+        {pendingDraft && !text && (
+          <div className="px-4 py-2 bg-[#5B0F1A]/15 border-b border-[#5B0F1A]/30 flex items-center gap-3 text-[11px]" style={F.ui}>
+            <span className="flex-1 text-[#A89968]">you have an unsent draft.</span>
+            <button onClick={restoreDraft} className="text-[#C9A961] uppercase tracking-wider hover:underline">restore</button>
+            <button onClick={discardDraft} className="text-[#6B6B6B] hover:text-[#A8A29E] uppercase tracking-wider">discard</button>
+          </div>
+        )}
         <div className="flex-1 px-4 py-4 overflow-y-auto">
           <textarea ref={taRef} value={text}
             onChange={e => { setText(e.target.value.slice(0, 2000)); syncMention(); }}
