@@ -1,15 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { buzz } from '../../lib/haptics';
 
 // A small black cat (your familiar) that slowly pads around the screen. Tap to feed it —
 // it purrs, hearts rise, and its hunger resets. Hunger creeps back over hours. Purely whimsy;
 // floats above content (z-45) but below toasts, and hides itself while an overlay is open.
+// EASTER EGG: tap it 6 times quickly and it turns into a little demon 😈 — tap again to turn back.
 export function FloatingCat({ active = true }) {
   const [pos, setPos] = useState({ x: 18, y: 70 });
   const [facing, setFacing] = useState(1); // 1 = facing right, -1 = left
   const [purr, setPurr] = useState(false);
   const [hearts, setHearts] = useState(0); // bump to retrigger the heart burst
   const [fedAt, setFedAt] = useLocalStorage('catFedAt', 0);
+  const [demon, setDemon] = useState(false);
+  const [fx, setFx] = useState(null); // { key, glyph } transform poof
 
   // Wander: every few seconds, amble to a new spot near the bottom of the screen.
   useEffect(() => {
@@ -27,6 +31,10 @@ export function FloatingCat({ active = true }) {
   }, [active]);
 
   const purrTimer = useRef(null);
+  const tapsRef = useRef(0);
+  const tapTimer = useRef(null);
+  const fxKey = useRef(0);
+
   const feed = () => {
     setFedAt(Date.now());
     setHearts(h => h + 1);
@@ -34,28 +42,59 @@ export function FloatingCat({ active = true }) {
     clearTimeout(purrTimer.current);
     purrTimer.current = setTimeout(() => setPurr(false), 2000);
   };
-  useEffect(() => () => clearTimeout(purrTimer.current), []);
+
+  const poof = (glyph) => { fxKey.current += 1; setFx({ key: fxKey.current, glyph }); };
+
+  const onTap = () => {
+    if (demon) {
+      // tap the demon → banish it back to a cat
+      buzz('react');
+      setDemon(false);
+      tapsRef.current = 0;
+      poof('💨');
+      return;
+    }
+    feed();
+    tapsRef.current += 1;
+    clearTimeout(tapTimer.current);
+    tapTimer.current = setTimeout(() => { tapsRef.current = 0; }, 1500); // streak resets if you dawdle
+    if (tapsRef.current >= 6) {
+      tapsRef.current = 0;
+      clearTimeout(tapTimer.current);
+      buzz('secret');
+      setDemon(true);
+      setPurr(false);
+      poof('🔥');
+    }
+  };
+
+  useEffect(() => () => { clearTimeout(purrTimer.current); clearTimeout(tapTimer.current); }, []);
 
   if (!active) return null;
 
-  // Hungry if not fed in the last ~8 hours — a faint "?" appears.
-  const hungry = Date.now() - (fedAt || 0) > 8 * 60 * 60 * 1000;
+  // Hungry if not fed in the last ~8 hours — a faint "?" appears (cats only).
+  const hungry = !demon && Date.now() - (fedAt || 0) > 8 * 60 * 60 * 1000;
 
   return (
     <button
-      onClick={feed}
-      aria-label="feed the familiar"
+      onClick={onTap}
+      aria-label={demon ? 'a little demon (tap to banish)' : 'feed the familiar'}
       className="fixed z-[45] pointer-events-auto select-none"
       style={{
         left: `${pos.x}%`, top: `${pos.y}%`,
         transition: 'left 4.5s ease-in-out, top 4.5s ease-in-out',
         fontSize: '1.4rem', lineHeight: 1,
-        filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.7))',
+        filter: demon
+          ? 'drop-shadow(0 0 6px rgba(200,16,46,0.7)) drop-shadow(0 1px 2px rgba(0,0,0,0.7))'
+          : 'drop-shadow(0 1px 2px rgba(0,0,0,0.7))',
       }}>
-      <span style={{ display: 'inline-block', transform: `scaleX(${facing})` }} className={purr ? 'animate-pulse-slow' : ''}>🐈‍⬛</span>
+      <span style={{ display: 'inline-block', transform: `scaleX(${facing})` }} className={purr || demon ? 'animate-pulse-slow' : ''}>{demon ? '😈' : '🐈‍⬛'}</span>
       {hungry && !purr && <span className="absolute -top-2 -right-1 text-[10px] text-[#C8102E]/70">?</span>}
-      {purr && (
-        <span key={hearts} className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs animate-fade-in" style={{ animation: 'likeBurst 1.6s ease-out forwards' }}>🤍</span>
+      {purr && !demon && (
+        <span key={hearts} className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs" style={{ animation: 'likeBurst 1.6s ease-out forwards' }}>🤍</span>
+      )}
+      {fx && (
+        <span key={fx.key} className="absolute -top-3 left-1/2 -translate-x-1/2 text-sm pointer-events-none" style={{ animation: 'likeBurst 1.4s ease-out forwards' }}>{fx.glyph}</span>
       )}
     </button>
   );
