@@ -738,7 +738,7 @@ THREAT ${['LOW', 'ELEV', 'HIGH', 'CRIT'][tick % 4]}
   if (mode === 'paralysis') {
     if (back) return (
       <div className={BWRAP} aria-hidden>
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 40%, rgba(20,18,22,0.5), rgba(2,2,3,0.96) 66%)' }} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 42%, rgba(18,16,20,0.4), rgba(4,4,5,0.78) 72%)' }} />
         {/* a failing, flickering light */}
         <div className="absolute left-1/2 top-[6%] -translate-x-1/2 w-[60%] h-[50%] animate-flicker" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(180,180,190,0.12), transparent 62%)', mixBlendMode: 'screen' }} />
         {/* the entity, looming out of the dark then lunging */}
@@ -747,15 +747,15 @@ THREAT ${['LOW', 'ELEV', 'HIGH', 'CRIT'][tick % 4]}
         <BoneHand className="absolute left-[4%] bottom-[5%] w-16 h-28 -rotate-[24deg]" opacity={0.3} />
         <BoneHand className="absolute right-[5%] bottom-[2%] w-16 h-28 rotate-[206deg] scale-x-[-1]" opacity={0.28} />
         {/* a creeping shadow rising from below, breathing */}
-        <div className="absolute inset-x-0 bottom-0 h-[42%] shock-breath-heavy" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.96), transparent)' }} />
+        <div className="absolute inset-x-0 bottom-0 h-[30%] shock-breath-heavy" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)' }} />
       </div>
     );
     return (
       <div className={`${FWRAP} text-[#b8b0a8]`} aria-hidden>
         {/* the jumpscare — a sudden blinding flash on the lunge */}
         <div className="absolute inset-0 shock-jump" style={{ background: 'rgba(222,222,228,0.9)' }} />
-        {/* labored-breath vignette closing in */}
-        <div className="absolute inset-0 shock-breath-heavy" style={{ boxShadow: 'inset 0 0 110px 52px rgba(0,0,0,0.92)' }} />
+        {/* labored-breath vignette closing in (eased so the app stays readable between breaths) */}
+        <div className="absolute inset-0 shock-breath-heavy" style={{ boxShadow: 'inset 0 0 80px 20px rgba(0,0,0,0.6)' }} />
         {/* claw marks torn down the screen */}
         <svg className="absolute inset-0 w-full h-full opacity-40" preserveAspectRatio="none" viewBox="0 0 100 100"><g stroke="#5b0f1a" strokeWidth="0.5" fill="none" strokeLinecap="round">
           <path d="M20 6 L24 70" /><path d="M26 4 L31 72" /><path d="M32 8 L36 66" /><path d="M70 10 L74 78" /><path d="M76 6 L80 74" />
