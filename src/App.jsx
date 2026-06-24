@@ -1920,10 +1920,11 @@ export default function App() {
       {!settings.parchmentMode && !isInsideOverlay && <ShockOverlay mode={settings.shockMode} layer="back" />}
       {/* Living ambient glow — breathing ember/candle light for depth (behind mood washes) */}
       {settings.ambientGlow !== false && !isInsideOverlay && !settings.parchmentMode && <AmbientGlow />}
-      {/* Always-on blood wash — drenches the whole frame in oxblood so the app reads RED, not grey */}
+      {/* Restrained oxblood breath — a hint at top + bottom over a deep near-black base, so the
+          gold hairlines + editorial type can breathe. Drama lives in the shock modes, not always-on. */}
       {!settings.parchmentMode && (
         <div className="absolute inset-0 pointer-events-none z-10" aria-hidden style={{
-          background: 'radial-gradient(ellipse at 50% 8%, rgba(139,0,0,0.30), transparent 55%), radial-gradient(ellipse at 50% 108%, rgba(91,15,26,0.42), transparent 60%)',
+          background: 'radial-gradient(ellipse at 50% 4%, rgba(139,0,0,0.13), transparent 50%), radial-gradient(ellipse at 50% 112%, rgba(91,15,26,0.16), transparent 56%)',
           mixBlendMode: 'soft-light',
         }} />
       )}
@@ -1932,7 +1933,7 @@ export default function App() {
         <div className="absolute inset-0 pointer-events-none z-10" style={{
           background: settings.parchmentMode
             ? 'radial-gradient(ellipse at center, transparent 60%, rgba(58, 34, 12, 0.25) 100%)'
-            : 'radial-gradient(ellipse at center, transparent 48%, rgba(40,0,6,0.5) 82%, rgba(0,0,0,0.8) 100%)'
+            : 'radial-gradient(ellipse at center, transparent 54%, rgba(14,2,7,0.45) 84%, rgba(0,0,0,0.78) 100%)'
         }} />
       )}
 

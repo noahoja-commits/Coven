@@ -113,26 +113,26 @@ export function AmbientGlow() {
     const t = setInterval(() => setHour(new Date().getHours() + new Date().getMinutes() / 60), 5 * 60 * 1000);
     return () => clearInterval(t);
   }, []);
-  // 0..1 intensity: dramatic at night, but ALWAYS strongly present (never a midday whisper).
+  // 0..1 intensity: a faint candle breath for depth — present at night, a whisper by day.
   const witching = hour >= 2.5 && hour < 4.5;
   let intensity;
-  if (witching) intensity = 1;
-  else if (hour < 7) intensity = 0.95;   // deep night → dawn
-  else if (hour < 17) intensity = 0.72;  // day — still very present
-  else intensity = 0.9;                  // dusk into night
+  if (witching) intensity = 0.62;
+  else if (hour < 7) intensity = 0.5;    // deep night → dawn
+  else if (hour < 17) intensity = 0.32;  // day — a whisper
+  else intensity = 0.46;                 // dusk into night
 
   return (
     <div className="ambient-glow absolute inset-0 pointer-events-none z-10 overflow-hidden"
-      style={{ opacity: 0.6 * intensity, mixBlendMode: 'screen' }}>
+      style={{ opacity: 0.5 * intensity, mixBlendMode: 'screen' }}>
       {/* warm ember, lower-left, breathing */}
       <div className="absolute -left-[22%] bottom-[4%] w-[90%] h-[68%] ambient-breathe"
-        style={{ background: 'radial-gradient(ellipse at center, rgba(200,16,46,0.7), rgba(139,0,0,0.32) 42%, transparent 70%)' }} />
-      {/* second oxblood bloom, bottom-center, for a deep red floor */}
+        style={{ background: 'radial-gradient(ellipse at center, rgba(200,16,46,0.42), rgba(139,0,0,0.18) 42%, transparent 70%)' }} />
+      {/* second oxblood bloom, bottom-center, a deep restrained floor */}
       <div className="absolute left-[15%] -bottom-[18%] w-[70%] h-[55%] ambient-breathe"
-        style={{ background: 'radial-gradient(ellipse at center, rgba(139,0,0,0.5), transparent 68%)', animationDelay: '-8s' }} />
+        style={{ background: 'radial-gradient(ellipse at center, rgba(139,0,0,0.26), transparent 68%)', animationDelay: '-8s' }} />
       {/* cool violet counter-light, upper-right, drifting + offset phase */}
       <div className="absolute -right-[15%] top-[4%] w-[78%] h-[60%] ambient-drift"
-        style={{ background: 'radial-gradient(ellipse at center, rgba(123,44,191,0.42), rgba(43,7,16,0.12) 50%, transparent 72%)' }} />
+        style={{ background: 'radial-gradient(ellipse at center, rgba(123,44,191,0.28), rgba(43,7,16,0.08) 50%, transparent 72%)' }} />
     </div>
   );
 }
