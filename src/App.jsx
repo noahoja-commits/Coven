@@ -640,12 +640,15 @@ export default function App() {
   // re-surface a pin that's mid-delete.
   const saveTonightStatus = async (status) => {
     setTonightStatus(status);
-    const sharing = !!(status && status.text && status.share && !settings.ghostMode);
+    // Sharing is independent of writing a status — you can just go live on the map.
+    const sharing = !!(status && status.share && !settings.ghostMode);
+    const hasPresence = !!(status && (status.text || status.share) && !settings.ghostMode);
     try {
-      if (!status || !status.text || settings.ghostMode) {
+      if (!hasPresence) {
         await clearTonightPin();
       } else {
-        await setTonightPin({ text: status.text, neighborhood: status.neighborhood, expiresAt: status.expiresAt });
+        // A shared-location-only user still gets a pin (default text) so they appear on the map.
+        await setTonightPin({ text: status.text || '· out tonight ·', neighborhood: status.neighborhood, expiresAt: status.expiresAt });
       }
     } catch { /* ignore network errors */ }
     // Real GPS proximity (opt-in): store precise coords (owner-locked) or clear them.

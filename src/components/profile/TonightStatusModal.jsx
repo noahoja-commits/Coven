@@ -13,12 +13,8 @@ const PROMPTS = [
   'who\u2019s rolling',
 ];
 
-const RADII = [
-  { m: 500, label: 'Block', sub: '~500m' },
-  { m: 1609, label: 'Hood', sub: '~1 mi' },
-  { m: 4828, label: 'Area', sub: '~3 mi' },
-  { m: 16093, label: 'City', sub: '~10 mi' },
-];
+const humanDist = (m) => m < 950 ? `${Math.round(m / 50) * 50} m` : `${(m / 1609).toFixed(1)} mi`;
+const radiusName = (m) => m < 700 ? 'block' : m < 2400 ? 'neighborhood' : m < 7000 ? 'area' : 'city';
 
 export function TonightStatusModal({ current, onSave, onClose }) {
   const [text, setText] = useState(current?.text || '');
@@ -104,18 +100,18 @@ export function TonightStatusModal({ current, onSave, onClose }) {
             </div>
             {share && (
               <div className="mt-3">
-                <div className="text-[9px] uppercase tracking-wider text-[#6B6B6B] mb-1.5" style={F.ui}>your broadcast circle</div>
-                <div className="grid grid-cols-4 gap-1.5">
-                  {RADII.map(r => (
-                    <button key={r.m} type="button" onClick={() => setFuzzM(r.m)}
-                      className={`px-1 py-1.5 text-center border transition-colors ${fuzzM === r.m ? 'border-[#8B0000] bg-[#8B0000]/20 text-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#5B0F1A]'}`}>
-                      <div className="text-[10px] leading-tight" style={F.ui}>{r.label}</div>
-                      <div className="text-[8px] text-[#6B6B6B]" style={F.mono}>{r.sub}</div>
-                    </button>
-                  ))}
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[9px] uppercase tracking-wider text-[#6B6B6B]" style={F.ui}>your broadcast circle</span>
+                  <span className="text-[10px] text-[#C9A961]" style={F.mono}>~{humanDist(fuzzM)} · {radiusName(fuzzM)}</span>
+                </div>
+                <input type="range" min="150" max="16000" step="50" value={fuzzM}
+                  onChange={e => setFuzzM(Number(e.target.value))}
+                  className="w-full accent-[#8B0000] cursor-pointer" />
+                <div className="flex justify-between text-[8px] text-[#6B6B6B] uppercase tracking-wider mt-0.5" style={F.ui}>
+                  <span>tight</span><span>wide</span>
                 </div>
                 <p className="text-[9px] text-[#6B6B6B] mt-2 leading-relaxed" style={F.serif}>
-                  others see only a {RADII.find(r => r.m === fuzzM)?.sub} circle — never your exact spot. your precise coords stay locked to you.
+                  others see only a ~{humanDist(fuzzM)} circle — never your exact spot. your precise coords stay locked to you.
                 </p>
               </div>
             )}
@@ -131,9 +127,9 @@ export function TonightStatusModal({ current, onSave, onClose }) {
           <button onClick={onClose}
             className="ml-auto px-4 py-2 text-[10px] uppercase tracking-wider border border-[#2A2A2A] text-[#A8A29E]"
             style={F.ui}>cancel</button>
-          <button onClick={save} disabled={!text.trim()}
+          <button onClick={save} disabled={!text.trim() && !share}
             className="px-4 py-2 text-[10px] uppercase tracking-wider bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] disabled:opacity-40 disabled:cursor-not-allowed"
-            style={F.ui}>set status</button>
+            style={F.ui}>{text.trim() ? 'set status' : (share ? 'go live' : 'set status')}</button>
         </div>
       </div>
     </div>
