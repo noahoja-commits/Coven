@@ -11,6 +11,34 @@ const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE
 
 export const config = { api: { bodyParser: false } };
 
+// Apply a store-boost subscription's state to the shop + bookkeeping table. Pins the shop
+// (boosted_until = paid period end) while the sub is in good standing; clears it otherwise.
+async function applyBoost(sub, extra = {}) {
+  const shopId = sub.metadata?.shop_id;
+  const ownerId = sub.metadata?.owner_id;
+  if (!shopId || !ownerId) return;
+  const active = sub.status === 'active' || sub.status === 'trialing';
+  const periodEnd = sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null;
+  await supa.from('store_subscriptions').upsert({
+    owner_id: ownerId,
+    shop_id: shopId,
+    stripe_customer_id: extra.customerId || (typeof sub.customer === 'string' ? sub.customer : sub.customer?.id) || null,
+    stripe_subscription_id: sub.id,
+    status: sub.status,
+    current_period_end: periodEnd,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: 'stripe_subscription_id' });
+  await supa.from('shops').update({ boosted_until: active ? periodEnd : null }).eq('id', shopId);
+}
+
+async function endBoost(sub) {
+  const shopId = sub.metadata?.shop_id;
+  await supa.from('store_subscriptions')
+    .update({ status: 'canceled', updated_at: new Date().toISOString() })
+    .eq('stripe_subscription_id', sub.id);
+  if (shopId) await supa.from('shops').update({ boosted_until: null }).eq('id', shopId);
+}
+
 function readRawBody(req) {
   return new Promise((resolve, reject) => {
     const chunks = [];
@@ -63,7 +91,21 @@ export default async function handler(req, res) {
         stripe_payment_intent: typeof s.payment_intent === 'string' ? s.payment_intent : null,
       }, { onConflict: 'stripe_session_id' });
       if (error) { res.status(500).json({ error: error.message }); return; }
+    } else if (s.metadata?.kind === 'boost' && s.subscription) {
+      // A store-boost subscription was purchased — fetch the sub for its period end, then pin the shop.
+      try {
+        const subId = typeof s.subscription === 'string' ? s.subscription : s.subscription.id;
+        const sub = await stripe.subscriptions.retrieve(subId);
+        if (!sub.metadata?.shop_id) sub.metadata = { ...sub.metadata, ...s.metadata };
+        await applyBoost(sub, { customerId: typeof s.customer === 'string' ? s.customer : s.customer?.id });
+      } catch (e) { console.error('boost activate', e.message); }
     }
+  } else if (event.type === 'customer.subscription.updated') {
+    const sub = event.data.object;
+    if (sub.metadata?.kind === 'boost') await applyBoost(sub);
+  } else if (event.type === 'customer.subscription.deleted') {
+    const sub = event.data.object;
+    if (sub.metadata?.kind === 'boost') await endBoost(sub);
   } else if (event.type === 'account.updated') {
     // A venue's Connect onboarding progressed — sync their payout readiness.
     const acct = event.data.object;

@@ -12,7 +12,7 @@ import { joinCommunity, leaveCommunity, fetchCommunityMemberCounts } from './lib
 import { fetchConversations, getOrCreateDM, createGroup, fetchMessages as fetchDMMessages, sendDM, markRead as dmMarkRead, setBuried as dmSetBuried, subscribeDMs, toggleDMReaction, subscribeDMReactions, sendPostToDM } from './lib/db/dm';
 import { fetchActiveStories, postStory as dbPostStory, deleteStory, reactToStory } from './lib/db/stories';
 import { fetchListings, createListing } from './lib/db/listings';
-import { fetchShops, createShop, deleteShop as dbDeleteShop } from './lib/db/shops';
+import { fetchShops, createShop, deleteShop as dbDeleteShop, startBoostCheckout } from './lib/db/shops';
 import { fetchPayoutStatus, startPayoutSetup, refreshPayoutStatus } from './lib/db/payouts';
 import { listCrews, createCrew as dbCreateCrew, joinCrew as dbJoinCrew } from './lib/db/crews';
 import { fetchProfileState, saveProfileState } from './lib/db/profileState';
@@ -550,6 +550,7 @@ export default function App() {
   // below once auth has rehydrated — otherwise a cold return from Stripe silently skips the refresh.
   const [pendingTicketRefresh, setPendingTicketRefresh] = useState(false);
   const [pendingConnectRefresh, setPendingConnectRefresh] = useState(false);
+  const [pendingBoostRefresh, setPendingBoostRefresh] = useState(false);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const t = params.get('ticket');
@@ -559,7 +560,8 @@ export default function App() {
     const ev = params.get('event');
     const od = params.get('oddity');
     const po = params.get('post');
-    if (!t && !connect && !u && !ev && !od && !po) return;
+    const boost = params.get('boost');
+    if (!t && !connect && !u && !ev && !od && !po && !boost) return;
     history.replaceState(null, '', window.location.pathname);
     if (u) setActiveUserHandle(u.toLowerCase().replace(/[^a-z0-9_.]/g, ''));
     if (ev) { setActiveEvent(ev); setTab('events'); }
@@ -567,6 +569,7 @@ export default function App() {
     if (po) setActivePostComments(po);
     if (t === 'success') { setTicketSuccess(true); setPendingTicketRefresh(true); }
     if (connect === 'done') setPendingConnectRefresh(true);
+    if (boost === 'success') { setTab('oddities'); setPendingBoostRefresh(true); }
   }, []);
 
   // Run the meId-gated post-payment refreshes once auth is ready (covers the cold-load case
@@ -592,7 +595,13 @@ export default function App() {
       });
       refresh(3);
     }
-  }, [meId, pendingTicketRefresh, pendingConnectRefresh]);
+    if (pendingBoostRefresh) {
+      setPendingBoostRefresh(false);
+      showToast('★ your store is boosted — pinned to the top.');
+      // Give the webhook a moment to set boosted_until, then pull the pinned ordering.
+      setTimeout(() => { fetchShops(meId).then(setShops).catch(() => {}); }, 2500);
+    }
+  }, [meId, pendingTicketRefresh, pendingConnectRefresh, pendingBoostRefresh]);
 
   const setupPayouts = () => {
     if (!meId || payoutBusy) return;
@@ -1840,6 +1849,7 @@ export default function App() {
           onCompose={(kind) => { setComposeKind(kind || 'sale'); setShowOddityCompose(true); }}
           onAddShop={addShop}
           onDeleteShop={removeShop}
+          onBoostShop={(id) => { showToast('opening secure checkout…'); startBoostCheckout(id).catch(e => showToast(`boost unavailable — ${e.message}`, 'error')); }}
         />
       </Suspense>
     );

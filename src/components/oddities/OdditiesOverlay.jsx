@@ -150,7 +150,7 @@ function ParlourTab({ items, onOpenOddity, onCompose }) {
   );
 }
 
-function ShopsTab({ shops = [], meId, onAddShop, onDeleteShop }) {
+function ShopsTab({ shops = [], meId, onAddShop, onDeleteShop, onBoostShop }) {
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState({ name: '', kind: '', neighborhood: '', url: '', blurb: '' });
   const submit = () => {
@@ -167,22 +167,39 @@ function ShopsTab({ shops = [], meId, onAddShop, onDeleteShop }) {
       ) : (
         <div className="space-y-2 mb-3">
           {shops.map(s => (
-            <div key={s.id} className="border border-[#2A2A2A] bg-[#0F0F0F] p-3 flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-[#C8102E]" style={F.display}>☩</div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-baseline justify-between gap-2">
-                  {s.url ? (
-                    <a href={s.url.startsWith('http') ? s.url : `https://${s.url}`} target="_blank" rel="noreferrer" className="text-[#F5F1E8] text-sm hover:text-[#C9A961]" style={F.display}>{s.name.toUpperCase()}</a>
-                  ) : (
-                    <h4 className="text-[#F5F1E8] text-sm" style={F.display}>{s.name.toUpperCase()}</h4>
-                  )}
-                  {s.verified && <span className="text-[9px] text-[#C8102E]" style={F.ui}>✓ verified</span>}
+            <div key={s.id} className={`border p-3 ${s.isBoosted ? 'border-[#C9A961]/60 bg-[#C9A961]/[0.04]' : 'border-[#2A2A2A] bg-[#0F0F0F]'}`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 border flex items-center justify-center ${s.isBoosted ? 'border-[#C9A961]/50 text-[#C9A961] bg-[#1A1A1A]' : 'border-[#2A2A2A] text-[#C8102E] bg-[#1A1A1A]'}`} style={F.display}>☩</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline justify-between gap-2">
+                    {s.url ? (
+                      <a href={s.url.startsWith('http') ? s.url : `https://${s.url}`} target="_blank" rel="noreferrer" className="text-[#F5F1E8] text-sm hover:text-[#C9A961] truncate" style={F.display}>{s.name.toUpperCase()}</a>
+                    ) : (
+                      <h4 className="text-[#F5F1E8] text-sm truncate" style={F.display}>{s.name.toUpperCase()}</h4>
+                    )}
+                    <span className="flex items-center gap-1.5 shrink-0">
+                      {s.isBoosted && <span className="text-[9px] text-[#C9A961] tracking-wider" style={F.ui}>★ boosted</span>}
+                      {s.verified && <span className="text-[9px] text-[#C8102E]" style={F.ui}>✓ verified</span>}
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>{[s.kind, s.neighborhood].filter(Boolean).join(' · ')}</div>
+                  {s.blurb && <div className="text-[11px] text-[#A8A29E] italic mt-0.5 truncate" style={F.serif}>{s.blurb}</div>}
                 </div>
-                <div className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>{[s.kind, s.neighborhood].filter(Boolean).join(' · ')}</div>
-                {s.blurb && <div className="text-[11px] text-[#A8A29E] italic mt-0.5 truncate" style={F.serif}>{s.blurb}</div>}
+                {s.mine && (
+                  <button onClick={() => onDeleteShop && onDeleteShop(s.id)} className="tap text-[#6B6B6B] hover:text-[#8B0000] p-1 self-start"><X size={12} /></button>
+                )}
               </div>
-              {s.mine && (
-                <button onClick={() => onDeleteShop && onDeleteShop(s.id)} className="tap text-[#6B6B6B] hover:text-[#8B0000] p-1"><X size={12} /></button>
+              {/* Owner-only: boost (pin) your store, or a note that it's already boosted. */}
+              {s.mine && onBoostShop && (
+                <div className="mt-2.5 pt-2.5 border-t border-[#1F1F1F]">
+                  {s.isBoosted ? (
+                    <div className="text-[10px] text-[#C9A961]/80 tracking-wider" style={F.ui}>★ pinned to the top · boost active</div>
+                  ) : (
+                    <button onClick={() => onBoostShop(s.id)} className="tap w-full py-2 border border-[#C9A961]/50 text-[#C9A961] text-[10px] uppercase tracking-[0.18em] hover:bg-[#C9A961]/10 transition-colors" style={F.ui}>
+                      ★ boost this store · $40/mo
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           ))}
@@ -206,7 +223,7 @@ function ShopsTab({ shops = [], meId, onAddShop, onDeleteShop }) {
   );
 }
 
-export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, listings = [], shops = [], meId, onAddShop, onDeleteShop, embedded = false }) {
+export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, listings = [], shops = [], meId, onAddShop, onDeleteShop, onBoostShop, embedded = false }) {
   const [tab, setTab] = useState('market');
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -269,7 +286,7 @@ export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, listings = [
           </>)}
           {tab === 'wanted' && <WantedTab items={wantedItems} onOpenOddity={onOpenOddity} onCompose={() => onCompose('wanted')} />}
           {tab === 'parlour' && <ParlourTab items={commissionItems} onOpenOddity={onOpenOddity} onCompose={() => onCompose('commission')} />}
-          {tab === 'shops' && <ShopsTab shops={shops} meId={meId} onAddShop={onAddShop} onDeleteShop={onDeleteShop} />}
+          {tab === 'shops' && <ShopsTab shops={shops} meId={meId} onAddShop={onAddShop} onDeleteShop={onDeleteShop} onBoostShop={onBoostShop} />}
         </div>
       </div>
     </div>
