@@ -95,7 +95,7 @@ import { AgeGate } from './components/shared/AgeGate';
 import { SettingsScreen, DEFAULT_SETTINGS } from './components/settings/SettingsScreen';
 
 import { COMMUNITIES } from './data/communities';
-import { fetchEvents, createEvent, toggleEventRsvp as dbToggleRsvp, fetchEventAttendees, deleteEvent as dbDeleteEvent } from './lib/db/events';
+import { fetchEvents, createEvent, toggleEventRsvp as dbToggleRsvp, fetchEventAttendees, deleteEvent as dbDeleteEvent, joinWaitlist, leaveWaitlist, fetchWaitlist } from './lib/db/events';
 import { CommentsOverlay } from './components/feed/CommentsOverlay';
 import { QuoteModal } from './components/feed/QuoteModal';
 import { VespersArchiveModal } from './components/feed/VespersArchiveModal';
@@ -195,6 +195,7 @@ export default function App() {
   const [events, setEvents] = useState([]);
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [activeEventAttendees, setActiveEventAttendees] = useState([]);
+  const [eventWaitlist, setEventWaitlist] = useState({ count: 0, mine: false });
   const [ticketManagerEvent, setTicketManagerEvent] = useState(null);
   const [venueEditorEvent, setVenueEditorEvent] = useState(null);
   const [myTicketEventIds, setMyTicketEventIds] = useState([]);
@@ -680,15 +681,36 @@ export default function App() {
     return () => { active = false; };
   }, [tab, meId, tonightStatus?.share, settings.ghostMode]);
 
-  // Load an event's attendees when its detail opens.
+  // Load an event's attendees + waitlist state when its detail opens.
   useEffect(() => {
-    if (!activeEvent) { setActiveEventAttendees([]); return; }
+    if (!activeEvent) { setActiveEventAttendees([]); setEventWaitlist({ count: 0, mine: false }); return; }
     let active = true;
     fetchEventAttendees(activeEvent)
       .then(a => { if (active) setActiveEventAttendees(a.map(x => ({ handle: x.handle, avatar: x.avatar }))); })
       .catch(() => {});
+    fetchWaitlist(activeEvent, meId)
+      .then(w => { if (active) setEventWaitlist(w); })
+      .catch(() => { if (active) setEventWaitlist({ count: 0, mine: false }); });
     return () => { active = false; };
-  }, [activeEvent]);
+  }, [activeEvent, meId]);
+
+  // Join / leave a sold-out rite's waitlist (optimistic + revert on failure).
+  const joinEventWaitlist = (eventId) => {
+    if (!meId) return;
+    setEventWaitlist(w => ({ count: w.count + 1, mine: true }));
+    joinWaitlist(eventId, meId).then(() => showToast('you’re on the waitlist.')).catch(() => {
+      setEventWaitlist(w => ({ count: Math.max(0, w.count - 1), mine: false }));
+      showToast("couldn't join the waitlist — try again.", 'error');
+    });
+  };
+  const leaveEventWaitlist = (eventId) => {
+    if (!meId) return;
+    setEventWaitlist(w => ({ count: Math.max(0, w.count - 1), mine: false }));
+    leaveWaitlist(eventId, meId).catch(() => {
+      setEventWaitlist(w => ({ count: w.count + 1, mine: true }));
+      showToast("couldn't leave the waitlist — try again.", 'error');
+    });
+  };
 
   // Lazy-load a thread's comments when it opens (base count -> 0 to avoid double-count).
   useEffect(() => {
@@ -2130,6 +2152,9 @@ export default function App() {
           onOpenUser={(h) => { setActiveEvent(null); setActiveUserHandle(h); }}
           onBack={() => setActiveEvent(null)}
           onDelete={removeEvent}
+          waitlist={eventWaitlist}
+          onJoinWaitlist={joinEventWaitlist}
+          onLeaveWaitlist={leaveEventWaitlist}
         />
         );
       })()}

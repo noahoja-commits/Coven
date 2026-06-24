@@ -105,3 +105,26 @@ export async function fetchEventAttendees(eventId) {
   if (error) throw error;
   return data || [];
 }
+
+// ── Waitlist (sold-out rites) ────────────────────────────────────────────────
+export async function joinWaitlist(eventId, userId) {
+  const { error } = await supabase.from('event_waitlist').insert({ event_id: eventId, user_id: userId });
+  if (error && error.code !== '23505') throw error; // ignore "already on it"
+}
+
+export async function leaveWaitlist(eventId, userId) {
+  const { error } = await supabase.from('event_waitlist').delete().match({ event_id: eventId, user_id: userId });
+  if (error) throw error;
+}
+
+// { count, mine } — count via a definer rpc (no list leak); mine via own-row read.
+// Degrades to { count:0, mine:false } pre-migration (supabase-js returns errors, not throws).
+export async function fetchWaitlist(eventId, userId) {
+  const [{ data: cnt }, { data: mineRow }] = await Promise.all([
+    supabase.rpc('event_waitlist_count', { p_event_id: eventId }),
+    userId
+      ? supabase.from('event_waitlist').select('event_id').eq('event_id', eventId).eq('user_id', userId).maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+  return { count: typeof cnt === 'number' ? cnt : 0, mine: !!mineRow };
+}

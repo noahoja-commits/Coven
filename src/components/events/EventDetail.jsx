@@ -11,7 +11,7 @@ const COVERS = {
   black: 'linear-gradient(135deg, #1F1F1F 0%, #0A0A0A 100%)',
 };
 
-export function EventDetail({ event, isGoing, onToggleRsvp, onBack, onOpenUser, attendees = [], meHandle, onBuy, onManageTickets, onDelete }) {
+export function EventDetail({ event, isGoing, onToggleRsvp, onBack, onOpenUser, attendees = [], meHandle, onBuy, onManageTickets, onDelete, waitlist = { count: 0, mine: false }, onJoinWaitlist, onLeaveWaitlist }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   if (!event) return null;
 
@@ -131,7 +131,17 @@ export function EventDetail({ event, isGoing, onToggleRsvp, onBack, onOpenUser, 
               <Ticket size={14} /> {event.sold} sold · door list
             </button>
           ) : soldOut ? (
-            <button disabled className="w-full py-3 text-xs uppercase tracking-[0.3em] bg-[#1A1A1A] text-[#6B6B6B] cursor-not-allowed" style={F.ui}>sold out</button>
+            <button
+              onClick={() => (waitlist.mine ? onLeaveWaitlist : onJoinWaitlist) && (waitlist.mine ? onLeaveWaitlist : onJoinWaitlist)(event.id)}
+              className={`w-full py-3 text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-2 transition-colors ${
+                waitlist.mine
+                  ? 'bg-[#5B0F1A] text-[#F5F1E8] hover:bg-[#3a0a12]'
+                  : 'bg-[#1A1A1A] border border-[#5B0F1A] text-[#C8102E] hover:bg-[#5B0F1A]/20'
+              }`} style={F.ui}>
+              {waitlist.mine
+                ? <><Check size={14} /> on the waitlist{waitlist.count ? ` · ${waitlist.count}` : ''}</>
+                : <>sold out · join waitlist{waitlist.count ? ` (${waitlist.count})` : ''}</>}
+            </button>
           ) : (
             <button onClick={() => onBuy && onBuy(event.id)}
               className="w-full py-3 text-xs uppercase tracking-[0.3em] bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] transition-colors flex items-center justify-center gap-2" style={F.ui}>
