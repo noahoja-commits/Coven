@@ -23,10 +23,3 @@ export const ODDITY_PALETTES = {
   midnight: { bg: 'linear-gradient(135deg, #1A1A2E 0%, #0F0F1F 70%, #08081A 100%)', stroke: '#5C5C8A', fill: '#08081A' },
   bone: { bg: 'linear-gradient(135deg, #3A3228 0%, #1F1A14 70%, #0F0C08 100%)', stroke: '#C9B898', fill: '#0F0C08' },
 };
-
-export const SHOPS = [
-  { id: 's1', name: 'Cathedral Co.', kind: 'mens · indie', neighborhood: 'Berlin / online', verified: true },
-  { id: 's2', name: 'Vermillion Vintage', kind: 'thrift · vintage', neighborhood: 'Bedford-Stuyvesant', verified: true },
-  { id: 's3', name: 'Procell', kind: 'archive · vintage', neighborhood: 'Lower East Side', verified: true },
-  { id: 's4', name: 'KILL STAR', kind: 'unisex · indie', neighborhood: 'online', verified: false },
-];
