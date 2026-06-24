@@ -269,13 +269,15 @@ export default function App() {
       scream: 'shock-type-metal', inferno: 'shock-type-metal',
       spatter: 'shock-type-unifraktur', void: 'shock-type-unifraktur', reliquary: 'shock-type-unifraktur',
       rebirth: 'shock-type-rocker', cathedral: 'shock-type-rocker', mist: 'shock-type-rocker',
+      keepsake: 'shock-type-fell', vow: 'shock-type-unifraktur',
+      xerox: 'shock-type-oswald', duotone: 'shock-type-oswald',
     };
-    document.body.classList.remove('shock-type-grenze', 'shock-type-pirata', 'shock-type-metal', 'shock-type-unifraktur', 'shock-type-rocker');
+    document.body.classList.remove('shock-type-grenze', 'shock-type-pirata', 'shock-type-metal', 'shock-type-unifraktur', 'shock-type-rocker', 'shock-type-fell', 'shock-type-oswald');
     const fc = SHOCK_FONT[settings.shockMode];
     if (fc && !settings.parchmentMode) document.body.classList.add(fc);
     // Some modes recolour the WHOLE app via a reliable element filter on .phone-frame (backdrop-filter
     // wouldn't override the red base): insomnia=electric blue, requiem=stark B&W, mist=sepia.
-    const SHOCK_DUO = { insomnia: 'shock-duo-blue', requiem: 'shock-duo-bw', mist: 'shock-duo-sepia' };
+    const SHOCK_DUO = { insomnia: 'shock-duo-blue', requiem: 'shock-duo-bw', mist: 'shock-duo-sepia', keepsake: 'shock-duo-sepia', xerox: 'shock-duo-bw', duotone: 'shock-duo-blue' };
     document.body.classList.remove('shock-duo-blue', 'shock-duo-bw', 'shock-duo-sepia');
     const dc = SHOCK_DUO[settings.shockMode];
     if (dc && !settings.parchmentMode) document.body.classList.add(dc);

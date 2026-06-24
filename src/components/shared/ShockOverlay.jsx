@@ -310,6 +310,101 @@ CPU ${18 + (tick % 7)}% · PROC 6${6 + (tick % 4)}
     );
   }
 
+  // ── KEEPSAKE — sepia romantic collage: candle glow + torn-paper captions + moon phases ──
+  if (mode === 'keepsake') {
+    if (back) return (
+      <div className={`${BWRAP} text-[#cdbb97]`} aria-hidden>
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 110%, rgba(232,196,90,0.5), rgba(120,90,40,0.16) 42%, transparent 74%)', mixBlendMode: 'screen' }} />
+        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 80px 26px rgba(20,14,6,0.6)' }} />
+        <div className="absolute bottom-[4%] left-1/2 -translate-x-1/2 flex items-end gap-6 opacity-80">
+          {[0, 1, 2].map(i => <span key={i} className="block w-[5px] rounded-full animate-flicker" style={{ height: 14 + (i % 2) * 7, background: 'radial-gradient(circle at 50% 0%, #fff, #ffb14a 45%, #8a4a00)', animationDelay: `${i * 0.3}s` }} />)}
+        </div>
+      </div>
+    );
+    return (
+      <div className={`${FWRAP} text-[#3a2c18]`} aria-hidden>
+        {[
+          { t: "look up — you'll see the stars", top: '15%', left: '7%', rot: -3 },
+          { t: "if it's meant to be, it'll be", top: '43%', left: '36%', rot: 2 },
+          { t: 'forever & always', top: '71%', left: '13%', rot: -1.5 },
+        ].map((c, i) => (
+          <span key={i} className="absolute px-1.5 py-0.5 text-[10px] tracking-wide" style={{ top: c.top, left: c.left, transform: `rotate(${c.rot}deg)`, background: 'rgba(226,212,182,0.82)', boxShadow: '0 1px 4px rgba(0,0,0,0.35)' }}>{c.t}</span>
+        ))}
+        <div className="absolute top-[8%] right-[8%] flex gap-1.5 opacity-50">
+          {['#1a1208', '#5a4424', '#cdbb97', '#5a4424', '#1a1208'].map((c, i) => <span key={i} className="block w-2.5 h-2.5 rounded-full" style={{ background: c, boxShadow: '0 0 5px rgba(232,196,90,0.4)' }} />)}
+        </div>
+        <div className="absolute inset-0" style={{ backgroundImage: GRAIN, backgroundSize: '120px 120px', mixBlendMode: 'overlay', opacity: 0.22 }} />
+      </div>
+    );
+  }
+
+  // ── XEROX — zine photocopy: heavy b&w grain + huge faint word + scattered lyric annotations ──
+  if (mode === 'xerox') {
+    if (back) return (
+      <div className={`${BWRAP} text-white`} aria-hidden>
+        <div className="absolute inset-0" style={{ background: 'rgba(8,8,8,0.22)' }} />
+        <div className="absolute inset-0 shock-burst" style={{ backgroundImage: GRAIN, backgroundSize: '70px 70px', opacity: 0.85, mixBlendMode: 'screen' }} />
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[32vw] leading-none whitespace-nowrap opacity-[0.06]">REMEMBER</div>
+      </div>
+    );
+    return (
+      <div className={`${FWRAP} text-[#EDEDED]`} aria-hidden>
+        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'repeating-linear-gradient(91deg, rgba(0,0,0,0.6) 0 1px, transparent 1px 7px)' }} />
+        {[
+          { t: 'I MISS YOU', top: '20%', left: '11%' }, { t: 'do you remember us?', top: '33%', left: '50%' },
+          { t: 'where are you now?', top: '58%', left: '18%' }, { t: 'if i knew', top: '74%', left: '58%' },
+          { t: 'sorry', top: '46%', left: '7%' },
+        ].map((a, i) => <span key={i} className="absolute text-[9px] uppercase tracking-[0.2em] opacity-60 shock-blink" style={{ top: a.top, left: a.left, animationDelay: `${(i % 5) * 0.4}s` }}>{a.t}</span>)}
+        <div className="absolute inset-0 shock-burst" style={{ backgroundImage: GRAIN, backgroundSize: '50px 50px', mixBlendMode: 'overlay', opacity: 0.5 }} />
+      </div>
+    );
+  }
+
+  // ── DUOTONE — blue grunge: coarse halftone + cracked texture + big stencil word ──
+  if (mode === 'duotone') {
+    if (back) return (
+      <div className={`${BWRAP} text-[#9fc0e8]`} aria-hidden>
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 38%, rgba(40,90,200,0.16), transparent 76%)', mixBlendMode: 'screen' }} />
+        <div className="absolute inset-0 shock-halftone-drift" style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.55) 1px, transparent 2px)', backgroundSize: '7px 7px', mixBlendMode: 'overlay', opacity: 0.35 }} />
+      </div>
+    );
+    return (
+      <div className={`${FWRAP} text-[#cfe0f5]`} aria-hidden>
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-6 text-[17vw] leading-[0.82] text-center opacity-[0.13]">SEE<br />NO<br />EVIL</div>
+        <svg className="absolute inset-0 w-full h-full opacity-25" preserveAspectRatio="none" viewBox="0 0 100 100"><g stroke="#dfeaf7" strokeWidth="0.18" fill="none">
+          <path d="M0 30 L20 34 L34 26 L52 38 L70 30 L88 42 L100 36" /><path d="M10 0 L16 22 L8 40 L20 60 L12 82 L22 100" /><path d="M60 0 L66 26 L58 48 L72 70 L64 100" /><path d="M0 70 L24 66 L46 76 L70 68 L100 78" />
+        </g></svg>
+        <div className="absolute inset-0" style={{ backgroundImage: GRAIN, backgroundSize: '90px 90px', mixBlendMode: 'overlay', opacity: 0.3 }} />
+      </div>
+    );
+  }
+
+  // ── THE VOW — black-metal: thorned filigree corners + crowned skull + oxblood blackletter ──
+  if (mode === 'vow') {
+    if (back) return (
+      <div className={`${BWRAP} text-[#b8b0a4]`} aria-hidden>
+        <div className="absolute inset-0" style={{ background: 'rgba(6,4,6,0.3)' }} />
+        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 70px 20px rgba(0,0,0,0.72)' }} />
+        <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
+          <rect x="3" y="3" width="94" height="94" fill="none" stroke="#cfc6b8" strokeWidth="0.22" opacity="0.35" />
+          <g stroke="#cfc6b8" strokeWidth="0.3" fill="none" opacity="0.55">
+            {[[6, 6, 0], [94, 6, 90], [94, 94, 180], [6, 94, 270]].map(([x, y, r], i) => (
+              <path key={i} d="M0 17 Q0 0 17 0 M3 12 q4 -8 9 -9 M0 9 q5 0 6 5 M9 0 q0 5 5 6" transform={`translate(${x},${y}) rotate(${r})`} />
+            ))}
+          </g>
+        </svg>
+        <div className="absolute left-1/2 top-[5%] -translate-x-1/2 text-2xl opacity-25">☠</div>
+      </div>
+    );
+    return (
+      <div className={`${FWRAP} text-[#8B0000]`} aria-hidden>
+        <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 text-center text-[15px] tracking-[0.18em] opacity-80 shock-twinkle" style={{ textShadow: '0 0 10px rgba(139,0,0,0.6)' }}>· till death do us part ·</div>
+        {['top-2 left-2', 'top-2 right-2', 'bottom-2 left-2', 'bottom-2 right-2'].map((p, i) => <span key={i} className={`absolute ${p} text-sm text-[#cfc6b8] opacity-50`}>✟</span>)}
+        <div className="absolute inset-0" style={{ backgroundImage: GRAIN, backgroundSize: '130px 130px', mixBlendMode: 'overlay', opacity: 0.2 }} />
+      </div>
+    );
+  }
+
   return null;
 }
 
@@ -330,4 +425,8 @@ export const SHOCK_MODES = [
   { id: 'mist', label: 'Mist', desc: 'sepia fog · falling leaves' },
   { id: 'reliquary', label: 'Reliquary', desc: 'gothic arch · inverted cross' },
   { id: 'alchemy', label: 'Alchemy', desc: 'zodiac · planet · sigils' },
+  { id: 'keepsake', label: 'Keepsake', desc: 'sepia collage · candlelight · torn paper' },
+  { id: 'xerox', label: 'Xerox', desc: 'zine photocopy · b&w grain · lyrics' },
+  { id: 'duotone', label: 'See No Evil', desc: 'blue grunge · halftone · stencil' },
+  { id: 'vow', label: 'The Vow', desc: 'black-metal filigree · till death' },
 ];

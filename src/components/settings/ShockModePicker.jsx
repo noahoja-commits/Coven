@@ -19,6 +19,10 @@ const SWATCH = {
   mist: 'linear-gradient(160deg, #e1cda5, #6b5a3c)',
   reliquary: 'radial-gradient(ellipse at 50% 30%, #2a2a30, #0A0A0A), repeating-radial-gradient(#d6cfc0 0 0.5px, transparent 1px 7px)',
   alchemy: 'radial-gradient(circle at 50% 50%, #14141a, #050508), repeating-radial-gradient(#bcb4a2 0 0.4px, transparent 1px 9px)',
+  keepsake: 'radial-gradient(ellipse at 50% 120%, #ffb14a 0 8%, #6b5a3c 30%, #1a1208 80%)',
+  xerox: 'repeating-linear-gradient(91deg, #0A0A0A 0 1px, #E8E8E8 1px 4px)',
+  duotone: 'linear-gradient(135deg, #2748ff, #0a1478), repeating-radial-gradient(rgba(255,255,255,0.5) 0 1px, transparent 2px 7px)',
+  vow: 'radial-gradient(ellipse at 50% 30%, #2a2228, #060406 75%), linear-gradient(0deg, #8B0000 0 2%, transparent 2%)',
 };
 
 // Live mode picker — translucent so the effect plays behind it while you try modes.
