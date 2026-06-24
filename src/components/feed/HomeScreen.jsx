@@ -353,7 +353,7 @@ export function HomeScreen({
           // "Hot" heat marker — only in trending, only for genuinely high-score posts.
           const isHot = feedSort === 'trending' && postScore(post) >= 8;
           return (
-            <article key={post.id} className="px-4 py-4 relative select-none" style={postAgeStyle(post.createdAt)} onDoubleClick={() => doubleTapLike(post)}>
+            <article key={post.id} className="px-4 py-4 relative select-none border-b border-[#141318]" style={postAgeStyle(post.createdAt)} onDoubleClick={() => doubleTapLike(post)}>
               {burst === post.id && (
                 <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
                   <span className="absolute w-40 h-40 rounded-full animate-heat-flash"
@@ -514,6 +514,7 @@ export function HomeScreen({
                 </button>
               )}
 
+              <div className="rule opacity-40 mb-2.5 mt-1" />
               <div className="flex items-center justify-between -ml-2">
                 <div className="flex items-center">
                   <Reaction icon="🦇" count={post.reactions.bat} active={post.myReactions?.bat} onClick={() => onReact && onReact(post.id, 'bat')} />
@@ -523,17 +524,17 @@ export function HomeScreen({
                 </div>
                 <div className="flex items-center gap-1">
                   <button onClick={() => onToggleCandle && onToggleCandle(post.id)}
-                    className={`p-2 transition-colors ${candled ? 'text-[#C9A961]' : 'text-[#6B6B6B] hover:text-[#C8102E]'}`}
+                    className={`p-2 tap transition-colors ${candled ? 'text-[#C9A961]' : 'text-[#6B6B6B] hover:text-[#C8102E]'}`}
                     title={candled ? 'candle lit' : 'light a candle'}>
                     <Flame size={14} fill={candled ? '#C9A961' : 'none'} />
                   </button>
                   <button onClick={() => onToggleBookmark && onToggleBookmark(post.id)}
-                    className={`p-2 transition-colors ${bookmarked ? 'text-[#C9A961]' : 'text-[#6B6B6B] hover:text-[#A8A29E]'}`}
+                    className={`p-2 tap transition-colors ${bookmarked ? 'text-[#C9A961]' : 'text-[#6B6B6B] hover:text-[#A8A29E]'}`}
                     title={bookmarked ? 'saved' : 'save'}>
                     <Bookmark size={14} fill={bookmarked ? '#C9A961' : 'none'} />
                   </button>
                   <button onClick={() => onOpenComments && onOpenComments(post.id)}
-                    className="flex items-center gap-1.5 text-[#6B6B6B] hover:text-[#A8A29E] text-xs px-2 py-1" style={F.ui}>
+                    className="flex items-center gap-1.5 text-[#6B6B6B] hover:text-[#C9A961] text-xs px-2 py-1 tap" style={F.ui}>
                     <MessageCircle size={13} />
                     <span style={F.mono} className="text-xs">
                       {(post.baseCommentCount || 0) + (Array.isArray(post.comments) ? post.comments.length : 0)}

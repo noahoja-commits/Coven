@@ -45,12 +45,12 @@ export function Header({ tab, onDMs, onCompose, onLibrary, onLogo, onNotificatio
           )}
         </div>
         <div className="flex items-center gap-1">
-          <button onClick={onLibrary} className={`${accentColor} hover:text-[#C9A961] transition-colors p-2`} title="the coven · portals"><Sparkles size={18} /></button>
+          <button onClick={onLibrary} className={`${accentColor} hover:text-[#C9A961] transition-colors p-2 tap`} title="the coven · portals"><Sparkles size={18} /></button>
           {tab === 'home' && (
-            <button onClick={onCompose} className={`${accentColor} hover:text-[#F5F1E8] transition-colors p-2`} title="new post"><Plus size={20} /></button>
+            <button onClick={onCompose} className={`${accentColor} hover:text-[#C9A961] transition-colors p-2 tap`} title="new post"><Plus size={20} /></button>
           )}
-          <button onClick={onSearch} className={`${accentColor} hover:text-[#F5F1E8] transition-colors p-2`} title="search"><Search size={18} /></button>
-          <button onClick={onNotifications} className={`${accentColor} hover:text-[#F5F1E8] transition-colors p-2`} title="notifications">
+          <button onClick={onSearch} className={`${accentColor} hover:text-[#C9A961] transition-colors p-2 tap`} title="search"><Search size={18} /></button>
+          <button onClick={onNotifications} className={`${accentColor} hover:text-[#C9A961] transition-colors p-2 tap`} title="notifications">
             <span className="relative inline-flex">
               <Bell size={18} />
               {unreadNotifications > 0 && (
@@ -60,7 +60,7 @@ export function Header({ tab, onDMs, onCompose, onLibrary, onLogo, onNotificatio
               )}
             </span>
           </button>
-          <button onClick={onDMs} className={`${accentColor} hover:text-[#F5F1E8] transition-colors p-2`} title="whispers">
+          <button onClick={onDMs} className={`${accentColor} hover:text-[#C9A961] transition-colors p-2 tap`} title="whispers">
             <span className="relative inline-flex">
               <MessageCircle size={20} />
               {unreadDMs > 0 && (
@@ -72,6 +72,7 @@ export function Header({ tab, onDMs, onCompose, onLibrary, onLogo, onNotificatio
           </button>
         </div>
       </div>
+      {!parchment && <span className="absolute bottom-0 inset-x-0 h-px pointer-events-none" style={{ background: 'linear-gradient(90deg, transparent, rgba(201,169,97,0.32) 50%, transparent)' }} />}
     </div>
   );
 }

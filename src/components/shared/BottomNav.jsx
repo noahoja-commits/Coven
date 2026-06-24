@@ -24,13 +24,13 @@ export function BottomNav({ tab, onChange, parchment = false }) {
           const active = tab === it.id;
           return (
             <button key={it.id} onClick={() => { buzz('nav'); onChange(it.id); }}
-              className={`relative flex flex-col items-center justify-center gap-1 transition-colors ${active ? activeColor : inactiveColor}`}>
+              className={`tap relative flex flex-col items-center justify-center gap-1 ${active ? activeColor : inactiveColor}`}>
+              {active && !parchment && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-9 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(201,169,97,0.75) 50%, transparent)' }} />}
               <div className="relative">
-                {active && <span className="absolute inset-0 -m-1.5 bg-[#8B0000]/20 blur-md rounded-full" />}
-                <NavSigil name={it.id} size={19} className={`relative transition-opacity ${active ? 'opacity-100' : 'opacity-80'}`} />
+                {active && <span className="absolute inset-0 -m-2 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(201,169,97,0.2), rgba(139,0,0,0.14) 58%, transparent 76%)' }} />}
+                <NavSigil name={it.id} size={19} className={`relative transition-opacity ${active ? 'opacity-100' : 'opacity-70'}`} />
               </div>
-              <span className="text-[9px] uppercase tracking-[0.18em]" style={F.ui}>{it.label}</span>
-              {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[1px] bg-[#8B0000]" />}
+              <span className={`text-[9px] uppercase tracking-[0.2em] transition-colors ${active && !parchment ? 'text-[#C9A961]' : ''}`} style={F.ui}>{it.label}</span>
             </button>
           );
         })}
