@@ -9,7 +9,7 @@ import { insertProfile, updateProfile, getProfileStats, getProfileByHandle, fetc
 import { fetchFollowing, fetchFollowers, followUser, unfollowUser } from './lib/db/social';
 import { FollowListOverlay } from './components/profile/FollowListOverlay';
 import { joinCommunity, leaveCommunity, fetchCommunityMemberCounts } from './lib/db/communities';
-import { fetchConversations, getOrCreateDM, createGroup, fetchMessages as fetchDMMessages, sendDM, markRead as dmMarkRead, setBuried as dmSetBuried, subscribeDMs } from './lib/db/dm';
+import { fetchConversations, getOrCreateDM, createGroup, fetchMessages as fetchDMMessages, sendDM, markRead as dmMarkRead, setBuried as dmSetBuried, subscribeDMs, toggleDMReaction, subscribeDMReactions } from './lib/db/dm';
 import { fetchActiveStories, postStory as dbPostStory, deleteStory, reactToStory } from './lib/db/stories';
 import { fetchListings, createListing } from './lib/db/listings';
 import { fetchShops, createShop, deleteShop as dbDeleteShop } from './lib/db/shops';
@@ -522,6 +522,22 @@ export default function App() {
     return unsub;
   }, [meId, dbProfile]);
 
+  // Live reaction chips: on any reaction change, refetch the open thread (cheap; DM threads
+  // are small). RLS only delivers reactions in conversations the user belongs to.
+  useEffect(() => {
+    if (!meId || !dbProfile) return;
+    const unsub = subscribeDMReactions(() => {
+      const openId = activeConversationRef.current;
+      if (!openId) return;
+      fetchDMMessages(openId, meId).then(msgs => setMessages(prev => {
+        const keep = (prev[openId] || []).filter(m =>
+          (m.pending || m.failed) && !msgs.some(s => s.from === 'me' && s.body === m.body));
+        return { ...prev, [openId]: [...msgs, ...keep] };
+      })).catch(() => {});
+    });
+    return unsub;
+  }, [meId, dbProfile]);
+
   // Returning from Stripe (ticket checkout / Connect onboarding) — webhooks are async, and on a
   // COLD load meId is null on first paint. So parse the URL params ONCE on mount (the params get
   // cleared here), stash the payment-return intent, and run the meId-gated refreshes in the effect
@@ -875,6 +891,29 @@ export default function App() {
         setMessages(prev => ({ ...prev, [conversationId]: (prev[conversationId] || []).map(m => m.id === tempId ? { ...m, pending: false, failed: true } : m) }));
         showToast("whisper didn't send — tap it to retry.", 'error');
       });
+  };
+
+  // Toggle a reaction (bat/fire/skull/smoke) on a single whisper.
+  const reactToMessage = (conversationId, messageId, kind) => {
+    if (!meId || !conversationId) return;
+    const msg = (messages[conversationId] || []).find(m => m.id === messageId);
+    if (!msg || String(messageId).startsWith('tempm-')) return; // can't react to an unsent message
+    const wasMine = !!msg.myReactions?.[kind];
+    setMessages(prev => ({
+      ...prev,
+      [conversationId]: (prev[conversationId] || []).map(m => {
+        if (m.id !== messageId) return m;
+        const reactions = { ...(m.reactions || { bat: 0, fire: 0, skull: 0, smoke: 0 }) };
+        const myReactions = { ...(m.myReactions || {}) };
+        reactions[kind] = Math.max(0, (reactions[kind] || 0) + (wasMine ? -1 : 1));
+        if (wasMine) delete myReactions[kind]; else myReactions[kind] = true;
+        return { ...m, reactions, myReactions };
+      }),
+    }));
+    toggleDMReaction(messageId, kind, meId, wasMine).catch(() => {
+      fetchDMMessages(conversationId, meId).then(msgs => setMessages(prev => ({ ...prev, [conversationId]: msgs }))).catch(() => {});
+      showToast("couldn't react — try again.", 'error');
+    });
   };
 
   // Retry a failed message: drop the failed copy and resend.
@@ -1883,6 +1922,7 @@ export default function App() {
           initialDraft={dmPrefill}
           onSend={(body) => sendMessage(activeConversation, body)}
           onRetry={(messageId) => retryMessage(activeConversation, messageId)}
+          onReact={(messageId, kind) => reactToMessage(activeConversation, messageId, kind)}
           onBack={() => { setActiveConversation(null); setActiveConvMeta(null); }}
         />
       )}

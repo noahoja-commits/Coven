@@ -2,9 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Send, Check, CheckCheck } from 'lucide-react';
 import { F } from '../../styles/fonts';
 
-export function ChatThread({ conversation, messages, onSend, onBack, onRetry, initialDraft = '' }) {
+const REACTION_KINDS = [['bat', '🦇'], ['fire', '🔥'], ['skull', '💀'], ['smoke', '💨']];
+
+export function ChatThread({ conversation, messages, onSend, onBack, onRetry, onReact, initialDraft = '' }) {
   const [draft, setDraft] = useState(initialDraft);
   const [seenAt, setSeenAt] = useState(null); // simulated remote read after delay
+  const [trayFor, setTrayFor] = useState(null); // message id whose reaction tray is open
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -61,8 +64,11 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, in
                 <div className="text-[10px] text-[#6B6B6B] mb-0.5 ml-1" style={F.mono}>{m.from}</div>
               )}
               <div
-                onClick={() => m.failed && onRetry && onRetry(m.id)}
-                className={`max-w-[78%] px-3 py-2 text-sm break-words ${m.failed ? 'cursor-pointer' : ''} ${
+                onClick={() => {
+                  if (m.failed) { onRetry && onRetry(m.id); return; }
+                  if (onReact && !m.pending) setTrayFor(t => t === m.id ? null : m.id);
+                }}
+                className={`max-w-[78%] px-3 py-2 text-sm break-words ${(m.failed || (onReact && !m.pending)) ? 'cursor-pointer' : ''} ${
                   mine
                     ? `text-[#F5F1E8] rounded-l-2xl rounded-tr-2xl rounded-br-md ${m.failed ? 'bg-[#3a0d0d] border border-[#8B0000]' : m.pending ? 'bg-[#8B0000]/60' : 'bg-[#8B0000]'}`
                     : 'bg-[#141414] text-[#F5F1E8] border border-[#2A2A2A] rounded-r-2xl rounded-tl-2xl rounded-bl-md'
@@ -71,6 +77,32 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, in
               >
                 {m.body}
               </div>
+              {/* reaction tray — tap a whisper to open */}
+              {trayFor === m.id && onReact && (
+                <div className={`flex gap-0.5 mt-1 px-1.5 py-1 rounded-full bg-[#141414] border border-[#2A2A2A] ${mine ? 'self-end' : 'self-start'}`}>
+                  {REACTION_KINDS.map(([k, icon]) => (
+                    <button key={k}
+                      onClick={(e) => { e.stopPropagation(); onReact(m.id, k); setTrayFor(null); }}
+                      className="text-base leading-none px-1.5 py-0.5 hover:scale-125 transition-transform">{icon}</button>
+                  ))}
+                </div>
+              )}
+              {/* reaction chips */}
+              {m.reactions && REACTION_KINDS.some(([k]) => m.reactions[k] > 0) && (
+                <div className={`flex flex-wrap gap-1 mt-1 ${mine ? 'self-end justify-end' : 'self-start'}`}>
+                  {REACTION_KINDS.filter(([k]) => m.reactions[k] > 0).map(([k, icon]) => (
+                    <button key={k}
+                      onClick={(e) => { e.stopPropagation(); onReact && onReact(m.id, k); }}
+                      className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[11px] border transition-colors ${
+                        m.myReactions?.[k]
+                          ? 'border-[#8B0000] bg-[#8B0000]/25 text-[#F5F1E8]'
+                          : 'border-[#2A2A2A] bg-[#141414] text-[#A8A29E] hover:text-[#F5F1E8]'
+                      }`}>
+                      <span className="leading-none">{icon}</span><span style={F.mono}>{m.reactions[k]}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
               <div className="text-[9px] text-[#6B6B6B] mt-0.5 px-1 flex items-center gap-1" style={F.mono}>
                 {m.failed ? (
                   <span className="text-[#C97a7a]">failed — tap to retry</span>

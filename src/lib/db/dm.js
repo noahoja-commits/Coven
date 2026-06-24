@@ -37,12 +37,55 @@ export async function fetchMessages(convId, myId) {
     .eq('conversation_id', convId)
     .order('created_at', { ascending: true });
   if (error) throw error;
-  return (data || []).map(m => ({
+  const msgs = (data || []).map(m => ({
     id: m.id,
     from: m.sender_id === myId ? 'me' : (m.sender?.handle || 'someone'),
     body: m.body,
     time: relativeTime(m.created_at),
+    reactions: { bat: 0, fire: 0, skull: 0, smoke: 0 },
+    myReactions: {},
   }));
+  // Aggregate per-message reactions. Pre-migration the table doesn't exist → the
+  // query errors, we ignore it, and messages simply render with no chips.
+  const ids = msgs.map(m => m.id);
+  if (ids.length) {
+    const { data: rx } = await supabase
+      .from('message_reactions')
+      .select('message_id, user_id, kind')
+      .in('message_id', ids);
+    if (rx) {
+      const byId = {}; msgs.forEach(m => { byId[m.id] = m; });
+      rx.forEach(r => {
+        const m = byId[r.message_id]; if (!m) return;
+        m.reactions[r.kind] = (m.reactions[r.kind] || 0) + 1;
+        if (r.user_id === myId) m.myReactions[r.kind] = true;
+      });
+    }
+  }
+  return msgs;
+}
+
+// Toggle one reaction on a single whisper (one row per user/message/kind).
+export async function toggleDMReaction(messageId, kind, userId, wasMine) {
+  if (wasMine) {
+    const { error } = await supabase.from('message_reactions')
+      .delete().match({ message_id: messageId, user_id: userId, kind });
+    if (error) throw error;
+  } else {
+    const { error } = await supabase.from('message_reactions')
+      .insert({ message_id: messageId, user_id: userId, kind });
+    if (error) throw error;
+  }
+}
+
+// Live reaction changes (RLS scopes reads to your own conversations, like messages).
+export function subscribeDMReactions(onChange) {
+  const ch = supabase
+    .channel('dm-reactions')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'message_reactions' },
+      payload => onChange(payload))
+    .subscribe();
+  return () => { supabase.removeChannel(ch); };
 }
 
 export async function sendDM(convId, senderId, body) {
