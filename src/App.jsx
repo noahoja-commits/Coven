@@ -1250,7 +1250,13 @@ export default function App() {
     setBlockedIds(prev => new Set(prev).add(profileId));
     setActiveUserHandle(null);
     addNotification({ kind: 'follow', avatar: '⛒', text: `you blocked ${handle || 'someone'}` });
-    try { await dbBlockUser(profileId); } catch { /* ignore */ }
+    try {
+      await dbBlockUser(profileId);
+    } catch {
+      setBlockedIds(prev => { const n = new Set(prev); n.delete(profileId); return n; });
+      showToast("couldn't block — try again.", 'error');
+      return;
+    }
     fetchFeed(meId, { scope: feedScope }).then(setPosts).catch(() => {});
   };
   const unblockUserById = async (profileId) => {
@@ -1928,7 +1934,7 @@ export default function App() {
           onMarkAllRead={markAllNotifsRead}
           onMarkRead={markNotifRead}
           onTap={handleNotificationTap}
-          onClearAll={() => { setNotifications([]); clearNotifications(meId).catch((e) => { console.error('[notifications] clear failed', e); fetchNotifications(meId).then(setNotifications).catch(() => {}); }); }}
+          onClearAll={() => { setNotifications([]); clearNotifications(meId).catch((e) => { console.error('[notifications] clear failed', e); fetchNotifications().then(setNotifications).catch(() => {}); }); }}
         />
       )}
       {showTonightModal && (

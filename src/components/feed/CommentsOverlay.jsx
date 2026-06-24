@@ -79,10 +79,10 @@ export function CommentsOverlay({ post, onClose, onComment, onReact, onReactComm
             </div>
           )}
           <div className="flex items-center -ml-2">
-            <Reaction icon="🦇" count={post.reactions.bat} active={post.myReactions?.bat} onClick={() => onReact && onReact('bat')} />
-            <Reaction icon="🔥" count={post.reactions.fire} active={post.myReactions?.fire} onClick={() => onReact && onReact('fire')} />
-            <Reaction icon="💀" count={post.reactions.skull} active={post.myReactions?.skull} onClick={() => onReact && onReact('skull')} />
-            <Reaction icon="💨" count={post.reactions.smoke} active={post.myReactions?.smoke} onClick={() => onReact && onReact('smoke')} />
+            <Reaction icon="🦇" count={post.reactions?.bat} active={post.myReactions?.bat} onClick={() => onReact && onReact('bat')} />
+            <Reaction icon="🔥" count={post.reactions?.fire} active={post.myReactions?.fire} onClick={() => onReact && onReact('fire')} />
+            <Reaction icon="💀" count={post.reactions?.skull} active={post.myReactions?.skull} onClick={() => onReact && onReact('skull')} />
+            <Reaction icon="💨" count={post.reactions?.smoke} active={post.myReactions?.smoke} onClick={() => onReact && onReact('smoke')} />
           </div>
         </div>
 

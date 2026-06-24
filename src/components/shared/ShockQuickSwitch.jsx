@@ -10,6 +10,7 @@ export function ShockQuickSwitch({ onNext, onShuffle, onPicker }) {
   const didLong = useRef(false);
   const lastTap = useRef(0);
   const singleRef = useRef(null);
+  const canceled = useRef(false);
 
   // Clear pending tap/long-press timers on unmount (the button unmounts when an overlay
   // opens) so a stray timer can't fire onNext/onShuffle after the user navigated away.
@@ -18,12 +19,13 @@ export function ShockQuickSwitch({ onNext, onShuffle, onPicker }) {
   const onDown = (e) => {
     e.stopPropagation();
     didLong.current = false;
+    canceled.current = false;
     longRef.current = setTimeout(() => { didLong.current = true; onShuffle?.(); }, 480);
   };
   const onUp = (e) => {
     e.stopPropagation();
     clearTimeout(longRef.current);
-    if (didLong.current) return;
+    if (didLong.current || canceled.current) return;
     const now = Date.now();
     if (now - lastTap.current < 300) {
       clearTimeout(singleRef.current);
@@ -40,7 +42,7 @@ export function ShockQuickSwitch({ onNext, onShuffle, onPicker }) {
       aria-label="switch shock mode"
       onPointerDown={onDown}
       onPointerUp={onUp}
-      onPointerLeave={() => clearTimeout(longRef.current)}
+      onPointerLeave={() => { canceled.current = true; clearTimeout(longRef.current); }}
       onContextMenu={(e) => e.preventDefault()}
       className="fixed bottom-24 right-4 z-40 w-11 h-11 rounded-full flex items-center justify-center select-none shock-qs"
       style={{

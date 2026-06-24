@@ -62,7 +62,11 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], onOpenUser,
   const located = grouped.filter(g => g.key !== '__none__');
   const maxCount = located[0]?.pins.length || 1;
   const topArea = located[0];
-  const activeAreaLabel = activeArea ? (groups[activeArea]?.label || activeArea) : null;
+  // Resolve the active area's label from ALL pins (not the filtered groups) so a search
+  // that empties the area still shows the proper label instead of the raw lowercased key.
+  const areaLabels = {};
+  pins.forEach(p => { const k = areaKey(p); if (k && !areaLabels[k]) areaLabels[k] = areaLabel(p); });
+  const activeAreaLabel = activeArea ? (groups[activeArea]?.label || areaLabels[activeArea] || activeArea) : null;
 
   return (
     <div className="absolute inset-0">

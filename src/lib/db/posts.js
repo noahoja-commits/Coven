@@ -92,7 +92,7 @@ export async function fetchUserPosts(authorId, { limit = 60 } = {}) {
     .order('created_at', { ascending: false })
     .limit(limit);
   if (error) throw error;
-  return (data || []).map(r => ({ id: r.id, kind: r.kind, img: r.img || null, body: r.body || '', community: r.community }));
+  return (data || []).map(r => ({ id: r.id, kind: r.kind, img: r.img || null, body: r.body || '', community: r.community, createdAt: r.created_at }));
 }
 
 // Cast or change a poll vote (one row per user per poll).
