@@ -83,6 +83,12 @@ export default function RealMap({ nearby = [], tonightStatus, ghost = false, onO
     map.on('load', () => { if (!cancelled) { map.resize(); setState('ready'); } });
     // Failsafe: never sit on "summoning…" — if the style/tiles stall, reveal the map anyway after 8s.
     const failsafe = setTimeout(() => { if (!cancelled) setState(s => (s === 'loading' ? 'ready' : s)); }, 8000);
+    // Keep the canvas fitted to the container even if its size settles after mount (animations, dvh).
+    const ro = (typeof ResizeObserver !== 'undefined')
+      ? new ResizeObserver(() => { try { map.resize(); } catch { /* noop */ } })
+      : null;
+    if (ro && containerRef.current) ro.observe(containerRef.current);
+    const reflow = setTimeout(() => { try { map.resize(); } catch { /* noop */ } }, 300);
 
     // Locate the user in parallel (non-blocking). Recenter + remember on success; ignore failures.
     getPosition().then(({ latitude, longitude }) => {
@@ -96,6 +102,8 @@ export default function RealMap({ nearby = [], tonightStatus, ghost = false, onO
     return () => {
       cancelled = true;
       clearTimeout(failsafe);
+      clearTimeout(reflow);
+      if (ro) ro.disconnect();
       markersRef.current.forEach(m => m.remove());
       markersRef.current = [];
       if (mapRef.current) { mapRef.current.remove(); mapRef.current = null; }

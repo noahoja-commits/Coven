@@ -660,7 +660,7 @@ THREAT ${['LOW', 'ELEV', 'HIGH', 'CRIT'][tick % 4]}
 // Mode registry — drives the picker (label + one-line vibe). Order = picker order.
 export const SHOCK_MODES = [
   { id: 'none', label: 'None', desc: 'pure brutalist base' },
-  { id: 'lament', label: 'Lament', desc: 'moonlit veil · drifting spirits · hauntingly beautiful' },
+  { id: 'lament', label: 'Lament', desc: 'ink across parchment · a dark castle · hauntingly beautiful' },
   { id: 'insomnia', label: 'Insomnia', desc: 'electric blue · heartbeat · 3:33am' },
   { id: 'dead-channel', label: 'Dead Channel', desc: '1-bit dither · tracking roll · no signal' },
   { id: 'emergency', label: 'Emergency', desc: 'twin radar · alert ticker · infernal signal' },

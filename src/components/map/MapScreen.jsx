@@ -45,7 +45,10 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = []
   const byDist = (arr) => hasDist ? [...arr].sort((a, b) => (distById[a.userId] ?? 1e9) - (distById[b.userId] ?? 1e9)) : arr;
 
   return (
-    <div className="absolute inset-0">
+    // Explicit height (content area = 100dvh − header 60 − nav 68) so the map container can't
+    // collapse to 0: MapScreen sits inside an `animate-screen-in` wrapper that has no in-flow
+    // height (its children are absolutely positioned), which would otherwise leave MapLibre 0px tall.
+    <div className="absolute inset-x-0 top-0" style={{ height: 'calc(100dvh - 128px)' }}>
       {festivalEvent && (
         <button onClick={onEnterFestival}
           className="absolute top-2 left-1/2 -translate-x-1/2 z-30 px-4 py-2 bg-[#8B0000]/90 border border-[#C9A961] text-[#F5F1E8] text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 shadow-xl animate-pulse-slow" style={F.ui}>
