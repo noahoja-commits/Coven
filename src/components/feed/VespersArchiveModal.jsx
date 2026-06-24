@@ -3,7 +3,7 @@ import { F } from '../../styles/fonts';
 import { TEXTS } from '../../data/library';
 import { todaysVespers, pastVespers } from '../../data/helpers';
 
-export function VespersArchiveModal({ onClose, onOpenLibrary }) {
+export function VespersArchiveModal({ onClose }) {
   const today = todaysVespers(TEXTS);
   const past = pastVespers(TEXTS, 14);
 
@@ -19,20 +19,18 @@ export function VespersArchiveModal({ onClose, onOpenLibrary }) {
         </div>
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {today && (
-            <button onClick={() => onOpenLibrary && onOpenLibrary(today.textId)}
-              className="w-full text-left p-3 border border-[#C9A961]/30 bg-[#C9A961]/5 hover:border-[#C9A961] transition-colors">
+            <div className="w-full text-left p-3 border border-[#C9A961]/30 bg-[#C9A961]/5">
               <div className="text-[10px] uppercase tracking-[0.3em] text-[#C9A961] mb-1" style={F.scriptureSC}>· today · {today.dateKey} ·</div>
               <p className="text-[#F5F1E8] text-sm italic leading-snug" style={F.scripture}>"{today.verse.text}"</p>
               <div className="text-[10px] text-[#C8102E]/70 mt-1" style={F.scriptureSC}>· {today.chapterTitle} ·</div>
-            </button>
+            </div>
           )}
           {past.map(v => (
-            <button key={v.dateKey} onClick={() => onOpenLibrary && onOpenLibrary(v.textId)}
-              className="w-full text-left p-3 border border-[#2A2A2A] hover:border-[#A89968]/40 transition-colors">
+            <div key={v.dateKey} className="w-full text-left p-3 border border-[#2A2A2A]">
               <div className="text-[10px] uppercase tracking-[0.3em] text-[#C8102E]/70 mb-1" style={F.scriptureSC}>· {v.dateKey} ·</div>
               <p className="text-[#A8A29E] text-sm italic leading-snug line-clamp-2" style={F.scripture}>"{v.verse.text}"</p>
               <div className="text-[10px] text-[#C8102E]/50 mt-1" style={F.scriptureSC}>· {v.chapterTitle} ·</div>
-            </button>
+            </div>
           ))}
         </div>
       </div>

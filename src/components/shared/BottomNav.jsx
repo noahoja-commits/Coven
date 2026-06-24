@@ -8,7 +8,7 @@ export function BottomNav({ tab, onChange, parchment = false }) {
     { id: 'communities', label: 'scenes' },
     { id: 'map', label: 'map' },
     { id: 'events', label: 'rites' },
-    { id: 'fits', label: 'fits' },
+    { id: 'oddities', label: 'oddities' },
     { id: 'profile', label: 'self' },
   ];
 

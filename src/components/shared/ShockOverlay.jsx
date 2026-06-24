@@ -617,11 +617,14 @@ THREAT ${['LOW', 'ELEV', 'HIGH', 'CRIT'][tick % 4]}
                 <feDisplacementMap in="SourceGraphic" in2="n" scale="16" xChannelSelector="R" yChannelSelector="G" />
               </filter>
             </defs>
-            <g filter="url(#lamentInk)" fill="#221208">
-              <circle cx="36" cy="42" r="15" className="shock-ink-bloom" />
-              <circle cx="62" cy="58" r="11" className="shock-ink-bloom" style={{ animationDelay: '1.2s' }} />
-              <ellipse cx="50" cy="50" rx="30" ry="6" className="shock-ink-bloom" style={{ animationDelay: '2.2s' }} />
-              <circle cx="24" cy="66" r="6" className="shock-ink-bloom" style={{ animationDelay: '3s' }} />
+            <g filter="url(#lamentInk)" fill="#1f1007" opacity="0.78">
+              {/* a river of ink flowing down the page + small settling blots, spread wide */}
+              <path d="M30 14 q6 14 -2 26 q-7 12 3 24 q7 9 -1 20" stroke="#1f1007" strokeWidth="3.4" fill="none" strokeLinecap="round" className="shock-ink-bloom" />
+              <path d="M70 18 q-5 16 3 28 q6 10 -2 22" stroke="#1f1007" strokeWidth="2.6" fill="none" strokeLinecap="round" className="shock-ink-bloom" style={{ animationDelay: '1.4s' }} />
+              <ellipse cx="30" cy="64" rx="8" ry="4" className="shock-ink-bloom" style={{ animationDelay: '2.4s' }} />
+              <circle cx="72" cy="70" r="4" className="shock-ink-bloom" style={{ animationDelay: '3s' }} />
+              <circle cx="20" cy="24" r="3" className="shock-ink-bloom" style={{ animationDelay: '0.6s' }} />
+              <circle cx="82" cy="42" r="2.5" className="shock-ink-bloom" style={{ animationDelay: '3.6s' }} />
             </g>
           </svg>
           {/* a written line, drying into legibility */}

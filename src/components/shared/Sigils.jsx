@@ -76,11 +76,23 @@ function SunMark(p) {
   );
 }
 
+// oddities → a funerary urn / amphora (wares, relics, things with a past)
+function Urn(p) {
+  return (
+    <svg {...COMMON} {...p}>
+      <path d="M8 5 H16" />
+      <path d="M9 5 C9 8 6 8 6 11 C6 16 8.5 20 12 20 C15.5 20 18 16 18 11 C18 8 15 8 15 5" />
+      <path d="M9.5 9 H14.5" strokeWidth="1.1" />
+    </svg>
+  );
+}
+
 const SIGILS = {
   home: Pentacle,
   communities: TripleMoon,
   map: CrossedCircle,
   events: Flame,
+  oddities: Urn,
   fits: Hanger,
   profile: SunMark,
 };

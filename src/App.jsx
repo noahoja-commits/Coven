@@ -70,9 +70,6 @@ import { ReflectionsModal } from './components/profile/ReflectionsModal';
 import { DreamJournalModal } from './components/profile/DreamJournalModal';
 
 import { CovenMenu } from './components/coven/CovenMenu';
-// Lazy — the Library carries the full text of every book; keep it out of the initial bundle.
-const LibraryOverlay = lazy(() => import('./components/library/LibraryOverlay').then(m => ({ default: m.LibraryOverlay })));
-const ReaderView = lazy(() => import('./components/library/ReaderView').then(m => ({ default: m.ReaderView })));
 // Lazy — the Coven portals + marketplace are all off the initial render path, so keep
 // them out of the main bundle and load on first open (wrapped in Suspense below).
 const OdditiesOverlay = lazy(() => import('./components/oddities/OdditiesOverlay').then(m => ({ default: m.OdditiesOverlay })));
@@ -87,7 +84,6 @@ const ConfessionsOverlay = lazy(() => import('./components/coven/ConfessionsOver
 const SoulsOverlay = lazy(() => import('./components/coven/SoulsOverlay').then(m => ({ default: m.SoulsOverlay })));
 const SigilDrawOverlay = lazy(() => import('./components/coven/SigilDrawOverlay').then(m => ({ default: m.SigilDrawOverlay })));
 const IntentionTimerOverlay = lazy(() => import('./components/coven/IntentionTimerOverlay').then(m => ({ default: m.IntentionTimerOverlay })));
-import { FashionScreen } from './components/fashion/FashionScreen';
 
 import { OnboardingFlow } from './components/onboarding/OnboardingFlow';
 import { WelcomeOverlay } from './components/onboarding/WelcomeOverlay';
@@ -159,7 +155,6 @@ export default function App() {
   // Tracks whether the current portal was opened from the star→menu (so closing returns
   // to the menu) vs. directly from the home screen / logo (so closing returns to home).
   const [portalFromMenu, setPortalFromMenu] = useState(false);
-  const [activeText, setActiveText] = useState(null); // library reader
   const [activeOddity, setActiveOddity] = useState(null);
   const [showOddityCompose, setShowOddityCompose] = useState(false);
   const [composeKind, setComposeKind] = useState('sale'); // sale | wanted | commission
@@ -217,7 +212,6 @@ export default function App() {
   const [muted, setMuted] = useLocalStorage('muted', {});
   const [anniversaries, setAnniversaries] = useLocalStorage('anniversaries', []);
   const [cardHistory, setCardHistory] = useLocalStorage('cardHistory', {});
-  const [marginalia, setMarginalia] = useLocalStorage('marginalia', {});
   const [postCandles, setPostCandles] = useLocalStorage('postCandles', {});
   const [nowPlaying, setNowPlaying] = useLocalStorage('nowPlaying', null);
   const [activityLog, setActivityLog] = useLocalStorage('activityLog', []);
@@ -415,7 +409,6 @@ export default function App() {
         if (cs.muted !== undefined) setMuted(cs.muted);
         if (cs.anniversaries !== undefined) setAnniversaries(cs.anniversaries);
         if (cs.cardHistory !== undefined) setCardHistory(cs.cardHistory);
-        if (cs.marginalia !== undefined) setMarginalia(cs.marginalia);
         if (cs.postCandles !== undefined) setPostCandles(cs.postCandles);
         if (cs.nowPlaying !== undefined) setNowPlaying(cs.nowPlaying);
         if (cs.activityLog !== undefined) setActivityLog(cs.activityLog);
@@ -481,14 +474,14 @@ export default function App() {
     if (!meId || !cloudSyncedRef.current) return;
     const blob = {
       tonightStatus, communityMembership, bookmarks, muted, anniversaries, cardHistory,
-      marginalia, postCandles, nowPlaying, activityLog, mutedKeywords, hiddenPosts,
+      postCandles, nowPlaying, activityLog, mutedKeywords, hiddenPosts,
       ritual, crystals, pinnedPostId, shrineTheme, divinationLog, storyHighlights, shrine, flameLitAt,
       ageDob,
     };
     const t = setTimeout(() => { saveProfileState(meId, 'clientSync', blob).catch(() => {}); }, 800);
     return () => clearTimeout(t);
   }, [meId, tonightStatus, communityMembership, bookmarks, muted, anniversaries, cardHistory,
-      marginalia, postCandles, nowPlaying, activityLog, mutedKeywords, hiddenPosts,
+      postCandles, nowPlaying, activityLog, mutedKeywords, hiddenPosts,
       ritual, crystals, pinnedPostId, shrineTheme, divinationLog, storyHighlights, shrine, flameLitAt, ageDob]);
 
   // Latest quiet-hours setting for the realtime closure below (avoids a stale capture).
@@ -569,7 +562,7 @@ export default function App() {
     history.replaceState(null, '', window.location.pathname);
     if (u) setActiveUserHandle(u.toLowerCase().replace(/[^a-z0-9_.]/g, ''));
     if (ev) { setActiveEvent(ev); setTab('events'); }
-    if (od) { setActiveOddity(od); setActivePortal('oddities'); setPortalFromMenu(false); }
+    if (od) { setActiveOddity(od); setTab('oddities'); }
     if (po) setActivePostComments(po);
     if (t === 'success') { setTicketSuccess(true); setPendingTicketRefresh(true); }
     if (connect === 'done') setPendingConnectRefresh(true);
@@ -1330,20 +1323,6 @@ export default function App() {
     setCardHistory(prev => prev[dateKey] ? prev : { ...prev, [dateKey]: card });
   };
 
-  const addMarginalia = (textId, mark) => {
-    setMarginalia(prev => ({
-      ...prev,
-      [textId]: [...(prev[textId] || []), { id: `mg${Date.now()}`, ...mark, at: Date.now() }],
-    }));
-  };
-
-  const removeMarginalia = (textId, markId) => {
-    setMarginalia(prev => ({
-      ...prev,
-      [textId]: (prev[textId] || []).filter(m => m.id !== markId),
-    }));
-  };
-
   // Shared mute test (muted handle OR muted keyword in the body). Used by the home
   // feed AND scene/profile lists so muting actually applies everywhere posts show.
   const isMutedPost = (p) => {
@@ -1572,7 +1551,7 @@ export default function App() {
     ticketManagerEvent || showCreateEvent || showEditProfile || showMood || sharePostTarget || showSettings || showBlocked || showLegal || showDeleteConfirm || reportSheet || legalEscalation ||
     showMyTickets || showReflections || showDreams || showNowPlaying || showAddGrave || showAddAnniv ||
     showVespersArchive || showNewGroup || showTonightModal || quoteTarget || showOddityCompose ||
-    activeOddity || activeText || activePostComments || followList || activeConversation || activeUserHandle ||
+    activeOddity || activePostComments || followList || activeConversation || activeUserHandle ||
     showSearch || showCrewBrowse || activeEvent || showCompose || showNotifs || showDMs || activePortal ||
     showShockPicker
   );
@@ -1607,7 +1586,6 @@ export default function App() {
     if (quoteTarget) { setQuoteTarget(null); return true; }
     if (showOddityCompose) { setShowOddityCompose(false); return true; }
     if (activeOddity) { setActiveOddity(null); return true; }
-    if (activeText) { setActiveText(null); return true; }
     if (activePostComments) { setActivePostComments(null); return true; }
     if (followList) { setFollowList(null); return true; }
     if (activeConversation) { setActiveConversation(null); setActiveConvMeta(null); return true; }
@@ -1719,15 +1697,14 @@ export default function App() {
   }
 
   // Profile context for header
-  const isInsideOverlay = activePortal || activeOddity || showOddityCompose || activeText;
+  const isInsideOverlay = activePortal || activeOddity || showOddityCompose;
   const onLibraryTap = () => {            // ✦ star → the portals menu
     if (activePortal) return;
     setActivePortal('menu');
   };
-  const onLogoTap = () => {               // Coven wordmark → straight into The Library
+  const onLogoTap = () => {               // Coven wordmark → the portals menu
     if (activePortal) return;
-    setPortalFromMenu(false);             // opened directly → close returns to home
-    setActivePortal('library');
+    setActivePortal('menu');
   };
   // Open a portal directly from outside the menu (home screen tiles); closing returns home.
   const openPortalDirect = (id) => { setPortalFromMenu(false); setActivePortal(id); };
@@ -1804,7 +1781,6 @@ export default function App() {
         onOpenTonightStatus={() => setShowTonightModal(true)}
         onOpenTarot={() => openPortalDirect('tarot')}
         onOpenEphemeris={() => openPortalDirect('ephemeris')}
-        onOpenLibrary={(id) => { setPortalFromMenu(false); setActivePortal('library'); setActiveText(id); }}
         onOpenCodex={() => openPortalDirect('codex')}
         onOpenVespersArchive={() => setShowVespersArchive(true)}
         ritual={ritual}
@@ -1851,7 +1827,20 @@ export default function App() {
     if (tab === 'events') return (
       <EventsScreen events={events} rsvp={eventRsvp} onToggleRsvp={toggleEventRsvp} onOpenEvent={(id) => setActiveEvent(id)} onCreateEvent={() => setShowCreateEvent(true)} />
     );
-    if (tab === 'fits') return <FashionScreen shops={shops} meId={meId} onAddStore={addShop} onDeleteStore={removeShop} />;
+    if (tab === 'oddities') return (
+      <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-[#C9A961] text-xl animate-pulse-slow" style={F.brand}>Coven</div>}>
+        <OdditiesOverlay
+          embedded
+          listings={listings}
+          shops={shops}
+          meId={meId}
+          onOpenOddity={(id) => setActiveOddity(id)}
+          onCompose={(kind) => { setComposeKind(kind || 'sale'); setShowOddityCompose(true); }}
+          onAddShop={addShop}
+          onDeleteShop={removeShop}
+        />
+      </Suspense>
+    );
     if (tab === 'profile') return (
       <ProfileScreen
         profile={{ ...profile, status: tonightStatus?.text || null }}
@@ -2218,7 +2207,6 @@ export default function App() {
       {showVespersArchive && (
         <VespersArchiveModal
           onClose={() => setShowVespersArchive(false)}
-          onOpenLibrary={(id) => { setPortalFromMenu(false); setActivePortal('library'); setActiveText(id); setShowVespersArchive(false); }}
         />
       )}
       {quoteTarget && (
@@ -2265,7 +2253,6 @@ export default function App() {
           onOpenCommunity={(id) => { setTab('communities'); setCommunity(id); setShowSearch(false); }}
           onOpenEvent={() => { setTab('events'); setShowSearch(false); }}
           onOpenCodex={() => { setPortalFromMenu(false); setActivePortal('codex'); setShowSearch(false); }}
-          onOpenLibrary={(id) => { setPortalFromMenu(false); setActivePortal('library'); setActiveText(id); setShowSearch(false); }}
         />
       )}
       {showSettings && (
@@ -2352,27 +2339,6 @@ export default function App() {
           onOpen={(id) => { setPortalFromMenu(true); setActivePortal(id); }}
         />
       )}
-      {(activePortal === 'library' || activeText) && (
-        <Suspense fallback={<div className="absolute inset-0 z-50 bg-[#0A0A0A] flex items-center justify-center text-[#C9A961] text-2xl animate-pulse-slow" style={F.brand}>Coven</div>}>
-          {activePortal === 'library' && !activeText && (
-            <LibraryOverlay
-              onClose={closePortal}
-              onOpenText={(id) => setActiveText(id)}
-            />
-          )}
-          {activeText && (
-            <ReaderView
-              textId={activeText}
-              marginalia={marginalia[activeText] || []}
-              onAddMarginalia={(m) => addMarginalia(activeText, m)}
-              onRemoveMarginalia={(id) => removeMarginalia(activeText, id)}
-              meHandle={meHandle}
-              meAvatar={meAvatar}
-              onBack={() => setActiveText(null)}
-            />
-          )}
-        </Suspense>
-      )}
       {activePortal === 'tarot' && (
         <TarotOverlay
           onClose={closePortal}
@@ -2429,18 +2395,6 @@ export default function App() {
         ) : (
           <AgeGate minAge={18} label="confessions" onPass={setAgeDob} onClose={closePortal} />
         )
-      )}
-      {activePortal === 'oddities' && !activeOddity && !showOddityCompose && (
-        <OdditiesOverlay
-          onClose={closePortal}
-          onOpenOddity={(id) => setActiveOddity(id)}
-          onCompose={(kind) => { setComposeKind(kind || 'sale'); setShowOddityCompose(true); }}
-          listings={listings}
-          shops={shops}
-          meId={meId}
-          onAddShop={addShop}
-          onDeleteShop={removeShop}
-        />
       )}
       {activeOddity && (
         <OddityDetail

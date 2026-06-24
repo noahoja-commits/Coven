@@ -4,8 +4,8 @@ import { F } from '../../styles/fonts';
 import { buzz } from '../../lib/haptics';
 
 export function Header({ tab, onDMs, onCompose, onLibrary, onLogo, onNotifications, onSearch, onSecret, communityName, unreadNotifications = 0, unreadDMs = 0, parchment = false }) {
-  // Long-press the wordmark to summon the sigil canvas (hidden lore). A normal tap still
-  // opens the Library; the long-press suppresses that tap.
+  // Long-press the wordmark to summon the sigil canvas (hidden lore). A normal tap opens
+  // the portals menu; the long-press suppresses that tap.
   const pressTimer = useRef(null);
   const fired = useRef(false);
   const startPress = () => { fired.current = false; pressTimer.current = setTimeout(() => { fired.current = true; buzz('secret'); onSecret && onSecret(); }, 650); };
@@ -35,7 +35,7 @@ export function Header({ tab, onDMs, onCompose, onLibrary, onLogo, onNotificatio
             <button onClick={logoTap}
               onPointerDown={startPress} onPointerUp={endPress} onPointerLeave={endPress}
               className={`${textColor} text-4xl leading-none hover:text-[#C9A961] transition-colors select-none`}
-              style={{ ...F.brand, textShadow: '0 0 22px rgba(200,16,46,0.55), 0 0 4px rgba(0,0,0,0.6)' }} title="The Library">Coven</button>
+              style={{ ...F.brand, textShadow: '0 0 22px rgba(200,16,46,0.55), 0 0 4px rgba(0,0,0,0.6)' }} title="the coven · portals">Coven</button>
           ) : (
             <button onClick={onLogo}
               className="text-[#C8102E] text-xl tracking-[0.18em] hover:text-[#F5F1E8] transition-colors"

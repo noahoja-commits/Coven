@@ -206,7 +206,7 @@ function ShopsTab({ shops = [], meId, onAddShop, onDeleteShop }) {
   );
 }
 
-export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, listings = [], shops = [], meId, onAddShop, onDeleteShop }) {
+export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, listings = [], shops = [], meId, onAddShop, onDeleteShop, embedded = false }) {
   const [tab, setTab] = useState('market');
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -216,8 +216,12 @@ export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, listings = [
   const wares = byKind('sale').filter(matchesQ);
   const wantedItems = byKind('wanted');
   const commissionItems = byKind('commission');
+  // As a tab (embedded): fill the content area with an explicit height so the inner column can't
+  // collapse (the screen-in wrapper has no in-flow height). As an overlay: cover everything at z-40.
+  const shellCls = embedded ? 'absolute inset-x-0 top-0 bg-[#0A0608]' : 'absolute inset-0 z-40 bg-[#0A0608] animate-fade-in';
+  const shellStyle = embedded ? { height: 'calc(100dvh - 128px)' } : undefined;
   return (
-    <div className="absolute inset-0 z-40 bg-[#0A0608] animate-fade-in">
+    <div className={shellCls} style={shellStyle}>
       <div className="absolute inset-0" style={{
         background: 'radial-gradient(ellipse at 50% 30%, #2A0710 0%, #0A0408 60%, #050204 100%)'
       }} />
@@ -226,7 +230,9 @@ export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, listings = [
       <div className="relative h-full flex flex-col">
         <div className="bg-black/60 backdrop-blur-md border-b border-[#5B0F1A]/40 safe-pt">
           <div className="px-4 h-[60px] flex items-center justify-between">
-            <button onClick={onClose} className="tap text-[#C8102E] hover:text-[#C9A961] p-2 -m-1 transition-colors"><X size={20} /></button>
+            {embedded
+              ? <span className="w-9" />
+              : <button onClick={onClose} className="tap text-[#C8102E] hover:text-[#C9A961] p-2 -m-1 transition-colors"><X size={20} /></button>}
             <div className="text-[#C9A961] text-base tracking-[0.3em]" style={F.scriptureSC}>ODDITIES</div>
             <button onClick={() => { setTab('market'); setSearchOpen(o => !o); if (searchOpen) setQuery(''); }}
               className={`tap p-2 -m-1 transition-colors ${searchOpen ? 'text-[#C9A961]' : 'text-[#C8102E] hover:text-[#C9A961]'}`}><Search size={18} /></button>

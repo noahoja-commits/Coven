@@ -2,8 +2,6 @@ import { X } from 'lucide-react';
 import { F } from '../../styles/fonts';
 
 const PORTALS = [
-  { id: 'library', name: 'The Library', desc: 'sacred texts. shared marginalia. the dead speak.', glyph: '✟', tone: 'gold', enabled: true },
-  { id: 'oddities', name: 'Oddities', desc: 'wares & curiosities. for sale, for trade, for keeping.', glyph: '⚱', tone: 'red', enabled: true },
   { id: 'tarot', name: 'The Deck', desc: 'one card a day. the alchemystic woodcut.', glyph: '✦', tone: 'gold', enabled: true },
   { id: 'ephemeris', name: 'The Ephemeris', desc: 'moon, sun, stars. tonight\u2019s sky.', glyph: '☽', tone: 'silver', enabled: true },
   { id: 'codex', name: 'The Codex', desc: 'a dictionary. goth, occult, scene, sacred.', glyph: '⌬', tone: 'gold', enabled: true },

@@ -18,7 +18,7 @@ export function HomeScreen({
   feedScope = 'everyone', onSetFeedScope, onLoadMore, feedHasMore = false, onReportPost,
   bookmarks = {}, onToggleBookmark, postCandles = {}, onToggleCandle, onOpenEvent, onVotePoll,
   onOpenStory, onCreateStory, stories = [], meHandle = 'you', meAvatar = '🦇',
-  tonightStatus, onOpenTonightStatus, onOpenTarot, onOpenEphemeris, onOpenLibrary, onOpenCodex, onOpenHashtag, onOpenVespersArchive,
+  tonightStatus, onOpenTonightStatus, onOpenTarot, onOpenEphemeris, onOpenCodex, onOpenHashtag, onOpenVespersArchive,
   ritual, ritualDoneToday, onPerformRitual, crystals = [], trackers = {}, onUpdateTracker, onOpenReflections,
   feedLoading = false, suggestedSouls = [], following = {}, onFollow, witching = false, vigil = false,
   settings = {},
@@ -206,8 +206,7 @@ export function HomeScreen({
       {/* Vespers */}
       {vespersOn && vespers && (
         <div className="border-b border-[#1A1A1A] flex">
-          <button onClick={() => onOpenLibrary && onOpenLibrary(vespers.textId)}
-            className="flex-1 text-left hover:bg-[#0F0F0F] transition-colors">
+          <div className="flex-1 text-left">
             <div className="px-4 py-3">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-[#C8102E]" style={F.scriptureSC}>✟</span>
@@ -220,7 +219,7 @@ export function HomeScreen({
                 · {vespers.chapterTitle} ·
               </p>
             </div>
-          </button>
+          </div>
           <button onClick={onOpenVespersArchive} title="archive"
             className="px-3 border-l border-[#1A1A1A] text-[10px] uppercase tracking-wider text-[#C8102E] hover:text-[#C9A961] hover:bg-[#0F0F0F]"
             style={F.scriptureSC}>

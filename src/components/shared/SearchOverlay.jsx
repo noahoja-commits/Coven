@@ -1,12 +1,11 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { X, Search, Hash, Calendar, BookOpen } from 'lucide-react';
+import { X, Search, Hash, Calendar } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { COMMUNITIES } from '../../data/communities';
 import { CODEX } from '../../data/codex';
-import { TEXTS } from '../../data/library';
 import { searchProfiles } from '../../lib/db/profiles';
 
-export function SearchOverlay({ posts = [], events = [], onClose, onOpenPost, onOpenUser, onOpenCommunity, onOpenEvent, onOpenCodex, onOpenLibrary }) {
+export function SearchOverlay({ posts = [], events = [], onClose, onOpenPost, onOpenUser, onOpenCommunity, onOpenEvent, onOpenCodex }) {
   const [q, setQ] = useState('');
   const [userResults, setUserResults] = useState([]);
   const [userError, setUserError] = useState(false);
@@ -38,7 +37,6 @@ export function SearchOverlay({ posts = [], events = [], onClose, onOpenPost, on
       scenes: COMMUNITIES.filter(c => matches(c.name) || matches(c.desc)).slice(0, 6),
       events: (events || []).filter(e => matches(e.name) || matches(e.venue) || matches(e.neighborhood) || (e.tags || []).some(t => matches(t))).slice(0, 6),
       codex: (CODEX || []).filter(c => matches(c.term) || matches(c.def)).slice(0, 6),
-      library: (TEXTS || []).filter(t => matches(t.title) || matches(t.author)).slice(0, 6),
     };
   }, [q, posts, events]);
 
@@ -161,20 +159,6 @@ export function SearchOverlay({ posts = [], events = [], onClose, onOpenPost, on
           </Section>
         )}
 
-        {results && results.library.length > 0 && (
-          <Section title="library">
-            {results.library.map(t => (
-              <button key={t.id} onClick={() => { onOpenLibrary && onOpenLibrary(t.id); onClose(); }}
-                className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-[#0F0F0F] text-left">
-                <BookOpen size={14} className="text-[#C8102E] shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="text-[#F5F1E8] text-sm" style={F.scripture}>{t.title}</div>
-                  <div className="text-[10px] text-[#A8A29E]" style={F.serif}>{t.author}</div>
-                </div>
-              </button>
-            ))}
-          </Section>
-        )}
       </div>
     </div>
   );
