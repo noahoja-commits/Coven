@@ -3,7 +3,7 @@
 // subtle full-screen tint. Only call this in response to the user enabling the
 // toggle — never on page load (it prompts for location permission).
 
-function getPosition() {
+export function getPosition() {
   return new Promise((resolve, reject) => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
       reject(new Error('geolocation unavailable'));

@@ -24,7 +24,7 @@ import { DeleteAccountModal } from './components/settings/DeleteAccountModal';
 import { deleteAccount } from './lib/db/account';
 import { ReportSheet } from './components/shared/ReportSheet';
 import { enablePush, disablePush, pushStatus } from './lib/db/push';
-import { setTonightPin, clearTonightPin, fetchTonightPins, subscribeTonightPins } from './lib/db/tonight';
+import { setTonightPin, clearTonightPin, fetchTonightPins, subscribeTonightPins, setTonightGeo, clearTonightGeo, fetchNearby } from './lib/db/tonight';
 import { Toast } from './components/shared/Toast';
 import { fetchMyTicketEventIds } from './lib/db/festival';
 import { FestivalMap } from './components/festival/FestivalMap';
@@ -40,7 +40,7 @@ import { GrainOverlay, AmbientGlow, HalftoneOverlay } from './components/shared/
 import { ShockOverlay, SHOCK_MODES } from './components/shared/ShockOverlay';
 import { ShockModePicker } from './components/settings/ShockModePicker';
 import { startAmbient, stopAmbient } from './lib/ambient';
-import { fetchWeatherTint } from './lib/weather';
+import { fetchWeatherTint, getPosition } from './lib/weather';
 import { InstallPrompt } from './components/shared/InstallPrompt';
 
 import { HomeScreen } from './components/feed/HomeScreen';
@@ -166,6 +166,7 @@ export default function App() {
   const [profile, setProfile] = useState(null); // mapped from the Supabase profile row
   const [tonightStatus, setTonightStatus] = useLocalStorage('tonightStatus', { text: '', setAt: Date.now(), expiresAt: Date.now() + 1000 * 60 * 60 * 12 });
   const [tonightPins, setTonightPins] = useState([]); // DB-backed: other souls out tonight
+  const [nearby, setNearby] = useState([]); // privacy-fuzzed proximity (only when you share location)
   const [trackers, setTrackers] = useState({}); // Supabase-backed (profile_state)
   const [notifications, setNotifications] = useState([]); // Supabase-backed (DB triggers + realtime)
   const [rawSettings, setSettings] = useLocalStorage('settings', DEFAULT_SETTINGS);
@@ -628,6 +629,7 @@ export default function App() {
   // re-surface a pin that's mid-delete.
   const saveTonightStatus = async (status) => {
     setTonightStatus(status);
+    const sharing = !!(status && status.text && status.share && !settings.ghostMode);
     try {
       if (!status || !status.text || settings.ghostMode) {
         await clearTonightPin();
@@ -635,14 +637,43 @@ export default function App() {
         await setTonightPin({ text: status.text, neighborhood: status.neighborhood, expiresAt: status.expiresAt });
       }
     } catch { /* ignore network errors */ }
+    // Real GPS proximity (opt-in): store precise coords (owner-locked) or clear them.
+    try {
+      if (sharing) {
+        const { latitude, longitude } = await getPosition();
+        await setTonightGeo({ lat: latitude, lng: longitude, fuzzM: status.fuzzM });
+        fetchNearby(latitude, longitude).then(setNearby).catch(() => {});
+      } else {
+        await clearTonightGeo();
+        setNearby([]);
+      }
+    } catch {
+      clearTonightGeo().catch(() => {}); // never leave stale coords broadcasting
+      setNearby([]);
+      if (sharing) showToast("couldn't read your location — sharing off.", 'error');
+    }
     fetchTonightPins().then(setTonightPins).catch(() => {});
   };
 
-  // Going ghost must immediately pull any existing pin from the shared map.
+  // Going ghost must immediately pull any existing pin AND precise coords from the shared map.
   useEffect(() => {
     if (!settings.ghostMode) return;
     clearTonightPin().then(() => fetchTonightPins().then(setTonightPins)).catch(() => {});
+    clearTonightGeo().catch(() => {});
+    setNearby([]);
   }, [settings.ghostMode]);
+
+  // Refresh privacy-fuzzed proximity only when the map is open and you're sharing (lazy —
+  // never prompts for location on a normal page load).
+  useEffect(() => {
+    if (tab !== 'map' || !meId || !tonightStatus?.share || settings.ghostMode) return undefined;
+    let active = true;
+    getPosition()
+      .then(({ latitude, longitude }) => fetchNearby(latitude, longitude))
+      .then(list => { if (active) setNearby(list); })
+      .catch(() => { if (active) setNearby([]); });
+    return () => { active = false; };
+  }, [tab, meId, tonightStatus?.share, settings.ghostMode]);
 
   // Load an event's attendees when its detail opens.
   useEffect(() => {
@@ -1725,6 +1756,7 @@ export default function App() {
           tonightStatus={tonightStatus}
           ghost={settings.ghostMode}
           pins={tonightPins.filter(p => p.userId !== meId && !blockedIds.has(p.userId))}
+          nearby={nearby.filter(n => !blockedIds.has(n.userId))}
           onOpenUser={(h) => setActiveUserHandle(h)}
           onOpenTonightStatus={() => setShowTonightModal(true)}
           festivalEvent={festivalEvent && exitedFestivalId === festivalEvent.id ? festivalEvent : null}

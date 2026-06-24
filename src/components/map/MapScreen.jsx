@@ -36,7 +36,7 @@ function pinPos(pin) {
   return { left: `${clamp(cx + jx, 6, 94)}%`, top: `${clamp(cy + jy, 22, 84)}%` };
 }
 
-export function MapScreen({ tonightStatus, ghost = false, pins = [], onOpenUser, onOpenTonightStatus, festivalEvent = null, onEnterFestival }) {
+export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = [], onOpenUser, onOpenTonightStatus, festivalEvent = null, onEnterFestival }) {
   const [view, setView] = useState('map'); // 'map' | 'list'
   const [query, setQuery] = useState('');
   const [activeArea, setActiveArea] = useState(null); // filter to one area cluster
@@ -60,6 +60,12 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], onOpenUser,
   });
   const grouped = Object.values(groups).sort((a, b) => sort === 'az' ? a.label.localeCompare(b.label) : b.pins.length - a.pins.length);
   const located = grouped.filter(g => g.key !== '__none__');
+  // Privacy-fuzzed proximity: real "X mi away" from the tonight_nearby RPC (only when you share location).
+  const distById = {};
+  nearby.forEach(n => { if (n && n.userId != null) distById[n.userId] = n.distanceMi; });
+  const hasDist = Object.keys(distById).length > 0;
+  const fmtDist = (id) => { const d = distById[id]; if (d == null) return null; return d <= 0 ? '< 0.5 mi' : `~${d} mi`; };
+  const byDist = (arr) => hasDist ? [...arr].sort((a, b) => (distById[a.userId] ?? 1e9) - (distById[b.userId] ?? 1e9)) : arr;
   const maxCount = located[0]?.pins.length || 1;
   const topArea = located[0];
   // Resolve the active area's label from ALL pins (not the filtered groups) so a search
@@ -198,8 +204,8 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], onOpenUser,
                 <div className="relative -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
                   <span className="absolute inset-0 -m-2 rounded-full bg-[#8B0000] opacity-25 animate-ping-slow" />
                   <Avatar url={p.avatarUrl} glyph={p.avatar} size={28} className="relative ring-2 ring-[#8B0000]/70" />
-                  <div className="mt-1 whitespace-nowrap px-1.5 py-0.5 bg-black/80 backdrop-blur-sm border border-[#8B0000]/40 text-[9px] text-[#F5F1E8] max-w-[160px] truncate" style={F.ui}>
-                    {p.handle} · {p.text ? p.text.slice(0, 28) : areaLabel(p)}
+                  <div className="mt-1 whitespace-nowrap px-1.5 py-0.5 bg-black/80 backdrop-blur-sm border border-[#8B0000]/40 text-[9px] text-[#F5F1E8] max-w-[180px] truncate" style={F.ui}>
+                    {p.handle} · {p.text ? p.text.slice(0, 28) : areaLabel(p)}{fmtDist(p.userId) ? ` · ${fmtDist(p.userId)}` : ''}
                   </div>
                 </div>
               </button>
@@ -241,12 +247,15 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], onOpenUser,
                   <span className="text-[#6B6B6B]">{g.pins.length} {g.pins.length === 1 ? 'soul' : 'souls'}</span>
                 </div>
                 <div className="divide-y divide-[#141414] border-y border-[#141414]">
-                  {g.pins.map(p => (
+                  {byDist(g.pins).map(p => (
                     <button key={p.userId} onClick={() => onOpenUser && onOpenUser(p.handle)}
                       className="w-full px-4 py-3 flex items-center gap-3 hover:bg-[#0F0F0F] transition-colors text-left">
                       <Avatar url={p.avatarUrl} glyph={p.avatar} size={36} className="ring-1 ring-[#8B0000]/60 shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <div className="text-[#F5F1E8] text-sm truncate" style={F.ui}>{p.handle}</div>
+                        <div className="text-[#F5F1E8] text-sm truncate flex items-center gap-1.5" style={F.ui}>
+                          <span className="truncate">{p.handle}</span>
+                          {fmtDist(p.userId) && <span className="text-[#C9A961] text-[10px] shrink-0" style={F.mono}>{fmtDist(p.userId)}</span>}
+                        </div>
                         {p.text && <div className="text-[11px] text-[#A8A29E] truncate" style={F.serif}>{p.text}</div>}
                       </div>
                     </button>

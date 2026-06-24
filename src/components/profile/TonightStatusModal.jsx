@@ -13,9 +13,18 @@ const PROMPTS = [
   'who\u2019s rolling',
 ];
 
+const RADII = [
+  { m: 500, label: 'Block', sub: '~500m' },
+  { m: 1609, label: 'Hood', sub: '~1 mi' },
+  { m: 4828, label: 'Area', sub: '~3 mi' },
+  { m: 16093, label: 'City', sub: '~10 mi' },
+];
+
 export function TonightStatusModal({ current, onSave, onClose }) {
   const [text, setText] = useState(current?.text || '');
   const [neighborhood, setNeighborhood] = useState(current?.neighborhood || '');
+  const [share, setShare] = useState(!!current?.share);
+  const [fuzzM, setFuzzM] = useState(current?.fuzzM || 1609);
 
   const save = () => {
     onSave({
@@ -23,6 +32,8 @@ export function TonightStatusModal({ current, onSave, onClose }) {
       neighborhood: neighborhood.trim(),
       setAt: Date.now(),
       expiresAt: Date.now() + 1000 * 60 * 60 * 12, // 12h
+      share,
+      fuzzM,
     });
     onClose();
   };
@@ -77,6 +88,37 @@ export function TonightStatusModal({ current, onSave, onClose }) {
                   style={F.serif}>{p}</button>
               ))}
             </div>
+          </div>
+
+          {/* share real location (opt-in) — broadcast only a fuzzed circle */}
+          <div className="mt-4 border-t border-[#1A1A1A] pt-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.ui}>· share location ·</div>
+                <div className="text-[10px] text-[#6B6B6B] mt-0.5" style={F.serif}>show real distance to nearby souls</div>
+              </div>
+              <button type="button" role="switch" aria-checked={share} onClick={() => setShare(s => !s)}
+                className={`w-11 h-6 rounded-full relative shrink-0 transition-colors ${share ? 'bg-[#8B0000]' : 'bg-[#2A2A2A]'}`}>
+                <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-[#F5F1E8] transition-transform ${share ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
+              </button>
+            </div>
+            {share && (
+              <div className="mt-3">
+                <div className="text-[9px] uppercase tracking-wider text-[#6B6B6B] mb-1.5" style={F.ui}>your broadcast circle</div>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {RADII.map(r => (
+                    <button key={r.m} type="button" onClick={() => setFuzzM(r.m)}
+                      className={`px-1 py-1.5 text-center border transition-colors ${fuzzM === r.m ? 'border-[#8B0000] bg-[#8B0000]/20 text-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#5B0F1A]'}`}>
+                      <div className="text-[10px] leading-tight" style={F.ui}>{r.label}</div>
+                      <div className="text-[8px] text-[#6B6B6B]" style={F.mono}>{r.sub}</div>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[9px] text-[#6B6B6B] mt-2 leading-relaxed" style={F.serif}>
+                  others see only a {RADII.find(r => r.m === fuzzM)?.sub} circle — never your exact spot. your precise coords stay locked to you.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 

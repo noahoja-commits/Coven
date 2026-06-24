@@ -44,6 +44,49 @@ export async function fetchTonightPins() {
   return (data || []).map(hydrate);
 }
 
+// ── Real GPS proximity (privacy-fuzzed) ─────────────────────────────────────
+// Precise coords live in tonight_geo, owner-locked + NOT in realtime. They never
+// reach another client. Others read only fuzzed coords + distance via the RPC.
+
+export async function setTonightGeo({ lat, lng, fuzzM }) {
+  const { data: u } = await supabase.auth.getUser();
+  const uid = u?.user?.id;
+  if (!uid || typeof lat !== 'number' || typeof lng !== 'number') return;
+  // No .select() — we never read raw coords back to the client.
+  await supabase.from('tonight_geo').upsert({
+    user_id: uid,
+    latitude: lat,
+    longitude: lng,
+    fuzz_m: Math.max(250, Math.round(fuzzM || 1609)),
+    updated_at: new Date().toISOString(),
+  }, { onConflict: 'user_id' });
+}
+
+export async function clearTonightGeo() {
+  const { data: u } = await supabase.auth.getUser();
+  const uid = u?.user?.id;
+  if (!uid) return;
+  await supabase.from('tonight_geo').delete().eq('user_id', uid);
+}
+
+// Fuzzed nearby souls + bucketed distance. Returns [] gracefully pre-migration.
+export async function fetchNearby(myLat, myLng) {
+  const { data, error } = await supabase.rpc('tonight_nearby', { my_lat: myLat, my_lng: myLng });
+  if (error) return [];
+  return (data || []).map(r => ({
+    userId: r.user_id,
+    handle: r.handle,
+    avatar: r.avatar || '✦',
+    avatarUrl: r.avatar_url || null,
+    text: r.status || '',
+    neighborhood: r.neighborhood || '',
+    city: r.city || '',
+    fuzzLat: r.fuzz_lat,
+    fuzzLng: r.fuzz_lng,
+    distanceMi: r.distance_mi,
+  }));
+}
+
 // Realtime: any change to tonight pins → tell the caller to refetch.
 export function subscribeTonightPins(onChange) {
   const ch = supabase
