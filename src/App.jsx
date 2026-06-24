@@ -51,6 +51,7 @@ import { ProfileScreen } from './components/profile/ProfileScreen';
 import { TonightStatusModal } from './components/profile/TonightStatusModal';
 import { ProfileEditModal } from './components/profile/ProfileEditModal';
 import { MoodModal } from './components/profile/MoodModal';
+import { moodActive } from './data/moods';
 import { ShareToDMModal } from './components/shared/ShareToDMModal';
 import { UserProfileOverlay } from './components/profile/UserProfileOverlay';
 import { StoryViewer } from './components/feed/StoryViewer';
@@ -295,18 +296,21 @@ export default function App() {
     return () => stopAmbient();
   }, [settings.soundOn]);
 
-  // Weather mood: when enabled, get location + current conditions -> a tint.
+  // Weather mood: when enabled, get location + current conditions -> a tint. Refreshes every
+  // 15 min so it tracks the real sky (e.g. a passing afternoon storm) instead of getting stuck.
   // Only requests geolocation here (on toggle-on), never on load.
   useEffect(() => {
-    let active = true;
     if (!settings.weatherMood) { setWeatherTint(null); return undefined; }
-    showToast('reading your local weather…');
-    fetchWeatherTint().then(t => {
+    let active = true;
+    const load = (announce) => fetchWeatherTint().then(t => {
       if (!active) return;
-      if (t) { setWeatherTint(t); showToast(`weather mood: ${t.label}`); }
-      else { setWeatherTint(null); showToast("couldn't read your local weather — allow location access, then toggle again.", 'error'); }
-    });
-    return () => { active = false; };
+      if (t) { setWeatherTint(t); if (announce) showToast(`weather mood: ${t.label}`); }
+      else if (announce) { setWeatherTint(null); showToast("couldn't read your local weather — allow location access, then toggle again.", 'error'); }
+    }).catch(() => {});
+    showToast('reading your local weather…');
+    load(true);
+    const timer = setInterval(() => load(false), 15 * 60 * 1000);
+    return () => { active = false; clearInterval(timer); };
   }, [settings.weatherMood]);
 
   // Lock body scroll when a modal overlay is open
@@ -1945,6 +1949,16 @@ export default function App() {
           background: weatherTint.color,
           opacity: weatherTint.opacity,
           mixBlendMode: 'soft-light',
+        }} />
+      )}
+
+      {/* Profile mood — your self-set mood washes the whole app in its colour (in love → crimson,
+          grieving → cold slate, euphoric → violet…) so picking a mood actually changes the world. */}
+      {moodActive(profile?.mood) && profile.mood.color && !isInsideOverlay && !settings.parchmentMode && (
+        <div className="absolute inset-0 pointer-events-none z-[11]" style={{
+          background: `radial-gradient(ellipse at 50% -8%, ${profile.mood.color}42, transparent 52%), radial-gradient(ellipse at 50% 108%, ${profile.mood.color}3A, transparent 58%)`,
+          boxShadow: `inset 0 0 130px 26px ${profile.mood.color}26`,
+          mixBlendMode: 'screen',
         }} />
       )}
 

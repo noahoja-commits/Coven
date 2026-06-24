@@ -582,77 +582,83 @@ THREAT ${['LOW', 'ELEV', 'HIGH', 'CRIT'][tick % 4]}
     );
   }
 
-  // ── LAMENT — liquid ink across a page of parchment in a dark castle. gothic, heart-wrenching,
-  //    stark yet beautiful — and hopeful: a shaft of dawn through a gothic window.
-  //    back: castle-dark + arched window/dawn shaft + the parchment page + ink blooming + a written line.
-  //    front: ink rivulets + fine flecks + a warm dawn glow at the crown + paper grain + vignette.
+  // ── LAMENT — a mourning letter: ink wept across parchment in a rain-struck castle. cold storm-
+  //    light through a gothic window, a single guttering candle, a wilting rose shedding petals,
+  //    and ink that runs like tears. heart-wrenching and beautiful — grief held by one small flame.
   if (mode === 'lament') {
     if (back) return (
       <div className={BWRAP} aria-hidden>
-        {/* cold castle stone, deep dark */}
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(34,30,34,0.5), rgba(10,8,10,0.82) 58%, #050405 100%)' }} />
-        {/* gothic arched window — a hopeful shaft of dawn pouring through */}
-        <div className="absolute left-1/2 top-[2%] -translate-x-1/2 w-44 h-60">
+        {/* cold castle stone, a sorrowful blue-grey dark */}
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 26%, rgba(40,46,64,0.5), rgba(10,12,20,0.86) 56%, #04050a 100%)' }} />
+        {/* gothic window — pale cold storm-light, rain on the glass */}
+        <div className="absolute left-1/2 top-[2%] -translate-x-1/2 w-44 h-60 overflow-hidden">
           <svg viewBox="0 0 100 150" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMin meet">
             <defs>
-              <linearGradient id="lamentDawn" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stopColor="#f6e6c2" /><stop offset="0.4" stopColor="#e0c890" stopOpacity="0.55" /><stop offset="1" stopColor="#c9a961" stopOpacity="0" />
+              <linearGradient id="lamentSky" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor="#aeb8d4" stopOpacity="0.5" /><stop offset="0.5" stopColor="#7e8aa8" stopOpacity="0.26" /><stop offset="1" stopColor="#5a6480" stopOpacity="0" />
               </linearGradient>
             </defs>
-            <path d="M50 6 Q14 11 14 50 L14 150 L86 150 L86 50 Q86 11 50 6 Z" fill="url(#lamentDawn)" className="shock-dawn" />
-            <path d="M50 6 L50 150 M14 50 L86 50 M32 28 L32 150 M68 28 L68 150" stroke="#0b0907" strokeWidth="1.1" fill="none" opacity="0.85" />
-            <path d="M50 6 Q14 11 14 50 L14 150 M50 6 Q86 11 86 50 L86 150" stroke="#1c1610" strokeWidth="2.4" fill="none" />
+            <path d="M50 6 Q14 11 14 50 L14 150 L86 150 L86 50 Q86 11 50 6 Z" fill="url(#lamentSky)" className="shock-veil" />
+            {/* rain streaking the panes */}
+            <g stroke="#cdd6ee" strokeWidth="0.5" opacity="0.34">
+              {[20, 30, 40, 52, 62, 72, 80].map((x, i) => <line key={i} x1={x} y1="12" x2={x - 7} y2="148" />)}
+            </g>
+            <path d="M50 6 L50 150 M14 50 L86 50 M32 28 L32 150 M68 28 L68 150" stroke="#0a0b12" strokeWidth="1.1" fill="none" opacity="0.85" />
+            <path d="M50 6 Q14 11 14 50 L14 150 M50 6 Q86 11 86 50 L86 150" stroke="#161a26" strokeWidth="2.4" fill="none" />
           </svg>
         </div>
-        {/* a wide downward shaft of dawn light falling into the room */}
-        <div className="absolute left-1/2 top-0 -translate-x-1/2 w-[58%] h-[78%] shock-dawn" style={{ background: 'linear-gradient(180deg, rgba(228,201,140,0.28), rgba(201,169,97,0.08) 46%, transparent 78%)', mixBlendMode: 'screen', clipPath: 'polygon(34% 0, 66% 0, 88% 100%, 12% 100%)' }} />
-        {/* the page of parchment, candle-warmed */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[82%] h-[66%]"
-          style={{ background: 'radial-gradient(ellipse at 50% 38%, #e8dcc0, #cdbf99 64%, #a99970 100%)', opacity: 0.46, boxShadow: '0 0 70px 14px rgba(0,0,0,0.7), inset 0 0 44px rgba(120,88,46,0.4)' }}>
-          {/* liquid ink blooming across the page (organic wet edges via turbulence + displacement) */}
+        {/* the cold pale light falling into the room */}
+        <div className="absolute left-1/2 top-0 -translate-x-1/2 w-[58%] h-[74%] shock-veil" style={{ background: 'linear-gradient(180deg, rgba(174,184,212,0.2), rgba(126,138,168,0.06) 46%, transparent 76%)', mixBlendMode: 'screen', clipPath: 'polygon(34% 0, 66% 0, 88% 100%, 12% 100%)' }} />
+        {/* the letter — parchment with ink wept across it */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[82%] h-[63%] rotate-[-1deg]"
+          style={{ background: 'radial-gradient(ellipse at 50% 40%, #e6dcc4, #c9bd9c 64%, #a3977a 100%)', opacity: 0.42, boxShadow: '0 12px 60px 10px rgba(0,0,0,0.72), inset 0 0 44px rgba(70,66,52,0.45)' }}>
           <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
             <defs>
               <filter id="lamentInk" x="-40%" y="-40%" width="180%" height="180%">
-                <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="7" result="n" />
-                <feDisplacementMap in="SourceGraphic" in2="n" scale="16" xChannelSelector="R" yChannelSelector="G" />
+                <feTurbulence type="fractalNoise" baseFrequency="0.016" numOctaves="2" seed="9" result="n" />
+                <feDisplacementMap in="SourceGraphic" in2="n" scale="15" xChannelSelector="R" yChannelSelector="G" />
               </filter>
             </defs>
-            <g filter="url(#lamentInk)" fill="#1f1007" opacity="0.78">
-              {/* a river of ink flowing down the page + small settling blots, spread wide */}
-              <path d="M30 14 q6 14 -2 26 q-7 12 3 24 q7 9 -1 20" stroke="#1f1007" strokeWidth="3.4" fill="none" strokeLinecap="round" className="shock-ink-bloom" />
-              <path d="M70 18 q-5 16 3 28 q6 10 -2 22" stroke="#1f1007" strokeWidth="2.6" fill="none" strokeLinecap="round" className="shock-ink-bloom" style={{ animationDelay: '1.4s' }} />
-              <ellipse cx="30" cy="64" rx="8" ry="4" className="shock-ink-bloom" style={{ animationDelay: '2.4s' }} />
-              <circle cx="72" cy="70" r="4" className="shock-ink-bloom" style={{ animationDelay: '3s' }} />
-              <circle cx="20" cy="24" r="3" className="shock-ink-bloom" style={{ animationDelay: '0.6s' }} />
-              <circle cx="82" cy="42" r="2.5" className="shock-ink-bloom" style={{ animationDelay: '3.6s' }} />
+            {/* ink running down from the words, like tears */}
+            <g filter="url(#lamentInk)" fill="#23160c" opacity="0.72" stroke="#23160c" strokeLinecap="round">
+              <path d="M30 30 q5 18 -2 30 q-6 14 2 30" strokeWidth="2.6" fill="none" className="shock-ink-bloom" />
+              <path d="M52 32 q4 16 -1 30 q-4 12 2 26" strokeWidth="2" fill="none" className="shock-ink-bloom" style={{ animationDelay: '1.6s' }} />
+              <path d="M70 30 q-4 18 2 32 q5 10 -2 22" strokeWidth="2.2" fill="none" className="shock-ink-bloom" style={{ animationDelay: '2.6s' }} />
+              <circle cx="22" cy="26" r="2.4" stroke="none" className="shock-ink-bloom" style={{ animationDelay: '0.6s' }} />
+              <circle cx="80" cy="34" r="2" stroke="none" className="shock-ink-bloom" style={{ animationDelay: '3.4s' }} />
             </g>
           </svg>
-          {/* a written line, drying into legibility */}
-          <div className="absolute left-0 right-0 top-[60%] text-center px-5 shock-ink-write" style={{ fontFamily: '"IM Fell English", serif', color: '#2a1810', fontSize: '15px', lineHeight: 1.5 }}>
-            grief is only love<br />with nowhere left to go
+          {/* the written grief, drying in */}
+          <div className="absolute left-0 right-0 top-[18%] text-center px-6 shock-ink-write" style={{ fontFamily: '"IM Fell English", serif', color: '#241910', fontSize: '15px', lineHeight: 1.55 }}>
+            your side of the bed<br />is still cold
           </div>
         </div>
-        {/* castle vignette swallowing the edges */}
-        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 130px 44px rgba(4,4,6,0.86)' }} />
+        {/* a single guttering candle — the last warmth in the room */}
+        <div className="absolute left-[15%] bottom-[19%] flex flex-col items-center">
+          <span className="block w-[4px] rounded-full animate-flicker" style={{ height: 11, marginBottom: -1, background: 'radial-gradient(circle at 50% 0%, #fff, #ffb14a 45%, #8a4a00)', filter: 'blur(0.3px)', boxShadow: '0 0 16px 5px rgba(255,170,80,0.45)' }} />
+          <span className="block w-[7px] rounded-[2px]" style={{ height: 30, background: 'linear-gradient(180deg, #e8dcc0, #b9a886 70%, #8a7a58)' }} />
+        </div>
+        {/* a wilting rose, its head bowed */}
+        <Rose className="absolute right-[9%] bottom-[9%] w-12 h-20 opacity-30 rotate-[152deg]" color="#7a5a66" />
+        {/* the cold vignette of the keep */}
+        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 130px 44px rgba(3,4,8,0.88)' }} />
       </div>
     );
     return (
-      <div className={`${FWRAP} text-[#2a1810]`} aria-hidden>
-        {/* ink rivulets bleeding down the page */}
-        {[[19, 0], [43, 2.6], [71, 1.3], [88, 3.4]].map(([l, d], i) => (
-          <span key={i} className="absolute top-0 w-[2px] shock-drip" style={{ left: `${l}%`, height: '30%', opacity: 0.55, background: 'linear-gradient(to bottom, #160c06, #2a1810 72%, transparent)', animationDelay: `${d}s`, animationDuration: '4.6s' }}>
-            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[5px] h-[5px] rounded-full" style={{ background: '#160c06' }} />
-          </span>
+      <div className={`${FWRAP} text-[#cdd6ee]`} aria-hidden>
+        {/* rain falling through the whole room */}
+        {RAIN.slice(0, 18).map((r, i) => <span key={i} className="absolute top-0 w-px shock-rain" style={{ left: `${r.l}%`, height: `${r.h}%`, background: 'linear-gradient(to bottom, transparent, rgba(190,202,230,0.42))', animationDelay: `${r.d}s`, animationDuration: `${r.dur}s` }} />)}
+        {/* ink tears running down the page */}
+        {[[30, 0], [52, 2.4], [70, 1.3]].map(([l, d], i) => (
+          <span key={i} className="absolute top-[34%] w-[1.5px] shock-drip" style={{ left: `${l}%`, height: '24%', opacity: 0.5, background: 'linear-gradient(to bottom, #160c06, #23160c 72%, transparent)', animationDelay: `${d}s`, animationDuration: '5.2s' }} />
         ))}
-        {/* fine ink flecks settling */}
-        {MOTES.slice(0, 14).map((m, i) => <span key={i} className="absolute rounded-full shock-mote" style={{ left: `${m.l}%`, top: `${m.t}%`, width: m.s, height: m.s, background: 'rgba(22,12,6,0.6)', animationDelay: `${m.d}s`, animationDuration: `${m.dur}s` }} />)}
-        {/* the hopeful dawn glow at the crown — warm light above everything */}
-        <div className="absolute -top-[6%] left-1/2 -translate-x-1/2 w-[70%] h-[22%] shock-dawn" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(232,201,140,0.5), rgba(201,169,97,0.12) 50%, transparent 76%)', mixBlendMode: 'screen' }} />
-        {/* the turning of the line — heartbreak into light */}
-        <div className="absolute left-0 right-0 bottom-[13%] text-center text-[12px] tracking-[0.3em] italic shock-dawn" style={{ fontFamily: '"IM Fell English", serif', color: '#cdb98a', textShadow: '0 0 10px rgba(201,169,97,0.5)' }}>· so let it become light ·</div>
-        {/* paper grain + the dark of the keep */}
-        <div className="absolute inset-0" style={{ backgroundImage: GRAIN, backgroundSize: '120px 120px', mixBlendMode: 'overlay', opacity: 0.2 }} />
-        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 90px 26px rgba(8,6,5,0.55)' }} />
+        {/* falling rose petals, slow and mournful */}
+        {PETALS.slice(0, 9).map((p, i) => <span key={i} className="absolute top-0 text-[11px] shock-leaf" style={{ left: `${p.l}%`, color: 'rgba(150,96,112,0.5)', animationDelay: `${p.d}s`, animationDuration: `${p.dur + 3}s` }}>{p.g}</span>)}
+        {/* the tender, hopeless-hopeful turn — tied to the rain */}
+        <div className="absolute left-0 right-0 bottom-[14%] text-center text-[12px] tracking-[0.26em] italic shock-veil" style={{ fontFamily: '"IM Fell English", serif', color: '#aeb8d4', textShadow: '0 0 10px rgba(120,140,180,0.5)' }}>· come back as rain — i won't mind ·</div>
+        {/* cold paper-grain + the dark */}
+        <div className="absolute inset-0" style={{ backgroundImage: GRAIN, backgroundSize: '120px 120px', mixBlendMode: 'overlay', opacity: 0.18 }} />
+        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 90px 26px rgba(4,5,10,0.6)' }} />
       </div>
     );
   }
@@ -663,7 +669,7 @@ THREAT ${['LOW', 'ELEV', 'HIGH', 'CRIT'][tick % 4]}
 // Mode registry — drives the picker (label + one-line vibe). Order = picker order.
 export const SHOCK_MODES = [
   { id: 'none', label: 'None', desc: 'pure brutalist base' },
-  { id: 'lament', label: 'Lament', desc: 'ink across parchment · a dark castle · hauntingly beautiful' },
+  { id: 'lament', label: 'Lament', desc: 'a mourning letter · rain & candlelight · heartbreaking' },
   { id: 'insomnia', label: 'Insomnia', desc: 'electric blue · heartbeat · 3:33am' },
   { id: 'dead-channel', label: 'Dead Channel', desc: '1-bit dither · tracking roll · no signal' },
   { id: 'emergency', label: 'Emergency', desc: 'twin radar · alert ticker · infernal signal' },
