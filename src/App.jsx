@@ -355,6 +355,7 @@ export default function App() {
       birthday: dbProfile.birthday || null,
       decor: dbProfile.decor || {},
       mood: dbProfile.mood || {},
+      archetype: dbProfile.archetype || null,
       city: dbProfile.city || '',
       scene: dbProfile.city || '',
       joinedScene: dbProfile.created_at,
@@ -1497,6 +1498,7 @@ export default function App() {
         city: next.city || next.scene || '',
         birthday: next.birthday || null,
         decor: next.decor || {},
+        archetype: next.archetype || null,
       });
       await refreshProfile();
     } catch {
@@ -2083,6 +2085,7 @@ export default function App() {
           profile={profile}
           meId={meId}
           onSave={saveProfile}
+          onSetShrineTheme={setShrineTheme}
           onClose={() => setShowEditProfile(false)}
         />
       )}

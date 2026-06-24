@@ -2,15 +2,15 @@ import { supabase } from '../supabase';
 
 // Every profile column EXCEPT birthday (which is column-locked to the owner at the
 // DB level — read via the my_birthday rpc). Use this instead of select('*').
-const PROFILE_COLS_FULL = 'id, handle, avatar, avatar_url, bio, city, created_at, is_system, pronouns, scenes, tags, decor, mood';
+const PROFILE_COLS_FULL = 'id, handle, avatar, avatar_url, bio, city, created_at, is_system, pronouns, scenes, tags, decor, mood, archetype';
 // Cascade fallbacks so reads don't break before a column's migration is applied:
-// full → drop `mood` (pre-0036, keeps decor) → drop `decor` (pre-0028).
+// full → drop the new optional cols (mood/archetype, keeps decor) → drop `decor` (pre-0028).
 const PROFILE_COLS = 'id, handle, avatar, avatar_url, bio, city, created_at, is_system, pronouns, scenes, tags, decor';
 const PROFILE_COLS_BASE = 'id, handle, avatar, avatar_url, bio, city, created_at, is_system, pronouns, scenes, tags';
 
 async function selectProfile(col, val) {
   let res = await supabase.from('profiles').select(PROFILE_COLS_FULL).eq(col, val).maybeSingle();
-  if (res.error && /mood/i.test(res.error.message || '')) {
+  if (res.error && /mood|archetype/i.test(res.error.message || '')) {
     res = await supabase.from('profiles').select(PROFILE_COLS).eq(col, val).maybeSingle();
   }
   if (res.error && /decor/i.test(res.error.message || '')) {
@@ -56,8 +56,8 @@ export async function insertProfile(row) {
 export async function updateProfile(id, patch) {
   let res = await supabase.from('profiles').update(patch).eq('id', id).select('id, handle').single();
   // Pre-migration: drop the missing column and retry so the rest of the profile still saves.
-  if (res.error && /mood/i.test(res.error.message || '') && patch.mood !== undefined) {
-    const { mood, ...rest } = patch;
+  if (res.error && /mood|archetype/i.test(res.error.message || '') && (patch.mood !== undefined || patch.archetype !== undefined)) {
+    const { mood, archetype, ...rest } = patch;
     res = await supabase.from('profiles').update(rest).eq('id', id).select('id, handle').single();
   }
   if (res.error && /decor/i.test(res.error.message || '') && patch.decor !== undefined) {

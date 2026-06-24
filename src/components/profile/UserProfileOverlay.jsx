@@ -5,6 +5,7 @@ import { getProfileByHandle, getProfileStats } from '../../lib/db/profiles';
 import { fetchUserPosts } from '../../lib/db/posts';
 import { borderStyle, bannerStyle } from '../../data/decor';
 import { moodActive } from '../../data/moods';
+import { archetypeById } from '../../data/archetypes';
 import { PostGrid } from './PostGrid';
 import { TarotFrame, arcanaFor, Grain } from '../shared/Sigils';
 
@@ -34,6 +35,7 @@ export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], isF
   // Real profile, or a minimal stand-in so the overlay still renders by handle.
   const user = profile || { handle, avatar: '✦', bio: '', tags: [], pronouns: '' };
   const mood = moodActive(user.mood) ? user.mood : null;
+  const arche = archetypeById(user.archetype);
 
   if (!loading && !profile) {
     return (
@@ -79,7 +81,15 @@ export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], isF
             {user.avatar_url ? <img src={user.avatar_url} alt="" className="w-full h-full object-cover" /> : user.avatar}
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-[#F5F1E8] text-xl truncate" style={F.brand}>{user.handle}</h2>
+            <div className="flex items-baseline gap-2">
+              <h2 className="text-[#F5F1E8] text-xl truncate" style={F.brand}>{user.handle}</h2>
+              {arche && (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 border text-[9px] uppercase tracking-wider shrink-0"
+                  style={{ borderColor: `${arche.accent}66`, color: arche.accent, ...F.ui }}>
+                  <span>{arche.glyph}</span>{arche.label}
+                </span>
+              )}
+            </div>
             {user.pronouns && <div className="text-[#6B6B6B] text-[10px] uppercase tracking-wider" style={F.ui}>{user.pronouns}</div>}
             {mood && (
               <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 border text-[10px] uppercase tracking-wider"

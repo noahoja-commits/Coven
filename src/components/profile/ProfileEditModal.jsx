@@ -3,12 +3,13 @@ import { X, Camera, Loader2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { uploadImage } from '../../lib/db/storage';
 import { BORDERS, BANNERS, borderStyle, bannerStyle } from '../../data/decor';
+import { ARCHETYPES } from '../../data/archetypes';
 
 // A cohesive occult/gothic sigil set — mourning, moon, cross, and alchemical marks.
 const AVATAR_OPTIONS = ['🦇', '🕯', '🥀', '🌹', '🌙', '🌑', '☾', '☽', '⛧', '⛤', '🜏', '𖤐', '☠', '💀', '⚰', '⚱', '✝', '✟', '☦', '♰', '†', '⸸', '☥', '🔮', '🕸', '🗝', '🦴', '⚜', '✦', '✧'];
 const VIBE_OPTIONS = ['goth', 'raver', 'smoker', 'witch', 'mystic', 'darkwave', 'tradgoth', 'industrial', 'romantic', 'doomer', 'punk', 'NYC', 'LA', 'PDX', 'Berlin', 'sober', 'soft', 'feral'];
 
-export function ProfileEditModal({ profile, meId, onSave, onClose }) {
+export function ProfileEditModal({ profile, meId, onSave, onClose, onSetShrineTheme }) {
   const [name, setName] = useState(profile.name || '');
   const [pronouns, setPronouns] = useState(profile.pronouns || '');
   const [bio, setBio] = useState(profile.bio || '');
@@ -19,6 +20,7 @@ export function ProfileEditModal({ profile, meId, onSave, onClose }) {
   const [border, setBorder] = useState(profile.decor?.border || 'none');
   const [banner, setBanner] = useState(profile.decor?.banner || 'none');
   const [bannerAnimated, setBannerAnimated] = useState(!!profile.decor?.animated);
+  const [archetype, setArchetype] = useState(profile.archetype || '');
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const fileRef = useRef(null);
@@ -36,7 +38,7 @@ export function ProfileEditModal({ profile, meId, onSave, onClose }) {
 
   const save = () => {
     if (uploading) return;
-    onSave({ ...profile, name: name.trim() || profile.name, pronouns, bio, birthday, avatar, avatarUrl, tags, decor: { border, banner, animated: bannerAnimated } });
+    onSave({ ...profile, name: name.trim() || profile.name, pronouns, bio, birthday, avatar, avatarUrl, tags, archetype: archetype || null, decor: { border, banner, animated: bannerAnimated } });
     onClose();
   };
 
@@ -88,6 +90,23 @@ export function ProfileEditModal({ profile, meId, onSave, onClose }) {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Archetype — a self-declared identity that also applies a matching shrine theme */}
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-2" style={F.scriptureSC}>· archetype ·</div>
+            <div className="flex flex-wrap gap-1.5">
+              <button onClick={() => setArchetype('')}
+                className={`px-2.5 py-1 text-[10px] uppercase tracking-wider border transition-colors ${!archetype ? 'border-[#8B0000] bg-[#5B0F1A]/25 text-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#5B0F1A]/60'}`} style={F.ui}>none</button>
+              {ARCHETYPES.map(a => (
+                <button key={a.id} onClick={() => { setArchetype(a.id); onSetShrineTheme && onSetShrineTheme(a.shrineTheme); }}
+                  className={`px-2.5 py-1 text-[10px] uppercase tracking-wider border transition-colors flex items-center gap-1 ${archetype === a.id ? 'text-[#F5F1E8]' : 'text-[#A8A29E] hover:border-[#5B0F1A]/60 border-[#2A2A2A]'}`}
+                  style={archetype === a.id ? { borderColor: a.accent, background: `${a.accent}22` } : { ...F.ui }}>
+                  <span style={{ color: a.accent }}>{a.glyph}</span>{a.label}
+                </button>
+              ))}
+            </div>
+            <p className="text-[9px] text-[#6B6B6B] mt-1.5" style={F.serif}>shows as a badge on your profile + sets a matching shrine theme.</p>
           </div>
 
           {/* Decorations — border + banner */}

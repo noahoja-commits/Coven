@@ -8,6 +8,7 @@ import { ACHIEVEMENTS, earnedAchievements } from '../../data/achievements';
 import { fetchUserPosts } from '../../lib/db/posts';
 import { borderStyle, bannerStyle } from '../../data/decor';
 import { moodActive } from '../../data/moods';
+import { archetypeById } from '../../data/archetypes';
 import { CRYSTAL_OPTIONS } from '../../data/crystals';
 import { SHRINE_OBJECTS, earnedShrine } from '../../data/shrine';
 import { PostGrid } from './PostGrid';
@@ -26,6 +27,7 @@ const SHRINE_THEMES = {
 export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpdateTracker, onOpenTonightStatus, onOpenSettings, mementoMoriOn, settings, onEditProfile, onLightCandle, crews = [], onOpenCrew, onBrowseCrews, onAddGrave, onAddAnniversary, onOpenNowPlaying, onOpenReflections, onOpenDreams, dreamsCount = 0, onOpenTickets, reflectionsCount = 0, nowPlaying, activityLog = [], sigils = [], bookmarks = [], onOpenComments, onOpenPost, ritual, ritualDoneToday, onPerformRitual, crystals = [], onToggleCrystal, pinnedPost, shrineTheme = 'oxblood', onSetShrineTheme, storyHighlights = [], onRemoveHighlight, achievementState = {}, onShowFollowers, onShowFollowing, joinedScenes = [], onOpenScene, onOpenMood,
 shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
   const mood = moodActive(profile.mood) ? profile.mood : null;
+  const arche = archetypeById(profile.archetype);
   const earned = earnedAchievements(achievementState);
   const earnedIds = new Set(earned.map(a => a.id));
   const [showThemePicker, setShowThemePicker] = useState(false);
@@ -132,6 +134,12 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
           <div className="flex-1 min-w-0">
             <div className="flex items-baseline gap-2">
               <h2 className="text-[#F5F1E8] text-xl truncate" style={F.brand}>{profile.name}</h2>
+              {arche && (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 border text-[9px] uppercase tracking-wider shrink-0"
+                  style={{ borderColor: `${arche.accent}66`, color: arche.accent, ...F.ui }}>
+                  <span>{arche.glyph}</span>{arche.label}
+                </span>
+              )}
             </div>
             <div className="text-[#6B6B6B] text-[10px] uppercase tracking-wider mb-1" style={F.ui}>
               {profile.pronouns} {sign && <span className="ml-2 text-[#C8102E]">{sign.glyph} {sign.name.toLowerCase()}</span>}
