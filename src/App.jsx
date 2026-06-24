@@ -1953,13 +1953,19 @@ export default function App() {
       )}
 
       {/* Profile mood — your self-set mood washes the whole app in its colour (in love → crimson,
-          grieving → cold slate, euphoric → violet…) so picking a mood actually changes the world. */}
+          grieving → cold slate, euphoric → violet…) so picking a mood actually changes the world.
+          Two layers: a bright screen-blended glow (vivid moods pop) + a faint flat tint (so even the
+          dark moods — numb, grieving — register), plus a glowing seam under the header you can't miss. */}
       {moodActive(profile?.mood) && profile.mood.color && !isInsideOverlay && !settings.parchmentMode && (
-        <div className="absolute inset-0 pointer-events-none z-[11]" style={{
-          background: `radial-gradient(ellipse at 50% -8%, ${profile.mood.color}42, transparent 52%), radial-gradient(ellipse at 50% 108%, ${profile.mood.color}3A, transparent 58%)`,
-          boxShadow: `inset 0 0 130px 26px ${profile.mood.color}26`,
-          mixBlendMode: 'screen',
-        }} />
+        <>
+          <div className="absolute inset-0 pointer-events-none z-[11]" style={{
+            background: `radial-gradient(ellipse at 50% -6%, ${profile.mood.color}5C, transparent 52%), radial-gradient(ellipse at 50% 106%, ${profile.mood.color}4E, transparent 58%)`,
+            boxShadow: `inset 0 0 150px 30px ${profile.mood.color}38`,
+            mixBlendMode: 'screen',
+          }} />
+          <div className="absolute inset-0 pointer-events-none z-[11]" style={{ background: profile.mood.color, opacity: 0.07 }} />
+          <div className="absolute top-[60px] inset-x-0 h-[2px] pointer-events-none z-[31]" style={{ background: `linear-gradient(90deg, transparent, ${profile.mood.color}, transparent)`, boxShadow: `0 0 14px 1px ${profile.mood.color}` }} />
+        </>
       )}
 
       {/* Color mood — Blood moon (red wash) or Ash (desaturate). Rendered as
