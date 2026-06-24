@@ -26,6 +26,7 @@ const TEARS = Array.from({ length: 10 }, (_, i) => ({ l: (i * 23 + 9) % 100, d: 
 const WISPS = Array.from({ length: 7 }, (_, i) => ({ l: (i * 31 + 12) % 100, d: (i * 1.4) % 9, dur: 9 + (i % 4) * 3, s: 4 + (i % 3) * 3 }));
 const STARS = Array.from({ length: 22 }, (_, i) => ({ l: (i * 47 + 3) % 100, t: (i * 19 + 5) % 62, d: (i * 0.5) % 4, s: i % 3 ? 1 : 2 }));
 const RAIN = Array.from({ length: 26 }, (_, i) => ({ l: (i * 19 + 4) % 100, d: (i * 0.27) % 2, dur: 0.5 + (i % 4) * 0.16, h: 7 + (i % 5) * 5 }));
+const EYES = Array.from({ length: 11 }, (_, i) => ({ l: (i * 37 + 6) % 94, t: (i * 53 + 7) % 90, d: (i * 0.7) % 5, s: 12 + (i % 3) * 7 }));
 
 function InvPentagram({ className = '', color = '#C8102E', circle = true, sw = 1.4 }) {
   return (
@@ -76,6 +77,35 @@ function VeiledFigure({ className = '', color = '#d8e2f5' }) {
       <path d="M50 16 C37 16 31 27 33 40 C25 53 21 86 24 122 C17 152 16 186 31 199 L69 199 C84 186 83 152 76 122 C79 86 75 53 67 40 C69 27 63 16 50 16 Z" fill="url(#veilG)" />
       <ellipse cx="50" cy="33" rx="15" ry="18" fill={color} opacity="0.16" />
       <ellipse cx="50" cy="36" rx="8" ry="11" fill="#0a0a14" opacity="0.45" />
+    </svg>
+  );
+}
+
+// A gaunt, screaming wraith — the thing that leans over you in the dark. Pale skin fading into
+// the black, hollow eye sockets with tiny dead-white pupils, sunken cheeks, a gaping mouth.
+function WraithFace({ className = '', style }) {
+  return (
+    <svg viewBox="0 0 100 132" className={className} style={style} aria-hidden>
+      <defs>
+        <radialGradient id="wraithSkin" cx="0.5" cy="0.4" r="0.62">
+          <stop offset="0" stopColor="#d9d5cc" /><stop offset="0.55" stopColor="#8b867c" /><stop offset="1" stopColor="#26241f" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      {/* gaunt elongated head dissolving into the dark */}
+      <path d="M50 4 C25 4 17 26 19 51 C20 74 30 104 50 128 C70 104 80 74 81 51 C83 26 75 4 50 4 Z" fill="url(#wraithSkin)" />
+      {/* hollow black eye sockets */}
+      <ellipse cx="36" cy="52" rx="8.5" ry="12" fill="#000" />
+      <ellipse cx="64" cy="52" rx="8.5" ry="12" fill="#000" />
+      {/* tiny dead-white pupils, staring */}
+      <circle cx="36" cy="53" r="1.6" fill="#fff" opacity="0.9" />
+      <circle cx="64" cy="53" r="1.6" fill="#fff" opacity="0.9" />
+      {/* sunken brow + hollow cheeks */}
+      <path d="M28 40 Q36 35 43 41 M57 41 Q64 35 72 40" stroke="#14120e" strokeWidth="1.6" fill="none" opacity="0.6" />
+      <path d="M30 66 Q34 78 40 84 M70 66 Q66 78 60 84" stroke="#14120e" strokeWidth="1.2" fill="none" opacity="0.45" />
+      {/* gaping, screaming mouth */}
+      <path d="M39 88 Q50 81 61 88 Q57 112 50 116 Q43 112 39 88 Z" fill="#070503" />
+      {/* jagged teeth */}
+      <path d="M41 90 l2 5 l2 -5 l2 5 l2 -5 l2 5 l2 -5 l2 5 l2 -5 l2 5" stroke="#cfc8b6" strokeWidth="0.8" fill="none" opacity="0.7" />
     </svg>
   );
 }
@@ -663,6 +693,85 @@ THREAT ${['LOW', 'ELEV', 'HIGH', 'CRIT'][tick % 4]}
     );
   }
 
+  // ── EGO DEATH — a mindfuck for the "I": a hypnotic vortex spiralling into a watching eye, the
+  //    self glitching apart, eyes opening everywhere, dissociative whispers. the whole app's hue warps.
+  if (mode === 'egodeath') {
+    if (back) return (
+      <div className={BWRAP} aria-hidden>
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 50% 45%, rgba(24,12,36,0.42), rgba(4,3,8,0.92) 70%)' }} />
+        {/* two counter-spinning hypnotic pinwheels */}
+        <div className="absolute left-1/2 top-[45%] w-[120%] aspect-square -translate-x-1/2 -translate-y-1/2 rounded-full shock-spin" style={{ background: 'repeating-conic-gradient(from 0deg, rgba(10,5,18,0.6) 0deg 7deg, rgba(42,22,64,0.5) 7deg 14deg)', opacity: 0.4, maskImage: 'radial-gradient(circle, #000 30%, transparent 66%)', WebkitMaskImage: 'radial-gradient(circle, #000 30%, transparent 66%)', animationDuration: '26s' }} />
+        <div className="absolute left-1/2 top-[45%] w-[82%] aspect-square -translate-x-1/2 -translate-y-1/2 rounded-full shock-spin-rev" style={{ background: 'repeating-conic-gradient(from 0deg, transparent 0deg 9deg, rgba(123,44,191,0.4) 9deg 12deg)', opacity: 0.5, maskImage: 'radial-gradient(circle, #000 18%, transparent 60%)', WebkitMaskImage: 'radial-gradient(circle, #000 18%, transparent 60%)' }} />
+        {/* the vortex rings pulled into the eye */}
+        {[0, 1, 2, 3, 4, 5].map(i => <div key={i} className="absolute left-1/2 top-[45%] w-64 h-64 rounded-full shock-pull" style={{ border: `2px solid ${i % 2 ? 'rgba(200,16,46,0.5)' : 'rgba(123,44,191,0.5)'}`, animationDelay: `${i * 0.66}s` }} />)}
+        {/* the watching eye at the centre */}
+        <svg viewBox="0 0 100 60" className="absolute left-1/2 top-[45%] w-52 -translate-x-1/2 -translate-y-1/2" style={{ opacity: 0.55 }}>
+          <path d="M3 30 Q50 2 97 30 Q50 58 3 30 Z" fill="#050308" stroke="#cdbce8" strokeWidth="1" className="shock-eyeblink" />
+          <circle cx="50" cy="30" r="13" fill="none" stroke="#C8102E" strokeWidth="1.2" className="shock-void" />
+          <circle cx="50" cy="30" r="5.5" fill="#000" className="shock-void" />
+          <circle cx="46.5" cy="26.5" r="1.5" fill="#fff" opacity="0.7" />
+        </svg>
+        <div className="absolute inset-0 shock-void" style={{ boxShadow: 'inset 0 0 120px 44px rgba(2,1,6,0.72)' }} />
+      </div>
+    );
+    return (
+      <div className={`${FWRAP} text-[#cdbce8]`} aria-hidden>
+        {/* a giant fragmenting "I" — the self coming apart */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 leading-none shock-rgb-r" style={{ fontSize: '52vw', color: 'rgba(255,255,255,0.05)', fontFamily: '"Grenze Gotisch", serif', textShadow: '5px 0 rgba(200,16,46,0.35), -5px 0 rgba(0,255,230,0.28)' }}>I</div>
+        {/* watching eyes opening across the dark */}
+        {EYES.map((e, i) => <span key={i} className="absolute shock-twinkle" style={{ left: `${e.l}%`, top: `${e.t}%`, fontSize: e.s, opacity: 0.5, animationDelay: `${e.d}s` }}>👁</span>)}
+        {/* dissociative whispers, flickering in and out */}
+        {[
+          { t: 'you are not real', top: '12%', left: '8%' }, { t: 'who is watching?', top: '24%', left: '52%' },
+          { t: 'this never happened', top: '40%', left: '13%' }, { t: 'wake up', top: '58%', left: '62%' },
+          { t: 'none of this is you', top: '70%', left: '9%' }, { t: 'look away', top: '84%', left: '50%' },
+          { t: 'are you still here?', top: '90%', left: '12%' }, { t: 'there is no I', top: '32%', left: '72%' },
+        ].map((a, i) => <span key={i} className="absolute text-[10px] uppercase tracking-[0.2em] opacity-50 shock-blink" style={{ top: a.top, left: a.left, animationDelay: `${(i % 6) * 0.4}s`, fontFamily: '"VT323", monospace' }}>{a.t}</span>)}
+        <div className="absolute inset-0 shock-rgb-c" style={{ background: 'rgba(0,255,230,0.05)', mixBlendMode: 'screen' }} />
+        <div className="absolute inset-0 opacity-25" style={{ background: 'repeating-linear-gradient(to bottom, rgba(0,0,0,0.4) 0 1px, transparent 1px 3px)' }} />
+      </div>
+    );
+  }
+
+  // ── SLEEP PARALYSIS — pure horror: a wraith looms out of the black and LUNGES (jumpscare flash),
+  //    skeletal hands reach, claw marks tear the screen, blood drips, the eyelids slam shut. don't move.
+  if (mode === 'paralysis') {
+    if (back) return (
+      <div className={BWRAP} aria-hidden>
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 40%, rgba(20,18,22,0.5), rgba(2,2,3,0.96) 66%)' }} />
+        {/* a failing, flickering light */}
+        <div className="absolute left-1/2 top-[6%] -translate-x-1/2 w-[60%] h-[50%] animate-flicker" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(180,180,190,0.12), transparent 62%)', mixBlendMode: 'screen' }} />
+        {/* the entity, looming out of the dark then lunging */}
+        <WraithFace className="absolute left-1/2 top-[14%] w-44 shock-loom" />
+        {/* skeletal hands reaching from the edges */}
+        <BoneHand className="absolute left-[4%] bottom-[5%] w-16 h-28 -rotate-[24deg]" opacity={0.3} />
+        <BoneHand className="absolute right-[5%] bottom-[2%] w-16 h-28 rotate-[206deg] scale-x-[-1]" opacity={0.28} />
+        {/* a creeping shadow rising from below, breathing */}
+        <div className="absolute inset-x-0 bottom-0 h-[42%] shock-breath-heavy" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.96), transparent)' }} />
+      </div>
+    );
+    return (
+      <div className={`${FWRAP} text-[#b8b0a8]`} aria-hidden>
+        {/* the jumpscare — a sudden blinding flash on the lunge */}
+        <div className="absolute inset-0 shock-jump" style={{ background: 'rgba(222,222,228,0.9)' }} />
+        {/* labored-breath vignette closing in */}
+        <div className="absolute inset-0 shock-breath-heavy" style={{ boxShadow: 'inset 0 0 110px 52px rgba(0,0,0,0.92)' }} />
+        {/* claw marks torn down the screen */}
+        <svg className="absolute inset-0 w-full h-full opacity-40" preserveAspectRatio="none" viewBox="0 0 100 100"><g stroke="#5b0f1a" strokeWidth="0.5" fill="none" strokeLinecap="round">
+          <path d="M20 6 L24 70" /><path d="M26 4 L31 72" /><path d="M32 8 L36 66" /><path d="M70 10 L74 78" /><path d="M76 6 L80 74" />
+        </g></svg>
+        {/* blood weeping from the top */}
+        {[[40, 0], [58, 1.6]].map(([l, d], i) => <span key={i} className="absolute top-0 w-[2px] shock-drip" style={{ left: `${l}%`, height: '18%', background: 'linear-gradient(to bottom, #8b0000, #5b0f1a 70%, transparent)', animationDelay: `${d}s` }} />)}
+        {/* the terror, flickering */}
+        <div className="absolute left-0 right-0 top-[42%] text-center text-[15px] tracking-[0.3em] text-[#C8102E] shock-blink" style={{ fontFamily: '"IM Fell English", serif', textShadow: '0 0 12px rgba(139,0,0,0.85)' }}>don't move</div>
+        <div className="absolute left-0 right-0 bottom-[15%] text-center text-[10px] tracking-[0.34em] text-[#b8b0a8]/60 shock-blink" style={{ animationDelay: '0.6s', fontFamily: '"VT323", monospace' }}>IT IS ALREADY IN THE ROOM</div>
+        {/* the eyelids slam shut */}
+        <div className="absolute inset-0 shock-eyelid" style={{ background: '#000' }} />
+        <div className="absolute inset-0" style={{ backgroundImage: GRAIN, backgroundSize: '120px 120px', mixBlendMode: 'overlay', opacity: 0.3 }} />
+      </div>
+    );
+  }
+
   return null;
 }
 
@@ -670,6 +779,8 @@ THREAT ${['LOW', 'ELEV', 'HIGH', 'CRIT'][tick % 4]}
 export const SHOCK_MODES = [
   { id: 'none', label: 'None', desc: 'pure brutalist base' },
   { id: 'lament', label: 'Lament', desc: 'a mourning letter · rain & candlelight · heartbreaking' },
+  { id: 'egodeath', label: 'Ego Death', desc: 'the I dissolves · hypnotic vortex · the watching eye' },
+  { id: 'paralysis', label: 'Sleep Paralysis', desc: 'pure horror · a wraith lunges from the dark' },
   { id: 'insomnia', label: 'Insomnia', desc: 'electric blue · heartbeat · 3:33am' },
   { id: 'dead-channel', label: 'Dead Channel', desc: '1-bit dither · tracking roll · no signal' },
   { id: 'emergency', label: 'Emergency', desc: 'twin radar · alert ticker · infernal signal' },

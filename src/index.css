@@ -465,6 +465,28 @@ body.shock-duo-sepia .phone-frame { filter: sepia(0.8) saturate(1.4) contrast(0.
 /* eyelid blink (requiem eye) */
 @keyframes shockEyeBlink { 0%, 90%, 100% { transform: scaleY(1); } 94% { transform: scaleY(0.05); } 97% { transform: scaleY(1); } }
 .shock-eyeblink { transform-origin: center; animation: shockEyeBlink 4.5s ease-in-out infinite; }
+
+/* ── EGO DEATH (mindfuck) ── */
+/* concentric rings spiralling into the eye — a hypnotic vortex pulling you in */
+@keyframes shockPull { 0% { transform: translate(-50%,-50%) scale(1.7) rotate(0deg); opacity: 0; } 14% { opacity: 0.55; } 100% { transform: translate(-50%,-50%) scale(0.04) rotate(160deg); opacity: 0; } }
+.shock-pull { animation: shockPull 4s cubic-bezier(0.5,0,0.85,0.4) infinite; }
+/* the whole app breathes an uncanny shifting hue (duo filter on .phone-frame) */
+@keyframes shockHueBreathe { 0%,100% { filter: hue-rotate(-24deg) saturate(1.15) contrast(1.04); } 50% { filter: hue-rotate(28deg) saturate(1.32) contrast(1.07); } }
+body.shock-duo-warp .phone-frame { animation: shockHueBreathe 7s ease-in-out infinite; }
+
+/* ── SLEEP PARALYSIS (horror) ── */
+/* the entity looms out of the dark, holds, then LUNGES, then is gone */
+@keyframes shockLoom { 0% { transform: translateX(-50%) scale(0.7); opacity: 0; } 38% { opacity: 0.42; } 84% { transform: translateX(-50%) scale(1.04); opacity: 0.66; } 89% { transform: translateX(-50%) scale(1.5); opacity: 0.97; } 95% { opacity: 0.95; } 100% { transform: translateX(-50%) scale(0.7); opacity: 0; } }
+.shock-loom { animation: shockLoom 9s ease-in infinite; }
+/* a sudden white jumpscare flash, timed to the lunge */
+@keyframes shockJump { 0%, 87%, 100% { opacity: 0; } 89% { opacity: 0.88; } 92% { opacity: 0; } }
+.shock-jump { animation: shockJump 9s steps(1) infinite; }
+/* the screen blinks shut like heavy eyelids you can't keep open */
+@keyframes shockEyelid { 0%, 68%, 100% { opacity: 0; } 80% { opacity: 0.94; } 85% { opacity: 0; } }
+.shock-eyelid { animation: shockEyelid 7s ease-in-out infinite; }
+/* a slow, labored breath — the vignette closing in and easing back */
+@keyframes shockBreathHeavy { 0%,100% { opacity: 0.5; } 46% { opacity: 1; } 56% { opacity: 0.94; } }
+.shock-breath-heavy { animation: shockBreathHeavy 4.6s ease-in-out infinite; }
 /* gentle drift for floating motes */
 @keyframes shockMote { 0% { transform: translateY(0) translateX(0); opacity: 0; } 20% { opacity: 0.8; } 80% { opacity: 0.6; } 100% { transform: translateY(-40vh) translateX(14px); opacity: 0; } }
 .shock-mote { animation-name: shockMote; animation-timing-function: linear; animation-iteration-count: infinite; }

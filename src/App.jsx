@@ -267,14 +267,16 @@ export default function App() {
       rebirth: 'shock-type-rocker', cathedral: 'shock-type-rocker', mist: 'shock-type-rocker',
       keepsake: 'shock-type-fell', vow: 'shock-type-unifraktur', lament: 'shock-type-fell',
       xerox: 'shock-type-oswald', duotone: 'shock-type-oswald',
+      egodeath: 'shock-type-grenze', paralysis: 'shock-type-metal',
     };
     document.body.classList.remove('shock-type-grenze', 'shock-type-pirata', 'shock-type-metal', 'shock-type-unifraktur', 'shock-type-rocker', 'shock-type-fell', 'shock-type-oswald');
     const fc = SHOCK_FONT[settings.shockMode];
     if (fc && !settings.parchmentMode) document.body.classList.add(fc);
     // Some modes recolour the WHOLE app via a reliable element filter on .phone-frame (backdrop-filter
-    // wouldn't override the red base): insomnia=electric blue, requiem=stark B&W, mist=sepia.
-    const SHOCK_DUO = { insomnia: 'shock-duo-blue', requiem: 'shock-duo-bw', mist: 'shock-duo-sepia', keepsake: 'shock-duo-sepia', xerox: 'shock-duo-bw', duotone: 'shock-duo-blue' };
-    document.body.classList.remove('shock-duo-blue', 'shock-duo-bw', 'shock-duo-sepia');
+    // wouldn't override the red base): insomnia=electric blue, requiem=stark B&W, mist=sepia,
+    // ego-death=a breathing uncanny hue-warp, paralysis=drained b&w horror.
+    const SHOCK_DUO = { insomnia: 'shock-duo-blue', requiem: 'shock-duo-bw', mist: 'shock-duo-sepia', keepsake: 'shock-duo-sepia', xerox: 'shock-duo-bw', duotone: 'shock-duo-blue', egodeath: 'shock-duo-warp', paralysis: 'shock-duo-bw' };
+    document.body.classList.remove('shock-duo-blue', 'shock-duo-bw', 'shock-duo-sepia', 'shock-duo-warp');
     const dc = SHOCK_DUO[settings.shockMode];
     if (dc && !settings.parchmentMode) document.body.classList.add(dc);
   }, [settings.parchmentMode, settings.mediaTreatment, settings.shockMode]);
@@ -1920,7 +1922,7 @@ export default function App() {
   const vigil = settings.vigilEnabled !== false && !settings.parchmentMode && isVigil();
 
   return (
-    <div className={`phone-frame max-w-md mx-auto relative overflow-hidden h-[100dvh] text-[#F5F1E8] ${settings.shockMode === 'scream' ? 'shock-shake' : settings.shockMode === 'glitch' ? 'shock-jitter' : ''}`}
+    <div className={`phone-frame max-w-md mx-auto relative overflow-hidden h-[100dvh] text-[#F5F1E8] ${settings.shockMode === 'scream' || settings.shockMode === 'paralysis' ? 'shock-shake' : settings.shockMode === 'glitch' ? 'shock-jitter' : ''}`}
       style={{ background: settings.parchmentMode ? '#EDE0C2' : '#0A0A0A' }}>
       {/* Shock mode — BACK layer: bold occult motifs render BEHIND the app content so it stays readable */}
       {!settings.parchmentMode && !isInsideOverlay && <ShockOverlay mode={settings.shockMode} layer="back" />}
