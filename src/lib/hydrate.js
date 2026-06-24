@@ -20,6 +20,7 @@ export function hydratePost(row, myReactionSet, myId) {
     quoted: row.quoted || undefined,
     anonymous: row.anonymous,
     eventId: row.event_id || null,
+    coauthorHandle: row.coauthor_handle || null,
     mine: !!myId && row.author_id_public === myId, // false for anon (acceptable)
     authorId: row.author_id_public || null,        // for block filtering
     reactions: { bat: row.bat, fire: row.fire, skull: row.skull, smoke: row.smoke },

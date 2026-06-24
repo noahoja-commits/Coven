@@ -19,6 +19,7 @@ function bodyFor(n, actor) {
     case 'rsvp':        return n.body ? `${actor} is coming to ${n.body}` : `${actor} is coming to your event`;
     case 'crew_join':   return n.body ? `${actor} joined ${n.body}` : `${actor} joined your crew`;
     case 'mention':     return `${actor} mentioned you`;
+    case 'coauthor':    return n.body ? `${actor} co-signed a post with you: "${n.body}"` : `${actor} co-signed a post with you`;
     default:            return `${actor} did something`;
   }
 }

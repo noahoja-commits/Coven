@@ -13,6 +13,7 @@ function text(n) {
     case 'rsvp':      return n.body ? `is coming to ${n.body}` : 'is coming to your event';
     case 'crew_join': return n.body ? `joined ${n.body}` : 'joined your crew';
     case 'mention':   return 'mentioned you';
+    case 'coauthor':  return n.body ? `co-signed a post with you: "${n.body}"` : 'co-signed a post with you';
     default:        return 'did something';
   }
 }

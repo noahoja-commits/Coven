@@ -842,7 +842,7 @@ export default function App() {
     return () => timeouts.forEach(clearTimeout);
   }, [meId, posts, meHandle, sigils, crystals, ritual, communityMembership, reflections, graves, bookmarks, divinationLog, following]);
 
-  const addPost = async ({ body, community, anonymous, poll, img, kind, eventId }) => {
+  const addPost = async ({ body, community, anonymous, poll, img, kind, eventId, coauthorId, coauthorHandle }) => {
     if (!meId) return;
     const tempId = `temp-${Date.now()}`;
     const optimistic = {
@@ -852,6 +852,7 @@ export default function App() {
       time: 'just now',
       community: community || 'general', body, img,
       avatarUrl: anonymous ? undefined : meAvatarUrl,
+      coauthorHandle: anonymous ? null : (coauthorHandle || null),
       reactions: { bat: 0, fire: 0, skull: 0, smoke: 0 }, comments: [], myReactions: {},
       mine: !anonymous, anonymous: !!anonymous, baseCommentCount: 0, pending: true,
     };
@@ -864,7 +865,7 @@ export default function App() {
     setPosts(prev => [optimistic, ...prev]);
     logActivity({ kind: 'post', glyph: anonymous ? '✟' : '✦', label: anonymous ? 'made a confession' : 'spoke into the dark', detail: body.length > 60 ? body.slice(0, 60) + '…' : body, postId: tempId });
     try {
-      const saved = await createPost({ body, community, anonymous, poll, img, kind, eventId }, { id: meId, handle: meHandle, avatar: meAvatar, avatarUrl: meAvatarUrl });
+      const saved = await createPost({ body, community, anonymous, poll, img, kind, eventId, coauthorId, coauthorHandle }, { id: meId, handle: meHandle, avatar: meAvatar, avatarUrl: meAvatarUrl });
       setPosts(prev => prev.map(p => (p.id === tempId ? saved : p)));
       if (eventId) fetchEventRecaps(eventId, meId).then(setEventRecaps).catch(() => {}); // refresh the event's recaps
     } catch (e) {

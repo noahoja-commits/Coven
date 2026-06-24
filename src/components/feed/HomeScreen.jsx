@@ -387,6 +387,10 @@ export function HomeScreen({
                     disabled={!!post.anonymous}
                     className={`text-[#F5F1E8] text-sm ${post.anonymous ? 'italic text-[#C8102E]' : 'hover:underline'}`}
                     style={F.ui}>{post.user}</button>
+                  {post.coauthorHandle && !post.anonymous && (
+                    <button onClick={(e) => { e.stopPropagation(); onOpenUser && onOpenUser(post.coauthorHandle); }}
+                      className="text-[10px] text-[#C9A961] hover:underline ml-1.5" style={F.ui}>with @{post.coauthorHandle}</button>
+                  )}
                   <div className="flex items-center gap-1.5 text-[10px] text-[#6B6B6B]" style={F.ui}>
                     <span style={F.mono} className="text-xs">{post.time}</span>
                     <span>·</span>

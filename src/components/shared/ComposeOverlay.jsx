@@ -10,6 +10,10 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
   const [text, setText] = useState('');
   const [community, setCommunity] = useState(initialCommunity || 'general');
   const [anonymous, setAnonymous] = useState(false);
+  const [coauthor, setCoauthor] = useState(null); // { id, handle } — co-signed post
+  const [coOpen, setCoOpen] = useState(false);
+  const [coSearch, setCoSearch] = useState('');
+  const [coResults, setCoResults] = useState([]);
   const [poll, setPoll] = useState(null); // null or {options: ['', '']}
   const [mediaFile, setMediaFile] = useState(null);
   const [mediaPreview, setMediaPreview] = useState(null);
@@ -100,11 +104,23 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
     setMediaFile(null); setMediaPreview(null); setMediaKind(null);
   };
 
+  // Co-author search.
+  useEffect(() => {
+    const q = coSearch.trim();
+    if (!q) { setCoResults([]); return undefined; }
+    let on = true;
+    const t = setTimeout(() => {
+      searchProfiles(q, { limit: 6 }).then(r => { if (on) setCoResults((r || []).filter(u => u.id !== meId)); }).catch(() => {});
+    }, 250);
+    return () => { on = false; clearTimeout(t); };
+  }, [coSearch, meId]);
+
   const submit = async () => {
     if (!canPost) return;
     setBusy(true); setError('');
     try {
       const payload = { body: text.trim(), community, anonymous };
+      if (coauthor && !anonymous) { payload.coauthorId = coauthor.id; payload.coauthorHandle = coauthor.handle; }
       if (poll) {
         const opts = poll.options.map(o => o.trim()).filter(Boolean);
         if (opts.length >= 2) payload.poll = opts;
@@ -119,7 +135,7 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
         }
       }
       onPost && onPost(payload);
-      setText(''); clearMedia(); clearDraft(); setPendingDraft(null);
+      setText(''); clearMedia(); clearDraft(); setPendingDraft(null); setCoauthor(null);
     } catch (err) {
       setError(err?.message || 'could not post — try again');
       setBusy(false);
@@ -231,6 +247,29 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
             {anonymous ? <EyeOff size={14} /> : <Eye size={14} />}
             <span>{anonymous ? 'confession' : 'identified'}</span>
           </button>
+          {!anonymous && (
+            <div className="relative">
+              {coauthor ? (
+                <button onClick={() => setCoauthor(null)} className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-[#C9A961] hover:text-[#8B0000]" style={F.ui} title="remove co-author">
+                  with @{coauthor.handle} ✕
+                </button>
+              ) : (
+                <button onClick={() => setCoOpen(o => !o)} className="text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#A8A29E]" style={F.ui} title="co-sign with a soul">+ co-sign</button>
+              )}
+              {coOpen && !coauthor && (
+                <div className="absolute bottom-full mb-2 left-0 w-52 bg-[#0F0F0F] border border-[#2A2A2A] z-20">
+                  <input value={coSearch} onChange={e => setCoSearch(e.target.value)} placeholder="search a soul…" autoFocus
+                    className="w-full bg-[#0A0A0A] border-b border-[#1A1A1A] px-2.5 py-1.5 text-xs text-[#F5F1E8] outline-none placeholder:text-[#6B6B6B]" style={F.ui} />
+                  {coResults.map(u => (
+                    <button key={u.id} onClick={() => { setCoauthor({ id: u.id, handle: u.handle }); setCoOpen(false); setCoSearch(''); setCoResults([]); }}
+                      className="w-full text-left px-2.5 py-1.5 text-xs text-[#A8A29E] hover:bg-[#1A1A1A] flex items-center gap-2" style={F.ui}>
+                      <span>{u.avatar}</span>@{u.handle}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           <span className="ml-auto text-[10px] text-[#6B6B6B]" style={F.mono}>{text.length}</span>
         </div>
         {anonymous && (
