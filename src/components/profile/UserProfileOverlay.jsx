@@ -4,6 +4,7 @@ import { F } from '../../styles/fonts';
 import { getProfileByHandle, getProfileStats } from '../../lib/db/profiles';
 import { fetchUserPosts } from '../../lib/db/posts';
 import { borderStyle, bannerStyle } from '../../data/decor';
+import { moodActive } from '../../data/moods';
 import { PostGrid } from './PostGrid';
 import { TarotFrame, arcanaFor, Grain } from '../shared/Sigils';
 
@@ -32,6 +33,7 @@ export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], isF
 
   // Real profile, or a minimal stand-in so the overlay still renders by handle.
   const user = profile || { handle, avatar: '✦', bio: '', tags: [], pronouns: '' };
+  const mood = moodActive(user.mood) ? user.mood : null;
 
   if (!loading && !profile) {
     return (
@@ -73,12 +75,18 @@ export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], isF
         ); })()}
         <div className="relative flex items-start gap-4">
           <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#3B0A12] to-[#0A0A0A] border border-[#3F3F3F] flex items-center justify-center text-3xl shrink-0"
-            style={borderStyle(user.decor?.border)}>
+            style={mood ? { boxShadow: `0 0 22px ${mood.color}88` } : borderStyle(user.decor?.border)}>
             {user.avatar_url ? <img src={user.avatar_url} alt="" className="w-full h-full object-cover" /> : user.avatar}
           </div>
           <div className="flex-1 min-w-0">
             <h2 className="text-[#F5F1E8] text-xl truncate" style={F.brand}>{user.handle}</h2>
             {user.pronouns && <div className="text-[#6B6B6B] text-[10px] uppercase tracking-wider" style={F.ui}>{user.pronouns}</div>}
+            {mood && (
+              <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 border text-[10px] uppercase tracking-wider"
+                style={{ borderColor: `${mood.color}66`, color: mood.color, textShadow: `0 0 6px ${mood.color}66`, ...F.ui }}>
+                <span>{mood.glyph}</span><span>{mood.label}</span>
+              </div>
+            )}
             {user.bio && <p className="text-[#A8A29E] text-sm leading-snug mt-1" style={F.serif}>{user.bio}</p>}
             {user.tags?.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-2">

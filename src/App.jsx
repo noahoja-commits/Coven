@@ -50,6 +50,7 @@ import { EventsScreen } from './components/events/EventsScreen';
 import { ProfileScreen } from './components/profile/ProfileScreen';
 import { TonightStatusModal } from './components/profile/TonightStatusModal';
 import { ProfileEditModal } from './components/profile/ProfileEditModal';
+import { MoodModal } from './components/profile/MoodModal';
 import { UserProfileOverlay } from './components/profile/UserProfileOverlay';
 import { StoryViewer } from './components/feed/StoryViewer';
 import { StoryComposer } from './components/feed/StoryComposer';
@@ -129,6 +130,7 @@ export default function App() {
   const [weatherTint, setWeatherTint] = useState(null); // {color,opacity} when Weather mood is on
   const [showTonightModal, setShowTonightModal] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showMood, setShowMood] = useState(false);
   const [showBlocked, setShowBlocked] = useState(false);
   const [showLegal, setShowLegal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -307,13 +309,13 @@ export default function App() {
 
   // Lock body scroll when a modal overlay is open
   useEffect(() => {
-    const anyModal = showEditProfile || showTonightModal || showSettings || showNotifs
+    const anyModal = showEditProfile || showMood || showTonightModal || showSettings || showNotifs
       || showCompose || showStoryComposer || showSearch || showVespersArchive
       || showAddGrave || showAddAnniv || showNewGroup || showReflections || showDreams || showCrewBrowse
       || showNowPlaying || showBlocked || showLegal || showDeleteConfirm || showMyTickets || quoteTarget || activeStoryIndex !== null;
     document.body.style.overflow = anyModal ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
-  }, [showEditProfile, showTonightModal, showSettings, showNotifs, showCompose, showStoryComposer, showSearch, showVespersArchive, showAddGrave, showAddAnniv, showNewGroup, showReflections, showDreams, showCrewBrowse, showNowPlaying, showBlocked, showLegal, showDeleteConfirm, showMyTickets, quoteTarget, activeStoryIndex]);
+  }, [showEditProfile, showMood, showTonightModal, showSettings, showNotifs, showCompose, showStoryComposer, showSearch, showVespersArchive, showAddGrave, showAddAnniv, showNewGroup, showReflections, showDreams, showCrewBrowse, showNowPlaying, showBlocked, showLegal, showDeleteConfirm, showMyTickets, quoteTarget, activeStoryIndex]);
 
   // Auto-expire tonight status after 12h
   useEffect(() => {
@@ -349,6 +351,7 @@ export default function App() {
       scenes: dbProfile.scenes || [],
       birthday: dbProfile.birthday || null,
       decor: dbProfile.decor || {},
+      mood: dbProfile.mood || {},
       city: dbProfile.city || '',
       scene: dbProfile.city || '',
       joinedScene: dbProfile.created_at,
@@ -1478,6 +1481,18 @@ export default function App() {
     }
   };
 
+  // Set/clear the self-set profile mood (public, expiring aura). Pass {} to clear.
+  const saveMood = async (mood) => {
+    setProfile(p => (p ? { ...p, mood: mood || {} } : p)); // optimistic
+    if (!meId) return;
+    try {
+      await updateProfile(meId, { mood: mood || {} });
+    } catch {
+      await refreshProfile();
+      showToast("couldn't set your mood — try again.", 'error');
+    }
+  };
+
   // ---- Overlay back-button + Escape handling ----------------------------------
   // Hooks MUST live above the early-return gate below (a render that returns early would
   // otherwise run fewer hooks → React hooks-order crash). No router → without this the
@@ -1488,7 +1503,7 @@ export default function App() {
   const anyOverlayOpen = !!(
     showSigilDraw ||
     ticketSuccess || activeStoryIndex !== null || showStoryComposer || venueEditorEvent ||
-    ticketManagerEvent || showCreateEvent || showEditProfile || showSettings || showBlocked || showLegal || showDeleteConfirm || reportSheet || legalEscalation ||
+    ticketManagerEvent || showCreateEvent || showEditProfile || showMood || showSettings || showBlocked || showLegal || showDeleteConfirm || reportSheet || legalEscalation ||
     showMyTickets || showReflections || showDreams || showNowPlaying || showAddGrave || showAddAnniv ||
     showVespersArchive || showNewGroup || showTonightModal || quoteTarget || showOddityCompose ||
     activeOddity || activeText || activePostComments || followList || activeConversation || activeUserHandle ||
@@ -1505,6 +1520,7 @@ export default function App() {
     if (ticketManagerEvent) { setTicketManagerEvent(null); return true; }
     if (showCreateEvent) { setShowCreateEvent(false); return true; }
     if (showEditProfile) { setShowEditProfile(false); return true; }
+    if (showMood) { setShowMood(false); return true; }
     if (showSettings) { setShowSettings(false); return true; }
     if (legalEscalation) { setLegalEscalation(null); return true; }
     if (reportSheet) { setReportSheet(null); return true; }
@@ -1778,6 +1794,7 @@ export default function App() {
         onOpenTonightStatus={() => setShowTonightModal(true)}
         onOpenSettings={() => setShowSettings(true)}
         onEditProfile={() => setShowEditProfile(true)}
+        onOpenMood={() => setShowMood(true)}
         onShowFollowers={openFollowers}
         onShowFollowing={openFollowing}
         joinedScenes={COMMUNITIES.filter(c => communityMembership[c.id])}
@@ -2022,6 +2039,13 @@ export default function App() {
           meId={meId}
           onSave={saveProfile}
           onClose={() => setShowEditProfile(false)}
+        />
+      )}
+      {showMood && (
+        <MoodModal
+          current={profile?.mood}
+          onSave={saveMood}
+          onClose={() => setShowMood(false)}
         />
       )}
       {activeStoryIndex !== null && (

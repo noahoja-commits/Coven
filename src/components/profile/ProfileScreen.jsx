@@ -7,6 +7,7 @@ import { timeAgo, daysBetween, sunSign } from '../../data/helpers';
 import { ACHIEVEMENTS, earnedAchievements } from '../../data/achievements';
 import { fetchUserPosts } from '../../lib/db/posts';
 import { borderStyle, bannerStyle } from '../../data/decor';
+import { moodActive } from '../../data/moods';
 import { CRYSTAL_OPTIONS } from '../../data/crystals';
 import { SHRINE_OBJECTS, earnedShrine } from '../../data/shrine';
 import { PostGrid } from './PostGrid';
@@ -22,8 +23,9 @@ const SHRINE_THEMES = {
   cathedral: 'linear-gradient(180deg, #1F0810 0%, transparent 100%)',
 };
 
-export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpdateTracker, onOpenTonightStatus, onOpenSettings, mementoMoriOn, settings, onEditProfile, onLightCandle, crews = [], onOpenCrew, onBrowseCrews, onAddGrave, onAddAnniversary, onOpenNowPlaying, onOpenReflections, onOpenDreams, dreamsCount = 0, onOpenTickets, reflectionsCount = 0, nowPlaying, activityLog = [], sigils = [], bookmarks = [], onOpenComments, onOpenPost, ritual, ritualDoneToday, onPerformRitual, crystals = [], onToggleCrystal, pinnedPost, shrineTheme = 'oxblood', onSetShrineTheme, storyHighlights = [], onRemoveHighlight, achievementState = {}, onShowFollowers, onShowFollowing, joinedScenes = [], onOpenScene,
+export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpdateTracker, onOpenTonightStatus, onOpenSettings, mementoMoriOn, settings, onEditProfile, onLightCandle, crews = [], onOpenCrew, onBrowseCrews, onAddGrave, onAddAnniversary, onOpenNowPlaying, onOpenReflections, onOpenDreams, dreamsCount = 0, onOpenTickets, reflectionsCount = 0, nowPlaying, activityLog = [], sigils = [], bookmarks = [], onOpenComments, onOpenPost, ritual, ritualDoneToday, onPerformRitual, crystals = [], onToggleCrystal, pinnedPost, shrineTheme = 'oxblood', onSetShrineTheme, storyHighlights = [], onRemoveHighlight, achievementState = {}, onShowFollowers, onShowFollowing, joinedScenes = [], onOpenScene, onOpenMood,
 shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
+  const mood = moodActive(profile.mood) ? profile.mood : null;
   const earned = earnedAchievements(achievementState);
   const earnedIds = new Set(earned.map(a => a.id));
   const [showThemePicker, setShowThemePicker] = useState(false);
@@ -107,6 +109,8 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
             <button onClick={() => shareCoven({ title: `@${profile.name} on Coven`, text: profile.bio || 'a soul in the coven', path: `?u=${profile.name}` })}
               className="text-[#6B6B6B] hover:text-[#A8A29E]" title="share your profile"><Share2 size={14} /></button>
             <button onClick={() => setShowThemePicker(true)} className="text-[#6B6B6B] hover:text-[#A8A29E]" title="shrine theme">✦</button>
+            <button onClick={onOpenMood} className="text-[#6B6B6B] hover:text-[#A8A29E] text-sm leading-none" title="set your mood"
+              style={mood ? { color: mood.color, textShadow: `0 0 8px ${mood.color}99` } : undefined}>{mood ? mood.glyph : '☁'}</button>
             <button onClick={onEditProfile} className="text-[#6B6B6B] hover:text-[#A8A29E]" title="edit profile"><Pencil size={14} /></button>
             <button onClick={onOpenSettings} className="text-[#6B6B6B] hover:text-[#A8A29E]"><Settings size={16} /></button>
           </div>
@@ -116,7 +120,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
           {/* Avatar with candle */}
           <div className="relative shrink-0">
             <div className={`w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#3B0A12] to-[#0A0A0A] border ${settings?.ghostMode ? 'border-[#7B2CBF]' : 'border-[#3F3F3F]'} flex items-center justify-center text-3xl`}
-              style={settings?.ghostMode ? { boxShadow: '0 0 20px rgba(123, 44, 191, 0.5)' } : borderStyle(profile.decor?.border)}>{profile.avatarUrl ? <img src={profile.avatarUrl} alt="" className="w-full h-full object-cover" /> : (profile.avatar || '🦇')}</div>
+              style={settings?.ghostMode ? { boxShadow: '0 0 20px rgba(123, 44, 191, 0.5)' } : mood ? { boxShadow: `0 0 22px ${mood.color}88` } : borderStyle(profile.decor?.border)}>{profile.avatarUrl ? <img src={profile.avatarUrl} alt="" className="w-full h-full object-cover" /> : (profile.avatar || '🦇')}</div>
             {/* Candle indicator */}
             {candleActive && (
               <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[#0A0A0A] border border-[#C9A961]/40 flex items-center justify-center" title={`lit by ${profile.candleLit.lastBy}`}>
@@ -132,6 +136,12 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
             <div className="text-[#6B6B6B] text-[10px] uppercase tracking-wider mb-1" style={F.ui}>
               {profile.pronouns} {sign && <span className="ml-2 text-[#C8102E]">{sign.glyph} {sign.name.toLowerCase()}</span>}
             </div>
+            {mood && (
+              <button onClick={onOpenMood} className="inline-flex items-center gap-1 px-2 py-0.5 mb-1 border text-[10px] uppercase tracking-wider"
+                style={{ borderColor: `${mood.color}66`, color: mood.color, textShadow: `0 0 6px ${mood.color}66`, ...F.ui }}>
+                <span>{mood.glyph}</span><span>{mood.label}</span>
+              </button>
+            )}
             <p className="text-[#A8A29E] text-sm leading-snug" style={F.serif}>{profile.bio}</p>
             <div className="flex flex-wrap items-center gap-1.5 mt-2">
               {profile.tags.map(t => (
