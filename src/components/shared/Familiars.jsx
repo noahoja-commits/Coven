@@ -1,76 +1,102 @@
-// Hand-drawn familiar art — a refined seated black cat and a little winged horned demon.
-// Silhouette-style with rim light + glowing eyes so they read as real creatures at small size,
-// not emoji. Both face the same way and share proportions so the transform feels crafted.
+// Hand-drawn familiar art — a refined seated black cat and the little demon it becomes.
+// Both share the SAME seated silhouette (bell haunches + round head) so the transform reads as
+// one creature changing: the cat's pointed ears become curved horns, bat wings + a spaded tail
+// unfurl, and the eyes kindle from gold to ember-red. Silhouette-style with rim light + glowing
+// eyes so they read as real little creatures at small size, not emoji.
+
+// Shared seated body — bell-shaped haunches tapering to a round head. Drawn on a 40×44 grid.
+function SeatedBody({ fill, rim }) {
+  return (
+    <>
+      {/* haunches: a soft bell, wide seated base narrowing to the shoulders */}
+      <path d="M14 20 C10.5 26 9 32 9.2 37 C9.3 40 11 41.5 14 41.5 L26 41.5 C29 41.5 30.7 40 30.8 37 C31 32 29.5 26 26 20 Z"
+        fill={fill} stroke={rim} strokeWidth="0.5" />
+      {/* front paws peeking under the base */}
+      <ellipse cx="15.5" cy="41" rx="2.4" ry="1.5" fill={fill} stroke={rim} strokeWidth="0.4" />
+      <ellipse cx="24.5" cy="41" rx="2.4" ry="1.5" fill={fill} stroke={rim} strokeWidth="0.4" />
+      {/* head: a clean round skull seated on the shoulders */}
+      <circle cx="20" cy="15" r="7.6" fill={fill} stroke={rim} strokeWidth="0.5" />
+    </>
+  );
+}
 
 export function CatFamiliar({ size = 30, glow = false, className = '', style }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 40 40" className={className} style={style} aria-hidden>
+    <svg width={size} height={(size * 44) / 40} viewBox="0 0 40 44" className={className} style={style} aria-hidden>
       <defs>
         <linearGradient id="catBody" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#1c1c20" />
-          <stop offset="0.5" stopColor="#0d0d10" />
+          <stop offset="0" stopColor="#26262b" />
+          <stop offset="0.45" stopColor="#101013" />
           <stop offset="1" stopColor="#050506" />
         </linearGradient>
       </defs>
-      {/* tail — sweeping curl along the right */}
-      <path d="M26 33 C36 33 37 21 30 18 C34 20 33 28 26 29 Z" fill="url(#catBody)" stroke="#000" strokeWidth="0.4" />
-      {/* seated body + head + ears as one silhouette */}
-      <path d="M20 39 C10 39 7.5 31 9.5 24 C8 19.5 8.5 13.5 12 11 L9.5 3.5 C9.2 2.4 10.2 2 11 2.7 L16 7 C17.2 6.4 18.5 6.1 20 6.1 C21.5 6.1 22.8 6.4 24 7 L29 2.7 C29.8 2 30.8 2.4 30.5 3.5 L28 11 C31.5 13.5 32 19.5 30.5 24 C32.5 31 30 39 20 39 Z"
-        fill="url(#catBody)" stroke="#26262c" strokeWidth="0.5" />
-      {/* inner-ear shadow */}
-      <path d="M12 4.5 L13.5 9 L15.5 7.2 Z M28 4.5 L26.5 9 L24.5 7.2 Z" fill="#000" opacity="0.5" />
-      {/* glowing eyes */}
-      <g style={glow ? { filter: 'drop-shadow(0 0 2px rgba(201,169,97,0.9))' } : undefined}>
-        <ellipse cx="16" cy="16.5" rx="1.7" ry="2.6" fill="#C9A961" />
-        <ellipse cx="24" cy="16.5" rx="1.7" ry="2.6" fill="#C9A961" />
-        <ellipse cx="16" cy="16.5" rx="0.55" ry="2.2" fill="#1a0e02" />
-        <ellipse cx="24" cy="16.5" rx="0.55" ry="2.2" fill="#1a0e02" />
+      {/* tail — a long sweep curling around the right of the base */}
+      <path d="M28 39 C39 39 40 24 30.5 22 C36.5 25 35 34 27 33.5 Z" fill="url(#catBody)" stroke="#1a1a1f" strokeWidth="0.4" strokeLinejoin="round" />
+      {/* pointed triangular ears */}
+      <path d="M12.5 11 L13.6 1.6 L19 8.5 Z" fill="url(#catBody)" stroke="#26262c" strokeWidth="0.4" strokeLinejoin="round" />
+      <path d="M27.5 11 L26.4 1.6 L21 8.5 Z" fill="url(#catBody)" stroke="#26262c" strokeWidth="0.4" strokeLinejoin="round" />
+      {/* inner-ear hollow */}
+      <path d="M14 8 L14.7 3.5 L17.4 8 Z" fill="#000" opacity="0.55" />
+      <path d="M26 8 L25.3 3.5 L22.6 8 Z" fill="#000" opacity="0.55" />
+      <SeatedBody fill="url(#catBody)" rim="#26262c" />
+      {/* glowing almond eyes with slit pupils */}
+      <g style={glow ? { filter: 'drop-shadow(0 0 2.5px rgba(201,169,97,0.95))' } : undefined}>
+        <path d="M13.6 15.4 Q16.4 13.4 18.4 15.6 Q16.2 17 13.6 15.4 Z" fill="#C9A961" />
+        <path d="M26.4 15.4 Q23.6 13.4 21.6 15.6 Q23.8 17 26.4 15.4 Z" fill="#C9A961" />
+        <ellipse cx="16" cy="15.4" rx="0.6" ry="1.9" fill="#160c02" />
+        <ellipse cx="24" cy="15.4" rx="0.6" ry="1.9" fill="#160c02" />
       </g>
-      {/* nose + whisker hint */}
-      <path d="M20 20.5 l-1.4 1.2 h2.8 Z" fill="#2a1014" />
+      {/* muzzle: nose + soft mouth */}
+      <path d="M20 18.2 l-1.3 1.1 h2.6 Z" fill="#caa37a" opacity="0.8" />
+      <path d="M20 19.3 q-1.4 1.3 -2.7 0.4 M20 19.3 q1.4 1.3 2.7 0.4" stroke="#000" strokeWidth="0.4" fill="none" opacity="0.5" />
+      {/* whiskers */}
+      <g stroke="#9a948c" strokeWidth="0.3" opacity="0.45" strokeLinecap="round">
+        <path d="M18 18.6 L11.5 17.8 M18 19.3 L11.8 19.8" />
+        <path d="M22 18.6 L28.5 17.8 M22 19.3 L28.2 19.8" />
+      </g>
     </svg>
   );
 }
 
 export function DemonFamiliar({ size = 32, className = '', style }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 40 42" className={className} style={style} aria-hidden>
+    <svg width={size} height={(size * 44) / 40} viewBox="0 0 40 44" className={className} style={style} aria-hidden>
       <defs>
         <linearGradient id="demonBody" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#2a0d12" />
-          <stop offset="0.5" stopColor="#140509" />
+          <stop offset="0" stopColor="#3a121a" />
+          <stop offset="0.45" stopColor="#1a070c" />
           <stop offset="1" stopColor="#080205" />
         </linearGradient>
         <radialGradient id="demonEye" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0" stopColor="#ff5a4a" />
+          <stop offset="0" stopColor="#ff6a52" />
           <stop offset="0.5" stopColor="#C8102E" />
           <stop offset="1" stopColor="#5b0f1a" />
         </radialGradient>
       </defs>
-      {/* bat wings, behind */}
-      <path d="M14 17 C5 11 1 12 2 19 C4 17 6 18 7 21 C4 20 3 22 4 26 C7 23 9 24 11 27 C9 22 11 19 14 18 Z"
-        fill="url(#demonBody)" stroke="#3a0f16" strokeWidth="0.5" />
-      <path d="M26 17 C35 11 39 12 38 19 C36 17 34 18 33 21 C36 20 37 22 36 26 C33 23 31 24 29 27 C31 22 29 19 26 18 Z"
-        fill="url(#demonBody)" stroke="#3a0f16" strokeWidth="0.5" />
-      {/* horns */}
-      <path d="M14.5 9 C11 5 11.5 1.5 14 1 C12.8 2.6 13.4 4.6 16 6.5 Z" fill="#1a0a0c" stroke="#3a0f16" strokeWidth="0.4" />
-      <path d="M25.5 9 C29 5 28.5 1.5 26 1 C27.2 2.6 26.6 4.6 24 6.5 Z" fill="#1a0a0c" stroke="#3a0f16" strokeWidth="0.4" />
-      {/* tail with spade tip */}
-      <path d="M24 33 C32 36 33 28 28 26 C31 28 30 32 25 31 Z" fill="url(#demonBody)" />
-      <path d="M27.5 24.5 l3 -2.5 l-0.4 3.4 l-2.6 0.6 Z" fill="#1a0a0c" />
-      {/* head + lean body + legs */}
-      <path d="M20 40 C14 40 12 35 13 31 C10.5 28 10.5 23 13 21 C11.5 18 12 13 16 11 C17 9.5 18.4 9 20 9 C21.6 9 23 9.5 24 11 C28 13 28.5 18 27 21 C29.5 23 29.5 28 27 31 C28 35 26 40 20 40 Z M16 38 L17 41.5 M24 38 L23 41.5"
-        fill="url(#demonBody)" stroke="#3a0f16" strokeWidth="0.6" strokeLinejoin="round" />
-      {/* clawed feet hint */}
-      <path d="M15 39.5 l-1.4 1.6 m1.8 -1.6 l0.2 2 M25 39.5 l1.4 1.6 m-1.8 -1.6 l-0.2 2" stroke="#1a0a0c" strokeWidth="0.9" strokeLinecap="round" />
-      {/* glowing eyes + a wicked brow */}
-      <path d="M14.5 16 L18 17.5 M25.5 16 L22 17.5" stroke="#3a0f16" strokeWidth="0.8" strokeLinecap="round" />
-      <ellipse cx="16.6" cy="18.4" rx="1.7" ry="1.5" fill="url(#demonEye)" style={{ filter: 'drop-shadow(0 0 2.5px rgba(200,16,46,0.95))' }} />
-      <ellipse cx="23.4" cy="18.4" rx="1.7" ry="1.5" fill="url(#demonEye)" style={{ filter: 'drop-shadow(0 0 2.5px rgba(200,16,46,0.95))' }} />
-      <ellipse cx="16.6" cy="18.4" rx="0.4" ry="1.2" fill="#1a0205" />
-      <ellipse cx="23.4" cy="18.4" rx="0.4" ry="1.2" fill="#1a0205" />
+      {/* bat wings, spread behind the body with scalloped membranes */}
+      <path d="M15 21 C7 14 1.5 14 1 20 C3.3 18.6 5 19.4 6 22 C3.4 21.4 2.2 22.8 2.6 26 C5.4 23.6 7.4 24.2 9 27 C7.2 23.2 9.4 21 13 20.4 Z"
+        fill="url(#demonBody)" stroke="#4a121c" strokeWidth="0.5" strokeLinejoin="round" />
+      <path d="M25 21 C33 14 38.5 14 39 20 C36.7 18.6 35 19.4 34 22 C36.6 21.4 37.8 22.8 37.4 26 C34.6 23.6 32.6 24.2 31 27 C32.8 23.2 30.6 21 27 20.4 Z"
+        fill="url(#demonBody)" stroke="#4a121c" strokeWidth="0.5" strokeLinejoin="round" />
+      {/* curved horns rising where the cat's ears were */}
+      <path d="M13.8 10 C10 6.5 10 2.5 12.8 1.4 C11.6 3.6 12.4 5.8 16 8.2 Z" fill="#2a0c11" stroke="#4a121c" strokeWidth="0.4" strokeLinejoin="round" />
+      <path d="M26.2 10 C30 6.5 30 2.5 27.2 1.4 C28.4 3.6 27.6 5.8 24 8.2 Z" fill="#2a0c11" stroke="#4a121c" strokeWidth="0.4" strokeLinejoin="round" />
+      {/* spaded tail curling around the right of the base */}
+      <path d="M28 38 C37 39 38.5 27 31 24.5 C36 27 34.5 35 27.5 33.5 Z" fill="url(#demonBody)" stroke="#4a121c" strokeWidth="0.4" strokeLinejoin="round" />
+      <path d="M30 22 l3.4 -2 l-0.2 3.8 l-3.1 0.3 Z" fill="#2a0c11" stroke="#4a121c" strokeWidth="0.3" strokeLinejoin="round" />
+      <SeatedBody fill="url(#demonBody)" rim="#4a121c" />
+      {/* heavy brow casting the eyes into a glare */}
+      <path d="M13.4 13.6 L18.4 15.4 M26.6 13.6 L21.6 15.4" stroke="#4a121c" strokeWidth="0.9" strokeLinecap="round" />
+      {/* glowing ember eyes */}
+      <g style={{ filter: 'drop-shadow(0 0 3px rgba(200,16,46,0.95))' }}>
+        <path d="M13.8 16 Q16.4 13.9 18.6 16.2 Q16.2 17.7 13.8 16 Z" fill="url(#demonEye)" />
+        <path d="M26.2 16 Q23.6 13.9 21.4 16.2 Q23.8 17.7 26.2 16 Z" fill="url(#demonEye)" />
+        <ellipse cx="16.1" cy="15.9" rx="0.5" ry="1.6" fill="#1a0205" />
+        <ellipse cx="23.9" cy="15.9" rx="0.5" ry="1.6" fill="#1a0205" />
+      </g>
       {/* fanged grin */}
-      <path d="M17.5 23 q2.5 2 5 0 M18 23 l0.5 1.6 l0.6 -1.4 M22 23 l-0.5 1.6 l-0.6 -1.4" stroke="#1a0205" strokeWidth="0.7" fill="#d8c9b0" strokeLinejoin="round" />
+      <path d="M16.5 19.4 Q20 22.4 23.5 19.4" stroke="#1a0205" strokeWidth="0.7" fill="none" strokeLinecap="round" />
+      <path d="M17.6 19.9 l0.7 1.7 l0.7 -1.5 Z M22.4 19.9 l-0.7 1.7 l-0.7 -1.5 Z" fill="#e8dcc4" />
     </svg>
   );
 }
