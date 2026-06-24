@@ -414,6 +414,61 @@ body.shock-duo-sepia .phone-frame { filter: sepia(0.8) saturate(1.4) contrast(0.
 @keyframes shockOrbitSlow { from { transform: translate(-50%,-50%) rotate(0); } to { transform: translate(-50%,-50%) rotate(-360deg); } }
 .shock-orbit-slow { animation: shockOrbitSlow 100s linear infinite; }
 
+/* ── INTENSITY PACK — new motion for the upgraded modes + the new "Lament" mode ── */
+/* sudden electric flash (storms, scream, insomnia, dead-channel) */
+@keyframes shockLightning { 0%, 92%, 100% { opacity: 0; } 93% { opacity: 0.9; } 94% { opacity: 0.1; } 96% { opacity: 0.7; } 97% { opacity: 0; } }
+.shock-lightning { animation: shockLightning 5s steps(1) infinite; }
+.shock-lightning-2 { animation: shockLightning 7.3s steps(1) infinite; animation-delay: -2s; }
+/* drift upward and fade — wisps, spirits, ash, smoke */
+@keyframes shockFloatUp { 0% { transform: translateY(0) translateX(0) scale(1); opacity: 0; } 14% { opacity: 1; } 86% { opacity: 0.7; } 100% { transform: translateY(-90vh) translateX(22px) scale(0.5); opacity: 0; } }
+.shock-floatup { animation-name: shockFloatUp; animation-timing-function: ease-out; animation-iteration-count: infinite; }
+/* gentle horizontal sway — the apparition, hanging things */
+@keyframes shockSway { 0%, 100% { transform: translateX(-50%) rotate(-1.5deg); } 50% { transform: translateX(-50%) rotate(1.5deg); } }
+.shock-sway { animation: shockSway 7s ease-in-out infinite; }
+/* expanding pulse ring */
+@keyframes shockRing { 0% { transform: translate(-50%,-50%) scale(0.2); opacity: 0.8; } 100% { transform: translate(-50%,-50%) scale(2.4); opacity: 0; } }
+.shock-ring { animation: shockRing 3.4s ease-out infinite; }
+/* fast vertical fall — rain / sleet */
+@keyframes shockRain { 0% { transform: translateY(-12vh); } 100% { transform: translateY(112vh); } }
+.shock-rain { animation-name: shockRain; animation-timing-function: linear; animation-iteration-count: infinite; }
+/* slow opacity breathe — veils, fog, halos */
+@keyframes shockVeil { 0%, 100% { opacity: 0.32; } 50% { opacity: 0.7; } }
+.shock-veil { animation: shockVeil 8s ease-in-out infinite; }
+/* the ghostly figure — fade + rise + dissolve */
+@keyframes shockApparition { 0%, 100% { opacity: 0; transform: translate(-50%,0) scale(1); } 30% { opacity: 0.5; } 55% { opacity: 0.62; transform: translate(-50%,-10px) scale(1.02); } 80% { opacity: 0.2; } }
+.shock-apparition { animation: shockApparition 11s ease-in-out infinite; }
+/* slow tear / dewdrop fall */
+@keyframes shockTear { 0% { transform: translateY(0); opacity: 0; } 12% { opacity: 0.8; } 90% { opacity: 0.6; } 100% { transform: translateY(70vh); opacity: 0; } }
+.shock-tear { animation-name: shockTear; animation-timing-function: cubic-bezier(0.5,0,0.9,0.4); animation-iteration-count: infinite; }
+/* pulsing moon / halo glow */
+@keyframes shockMoon { 0%, 100% { opacity: 0.7; filter: drop-shadow(0 0 22px rgba(196,210,240,0.5)); } 50% { opacity: 1; filter: drop-shadow(0 0 46px rgba(210,222,248,0.85)); } }
+.shock-moon { animation: shockMoon 9s ease-in-out infinite; }
+/* VHS vertical-hold tracking band rolling down */
+@keyframes shockTrack { 0% { top: -20%; } 100% { top: 120%; } }
+.shock-track { animation: shockTrack 4.5s linear infinite; }
+/* insomnia heartbeat double-thump */
+@keyframes shockHeartbeat { 0%, 38%, 100% { opacity: 0.15; } 8% { opacity: 0.7; } 16% { opacity: 0.2; } 24% { opacity: 0.6; } }
+.shock-heartbeat { animation: shockHeartbeat 2.4s ease-in-out infinite; }
+/* rising smoke plume */
+@keyframes shockSmoke { 0% { transform: translateY(0) scaleX(1); opacity: 0; } 20% { opacity: 0.5; } 100% { transform: translateY(-60vh) scaleX(1.8); opacity: 0; } }
+.shock-smoke { animation-name: shockSmoke; animation-timing-function: ease-out; animation-iteration-count: infinite; }
+/* hard strobe on/off */
+@keyframes shockStrobe { 0%, 46%, 54%, 100% { opacity: 0; } 50% { opacity: 1; } }
+.shock-strobe { animation: shockStrobe 0.32s steps(1) infinite; }
+/* crack flicker reveal */
+@keyframes shockCrackIn { 0%, 70% { opacity: 0; } 72% { opacity: 0.9; } 74% { opacity: 0.2; } 78% { opacity: 0.8; } 100% { opacity: 0.55; } }
+.shock-crackin { animation: shockCrackIn 6s ease-out infinite; }
+/* slow rotation pair for ornamental rings */
+@keyframes shockSpin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+.shock-spin { animation: shockSpin 40s linear infinite; }
+.shock-spin-rev { animation: shockSpin 28s linear infinite reverse; }
+/* eyelid blink (requiem eye) */
+@keyframes shockEyeBlink { 0%, 90%, 100% { transform: scaleY(1); } 94% { transform: scaleY(0.05); } 97% { transform: scaleY(1); } }
+.shock-eyeblink { transform-origin: center; animation: shockEyeBlink 4.5s ease-in-out infinite; }
+/* gentle drift for floating motes */
+@keyframes shockMote { 0% { transform: translateY(0) translateX(0); opacity: 0; } 20% { opacity: 0.8; } 80% { opacity: 0.6; } 100% { transform: translateY(-40vh) translateX(14px); opacity: 0; } }
+.shock-mote { animation-name: shockMote; animation-timing-function: linear; animation-iteration-count: infinite; }
+
 /* Opt-in shock modes keep their motion even under reduced-motion; only soften the frame shake. */
 @media (prefers-reduced-motion: reduce) {
   .shock-shake { animation-duration: 6s; }

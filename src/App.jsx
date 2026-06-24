@@ -269,7 +269,7 @@ export default function App() {
       scream: 'shock-type-metal', inferno: 'shock-type-metal',
       spatter: 'shock-type-unifraktur', void: 'shock-type-unifraktur', reliquary: 'shock-type-unifraktur',
       rebirth: 'shock-type-rocker', cathedral: 'shock-type-rocker', mist: 'shock-type-rocker',
-      keepsake: 'shock-type-fell', vow: 'shock-type-unifraktur',
+      keepsake: 'shock-type-fell', vow: 'shock-type-unifraktur', lament: 'shock-type-fell',
       xerox: 'shock-type-oswald', duotone: 'shock-type-oswald',
     };
     document.body.classList.remove('shock-type-grenze', 'shock-type-pirata', 'shock-type-metal', 'shock-type-unifraktur', 'shock-type-rocker', 'shock-type-fell', 'shock-type-oswald');
