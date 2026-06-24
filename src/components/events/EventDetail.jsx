@@ -11,9 +11,11 @@ const COVERS = {
   black: 'linear-gradient(135deg, #1F1F1F 0%, #0A0A0A 100%)',
 };
 
-export function EventDetail({ event, isGoing, onToggleRsvp, onBack, onOpenUser, attendees = [], meHandle, onBuy, onManageTickets, onDelete, waitlist = { count: 0, mine: false }, onJoinWaitlist, onLeaveWaitlist }) {
+export function EventDetail({ event, isGoing, onToggleRsvp, onBack, onOpenUser, attendees = [], meHandle, onBuy, onManageTickets, onDelete, waitlist = { count: 0, mine: false }, onJoinWaitlist, onLeaveWaitlist, recaps = [], onStartRecap, onOpenRecap }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   if (!event) return null;
+
+  const isPast = !!event.dateRaw && new Date(event.dateRaw) < new Date();
 
   const cover = COVERS[event.cover] || COVERS.red;
   const others = attendees.filter(a => a.handle && a.handle !== meHandle);
@@ -122,6 +124,39 @@ export function EventDetail({ event, isGoing, onToggleRsvp, onBack, onOpenUser, 
       </div>
 
       <EventInviteCard event={event} goingCount={goingCount} />
+
+      {/* Recap thread — after the rite, collect photos + words */}
+      {isPast && (
+        <div className="px-4 pt-2">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.ui}>· the recap ·</span>
+            {meHandle && (
+              <button onClick={() => onStartRecap && onStartRecap(event.id)}
+                className="text-[10px] uppercase tracking-wider text-[#C9A961] hover:text-[#F5F1E8]" style={F.ui}>+ share a recap</button>
+            )}
+          </div>
+          {recaps.length === 0 ? (
+            <p className="text-[11px] text-[#6B6B6B] italic pb-2" style={F.serif}>no recaps yet — be the first to share how the rite went.</p>
+          ) : (
+            <div className="space-y-1.5 pb-2">
+              {recaps.map(p => (
+                <button key={p.id} onClick={() => onOpenRecap && onOpenRecap(p)}
+                  className="w-full text-left flex items-start gap-2.5 p-2 border border-[#1A1A1A] hover:border-[#2A2A2A] bg-[#0A0204]/40 transition-colors">
+                  <div className="w-7 h-7 rounded-full bg-[#1A1A1A] flex items-center justify-center text-sm shrink-0 overflow-hidden">
+                    {p.avatarUrl ? <img src={p.avatarUrl} alt="" className="w-full h-full object-cover" /> : p.avatar}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[#A8A29E] text-[11px]" style={F.ui}>{p.user}</div>
+                    {p.body && <div className="text-[#F5F1E8] text-xs leading-snug line-clamp-2" style={F.serif}>{p.body}</div>}
+                    {p.img && <div className="text-[10px] text-[#6B6B6B] mt-0.5">🖼 photo</div>}
+                    <div className="text-[9px] text-[#6B6B6B] mt-0.5" style={F.mono}>{p.baseCommentCount > 0 ? `${p.baseCommentCount} replies` : 'tap to comment'}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* CTA */}
       <div className="px-4 pt-4 sticky bottom-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A] to-transparent pb-4">

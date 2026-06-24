@@ -109,7 +109,7 @@ export async function clearPollVote(postId, userId) {
 
 // Create a post and return it already hydrated to the client shape.
 // `me` = { id, handle, avatar }.
-export async function createPost({ body, community, anonymous, poll, kind, img, event, quoted }, me) {
+export async function createPost({ body, community, anonymous, poll, kind, img, event, quoted, eventId }, me) {
   const insert = {
     author_id: me.id,
     body: body || '',
@@ -121,6 +121,7 @@ export async function createPost({ body, community, anonymous, poll, kind, img, 
   if (img) insert.img = img;
   if (event) insert.event = event;
   if (quoted) insert.quoted = quoted;
+  if (eventId) insert.event_id = eventId; // links the post to an event as a recap
 
   const { data, error } = await supabase.from('posts').insert(insert).select().single();
   if (error) throw error;
@@ -142,11 +143,20 @@ export async function createPost({ body, community, anonymous, poll, kind, img, 
     quoted: data.quoted || undefined,
     anonymous: data.anonymous,
     mine: !anonymous,
+    eventId: data.event_id || null,
     reactions: { bat: 0, fire: 0, skull: 0, smoke: 0 },
     myReactions: {},
     comments: [],
     baseCommentCount: 0,
   };
+}
+
+// Recap posts linked to an event (newest first). Returns [] gracefully pre-migration.
+export async function fetchEventRecaps(eventId, myId) {
+  const { data, error } = await supabase
+    .from('feed_posts').select('*').eq('event_id', eventId).order('created_at', { ascending: false });
+  if (error) return [];
+  return (data || []).map(r => hydratePost(r, new Set(), myId));
 }
 
 export async function deletePost(postId) {

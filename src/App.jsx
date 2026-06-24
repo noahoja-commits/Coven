@@ -4,7 +4,7 @@ import { useAuth } from './auth/AuthProvider';
 import { isSupabaseConfigured } from './lib/supabase';
 import { SignInScreen } from './components/auth/SignInScreen';
 import { ResetPasswordScreen } from './components/auth/ResetPasswordScreen';
-import { fetchFeed, createPost, deletePost as dbDeletePost, togglePostReaction, fetchComments, createComment, castPollVote, clearPollVote } from './lib/db/posts';
+import { fetchFeed, createPost, deletePost as dbDeletePost, togglePostReaction, fetchComments, createComment, castPollVote, clearPollVote, fetchEventRecaps } from './lib/db/posts';
 import { insertProfile, updateProfile, getProfileStats, getProfileByHandle, fetchProfiles } from './lib/db/profiles';
 import { fetchFollowing, fetchFollowers, followUser, unfollowUser } from './lib/db/social';
 import { FollowListOverlay } from './components/profile/FollowListOverlay';
@@ -191,6 +191,8 @@ export default function App() {
   const [communityCounts, setCommunityCounts] = useState({}); // server-backed member counts per scene
   const [communityPosts, setCommunityPosts] = useState(null); // real per-scene feed for the open scene
   const [composeCommunity, setComposeCommunity] = useState(null); // preset scene when composing from a scene
+  const [composeEventId, setComposeEventId] = useState(null); // set when composing an event recap
+  const [eventRecaps, setEventRecaps] = useState([]); // recap posts for the open event
   const [eventRsvp, setEventRsvp] = useState({});
   const [events, setEvents] = useState([]);
   const [showCreateEvent, setShowCreateEvent] = useState(false);
@@ -682,9 +684,9 @@ export default function App() {
     return () => { active = false; };
   }, [tab, meId, tonightStatus?.share, settings.ghostMode]);
 
-  // Load an event's attendees + waitlist state when its detail opens.
+  // Load an event's attendees + waitlist + recap posts when its detail opens.
   useEffect(() => {
-    if (!activeEvent) { setActiveEventAttendees([]); setEventWaitlist({ count: 0, mine: false }); return; }
+    if (!activeEvent) { setActiveEventAttendees([]); setEventWaitlist({ count: 0, mine: false }); setEventRecaps([]); return; }
     let active = true;
     fetchEventAttendees(activeEvent)
       .then(a => { if (active) setActiveEventAttendees(a.map(x => ({ userId: x.user_id, handle: x.handle, avatar: x.avatar, isMutual: !!x.is_mutual }))); })
@@ -692,8 +694,20 @@ export default function App() {
     fetchWaitlist(activeEvent, meId)
       .then(w => { if (active) setEventWaitlist(w); })
       .catch(() => { if (active) setEventWaitlist({ count: 0, mine: false }); });
+    fetchEventRecaps(activeEvent, meId)
+      .then(r => { if (active) setEventRecaps(r); })
+      .catch(() => { if (active) setEventRecaps([]); });
     return () => { active = false; };
   }, [activeEvent, meId]);
+
+  // Start a recap → open the composer pre-linked to the event.
+  const startEventRecap = (eventId) => { setComposeEventId(eventId); setShowCompose(true); };
+  // Open a recap post's comments (inject it into the feed cache so CommentsOverlay resolves it).
+  const openRecapPost = (post) => {
+    setPosts(prev => prev.some(p => p.id === post.id) ? prev : [...prev, post]);
+    setActiveEvent(null);
+    setActivePostComments(post.id);
+  };
 
   // Join / leave a sold-out rite's waitlist (optimistic + revert on failure).
   const joinEventWaitlist = (eventId) => {
@@ -828,7 +842,7 @@ export default function App() {
     return () => timeouts.forEach(clearTimeout);
   }, [meId, posts, meHandle, sigils, crystals, ritual, communityMembership, reflections, graves, bookmarks, divinationLog, following]);
 
-  const addPost = async ({ body, community, anonymous, poll, img, kind }) => {
+  const addPost = async ({ body, community, anonymous, poll, img, kind, eventId }) => {
     if (!meId) return;
     const tempId = `temp-${Date.now()}`;
     const optimistic = {
@@ -850,8 +864,9 @@ export default function App() {
     setPosts(prev => [optimistic, ...prev]);
     logActivity({ kind: 'post', glyph: anonymous ? '✟' : '✦', label: anonymous ? 'made a confession' : 'spoke into the dark', detail: body.length > 60 ? body.slice(0, 60) + '…' : body, postId: tempId });
     try {
-      const saved = await createPost({ body, community, anonymous, poll, img, kind }, { id: meId, handle: meHandle, avatar: meAvatar, avatarUrl: meAvatarUrl });
+      const saved = await createPost({ body, community, anonymous, poll, img, kind, eventId }, { id: meId, handle: meHandle, avatar: meAvatar, avatarUrl: meAvatarUrl });
       setPosts(prev => prev.map(p => (p.id === tempId ? saved : p)));
+      if (eventId) fetchEventRecaps(eventId, meId).then(setEventRecaps).catch(() => {}); // refresh the event's recaps
     } catch (e) {
       setPosts(prev => prev.filter(p => p.id !== tempId));
     }
@@ -2026,8 +2041,8 @@ export default function App() {
         <ComposeOverlay
           meId={meId}
           initialCommunity={composeCommunity}
-          onClose={() => { setShowCompose(false); setComposeCommunity(null); }}
-          onPost={(data) => { addPost(data); setShowCompose(false); setComposeCommunity(null); }}
+          onClose={() => { setShowCompose(false); setComposeCommunity(null); setComposeEventId(null); }}
+          onPost={(data) => { addPost({ ...data, eventId: composeEventId }); setShowCompose(false); setComposeCommunity(null); setComposeEventId(null); }}
         />
       )}
       {activePostComments && (
@@ -2158,6 +2173,9 @@ export default function App() {
           waitlist={eventWaitlist}
           onJoinWaitlist={joinEventWaitlist}
           onLeaveWaitlist={leaveEventWaitlist}
+          recaps={eventRecaps}
+          onStartRecap={startEventRecap}
+          onOpenRecap={openRecapPost}
         />
         );
       })()}
