@@ -1,7 +1,10 @@
-import { useState } from 'react';
-import { Plus, Map as MapIcon, List } from 'lucide-react';
+import { useState, lazy, Suspense } from 'react';
+import { Plus, Map as MapIcon, List, Navigation } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { Avatar } from '../shared/Avatar';
+
+// The real dark map (MapLibre + free OpenFreeMap tiles) is heavy — load it only when opened.
+const RealMap = lazy(() => import('./RealMap'));
 
 function hashStr(s) {
   let h = 0;
@@ -86,11 +89,11 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = []
       {/* map / by-area toggle + sort */}
       <div className="absolute top-2 left-2 z-30 flex items-center gap-1.5">
         <div className="flex border border-[#2A2A2A] bg-black/70 backdrop-blur-sm">
-          {[['map', MapIcon], ['list', List]].map(([v, Icon]) => (
+          {[['map', MapIcon, 'map'], ['list', List, 'by area'], ['real', Navigation, 'live']].map(([v, Icon, lbl]) => (
             <button key={v} onClick={() => setView(v)}
               className={`flex items-center gap-1 px-2.5 py-1.5 text-[9px] uppercase tracking-[0.18em] transition-colors ${view === v ? 'bg-[#8B0000] text-[#F5F1E8]' : 'text-[#A8A29E] hover:text-[#F5F1E8]'}`}
               style={F.ui}>
-              <Icon size={11} /> {v === 'map' ? 'map' : 'by area'}
+              <Icon size={11} /> {lbl}
             </button>
           ))}
         </div>
@@ -100,21 +103,27 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = []
       </div>
 
       {/* search */}
-      <div className="absolute top-11 left-2 right-2 z-30">
-        <input value={query} onChange={e => setQuery(e.target.value)}
-          placeholder="search souls or status…"
-          className="w-full bg-black/70 backdrop-blur-sm border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none px-2.5 py-1.5 text-[11px] text-[#F5F1E8] placeholder:text-[#6B6B6B]" style={F.ui} />
-      </div>
+      {view !== 'real' && (
+        <div className="absolute top-11 left-2 right-2 z-30">
+          <input value={query} onChange={e => setQuery(e.target.value)}
+            placeholder="search souls or status…"
+            className="w-full bg-black/70 backdrop-blur-sm border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none px-2.5 py-1.5 text-[11px] text-[#F5F1E8] placeholder:text-[#6B6B6B]" style={F.ui} />
+        </div>
+      )}
 
       {/* filter chip + counter */}
-      {filtering && (
+      {view !== 'real' && filtering && (
         <div className="absolute top-[78px] left-2 right-2 z-30 flex items-center gap-1.5 text-[9px] uppercase tracking-[0.15em]" style={F.ui}>
           <span className="text-[#C9A961] bg-black/75 px-2 py-1 border border-[#5B0F1A]/50">{filtered.length} of {pins.length}{activeAreaLabel ? ` · ${activeAreaLabel}` : ''}</span>
           <button onClick={() => { setQuery(''); setActiveArea(null); }} className="text-[#A8A29E] hover:text-[#F5F1E8] bg-black/75 px-2 py-1 border border-[#2A2A2A]">clear ✕</button>
         </div>
       )}
 
-      {view === 'map' ? (
+      {view === 'real' ? (
+        <Suspense fallback={<div className="absolute inset-0 top-[100px] bottom-0 flex items-center justify-center text-[#6B6B6B] text-xs bg-[#070708]" style={F.ui}>summoning the map…</div>}>
+          <RealMap nearby={nearby} tonightStatus={tonightStatus} ghost={ghost} onOpenUser={onOpenUser} onOpenTonightStatus={onOpenTonightStatus} />
+        </Suspense>
+      ) : view === 'map' ? (
         <>
           <div className="absolute inset-0 overflow-hidden bg-[#070708]">
             <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice">

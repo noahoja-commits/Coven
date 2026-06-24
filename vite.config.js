@@ -43,6 +43,11 @@ export default defineConfig({
       },
     }),
   ],
+  // maplibre-gl (the real map, lazy-loaded) ships BigInt literals, which the low
+  // target below can't downlevel. Tell esbuild BigInt is fine: our own code uses no
+  // BigInt, so this only affects the maplibre chunk — which only loads on browsers
+  // that support BigInt anyway (and the stylized map covers everyone else).
+  esbuild: { supported: { bigint: true } },
   build: {
     // Broaden device support: esbuild transpiles modern syntax (optional chaining,
     // nullish coalescing, logical assignment) down so older Android/Samsung browsers
