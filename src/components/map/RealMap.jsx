@@ -146,7 +146,9 @@ export default function RealMap({ nearby = [], tonightStatus, ghost = false, onO
 
   return (
     <div className="absolute inset-0 bg-[#070708]">
-      <div ref={containerRef} className="absolute inset-0" />
+      {/* h-full (not inset-0): MapLibre forces position:relative on its container, which would
+          nullify absolute insets and collapse the map to 0 height. height:100% survives that. */}
+      <div ref={containerRef} className="h-full w-full" />
       {state === 'loading' && (
         <div className="absolute inset-0 flex items-center justify-center text-[#6B6B6B] text-xs pointer-events-none" style={F.ui}>summoning the map…</div>
       )}
