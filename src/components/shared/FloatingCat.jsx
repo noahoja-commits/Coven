@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { buzz } from '../../lib/haptics';
+import { CatFamiliar, DemonFamiliar } from './Familiars';
 
 // A small black cat (your familiar) that slowly pads around the screen. Tap to feed it —
 // it purrs, hearts rise, and its hunger resets. Hunger creeps back over hours. Purely whimsy;
@@ -88,7 +89,9 @@ export function FloatingCat({ active = true }) {
           ? 'drop-shadow(0 0 6px rgba(200,16,46,0.7)) drop-shadow(0 1px 2px rgba(0,0,0,0.7))'
           : 'drop-shadow(0 1px 2px rgba(0,0,0,0.7))',
       }}>
-      <span style={{ display: 'inline-block', transform: `scaleX(${facing})` }} className={purr || demon ? 'animate-pulse-slow' : ''}>{demon ? '😈' : '🐈‍⬛'}</span>
+      <span style={{ display: 'inline-block', transform: `scaleX(${facing})` }} className={purr || demon ? 'animate-pulse-slow' : ''}>
+        {demon ? <DemonFamiliar size={32} /> : <CatFamiliar size={30} glow={purr} />}
+      </span>
       {hungry && !purr && <span className="absolute -top-2 -right-1 text-[10px] text-[#C8102E]/70">?</span>}
       {purr && !demon && (
         <span key={hearts} className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs" style={{ animation: 'likeBurst 1.6s ease-out forwards' }}>🤍</span>
