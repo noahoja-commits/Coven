@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { X, Search, Plus } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { EmptyState } from '../shared/EmptyState';
+import { SectionLabel } from '../shared/SectionLabel';
+import { Button } from '../shared/Button';
 import { ODDITY_CATEGORIES, ODDITY_PALETTES, CONDITION_LABELS } from '../../data/oddities';
 
 function OddityImage({ shape, palette, imageUrl, small = false }) {
@@ -45,8 +47,8 @@ function OddityImage({ shape, palette, imageUrl, small = false }) {
 
 function OddityCard({ item, onOpen }) {
   return (
-    <button onClick={() => onOpen(item.id)} className="group text-left">
-      <div className="border border-[#2A2A2A] hover:border-[#5B0F1A]/50 transition-colors">
+    <button onClick={() => onOpen(item.id)} className="tap group text-left">
+      <div className="border border-[#2A2A2A] hover:border-[#C9A961]/40 transition-colors">
         <OddityImage shape={item.photo.shape} palette={item.photo.palette} imageUrl={item.imageUrl} />
         <div className="p-2.5 bg-[#0F0F0F]">
           <div className="flex items-baseline justify-between gap-2 mb-1">
@@ -62,7 +64,7 @@ function OddityCard({ item, onOpen }) {
 
 function UserOddityCard({ item, onOpen }) {
   return (
-    <button onClick={() => onOpen && onOpen(item.id)} className="text-left">
+    <button onClick={() => onOpen && onOpen(item.id)} className="tap text-left">
       <div className="border border-[#C9A961]/30 hover:border-[#C9A961]/60 transition-colors">
         <div className="relative w-full overflow-hidden bg-gradient-to-br from-[#3B0A12] to-[#0A0204]" style={{ aspectRatio: '4/5' }}>
           <div className="absolute inset-0 flex items-center justify-center text-[#C9A961]/40 text-5xl">⚱</div>
@@ -90,9 +92,9 @@ function MarketplaceTab({ onOpenOddity, onCompose, listings = [] }) {
       <div className="px-4 pb-3 flex gap-1.5 overflow-x-auto no-scrollbar">
         {ODDITY_CATEGORIES.map(c => (
           <button key={c.id} onClick={() => setCategory(c.id)}
-            className={`shrink-0 px-3 py-1.5 text-[10px] uppercase tracking-wider border transition-colors
-              ${category === c.id ? 'bg-[#5B0F1A] text-[#F5F1E8] border-[#5B0F1A]' : 'border-[#2A2A2A] text-[#A8A29E]'}`}
-            style={F.ui}>{c.label}</button>
+            className={`tap shrink-0 px-3 py-1.5 text-[10px] uppercase tracking-wider border transition-colors
+              ${category === c.id ? 'border-[#C9A961]/70 text-[#C9A961]' : 'border-[#2A2A2A] text-[#A8A29E] hover:text-[#C9A961]'}`}
+            style={category === c.id ? { ...F.ui, boxShadow: '0 0 12px rgba(201,169,97,0.18)' } : F.ui}>{c.label}</button>
         ))}
       </div>
       {filtered.length === 0 ? (
@@ -104,7 +106,7 @@ function MarketplaceTab({ onOpenOddity, onCompose, listings = [] }) {
           {filtered.map(item => <OddityCard key={item.id} item={item} onOpen={onOpenOddity} />)}
         </div>
       )}
-      <button onClick={onCompose} className="fixed bottom-6 right-6 z-10 w-14 h-14 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] flex items-center justify-center shadow-xl"
+      <button onClick={onCompose} className="tap fixed bottom-6 right-6 z-10 w-14 h-14 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] flex items-center justify-center shadow-xl"
         style={{ boxShadow: '0 0 24px rgba(91, 15, 26, 0.6)' }}>
         <Plus size={22} />
       </button>
@@ -115,7 +117,7 @@ function MarketplaceTab({ onOpenOddity, onCompose, listings = [] }) {
 function WantedTab({ items, onOpenOddity, onCompose }) {
   return (
     <div className="px-4 pb-12">
-      <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E] mb-3" style={F.scriptureSC}>· what the coven is seeking ·</div>
+      <SectionLabel className="mb-3">what the coven is seeking</SectionLabel>
       {items.length === 0 ? (
         <div className="py-10 text-center text-[#6B6B6B] text-xs italic" style={F.serif}>no one is seeking anything yet.</div>
       ) : (
@@ -123,7 +125,7 @@ function WantedTab({ items, onOpenOddity, onCompose }) {
           {items.map(item => <OddityCard key={item.id} item={item} onOpen={onOpenOddity} />)}
         </div>
       )}
-      <button onClick={onCompose} className="mt-2 w-full py-2.5 border border-dashed border-[#3F3F3F] text-[#A8A29E] text-xs uppercase tracking-wider hover:border-[#5B0F1A] hover:text-[#F5F1E8] transition-colors" style={F.ui}>+ post a wanted</button>
+      <button onClick={onCompose} className="tap mt-2 w-full py-2.5 border border-dashed border-[#3F3F3F] text-[#A8A29E] text-xs uppercase tracking-wider hover:border-[#C9A961]/60 hover:text-[#C9A961] transition-colors" style={F.ui}>+ post a wanted</button>
     </div>
   );
 }
@@ -131,7 +133,7 @@ function WantedTab({ items, onOpenOddity, onCompose }) {
 function ParlourTab({ items, onOpenOddity, onCompose }) {
   return (
     <div className="px-4 pb-12">
-      <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E] mb-1" style={F.scriptureSC}>· the parlour ·</div>
+      <SectionLabel className="mb-1">the parlour</SectionLabel>
       <p className="text-[10px] text-[#6B6B6B] italic mb-3" style={F.serif}>commissions from the coven's artists — tattooers, painters, seamstresses.</p>
       {items.length === 0 ? (
         <div className="py-10 text-center text-[#6B6B6B]" style={F.serif}>
@@ -143,7 +145,7 @@ function ParlourTab({ items, onOpenOddity, onCompose }) {
           {items.map(item => <OddityCard key={item.id} item={item} onOpen={onOpenOddity} />)}
         </div>
       )}
-      <button onClick={onCompose} className="mt-2 w-full py-2.5 border border-dashed border-[#3F3F3F] text-[#A8A29E] text-xs uppercase tracking-wider hover:border-[#5B0F1A] hover:text-[#F5F1E8] transition-colors" style={F.ui}>+ offer a commission</button>
+      <button onClick={onCompose} className="tap mt-2 w-full py-2.5 border border-dashed border-[#3F3F3F] text-[#A8A29E] text-xs uppercase tracking-wider hover:border-[#C9A961]/60 hover:text-[#C9A961] transition-colors" style={F.ui}>+ offer a commission</button>
     </div>
   );
 }
@@ -159,7 +161,7 @@ function ShopsTab({ shops = [], meId, onAddShop, onDeleteShop }) {
   };
   return (
     <div className="px-4 pb-12">
-      <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E] mb-3" style={F.scriptureSC}>· the merchants ·</div>
+      <SectionLabel className="mb-3">the merchants</SectionLabel>
       {shops.length === 0 ? (
         <div className="py-8 text-center text-[#6B6B6B] text-xs italic" style={F.serif}>no shops listed yet. add yours.</div>
       ) : (
@@ -180,7 +182,7 @@ function ShopsTab({ shops = [], meId, onAddShop, onDeleteShop }) {
                 {s.blurb && <div className="text-[11px] text-[#A8A29E] italic mt-0.5 truncate" style={F.serif}>{s.blurb}</div>}
               </div>
               {s.mine && (
-                <button onClick={() => onDeleteShop && onDeleteShop(s.id)} className="text-[#6B6B6B] hover:text-[#8B0000] p-1"><X size={12} /></button>
+                <button onClick={() => onDeleteShop && onDeleteShop(s.id)} className="tap text-[#6B6B6B] hover:text-[#8B0000] p-1"><X size={12} /></button>
               )}
             </div>
           ))}
@@ -190,15 +192,15 @@ function ShopsTab({ shops = [], meId, onAddShop, onDeleteShop }) {
         <div className="border border-[#2A2A2A] bg-[#0F0F0F] p-3 space-y-2">
           {[['name', 'shop name'], ['kind', 'kind (e.g. thrift · vintage)'], ['neighborhood', 'neighborhood / online'], ['url', 'link (optional)'], ['blurb', 'one line about it (optional)']].map(([k, ph]) => (
             <input key={k} value={form[k]} onChange={e => setForm({ ...form, [k]: e.target.value })} placeholder={ph}
-              className="w-full bg-[#0A0608] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none px-2.5 py-1.5 text-[#F5F1E8] text-sm" style={F.serif} />
+              className="field" />
           ))}
           <div className="flex gap-2 justify-end">
-            <button onClick={() => setAdding(false)} className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-[#6B6B6B]" style={F.ui}>cancel</button>
-            <button onClick={submit} disabled={!form.name.trim()} className="px-3 py-1.5 text-[10px] uppercase tracking-wider bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] disabled:opacity-40" style={F.ui}>add shop</button>
+            <Button variant="quiet" onClick={() => setAdding(false)}>cancel</Button>
+            <Button variant="primary" onClick={submit} disabled={!form.name.trim()}>add shop</Button>
           </div>
         </div>
       ) : (
-        <button onClick={() => setAdding(true)} className="w-full py-2.5 border border-dashed border-[#3F3F3F] text-[#A8A29E] text-xs uppercase tracking-wider hover:border-[#5B0F1A] hover:text-[#F5F1E8] transition-colors" style={F.ui}>+ add your shop</button>
+        <button onClick={() => setAdding(true)} className="tap w-full py-2.5 border border-dashed border-[#3F3F3F] text-[#A8A29E] text-xs uppercase tracking-wider hover:border-[#C9A961]/60 hover:text-[#C9A961] transition-colors" style={F.ui}>+ add your shop</button>
       )}
     </div>
   );
@@ -224,10 +226,10 @@ export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, listings = [
       <div className="relative h-full flex flex-col">
         <div className="bg-black/60 backdrop-blur-md border-b border-[#5B0F1A]/40 safe-pt">
           <div className="px-4 h-[60px] flex items-center justify-between">
-            <button onClick={onClose} className="text-[#C8102E] hover:text-[#C9A961] p-2 -m-1 transition-colors"><X size={20} /></button>
+            <button onClick={onClose} className="tap text-[#C8102E] hover:text-[#C9A961] p-2 -m-1 transition-colors"><X size={20} /></button>
             <div className="text-[#C9A961] text-base tracking-[0.3em]" style={F.scriptureSC}>ODDITIES</div>
             <button onClick={() => { setTab('market'); setSearchOpen(o => !o); if (searchOpen) setQuery(''); }}
-              className={`p-2 -m-1 transition-colors ${searchOpen ? 'text-[#C9A961]' : 'text-[#C8102E] hover:text-[#C9A961]'}`}><Search size={18} /></button>
+              className={`tap p-2 -m-1 transition-colors ${searchOpen ? 'text-[#C9A961]' : 'text-[#C8102E] hover:text-[#C9A961]'}`}><Search size={18} /></button>
           </div>
           {searchOpen && (
             <div className="px-4 pb-3">
@@ -246,7 +248,7 @@ export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, listings = [
             { id: 'shops', label: 'shops' },
           ].map(t => (
             <button key={t.id} onClick={() => setTab(t.id)}
-              className={`flex-1 py-2.5 text-[10px] uppercase tracking-[0.2em] ${tab === t.id ? 'text-[#C9A961] border-b border-[#5B0F1A]' : 'text-[#6B6B6B]'}`}
+              className={`tap flex-1 py-2.5 text-[10px] uppercase tracking-[0.2em] transition-colors ${tab === t.id ? 'text-[#C9A961] border-b border-[#C9A961]/70' : 'text-[#6B6B6B] hover:text-[#A8A29E]'}`}
               style={F.ui}>{t.label}</button>
           ))}
         </div>

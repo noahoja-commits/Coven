@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { F } from '../../styles/fonts';
+import { SectionLabel } from '../shared/SectionLabel';
 
 const PROMPTS = [
   'looking for a smoke sesh',
@@ -44,10 +45,10 @@ export function TonightStatusModal({ current, onSave, onClose }) {
       <div className="bg-[#0F0F0F] border border-[#2A2A2A] w-full sm:max-w-md sm:m-4 animate-slide-up safe-pb max-h-[90dvh] overflow-y-auto">
         <div className="flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A]">
           <div>
-            <span className="text-[10px] uppercase tracking-[0.25em] text-[#5B0F1A]" style={F.ui}>· tonight ·</span>
+            <SectionLabel rule={false}>tonight</SectionLabel>
             <h3 className="text-[#F5F1E8] text-lg leading-none mt-1" style={F.display}>SET YOUR STATUS</h3>
           </div>
-          <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
+          <button onClick={onClose} className="tap text-[#A8A29E] hover:text-[#C9A961] p-2 -m-1"><X size={20} /></button>
         </div>
 
         <div className="p-4">
@@ -57,8 +58,7 @@ export function TonightStatusModal({ current, onSave, onClose }) {
             value={text}
             onChange={e => setText(e.target.value.slice(0, 80))}
             placeholder="what are you up to tonight?"
-            className="w-full h-24 bg-[#0A0A0A] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none p-3 text-[#F5F1E8] text-base resize-none"
-            style={F.serif}
+            className="field h-24 resize-none"
             maxLength={80}
           />
           <div className="flex justify-between items-center mt-1">
@@ -70,17 +70,16 @@ export function TonightStatusModal({ current, onSave, onClose }) {
             value={neighborhood}
             onChange={e => setNeighborhood(e.target.value.slice(0, 40))}
             placeholder="neighborhood (optional) — e.g. Ybor"
-            className="w-full mt-3 bg-[#0A0A0A] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none px-3 py-2 text-[#F5F1E8] text-sm"
-            style={F.serif}
+            className="field mt-3"
             maxLength={40}
           />
 
           <div className="mt-4">
-            <div className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-2" style={F.ui}>· quick fills ·</div>
+            <SectionLabel rule={false} className="mb-2">quick fills</SectionLabel>
             <div className="flex flex-wrap gap-1.5">
               {PROMPTS.map(p => (
                 <button key={p} onClick={() => setText(p)}
-                  className="text-[11px] px-2 py-1 border border-[#2A2A2A] text-[#A8A29E] hover:border-[#5B0F1A] hover:text-[#F5F1E8] transition-colors"
+                  className="tap text-[11px] px-2 py-1 border border-[#2A2A2A] text-[#A8A29E] hover:border-[#5B0F1A] hover:text-[#F5F1E8]"
                   style={F.serif}>{p}</button>
               ))}
             </div>
@@ -90,7 +89,7 @@ export function TonightStatusModal({ current, onSave, onClose }) {
           <div className="mt-4 border-t border-[#1A1A1A] pt-4">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <div className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.ui}>· share location ·</div>
+                <SectionLabel rule={false}>share location</SectionLabel>
                 <div className="text-[10px] text-[#6B6B6B] mt-0.5" style={F.serif}>show real distance to nearby souls</div>
               </div>
               <button type="button" role="switch" aria-checked={share} onClick={() => setShare(s => !s)}
@@ -120,16 +119,10 @@ export function TonightStatusModal({ current, onSave, onClose }) {
 
         <div className="flex items-center gap-2 p-4 border-t border-[#1A1A1A]">
           {current && (
-            <button onClick={clear}
-              className="px-3 py-2 text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#A8A29E]"
-              style={F.ui}>clear</button>
+            <button onClick={clear} className="btn btn-quiet">clear</button>
           )}
-          <button onClick={onClose}
-            className="ml-auto px-4 py-2 text-[10px] uppercase tracking-wider border border-[#2A2A2A] text-[#A8A29E]"
-            style={F.ui}>cancel</button>
-          <button onClick={save} disabled={!text.trim() && !share}
-            className="px-4 py-2 text-[10px] uppercase tracking-wider bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] disabled:opacity-40 disabled:cursor-not-allowed"
-            style={F.ui}>{text.trim() ? 'set status' : (share ? 'go live' : 'set status')}</button>
+          <button onClick={onClose} className="btn btn-ghost ml-auto">cancel</button>
+          <button onClick={save} disabled={!text.trim() && !share} className="btn btn-primary">{text.trim() ? 'set status' : (share ? 'go live' : 'set status')}</button>
         </div>
       </div>
     </div>

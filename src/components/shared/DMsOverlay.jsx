@@ -20,11 +20,11 @@ export function DMsOverlay({ conversations = [], onClose, onOpenConversation, on
     <div className="absolute inset-0 z-30 bg-[#0A0A0A] animate-slide-in-right">
       <div className="absolute top-0 inset-x-0 z-10 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A] safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
+          <button onClick={onClose} className="tap text-[#A8A29E] hover:text-[#C9A961] p-2 -m-1 transition-colors"><X size={20} /></button>
           <div className="text-[#F5F1E8] text-base tracking-[0.3em]" style={F.display}>WHISPERS</div>
           <button
             onClick={onNewGroup}
-            className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"
+            className="tap text-[#A8A29E] hover:text-[#C9A961] p-2 -m-1 transition-colors"
             title="new whisper circle"
             aria-label="new whisper"
           >
@@ -47,7 +47,7 @@ export function DMsOverlay({ conversations = [], onClose, onOpenConversation, on
             {query && (
               <button
                 onClick={() => setQuery('')}
-                className="text-[#6B6B6B] hover:text-[#A8A29E]"
+                className="tap text-[#6B6B6B] hover:text-[#C9A961]"
                 aria-label="clear search"
               >
                 <X size={12} />
@@ -56,11 +56,11 @@ export function DMsOverlay({ conversations = [], onClose, onOpenConversation, on
           </div>
           <div className="flex gap-1.5 mt-2">
             <button onClick={() => setShowBuried(false)}
-              className={`px-3 py-1 text-[10px] uppercase tracking-wider border ${!showBuried ? 'bg-[#F5F1E8] text-[#0A0A0A] border-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A8A29E]'}`}
-              style={F.ui}>inbox</button>
+              className={`tap px-3 py-1 text-[10px] uppercase tracking-wider border ${!showBuried ? 'border-[#C9A961]/70 text-[#C9A961]' : 'border-[#2A2A2A] text-[#A8A29E] hover:text-[#C9A961]'}`}
+              style={!showBuried ? { ...F.ui, boxShadow: '0 0 12px rgba(201,169,97,0.18)' } : F.ui}>inbox</button>
             <button onClick={() => setShowBuried(true)}
-              className={`px-3 py-1 text-[10px] uppercase tracking-wider border flex items-center gap-1 ${showBuried ? 'bg-[#F5F1E8] text-[#0A0A0A] border-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A8A29E]'}`}
-              style={F.ui}><Archive size={10} /> buried</button>
+              className={`tap px-3 py-1 text-[10px] uppercase tracking-wider border flex items-center gap-1 ${showBuried ? 'border-[#C9A961]/70 text-[#C9A961]' : 'border-[#2A2A2A] text-[#A8A29E] hover:text-[#C9A961]'}`}
+              style={showBuried ? { ...F.ui, boxShadow: '0 0 12px rgba(201,169,97,0.18)' } : F.ui}><Archive size={10} /> buried</button>
           </div>
         </div>
         <div className="divide-y divide-[#1A1A1A]">
@@ -88,7 +88,7 @@ export function DMsOverlay({ conversations = [], onClose, onOpenConversation, on
                 </div>
               </button>
               <button onClick={(e) => { e.stopPropagation(); onBury && onBury(c.id); }}
-                className="shrink-0 px-4 flex items-center text-[#5B5B5B] hover:text-[#C8102E] opacity-70 group-hover:opacity-100 transition-opacity"
+                className="tap shrink-0 px-4 flex items-center text-[#5B5B5B] hover:text-[#C8102E] opacity-70 group-hover:opacity-100 transition-opacity"
                 title={showBuried ? 'restore' : 'bury'} aria-label={showBuried ? 'restore' : 'bury'}>
                 <Archive size={14} />
               </button>

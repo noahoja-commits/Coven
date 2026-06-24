@@ -33,8 +33,8 @@ export function CommunitiesScreen({ onOpenCommunity, membership = {}, memberCoun
       </div>
 
       <div className="px-4 pb-4">
-        <div className="flex items-center gap-2 px-3 py-2.5 bg-[#141414] border border-[#2A2A2A]">
-          <Search size={14} className="text-[#6B6B6B]" />
+        <div className="field flex items-center gap-2 !py-2.5">
+          <Search size={14} className="text-[#6B6B6B] shrink-0" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -43,7 +43,7 @@ export function CommunitiesScreen({ onOpenCommunity, membership = {}, memberCoun
             style={F.ui}
           />
           {query && (
-            <button onClick={() => setQuery('')} className="text-[#6B6B6B] hover:text-[#A8A29E]" aria-label="clear">
+            <button onClick={() => setQuery('')} className="text-[#6B6B6B] hover:text-[#A8A29E] shrink-0" aria-label="clear">
               <X size={12} />
             </button>
           )}
@@ -52,7 +52,7 @@ export function CommunitiesScreen({ onOpenCommunity, membership = {}, memberCoun
           {['all', 'joined'].map(f => (
             <button key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1 text-[10px] uppercase tracking-wider border transition-colors ${filter === f ? 'bg-[#F5F1E8] text-[#0A0A0A] border-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#3F3F3F]'}`}
+              className={`tap chip ${filter === f ? 'chip-gold' : 'hover:border-[#3F3F3F]'}`}
               style={F.ui}>
               {f}
             </button>
@@ -60,7 +60,7 @@ export function CommunitiesScreen({ onOpenCommunity, membership = {}, memberCoun
         </div>
       </div>
 
-      <div className="divide-y divide-[#1A1A1A] border-t border-[#1A1A1A]">
+      <div className="divide-y divide-[#1C1A1A] border-t border-[#1C1A1A]">
         {filtered.length === 0 && (
           <div className="px-4 py-8 text-center text-[#6B6B6B] text-xs" style={F.mono}>
             no scenes found
@@ -72,7 +72,7 @@ export function CommunitiesScreen({ onOpenCommunity, membership = {}, memberCoun
           const postCount = st?.posts ?? 0;
           const activeLabel = !stats ? '·' : (st?.latest ? `active ${relativeTime(st.latest)}` : 'quiet');
           return (
-            <button key={c.id} onClick={() => onOpenCommunity(c.id)} className="w-full px-4 py-4 flex items-start gap-3 hover:bg-[#0F0F0F] transition-colors text-left">
+            <button key={c.id} onClick={() => onOpenCommunity(c.id)} className="tap w-full px-4 py-4 flex items-start gap-3 hover:bg-[#0F0F0F] transition-colors text-left">
               <div className="w-12 h-12 bg-[#141414] border border-[#2A2A2A] flex items-center justify-center text-[#F5F1E8] text-xl shrink-0" style={F.display}>
                 {c.glyph}
               </div>
@@ -92,7 +92,7 @@ export function CommunitiesScreen({ onOpenCommunity, membership = {}, memberCoun
                     tabIndex={0}
                     onClick={(e) => { e.stopPropagation(); onToggleMembership && onToggleMembership(c.id); }}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); onToggleMembership && onToggleMembership(c.id); } }}
-                    className={`px-2 py-0.5 border cursor-pointer ${joined ? 'border-[#8B0000] text-[#F5F1E8] bg-[#8B0000]/15' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#5B0F1A]'}`}>
+                    className={`tap chip cursor-pointer ${joined ? 'border-[#8B0000] text-[#F5F1E8] bg-[#8B0000]/15' : 'hover:border-[#5B0F1A]'}`}>
                     {joined ? 'joined' : 'join'}
                   </span>
                 </div>
@@ -112,11 +112,11 @@ export function CommunityDetail({ id, onBack, posts: postsProp, loading = false,
   if (!c) return null;
   return (
     <div className="pb-24">
-      <div className="relative px-4 pt-3 pb-5 border-b border-[#1A1A1A] overflow-hidden">
+      <div className="relative px-4 pt-3 pb-5 border-b border-[#1C1A1A] overflow-hidden">
         <div className="absolute inset-0 opacity-20" style={{
           background: 'radial-gradient(ellipse at 50% 0%, #3B0A12 0%, transparent 60%)'
         }} />
-        <button onClick={onBack} className="relative flex items-center gap-1 text-[#A8A29E] hover:text-[#F5F1E8] mb-3 p-2 -m-1 text-sm transition-colors" style={F.ui}>
+        <button onClick={onBack} className="tap relative flex items-center gap-1 text-[#A8A29E] hover:text-[#F5F1E8] mb-3 p-2 -m-1 text-sm" style={F.ui}>
           <ChevronLeft size={20} /> scenes
         </button>
         <div className="relative flex items-center gap-3">
@@ -128,13 +128,10 @@ export function CommunityDetail({ id, onBack, posts: postsProp, loading = false,
         </div>
         <div className="relative flex items-center gap-2 mt-4">
           <button onClick={onToggleMembership}
-            className={`flex-1 text-xs py-2 border uppercase tracking-wider transition-colors ${isMember ? 'text-[#F5F1E8] border-[#8B0000] bg-[#8B0000]/20 hover:bg-[#8B0000]/30' : 'text-[#A8A29E] border-[#2A2A2A] hover:border-[#5B0F1A] hover:text-[#F5F1E8]'}`}
-            style={F.ui}>
+            className={`btn flex-1 ${isMember ? 'btn-primary' : 'btn-ghost'}`}>
             {isMember ? 'joined' : 'join'}
           </button>
-          <button onClick={onPostToScene}
-            className="flex-1 text-xs py-2 border uppercase tracking-wider text-[#A8A29E] border-[#2A2A2A] hover:border-[#5B0F1A] hover:text-[#F5F1E8] transition-colors"
-            style={F.ui}>
+          <button onClick={onPostToScene} className="btn btn-ghost flex-1">
             post to this scene
           </button>
         </div>
@@ -145,7 +142,7 @@ export function CommunityDetail({ id, onBack, posts: postsProp, loading = false,
         </div>
       </div>
 
-      <div className="divide-y divide-[#1A1A1A]">
+      <div className="divide-y divide-[#1C1A1A]">
         {loading ? (
           <div className="px-4 py-12 text-center text-[#6B6B6B] text-sm italic" style={F.serif}>· gathering the scene ·</div>
         ) : posts.length > 0 ? posts.map(post => (

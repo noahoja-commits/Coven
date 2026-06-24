@@ -41,7 +41,7 @@ export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], isF
     return (
       <div className="absolute inset-0 z-40 bg-[#0A0A0A] animate-slide-in-right flex flex-col">
         <div className="sticky top-0 z-10 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A] safe-pt px-4 h-[60px] flex items-center">
-          <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1"><ArrowLeft size={20} /></button>
+          <button onClick={onClose} className="tap text-[#A8A29E] hover:text-[#C9A961] p-2 -m-1"><ArrowLeft size={20} /></button>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center text-center px-10 gap-2">
           <div className="text-4xl text-[#3F3F3F]">⚰</div>
@@ -56,7 +56,7 @@ export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], isF
       {/* Header */}
       <div className="sticky top-0 z-10 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A] safe-pt">
         <div className="px-4 h-[60px] flex items-center gap-3">
-          <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
+          <button onClick={onClose} className="tap text-[#A8A29E] hover:text-[#C9A961] p-2 -m-1"><ArrowLeft size={20} /></button>
           <div className="flex-1 min-w-0">
             <div className="text-[#F5F1E8] text-sm truncate" style={F.ui}>{user.handle}</div>
             <div className="text-[10px] text-[#6B6B6B]" style={F.mono}>{theirPosts.length} posts</div>
@@ -116,17 +116,17 @@ export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], isF
 
         <div className="relative grid grid-cols-3 gap-2 mt-4">
           <button onClick={onToggleFollow}
-            className={`py-2 text-[10px] uppercase tracking-wider border flex items-center justify-center gap-1.5 ${isFollowing ? 'border-[#8B0000] bg-[#8B0000]/15 text-[#F5F1E8]' : 'border-[#3F3F3F] text-[#A8A29E] hover:border-[#5B0F1A] hover:text-[#F5F1E8]'}`}
-            style={F.ui}>
+            className={`tap py-2 text-[10px] uppercase tracking-wider border flex items-center justify-center gap-1.5 ${isFollowing ? 'border-[#C9A961]/70 text-[#F5F1E8]' : 'border-[#3F3F3F] text-[#A8A29E] hover:border-[#5B0F1A] hover:text-[#F5F1E8]'}`}
+            style={{ ...F.ui, boxShadow: isFollowing ? '0 0 12px rgba(201,169,97,0.18)' : 'none' }}>
             {isFollowing ? <><UserCheck size={12} /> following</> : <><UserPlus size={12} /> follow</>}
           </button>
           <button onClick={onWhisper}
-            className="py-2 text-[10px] uppercase tracking-wider border border-[#3F3F3F] text-[#A8A29E] hover:border-[#5B0F1A] hover:text-[#F5F1E8] flex items-center justify-center gap-1.5"
+            className="tap py-2 text-[10px] uppercase tracking-wider border border-[#3F3F3F] text-[#A8A29E] hover:border-[#5B0F1A] hover:text-[#F5F1E8] flex items-center justify-center gap-1.5"
             style={F.ui}>
             <MessageCircle size={12} /> whisper
           </button>
           <button onClick={onToggleMute}
-            className={`py-2 text-[10px] uppercase tracking-wider border flex items-center justify-center gap-1.5 ${isMuted ? 'border-[#A89968] bg-[#A89968]/15 text-[#F5F1E8]' : 'border-[#3F3F3F] text-[#A8A29E] hover:border-[#A89968]'}`}
+            className={`tap py-2 text-[10px] uppercase tracking-wider border flex items-center justify-center gap-1.5 ${isMuted ? 'border-[#A89968] bg-[#A89968]/15 text-[#F5F1E8]' : 'border-[#3F3F3F] text-[#A8A29E] hover:border-[#A89968]'}`}
             style={F.ui}>
             {isMuted ? <><VolumeX size={12} /> muted</> : <><Volume2 size={12} /> mute</>}
           </button>
@@ -134,9 +134,9 @@ export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], isF
 
         <div className="relative flex items-center gap-4 mt-3">
           <button onClick={() => { if (profile?.id && confirm(`Block @${user.handle}? You won't see each other.`)) onBlock && onBlock(profile.id); }}
-            className="text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#8B0000] transition-colors" style={F.ui}>⛒ block</button>
+            className="tap text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#8B0000]" style={F.ui}>⛒ block</button>
           <button onClick={() => { if (profile?.id) onReport && onReport(profile.id); }}
-            className="text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#C8102E] transition-colors" style={F.ui}>⚑ report</button>
+            className="tap text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#C8102E]" style={F.ui}>⚑ report</button>
         </div>
       </div>
 

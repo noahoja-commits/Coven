@@ -20,8 +20,7 @@ export function EventsScreen({ events = [], rsvp = {}, onToggleRsvp, onOpenEvent
           <h2 className="text-[#F5F1E8] text-2xl mb-1" style={F.display}>RITES</h2>
           <p className="text-[#A8A29E] text-sm" style={F.serif}>what's coming. who's going.</p>
         </div>
-        <button onClick={onCreateEvent}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-wider bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] transition-colors" style={F.ui}>
+        <button onClick={onCreateEvent} className="btn btn-primary">
           <Plus size={13} /> host
         </button>
       </div>
@@ -31,8 +30,7 @@ export function EventsScreen({ events = [], rsvp = {}, onToggleRsvp, onOpenEvent
           {allTags.map(t => (
             <button key={t}
               onClick={() => setActiveTag(t)}
-              className={`shrink-0 px-3 py-1.5 text-[10px] uppercase tracking-wider border transition-colors
-                ${activeTag === t ? 'bg-[#F5F1E8] text-[#0A0A0A] border-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#3F3F3F]'}`}
+              className={`tap shrink-0 chip ${activeTag === t ? 'chip-gold' : 'hover:border-[#3F3F3F]'}`}
               style={F.ui}>{t}</button>
           ))}
         </div>
@@ -57,7 +55,7 @@ export function EventsScreen({ events = [], rsvp = {}, onToggleRsvp, onOpenEvent
             <div key={e.id} role="button" tabIndex={0}
               onClick={() => onOpenEvent && onOpenEvent(e.id)}
               onKeyDown={(ev) => { if (ev.key === 'Enter') onOpenEvent && onOpenEvent(e.id); }}
-              className="block w-full text-left border border-[#2A2A2A] overflow-hidden hover:border-[#3F3F3F] transition-colors cursor-pointer">
+              className="tap block w-full text-left border border-[#1C1A1A] overflow-hidden hover:border-[#3F3F3F] transition-colors cursor-pointer">
               <div className="relative h-32 overflow-hidden" style={{ background: cover }}>
                 <svg viewBox="0 0 200 60" className="absolute inset-0 w-full h-full opacity-30" preserveAspectRatio="xMidYMid slice">
                   <path d="M 0 60 L 30 30 L 50 45 L 80 15 L 110 35 L 140 10 L 170 30 L 200 20 L 200 60 Z" fill="rgba(0,0,0,0.6)" />
@@ -83,14 +81,13 @@ export function EventsScreen({ events = [], rsvp = {}, onToggleRsvp, onOpenEvent
                 </div>
                 <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
                   {(e.tags || []).map(t => (
-                    <span key={t} className="text-[10px] px-1.5 py-0.5 border border-[#2A2A2A] text-[#A8A29E] uppercase tracking-wider" style={F.ui}>{t}</span>
+                    <span key={t} className="chip" style={F.ui}>{t}</span>
                   ))}
                 </div>
                 <button
                   type="button"
                   onClick={(ev) => { ev.stopPropagation(); onToggleRsvp && onToggleRsvp(e.id); }}
-                  className={`mt-3 w-full py-2 text-[10px] uppercase tracking-wider border flex items-center justify-center gap-1.5 transition-colors ${rsvp[e.id] ? 'bg-[#8B0000]/20 border-[#8B0000] text-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#5B0F1A] hover:text-[#F5F1E8]'}`}
-                  style={F.ui}>
+                  className={`btn w-full mt-3 ${rsvp[e.id] ? 'btn-primary' : 'btn-ghost'}`}>
                   {rsvp[e.id] ? <><Check size={12} /> going</> : 'rsvp'}
                 </button>
               </div>

@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
+import { SectionLabel } from '../shared/SectionLabel';
 import { uploadImage } from '../../lib/db/storage';
 
 const GLYPHS = ['🦇', '🕯', '✟', '⚱', '☠', '🩸', '🌹', '🌙', '⛧', '☩', '✦', '☽', '⚰', '♰', '🜏', '⛤'];
@@ -46,11 +47,9 @@ export function StoryComposer({ meId, onClose, onPost }) {
     <div className="fixed inset-0 z-[55] bg-black flex flex-col animate-fade-in">
       <div className="bg-black/60 backdrop-blur-md border-b border-white/10 z-10 safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onClose} className="text-white/80 hover:text-white p-2 -m-1 transition-colors"><X size={20} /></button>
+          <button onClick={onClose} className="tap text-white/80 hover:text-[#C9A961] p-2 -m-1"><X size={20} /></button>
           <div className="text-white text-sm tracking-[0.3em]" style={F.display}>YOUR STORY</div>
-          <button onClick={submit} disabled={!canPost}
-            className={`text-white text-xs px-3 py-1.5 uppercase tracking-wider flex items-center gap-1.5 ${canPost ? 'bg-[#8B0000]' : 'bg-white/10 opacity-50'}`}
-            style={F.ui}>{busy ? <><Loader2 size={12} className="animate-spin" /> posting</> : 'post'}</button>
+          <button onClick={submit} disabled={!canPost} className="btn btn-primary">{busy ? <><Loader2 size={12} className="animate-spin" /> posting</> : 'post'}</button>
         </div>
       </div>
 
@@ -80,24 +79,24 @@ export function StoryComposer({ meId, onClose, onPost }) {
             value={caption}
             onChange={e => setCaption(e.target.value.slice(0, 80))}
             placeholder="say something..."
-            className="flex-1 bg-white/5 border border-white/10 focus:border-white/30 outline-none p-2.5 text-white text-sm placeholder:text-white/40"
-            style={F.serif}
+            className="field flex-1 text-sm"
             autoFocus
           />
           <input ref={fileRef} type="file" accept="image/*" onChange={onPickImage} className="hidden" />
           <button onClick={() => imgPreview ? (setImgFile(null), setImgPreview(null)) : fileRef.current?.click()}
-            className={`shrink-0 w-10 h-10 flex items-center justify-center border ${imgPreview ? 'border-[#C9A961] text-[#C9A961]' : 'border-white/20 text-white/70 hover:text-white'}`}
+            className={`tap shrink-0 w-10 h-10 flex items-center justify-center border ${imgPreview ? 'border-[#C9A961] text-[#C9A961]' : 'border-white/20 text-white/70 hover:text-[#C9A961] hover:border-[#C9A961]/60'}`}
             title={imgPreview ? 'remove photo' : 'add a photo'}>
             {imgPreview ? <X size={16} /> : <ImageIcon size={16} />}
           </button>
         </div>
 
         <div>
-          <div className="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-2" style={F.scriptureSC}>· glyph ·</div>
+          <SectionLabel className="mb-2">glyph</SectionLabel>
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
             {GLYPHS.map(g => (
               <button key={g} onClick={() => setGlyph(g)}
-                className={`shrink-0 w-9 h-9 flex items-center justify-center text-lg border transition-colors ${glyph === g ? 'border-white bg-white/10' : 'border-white/10 hover:border-white/30'}`}>
+                className={`tap shrink-0 w-9 h-9 flex items-center justify-center text-lg border ${glyph === g ? 'border-[#C9A961]/70 bg-white/5' : 'border-white/10 hover:border-[#5B0F1A]'}`}
+                style={glyph === g ? { boxShadow: '0 0 12px rgba(201,169,97,0.18)' } : undefined}>
                 {g}
               </button>
             ))}
@@ -105,12 +104,12 @@ export function StoryComposer({ meId, onClose, onPost }) {
         </div>
 
         <div>
-          <div className="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-2" style={F.scriptureSC}>· background ·</div>
+          <SectionLabel className="mb-2">background</SectionLabel>
           <div className="flex gap-1.5">
             {BACKGROUNDS.map(b => (
               <button key={b.id} onClick={() => setBg(b)}
-                className={`flex-1 h-8 border-2 transition-colors ${bg.id === b.id ? 'border-white' : 'border-white/10'}`}
-                style={{ background: b.bg }} title={b.label} />
+                className={`tap flex-1 h-8 border-2 ${bg.id === b.id ? 'border-[#C9A961]/70' : 'border-white/10 hover:border-[#5B0F1A]'}`}
+                style={bg.id === b.id ? { background: b.bg, boxShadow: '0 0 12px rgba(201,169,97,0.18)' } : { background: b.bg }} title={b.label} />
             ))}
           </div>
         </div>

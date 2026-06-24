@@ -26,7 +26,7 @@ export function TicketManager({ event, onClose, onEditVenueMap }) {
     <div className="absolute inset-0 z-50 bg-[#0A0A0A] animate-slide-in-right overflow-y-auto safe-pb">
       <div className="sticky top-0 z-10 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A] safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
+          <button onClick={onClose} className="tap text-[#A8A29E] hover:text-[#C9A961] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
           <div className="text-[#F5F1E8] text-sm tracking-[0.25em]" style={F.display}>DOOR</div>
           <span className="w-9" />
         </div>
@@ -41,7 +41,7 @@ export function TicketManager({ event, onClose, onEditVenueMap }) {
         </div>
         {onEditVenueMap && (
           <button onClick={onEditVenueMap}
-            className="mt-3 w-full py-2 border border-[#2A2A2A] text-[#A8A29E] text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:border-[#5B0F1A] hover:text-[#F5F1E8] transition-colors" style={F.ui}>
+            className="tap mt-3 w-full py-2 border border-[#2A2A2A] text-[#A8A29E] text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:border-[#C9A961]/60 hover:text-[#C9A961] transition-colors" style={F.ui}>
             <Map size={13} /> festival mode · venue map
           </button>
         )}
@@ -67,7 +67,7 @@ export function TicketManager({ event, onClose, onEditVenueMap }) {
                   <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-[#5B8A3A] px-2 py-1" style={F.ui}><Check size={12} /> in</span>
                 ) : (
                   <button onClick={() => doCheckIn(t.id)}
-                    className="text-[10px] uppercase tracking-wider px-3 py-1.5 border border-[#2A2A2A] text-[#A8A29E] hover:border-[#5B0F1A] hover:text-[#F5F1E8] transition-colors" style={F.ui}>
+                    className="tap text-[10px] uppercase tracking-wider px-3 py-1.5 border border-[#2A2A2A] text-[#A8A29E] hover:border-[#C9A961]/60 hover:text-[#C9A961] transition-colors" style={F.ui}>
                     check in
                   </button>
                 )}

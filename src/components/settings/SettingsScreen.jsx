@@ -1,12 +1,15 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { setHaptics } from '../../lib/haptics';
+import { SectionLabel } from '../shared/SectionLabel';
+import { Button } from '../shared/Button';
 
 function Toggle({ on, onChange }) {
   return (
     <button onClick={() => onChange(!on)}
-      className={`relative w-10 h-5 rounded-full transition-colors ${on ? 'bg-[#5B0F1A]' : 'bg-[#2A2A2A]'}`}>
-      <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-[#F5F1E8] transition-all ${on ? 'left-5' : 'left-0.5'}`} />
+      className={`tap relative w-10 h-5 rounded-full transition-colors ${on ? 'bg-[#5B0F1A]' : 'bg-[#2A2A2A]'}`}
+      style={on ? { boxShadow: '0 0 10px rgba(201,169,97,0.18)' } : undefined}>
+      <span className={`absolute top-0.5 w-4 h-4 rounded-full transition-all ${on ? 'left-5 bg-[#C9A961]' : 'left-0.5 bg-[#F5F1E8]'}`} />
     </button>
   );
 }
@@ -24,8 +27,8 @@ function Segmented({ value, onChange, options }) {
     <div className="flex border border-[#2A2A2A] divide-x divide-[#2A2A2A]">
       {options.map(([val, label]) => (
         <button key={val} onClick={() => onChange(val)}
-          className={`px-2.5 py-1 text-[10px] uppercase tracking-wider transition-colors ${value === val ? 'bg-[#8B0000] text-[#F5F1E8]' : 'text-[#A8A29E] hover:text-[#F5F1E8]'}`}
-          style={F.ui}>
+          className={`tap px-2.5 py-1 text-[10px] uppercase tracking-wider transition-colors ${value === val ? 'text-[#C9A961] border-[#C9A961]/70' : 'text-[#A8A29E] hover:text-[#C9A961]'}`}
+          style={value === val ? { ...F.ui, boxShadow: 'inset 0 0 12px rgba(201,169,97,0.18)' } : F.ui}>
           {label}
         </button>
       ))}
@@ -36,7 +39,7 @@ function Segmented({ value, onChange, options }) {
 function Section({ title, children }) {
   return (
     <div className="mb-6">
-      <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E] px-4 pb-2" style={F.scriptureSC}>· {title} ·</div>
+      <SectionLabel className="px-4 pb-2">{title}</SectionLabel>
       <div className="border-y border-[#1A1A1A] divide-y divide-[#1A1A1A]">{children}</div>
     </div>
   );
@@ -70,7 +73,7 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
     <div className="absolute inset-0 z-50 bg-[#0A0A0A] animate-slide-in-right flex flex-col">
       <div className="bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A] safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onBack} className="text-[#A8A29E] hover:text-[#F5F1E8] transition-colors flex items-center gap-1 -ml-1" style={F.ui}>
+          <button onClick={onBack} className="tap text-[#A8A29E] hover:text-[#C9A961] transition-colors flex items-center gap-1 -ml-1" style={F.ui}>
             <ChevronLeft size={18} /><span className="text-xs uppercase tracking-wider">back</span>
           </button>
           <div className="text-[#F5F1E8] text-base tracking-[0.3em]" style={F.display}>SETTINGS</div>
@@ -104,10 +107,9 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
             />
           </Row>
           <Row label="Shock mode" desc="how the dark manifests — blood spatter, the scream, glitch, insomnia blue, dead channel, pyre, sanctum & more.">
-            <button onClick={onOpenShockPicker}
-              className="px-3 py-1.5 text-[10px] uppercase tracking-wider border border-[#5B0F1A] text-[#C8102E] hover:bg-[#5B0F1A]/20 transition-colors" style={F.ui}>
+            <Button variant="ghost" onClick={onOpenShockPicker} className="tap">
               {(settings.shockMode && settings.shockMode !== 'none') ? settings.shockMode : 'choose'} ›
-            </button>
+            </Button>
           </Row>
           <Row label="Quick-switch sigil" desc="a floating sigil while a mode is on — tap to cycle, double-tap for the picker, hold to shuffle.">
             <Toggle on={settings.quickSwitch !== false} onChange={v => set('quickSwitch', v)} />
@@ -169,11 +171,8 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
           <div className="px-4 py-3">
             <p className="text-[10px] text-[#6B6B6B] mb-2" style={F.serif}>posts containing these words won't show in your feed.</p>
             <form onSubmit={addKeyword} className="flex gap-2 mb-2">
-              <input name="kw" placeholder="word or phrase"
-                className="flex-1 bg-[#0A0A0A] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none px-2.5 py-1.5 text-[#F5F1E8] text-sm"
-                style={F.serif} />
-              <button type="submit"
-                className="px-3 py-1.5 text-[10px] uppercase tracking-wider bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8]" style={F.ui}>mute</button>
+              <input name="kw" placeholder="word or phrase" className="field flex-1" />
+              <Button type="submit" variant="primary">mute</Button>
             </form>
             {mutedKeywords.length === 0 ? (
               <p className="text-[10px] text-[#6B6B6B] italic" style={F.serif}>· nothing muted ·</p>
@@ -181,8 +180,7 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
               <div className="flex flex-wrap gap-1.5">
                 {mutedKeywords.map(k => (
                   <button key={k} onClick={() => removeKeyword(k)}
-                    className="flex items-center gap-1 px-2 py-1 text-[11px] border border-[#5B0F1A]/40 bg-[#5B0F1A]/10 text-[#A8A29E] hover:text-[#F5F1E8] hover:bg-[#5B0F1A]/20"
-                    style={F.ui}>
+                    className="tap chip chip-gold hover:text-[#F5F1E8]">
                     {k} <span className="text-[#8B0000]">×</span>
                   </button>
                 ))}
@@ -234,10 +232,10 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
             <div className="px-4 pb-3 flex items-center gap-2 text-[11px] text-[#A8A29E]" style={F.ui}>
               <span>from</span>
               <input type="time" value={settings.quietHours?.start || '22:00'} onChange={e => set('quietHours', { ...settings.quietHours, start: e.target.value })}
-                className="bg-[#0A0A0A] border border-[#2A2A2A] px-2 py-1 text-[#F5F1E8]" />
+                className="field w-auto px-2 py-1" />
               <span>to</span>
               <input type="time" value={settings.quietHours?.end || '08:00'} onChange={e => set('quietHours', { ...settings.quietHours, end: e.target.value })}
-                className="bg-[#0A0A0A] border border-[#2A2A2A] px-2 py-1 text-[#F5F1E8]" />
+                className="field w-auto px-2 py-1" />
             </div>
           )}
         </Section>
@@ -254,10 +252,9 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
                 <p className="text-[10px] text-[#6B6B6B] mb-2" style={F.serif}>
                   {payoutStatus?.hasAccount ? 'finish onboarding to start receiving ticket money.' : 'connect a bank to sell tickets and get paid automatically when people buy.'}
                 </p>
-                <button onClick={onSetupPayouts} disabled={payoutBusy}
-                  className="px-3 py-1.5 text-[10px] uppercase tracking-wider bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] transition-colors disabled:opacity-60 disabled:cursor-wait" style={F.ui}>
+                <Button variant="primary" onClick={onSetupPayouts} disabled={payoutBusy} className="disabled:cursor-wait">
                   {payoutBusy ? 'opening Stripe…' : (payoutStatus?.hasAccount ? 'finish payout setup' : 'set up payouts')}
-                </button>
+                </Button>
               </>
             )}
           </div>
@@ -271,7 +268,7 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
             { label: 'Help & feedback', onClick: () => { window.location.href = 'mailto:noahoja@gmail.com?subject=Coven%20feedback'; } },
           ].map(item => (
             <button key={item.label} onClick={item.onClick}
-              className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-[#0F0F0F] transition-colors">
+              className="tap w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-[#0F0F0F] transition-colors">
               <span className="flex-1 text-[#F5F1E8] text-sm" style={F.serif}>{item.label}</span>
               <ChevronRight size={16} className="text-[#3F3F3F]" />
             </button>
@@ -281,15 +278,15 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
         <div className="px-4 mt-4 space-y-2">
           {onRerunOnboarding && (
             <button onClick={onRerunOnboarding}
-              className="w-full py-3 text-[#C8102E] text-xs uppercase tracking-[0.25em] border border-[#2A2A2A] hover:border-[#A89968]" style={F.ui}>
+              className="tap w-full py-3 text-[#C8102E] text-xs uppercase tracking-[0.25em] border border-[#2A2A2A] hover:border-[#A89968]" style={F.ui}>
               re-do onboarding
             </button>
           )}
-          <button onClick={onLogout} className="w-full py-3 text-[#5B0F1A] text-xs uppercase tracking-[0.25em] border border-[#2A2A2A] hover:border-[#5B0F1A]" style={F.ui}>
+          <button onClick={onLogout} className="tap w-full py-3 text-[#5B0F1A] text-xs uppercase tracking-[0.25em] border border-[#2A2A2A] hover:border-[#5B0F1A]" style={F.ui}>
             sign out
           </button>
           {onDeleteAccount && (
-            <button onClick={onDeleteAccount} className="w-full py-3 text-[#8B0000] text-[10px] uppercase tracking-[0.25em] hover:text-[#5B0F1A]" style={F.ui}>
+            <button onClick={onDeleteAccount} className="tap w-full py-3 text-[#8B0000] text-[10px] uppercase tracking-[0.25em] hover:text-[#5B0F1A]" style={F.ui}>
               delete account
             </button>
           )}

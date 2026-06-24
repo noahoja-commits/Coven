@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { F } from '../../styles/fonts';
+import { SectionLabel } from '../shared/SectionLabel';
 import { MOODS, MOOD_TTLS, moodActive } from '../../data/moods';
 
 export function MoodModal({ current, onSave, onClose }) {
@@ -29,10 +30,10 @@ export function MoodModal({ current, onSave, onClose }) {
       <div className="bg-[#0F0F0F] border border-[#2A2A2A] w-full sm:max-w-md sm:m-4 animate-slide-up safe-pb max-h-[90dvh] overflow-y-auto">
         <div className="flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A]">
           <div>
-            <span className="text-[10px] uppercase tracking-[0.25em] text-[#5B0F1A]" style={F.ui}>· current state ·</span>
+            <SectionLabel rule={false}>current state</SectionLabel>
             <h3 className="text-[#F5F1E8] text-lg leading-none mt-1" style={F.display}>SET YOUR MOOD</h3>
           </div>
-          <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
+          <button onClick={onClose} className="tap text-[#A8A29E] hover:text-[#C9A961] p-2 -m-1"><X size={20} /></button>
         </div>
 
         <div className="p-4">
@@ -43,8 +44,8 @@ export function MoodModal({ current, onSave, onClose }) {
               const on = !custom.trim() && pick?.label === m.label;
               return (
                 <button key={m.id} onClick={() => { setCustom(''); setPick(m); }}
-                  className={`flex flex-col items-center gap-1 py-2.5 border transition-colors ${on ? 'border-[#8B0000] bg-[#8B0000]/15' : 'border-[#2A2A2A] hover:border-[#5B0F1A]'}`}
-                  style={{ boxShadow: on ? `0 0 14px ${m.color}55` : 'none' }}>
+                  className={`tap flex flex-col items-center gap-1 py-2.5 border ${on ? 'border-[#C9A961]/70' : 'border-[#2A2A2A] hover:border-[#5B0F1A]'}`}
+                  style={{ boxShadow: on ? '0 0 12px rgba(201,169,97,0.18)' : 'none' }}>
                   <span className="text-lg leading-none" style={{ color: m.color, textShadow: `0 0 8px ${m.color}99` }}>{m.glyph}</span>
                   <span className="text-[10px] uppercase tracking-wider text-[#A8A29E]" style={F.ui}>{m.label}</span>
                 </button>
@@ -56,8 +57,7 @@ export function MoodModal({ current, onSave, onClose }) {
             value={custom}
             onChange={e => { setCustom(e.target.value.slice(0, 24)); }}
             placeholder="or name your own…"
-            className="w-full mt-3 bg-[#0A0A0A] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none px-3 py-2 text-[#F5F1E8] text-sm"
-            style={F.serif}
+            className="field mt-3"
             maxLength={24}
           />
 
@@ -66,8 +66,8 @@ export function MoodModal({ current, onSave, onClose }) {
             <div className="grid grid-cols-3 gap-1.5">
               {MOOD_TTLS.map(t => (
                 <button key={t.id} onClick={() => setTtl(t.id)}
-                  className={`px-1 py-1.5 text-center border text-[10px] uppercase tracking-wider transition-colors ${ttl === t.id ? 'border-[#8B0000] bg-[#8B0000]/20 text-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#5B0F1A]'}`}
-                  style={F.ui}>{t.label}</button>
+                  className={`tap px-1 py-1.5 text-center border text-[10px] uppercase tracking-wider ${ttl === t.id ? 'border-[#C9A961]/70 text-[#F5F1E8]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#5B0F1A]'}`}
+                  style={{ ...F.ui, boxShadow: ttl === t.id ? '0 0 12px rgba(201,169,97,0.18)' : 'none' }}>{t.label}</button>
               ))}
             </div>
           </div>
@@ -75,12 +75,10 @@ export function MoodModal({ current, onSave, onClose }) {
 
         <div className="flex items-center gap-2 p-4 border-t border-[#1A1A1A]">
           {live && (
-            <button onClick={clear} className="px-3 py-2 text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#A8A29E]" style={F.ui}>clear</button>
+            <button onClick={clear} className="btn btn-quiet">clear</button>
           )}
-          <button onClick={onClose} className="ml-auto px-4 py-2 text-[10px] uppercase tracking-wider border border-[#2A2A2A] text-[#A8A29E]" style={F.ui}>cancel</button>
-          <button onClick={save} disabled={!chosen}
-            className="px-4 py-2 text-[10px] uppercase tracking-wider bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] disabled:opacity-40 disabled:cursor-not-allowed"
-            style={F.ui}>set mood</button>
+          <button onClick={onClose} className="btn btn-ghost ml-auto">cancel</button>
+          <button onClick={save} disabled={!chosen} className="btn btn-primary">set mood</button>
         </div>
       </div>
     </div>

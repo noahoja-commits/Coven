@@ -41,14 +41,14 @@ export function CommentsOverlay({ post, onClose, onComment, onReact, onReactComm
       {/* Header */}
       <div className="bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A] safe-pt">
         <div className="px-4 h-[60px] flex items-center gap-3">
-          <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
+          <button onClick={onClose} className="tap text-[#A8A29E] hover:text-[#C9A961] p-2 -m-1"><ArrowLeft size={20} /></button>
           <div className="flex-1 min-w-0">
             <div className="text-[#F5F1E8] text-sm" style={F.display}>COMMENTS</div>
             <div className="text-[10px] text-[#6B6B6B]" style={F.mono}>{baseCount + comments.length} total</div>
           </div>
           {onToggleBookmark && (
             <button onClick={onToggleBookmark}
-              className={`p-2 ${isBookmarked ? 'text-[#C9A961]' : 'text-[#6B6B6B] hover:text-[#A8A29E]'}`}
+              className={`tap p-2 ${isBookmarked ? 'text-[#C9A961]' : 'text-[#6B6B6B] hover:text-[#C9A961]'}`}
               title={isBookmarked ? 'saved' : 'save'}>
               <Bookmark size={16} fill={isBookmarked ? '#C9A961' : 'none'} />
             </button>
@@ -119,7 +119,7 @@ export function CommentsOverlay({ post, onClose, onComment, onReact, onReactComm
           <div className="flex items-center gap-2 px-2 py-1 mb-1 bg-[#5B0F1A]/10 border-l-2 border-[#5B0F1A]">
             <CornerDownRight size={11} className="text-[#C8102E]" />
             <span className="text-[10px] uppercase tracking-wider text-[#C8102E]" style={F.ui}>replying to {replyingToComment.user}</span>
-            <button onClick={() => setReplyTo(null)} className="ml-auto text-[#6B6B6B] hover:text-[#A8A29E] text-xs">×</button>
+            <button onClick={() => setReplyTo(null)} className="tap ml-auto text-[#6B6B6B] hover:text-[#C9A961] text-xs">×</button>
           </div>
         )}
         <div className="flex items-end gap-2">
@@ -143,7 +143,7 @@ export function CommentsOverlay({ post, onClose, onComment, onReact, onReactComm
           <button
             onClick={send}
             disabled={!draft.trim()}
-            className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center transition-colors ${
+            className={`tap w-9 h-9 shrink-0 rounded-full flex items-center justify-center ${
               draft.trim() ? 'bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8]' : 'bg-[#141414] border border-[#2A2A2A] text-[#6B6B6B]'
             }`}
           >

@@ -61,7 +61,7 @@ export function NotificationsPanel({ notifications, onClose, onMarkAllRead, onMa
     <div className="absolute inset-0 z-30 bg-[#0A0A0A] animate-slide-in-right flex flex-col">
       <div className="bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A] safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
+          <button onClick={onClose} className="tap text-[#A8A29E] hover:text-[#C9A961] p-2 -m-1 transition-colors"><X size={20} /></button>
           <div className="text-[#F5F1E8] text-base tracking-[0.3em]" style={F.display}>NOTIFICATIONS</div>
           <button
             onMouseDown={handlePressStart}
@@ -69,7 +69,7 @@ export function NotificationsPanel({ notifications, onClose, onMarkAllRead, onMa
             onMouseLeave={handlePressEnd}
             onTouchStart={handlePressStart}
             onTouchEnd={handlePressEnd}
-            className="text-[#C8102E] text-[10px] uppercase tracking-wider"
+            className="tap text-[#C8102E] hover:text-[#C9A961] text-[10px] uppercase tracking-wider"
             style={F.ui}
             title="long press to mark all read">
             {unread > 0 ? `${unread} new` : '—'}
@@ -84,7 +84,7 @@ export function NotificationsPanel({ notifications, onClose, onMarkAllRead, onMa
       {notifications.length > 0 && (
         <div className="px-4 py-2 border-b border-[#1A1A1A] flex items-center justify-end">
           <button onClick={onClearAll}
-            className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#8B0000]" style={F.ui}>
+            className="tap flex items-center gap-1 text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#8B0000]" style={F.ui}>
             <Trash2 size={10} /> clear all
           </button>
         </div>
@@ -104,7 +104,7 @@ export function NotificationsPanel({ notifications, onClose, onMarkAllRead, onMa
               return (
                 <button key={n.id}
                   onClick={() => { n.ids.forEach(id => onMarkRead && onMarkRead(id)); onTap && onTap(n); }}
-                  className={`w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-[#0F0F0F] transition-colors ${!n.read ? 'bg-[#0F0506]' : ''}`}>
+                  className={`tap w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-[#0F0F0F] transition-colors ${!n.read ? 'bg-[#0F0506]' : ''}`}>
                   <div className="relative w-10 h-10 rounded-full overflow-hidden bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-base shrink-0">
                     {n.avatarUrl ? <img src={n.avatarUrl} alt="" className="w-full h-full object-cover" /> : n.avatar}
                     <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#0A0A0A] border border-[#2A2A2A] flex items-center justify-center" style={{ color: k.color }}>

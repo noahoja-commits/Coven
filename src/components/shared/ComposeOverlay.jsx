@@ -151,11 +151,9 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
     <div className="absolute inset-0 z-30 bg-[#0A0A0A] flex flex-col animate-fade-in safe-pb">
       <div className="bg-[#0A0A0A] border-b border-[#1A1A1A] safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onClose} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
+          <button onClick={onClose} className="tap text-[#A8A29E] hover:text-[#C9A961] p-2 -m-1"><X size={20} /></button>
           <div className="text-[#F5F1E8] text-sm tracking-[0.25em]" style={F.display}>NEW POST</div>
-          <button onClick={submit} disabled={!canPost}
-            className={`text-[#F5F1E8] text-xs px-3 py-1.5 uppercase tracking-wider transition-opacity flex items-center gap-1.5 ${canPost ? 'bg-[#8B0000] hover:bg-[#5B0F1A]' : 'bg-[#3F0A12] opacity-50 cursor-not-allowed'}`}
-            style={F.ui}>{busy ? <><Loader2 size={12} className="animate-spin" /> posting</> : 'post'}</button>
+          <button onClick={submit} disabled={!canPost} className="btn btn-primary">{busy ? <><Loader2 size={12} className="animate-spin" /> posting</> : 'post'}</button>
         </div>
       </div>
       <div className="flex-1 flex flex-col">
@@ -169,8 +167,8 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
         {pendingDraft && !text && (
           <div className="px-4 py-2 bg-[#5B0F1A]/15 border-b border-[#5B0F1A]/30 flex items-center gap-3 text-[11px]" style={F.ui}>
             <span className="flex-1 text-[#C8102E]">you have an unsent draft.</span>
-            <button onClick={restoreDraft} className="text-[#C9A961] uppercase tracking-wider hover:underline">restore</button>
-            <button onClick={discardDraft} className="text-[#6B6B6B] hover:text-[#A8A29E] uppercase tracking-wider">discard</button>
+            <button onClick={restoreDraft} className="btn btn-quiet text-[#C9A961] hover:text-[#F5F1E8]">restore</button>
+            <button onClick={discardDraft} className="btn btn-quiet">discard</button>
           </div>
         )}
         <div className="flex-1 px-4 py-4 overflow-y-auto">
@@ -189,7 +187,7 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
               ) : (
                 <img src={mediaPreview} alt="" className="max-h-72 w-auto border border-[#2A2A2A]" />
               )}
-              <button onClick={clearMedia} className="absolute top-1 right-1 w-7 h-7 bg-black/80 border border-[#3F3F3F] text-[#F5F1E8] flex items-center justify-center" title="remove"><X size={14} /></button>
+              <button onClick={clearMedia} className="tap absolute top-1 right-1 w-7 h-7 bg-black/80 border border-[#3F3F3F] text-[#F5F1E8] hover:text-[#C9A961] flex items-center justify-center" title="remove"><X size={14} /></button>
             </div>
           )}
           {mediaKind === 'video' && (
@@ -204,10 +202,9 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
                 <div key={i} className="flex items-center gap-2">
                   <input value={opt} onChange={e => updateOption(i, e.target.value.slice(0, 48))}
                     placeholder={`option ${i + 1}`}
-                    className="flex-1 bg-[#0A0A0A] border border-[#2A2A2A] focus:border-[#7B2CBF] outline-none px-2 py-1.5 text-[#F5F1E8] text-sm"
-                    style={F.serif} />
+                    className="field flex-1 focus:border-[#7B2CBF] text-sm" />
                   {poll.options.length > 2 && (
-                    <button onClick={() => removeOption(i)} className="text-[#6B6B6B] hover:text-[#8B0000]"><Minus size={14} /></button>
+                    <button onClick={() => removeOption(i)} className="tap text-[#6B6B6B] hover:text-[#C9A961]"><Minus size={14} /></button>
                   )}
                 </div>
               ))}
@@ -239,8 +236,8 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
         <div className="border-t border-[#1A1A1A] px-4 py-3 flex items-center gap-4">
           <input ref={fileRef} type="file" accept="image/*,video/*" onChange={onPickMedia} className="hidden" />
           <button onClick={() => fileRef.current?.click()} disabled={!!poll}
-            className={`${mediaPreview ? 'text-[#C9A961]' : 'text-[#A8A29E] hover:text-[#F5F1E8]'} disabled:opacity-30`} title="add a photo or video"><ImageIcon size={18} /></button>
-          <button onClick={togglePoll} disabled={!!mediaFile} className={`${poll ? 'text-[#7B2CBF]' : 'text-[#A8A29E] hover:text-[#F5F1E8]'} disabled:opacity-30`} title="poll"><BarChart2 size={18} /></button>
+            className={`tap ${mediaPreview ? 'text-[#C9A961]' : 'text-[#A8A29E] hover:text-[#C9A961]'} disabled:opacity-30`} title="add a photo or video"><ImageIcon size={18} /></button>
+          <button onClick={togglePoll} disabled={!!mediaFile} className={`tap ${poll ? 'text-[#7B2CBF]' : 'text-[#A8A29E] hover:text-[#C9A961]'} disabled:opacity-30`} title="poll"><BarChart2 size={18} /></button>
           <button onClick={() => setAnonymous(!anonymous)}
             className={`flex items-center gap-1.5 text-[10px] uppercase tracking-wider transition-colors ${anonymous ? 'text-[#7B2CBF]' : 'text-[#6B6B6B] hover:text-[#A8A29E]'}`}
             style={F.ui} title="post as confession">
@@ -259,7 +256,7 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
               {coOpen && !coauthor && (
                 <div className="absolute bottom-full mb-2 left-0 w-52 bg-[#0F0F0F] border border-[#2A2A2A] z-20">
                   <input value={coSearch} onChange={e => setCoSearch(e.target.value)} placeholder="search a soul…" autoFocus
-                    className="w-full bg-[#0A0A0A] border-b border-[#1A1A1A] px-2.5 py-1.5 text-xs text-[#F5F1E8] outline-none placeholder:text-[#6B6B6B]" style={F.ui} />
+                    className="field text-xs" style={F.ui} />
                   {coResults.map(u => (
                     <button key={u.id} onClick={() => { setCoauthor({ id: u.id, handle: u.handle }); setCoOpen(false); setCoSearch(''); setCoResults([]); }}
                       className="w-full text-left px-2.5 py-1.5 text-xs text-[#A8A29E] hover:bg-[#1A1A1A] flex items-center gap-2" style={F.ui}>

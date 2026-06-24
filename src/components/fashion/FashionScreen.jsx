@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { ExternalLink, X, Plus } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { EmptyState } from '../shared/EmptyState';
+import { SectionLabel } from '../shared/SectionLabel';
 import { FASHION } from '../../data/fashion';
 
 const PALETTE = {
@@ -97,7 +98,7 @@ function FashionTile({ item }) {
         <div className="text-[#A8A29E] text-[11px] mt-0.5 pl-2.5" style={F.ui}>{item.kind}</div>
         <div className="flex items-center gap-1.5 mt-2 pl-2.5">
           {item.tags.map(t => (
-            <span key={t} className="text-[10px] px-1.5 py-0.5 border border-[#3F3F3F] text-[#A8A29E] uppercase tracking-wider" style={F.ui}>{t}</span>
+            <span key={t} className="chip" style={F.ui}>{t}</span>
           ))}
           <span className="ml-auto text-[#C9A961]/90 text-xs" style={F.mono}>{item.price}</span>
         </div>
@@ -147,8 +148,7 @@ export function FashionScreen({ shops = [], meId, onAddStore, onDeleteStore }) {
           const active = filter === t;
           return (
             <button key={t} onClick={() => setFilter(t)}
-              className={`shrink-0 px-3 py-1.5 text-[10px] uppercase tracking-wider border transition-colors
-                ${active ? 'bg-[#5B0F1A] text-[#F5F1E8] border-[#8B0000]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#5B0F1A]/60'}`}
+              className={`tap shrink-0 chip ${active ? 'chip-gold' : 'hover:border-[#5B0F1A]/60'}`}
               style={F.ui}>{t}</button>
           );
         })}
@@ -157,24 +157,21 @@ export function FashionScreen({ shops = [], meId, onAddStore, onDeleteStore }) {
       {/* Community stores — a directory of shops / clothing sites souls have found. */}
       {showStores && (
         <div className="px-3 mb-3">
-          <div className="flex items-center justify-between px-1 mb-2">
-            <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.ui}>· stores the coven found ·</div>
-            {meId && !adding && (
-              <button onClick={() => setAdding(true)} className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-[#A8A29E] hover:text-[#C9A961]" style={F.ui}>
-                <Plus size={12} /> add a store
-              </button>
-            )}
-          </div>
+          <SectionLabel className="px-1 mb-2" action={meId && !adding && (
+            <button onClick={() => setAdding(true)} className="btn btn-quiet">
+              <Plus size={12} /> add a store
+            </button>
+          )}>stores the coven found</SectionLabel>
 
           {adding && (
-            <div className="border border-[#2A2A2A] bg-[#0F0F0F] p-3 space-y-2 mb-2">
+            <div className="card p-3 space-y-2 mb-2">
               {[['name', 'store name'], ['kind', 'kind (e.g. indie · online)'], ['url', 'link (e.g. killstar.com)'], ['blurb', 'one line about it (optional)']].map(([k, ph]) => (
                 <input key={k} value={form[k]} onChange={e => setForm({ ...form, [k]: e.target.value })} placeholder={ph}
-                  className="w-full bg-[#0A0608] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none px-2.5 py-1.5 text-[#F5F1E8] text-sm" style={F.serif} />
+                  className="field !py-1.5" />
               ))}
               <div className="flex gap-2 justify-end">
-                <button onClick={() => { setAdding(false); setForm(EMPTY_STORE); }} className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-[#6B6B6B]" style={F.ui}>cancel</button>
-                <button onClick={submitStore} disabled={!form.name.trim()} className="px-3 py-1.5 text-[10px] uppercase tracking-wider bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] disabled:opacity-40" style={F.ui}>add store</button>
+                <button onClick={() => { setAdding(false); setForm(EMPTY_STORE); }} className="btn btn-quiet">cancel</button>
+                <button onClick={submitStore} disabled={!form.name.trim()} className="btn btn-primary">add store</button>
               </div>
             </div>
           )}

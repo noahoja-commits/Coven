@@ -15,6 +15,7 @@ import { PostGrid } from './PostGrid';
 import { TarotFrame, arcanaFor, Grain } from '../shared/Sigils';
 import { ArcanaCard } from './ArcanaCard';
 import { DarkRecapModal } from './DarkRecapModal';
+import { SectionLabel } from '../shared/SectionLabel';
 
 const SHRINE_THEMES = {
   oxblood: 'radial-gradient(ellipse at 50% 0%, #5B0F1A 0%, transparent 60%)',
@@ -81,7 +82,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
   return (
     <div className="pb-24">
       {/* Header card — framed as a tarot arcana */}
-      <div className="relative px-4 pt-4 pb-5 border-b border-[#1A1A1A] overflow-hidden">
+      <div className="relative px-4 pt-4 pb-5 border-b border-[#1C1A1A] overflow-hidden">
         <div className="absolute inset-0 opacity-25" style={{ background: SHRINE_THEMES[shrineTheme] || SHRINE_THEMES.oxblood }} />
         <Grain opacity={0.06} />
         <TarotFrame />
@@ -102,19 +103,19 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
             {(() => {
               const headline = graves.find(g => !g.private);
               return headline ? (
-                <button onClick={onAddGrave} className="text-[10px] text-[#6B6B6B] hover:text-[#A8A29E] uppercase tracking-wider flex items-center gap-1" style={F.ui}>
+                <button onClick={onAddGrave} className="tap text-[10px] text-[#6B6B6B] hover:text-[#C9A961] uppercase tracking-wider flex items-center gap-1" style={F.ui}>
                   <span className="text-base">⚱</span>
                   <span>{headline.name}</span>
                 </button>
               ) : null;
             })()}
             <button onClick={() => shareCoven({ title: `@${profile.name} on Coven`, text: profile.bio || 'a soul in the coven', path: `?u=${profile.name}` })}
-              className="text-[#6B6B6B] hover:text-[#A8A29E]" title="share your profile"><Share2 size={14} /></button>
-            <button onClick={() => setShowThemePicker(true)} className="text-[#6B6B6B] hover:text-[#A8A29E]" title="shrine theme">✦</button>
-            <button onClick={onOpenMood} className="text-[#6B6B6B] hover:text-[#A8A29E] text-sm leading-none" title="set your mood"
+              className="tap text-[#6B6B6B] hover:text-[#C9A961]" title="share your profile"><Share2 size={14} /></button>
+            <button onClick={() => setShowThemePicker(true)} className="tap text-[#6B6B6B] hover:text-[#C9A961]" title="shrine theme">✦</button>
+            <button onClick={onOpenMood} className="tap text-[#6B6B6B] hover:text-[#C9A961] text-sm leading-none" title="set your mood"
               style={mood ? { color: mood.color, textShadow: `0 0 8px ${mood.color}99` } : undefined}>{mood ? mood.glyph : '☁'}</button>
-            <button onClick={onEditProfile} className="text-[#6B6B6B] hover:text-[#A8A29E]" title="edit profile"><Pencil size={14} /></button>
-            <button onClick={onOpenSettings} className="text-[#6B6B6B] hover:text-[#A8A29E]"><Settings size={16} /></button>
+            <button onClick={onEditProfile} className="tap text-[#6B6B6B] hover:text-[#C9A961]" title="edit profile"><Pencil size={14} /></button>
+            <button onClick={onOpenSettings} className="tap text-[#6B6B6B] hover:text-[#C9A961]"><Settings size={16} /></button>
           </div>
         </div>
 
@@ -135,7 +136,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
             <div className="flex items-baseline gap-2">
               <h2 className="text-[#F5F1E8] text-xl truncate" style={F.brand}>{profile.name}</h2>
               {arche && (
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 border text-[9px] uppercase tracking-wider shrink-0"
+                <span className="chip shrink-0"
                   style={{ borderColor: `${arche.accent}66`, color: arche.accent, ...F.ui }}>
                   <span>{arche.glyph}</span>{arche.label}
                 </span>
@@ -145,7 +146,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
               {profile.pronouns} {sign && <span className="ml-2 text-[#C8102E]">{sign.glyph} {sign.name.toLowerCase()}</span>}
             </div>
             {mood && (
-              <button onClick={onOpenMood} className="inline-flex items-center gap-1 px-2 py-0.5 mb-1 border text-[10px] uppercase tracking-wider"
+              <button onClick={onOpenMood} className="chip tap mb-1"
                 style={{ borderColor: `${mood.color}66`, color: mood.color, textShadow: `0 0 6px ${mood.color}66`, ...F.ui }}>
                 <span>{mood.glyph}</span><span>{mood.label}</span>
               </button>
@@ -153,7 +154,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
             <p className="text-[#A8A29E] text-sm leading-snug" style={F.serif}>{profile.bio}</p>
             <div className="flex flex-wrap items-center gap-1.5 mt-2">
               {profile.tags.map(t => (
-                <span key={t} className="text-[10px] px-1.5 py-0.5 border border-[#2A2A2A] text-[#A8A29E] uppercase tracking-wider" style={F.ui}>{t}</span>
+                <span key={t} className="chip" style={F.ui}>{t}</span>
               ))}
             </div>
           </div>
@@ -168,14 +169,14 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
         )}
 
         {/* Stats */}
-        <div className="relative flex items-center gap-5 mt-4 pt-4 border-t border-[#1A1A1A]">
+        <div className="relative flex items-center gap-5 mt-4 pt-4 border-t border-[#1C1A1A]">
           <div><span className="text-[#F5F1E8] text-base block leading-none" style={F.mono}>{profile.posts}</span><span className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>posts</span></div>
-          <button onClick={onShowFollowers} className="text-left hover:opacity-80 transition-opacity"><span className="text-[#F5F1E8] text-base block leading-none" style={F.mono}>{profile.followers}</span><span className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>followers</span></button>
-          <button onClick={onShowFollowing} className="text-left hover:opacity-80 transition-opacity"><span className="text-[#F5F1E8] text-base block leading-none" style={F.mono}>{profile.following}</span><span className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>following</span></button>
+          <button onClick={onShowFollowers} className="tap text-left hover:text-[#C9A961]"><span className="text-[#F5F1E8] text-base block leading-none" style={F.mono}>{profile.followers}</span><span className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>followers</span></button>
+          <button onClick={onShowFollowing} className="tap text-left hover:text-[#C9A961]"><span className="text-[#F5F1E8] text-base block leading-none" style={F.mono}>{profile.following}</span><span className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>following</span></button>
         </div>
 
         <button onClick={() => setShowRecap(true)}
-          className="relative w-full mt-3 py-2 text-[10px] uppercase tracking-[0.25em] text-[#C8102E] border border-[#2A2A2A] hover:border-[#5B0F1A] hover:text-[#C9A961] transition-colors" style={F.ui}>
+          className="btn btn-ghost relative w-full mt-3">
           ✦ your dark recap
         </button>
         {showRecap && <DarkRecapModal stats={recapStats} onClose={() => setShowRecap(false)} />}
@@ -185,19 +186,19 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
             <div onClick={e => e.stopPropagation()}>
               <ArcanaCard handle={profile.name} mode="full" />
               <button onClick={() => setShowArcana(false)}
-                className="mt-4 mx-auto block text-[10px] uppercase tracking-[0.3em] text-[#C8102E]/70 hover:text-[#C9A961]" style={F.ui}>· close ·</button>
+                className="btn btn-quiet mt-4 mx-auto block">· close ·</button>
             </div>
           </div>
         )}
 
         {/* Scenes you're in */}
         {joinedScenes.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-[#1A1A1A]">
-            <div className="text-[10px] uppercase tracking-[0.25em] text-[#6B6B6B] mb-2" style={F.ui}>· scenes you're in ·</div>
+          <div className="mt-4 pt-4 border-t border-[#1C1A1A]">
+            <SectionLabel className="mb-2">scenes you're in</SectionLabel>
             <div className="flex flex-wrap gap-1.5">
               {joinedScenes.map(s => (
                 <button key={s.id} onClick={() => onOpenScene && onOpenScene(s.id)}
-                  className="flex items-center gap-1.5 px-2 py-1 border border-[#2A2A2A] hover:border-[#5B0F1A] text-[#A8A29E] hover:text-[#F5F1E8] text-[11px] transition-colors" style={F.ui}>
+                  className="chip tap hover:text-[#C9A961]" style={F.ui}>
                   <span>{s.glyph}</span><span>{s.name}</span>
                 </button>
               ))}
@@ -209,7 +210,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
       {/* Pinned post */}
       {pinnedPost && (
         <button onClick={() => onOpenComments && onOpenComments(pinnedPost.id)}
-          className="block w-full text-left mx-4 mt-3 p-3 border border-[#C9A961]/40 bg-gradient-to-br from-[#C9A961]/10 to-transparent hover:border-[#C9A961] transition-colors" style={{ width: 'calc(100% - 2rem)' }}>
+          className="tap block w-full text-left mx-4 mt-3 p-3 border border-[#C9A961]/40 bg-gradient-to-br from-[#C9A961]/10 to-transparent hover:border-[#C9A961]" style={{ width: 'calc(100% - 2rem)' }}>
           <div className="text-[10px] uppercase tracking-[0.25em] text-[#C9A961] mb-1.5 flex items-center gap-1.5" style={F.ui}>
             <span>📌</span> · pinned to the shrine ·
           </div>
@@ -220,10 +221,9 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
 
       {/* Story highlights */}
       {storyHighlights.length > 0 && (
-        <div className="mx-4 mt-3 border border-[#2A2A2A] bg-[#0F0F0F]" style={{ width: 'calc(100% - 2rem)' }}>
-          <div className="px-3 py-2 border-b border-[#1A1A1A] flex items-center justify-between">
-            <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· kept stories ·</span>
-            <span className="text-[10px] text-[#6B6B6B]" style={F.mono}>{storyHighlights.length}</span>
+        <div className="card mx-4 mt-3" style={{ width: 'calc(100% - 2rem)' }}>
+          <div className="px-3 py-2 border-b border-[#1C1A1A]">
+            <SectionLabel rule={false} action={<span className="ml-auto text-[10px] text-[#6B6B6B]" style={F.mono}>{storyHighlights.length}</span>}>kept stories</SectionLabel>
           </div>
           <div className="flex gap-2 p-3 overflow-x-auto no-scrollbar">
             {storyHighlights.map(h => (
@@ -242,7 +242,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
                   <span className="text-[8px] text-white/70 text-center line-clamp-2" style={F.scripture}>{h.caption}</span>
                 </div>
                 <button onClick={() => onRemoveHighlight && onRemoveHighlight(h.id)}
-                  className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#0A0A0A] border border-[#2A2A2A] text-[#6B6B6B] hover:text-[#8B0000] text-xs opacity-0 group-hover:opacity-100 p-1 transition-colors">×</button>
+                  className="tap absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#0A0A0A] border border-[#1C1A1A] text-[#6B6B6B] hover:text-[#8B0000] text-xs opacity-0 group-hover:opacity-100 p-1">×</button>
               </div>
             ))}
           </div>
@@ -252,18 +252,18 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
       {/* Theme picker modal */}
       {showThemePicker && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center animate-fade-in" onClick={() => setShowThemePicker(false)}>
-          <div className="bg-[#0F0F0F] border border-[#2A2A2A] w-full sm:max-w-md sm:m-4 animate-slide-up" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A]">
+          <div className="card bg-[#0F0F0F] w-full sm:max-w-md sm:m-4 animate-slide-up" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#1C1A1A]">
               <div>
                 <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· tint your shrine ·</span>
                 <h3 className="text-[#F5F1E8] text-lg leading-none mt-1" style={F.display}>THEME</h3>
               </div>
-              <button onClick={() => setShowThemePicker(false)} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
+              <button onClick={() => setShowThemePicker(false)} className="tap text-[#A8A29E] hover:text-[#C9A961] p-2 -m-1"><X size={20} /></button>
             </div>
             <div className="p-4 grid grid-cols-2 gap-2">
               {Object.keys(SHRINE_THEMES).map(name => (
                 <button key={name} onClick={() => { onSetShrineTheme && onSetShrineTheme(name); setShowThemePicker(false); }}
-                  className={`relative h-20 border-2 ${shrineTheme === name ? 'border-[#C9A961]' : 'border-[#2A2A2A]'} overflow-hidden`}>
+                  className={`tap relative h-20 border-2 ${shrineTheme === name ? 'border-[#C9A961]' : 'border-[#1C1A1A]'} overflow-hidden`}>
                   <div className="absolute inset-0 bg-[#0A0A0A]" />
                   <div className="absolute inset-0 opacity-60" style={{ background: SHRINE_THEMES[name] }} />
                   <div className="absolute bottom-1 left-2 text-[10px] uppercase tracking-wider text-[#F5F1E8]" style={F.ui}>{name}</div>
@@ -277,7 +277,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
       {/* Daily ritual + crystals strip */}
       <div className="mx-4 mt-4 grid grid-cols-2 gap-2" style={{ width: 'calc(100% - 2rem)' }}>
         <button onClick={onPerformRitual} disabled={ritualDoneToday}
-          className={`p-3 border text-left transition-colors ${ritualDoneToday ? 'border-[#C9A961]/40 bg-[#C9A961]/5' : 'border-[#2A2A2A] hover:border-[#A89968]/40 bg-[#0F0F0F]'}`}>
+          className={`tap card p-3 text-left ${ritualDoneToday ? 'border-[#C9A961]/40 bg-[#C9A961]/5' : 'hover:border-[#A89968]/40'}`}>
           <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E] mb-1" style={F.ui}>· daily ritual ·</div>
           <div className="flex items-baseline gap-2">
             <span className="text-[#C9A961] text-2xl leading-none" style={F.mono}>{ritual?.streak || 0}</span>
@@ -295,12 +295,12 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
       <ShrineBlock shrine={shrine} onSetShrine={onSetShrine} state={achievementState} />
 
       {/* Now playing */}
-      <button onClick={onOpenNowPlaying} className="w-full text-left mx-4 mt-4 p-3 border border-[#2A2A2A] bg-gradient-to-br from-[#A89968]/10 to-transparent hover:border-[#A89968]/50 transition-colors group" style={{ width: 'calc(100% - 2rem)' }}>
+      <button onClick={onOpenNowPlaying} className="tap w-full text-left mx-4 mt-4 p-3 border border-[#1C1A1A] bg-gradient-to-br from-[#A89968]/10 to-transparent hover:border-[#A89968]/50 group" style={{ width: 'calc(100% - 2rem)' }}>
         <div className="flex items-center justify-between mb-1">
           <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E] flex items-center gap-1.5" style={F.ui}>
             <Music size={11} /> · now playing ·
           </span>
-          <Pencil size={11} className="text-[#6B6B6B] group-hover:text-[#A8A29E]" />
+          <Pencil size={11} className="text-[#6B6B6B] group-hover:text-[#C9A961]" />
         </div>
         {nowPlaying ? (
           <div className="flex items-center gap-2.5">
@@ -316,7 +316,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
               <span className="text-[#C9A961]">{nowPlaying.artist}</span>
               {nowPlaying.artist && nowPlaying.track && <span className="text-[#C8102E]/60"> · </span>}
               <span className="italic">{nowPlaying.track}</span>
-              {nowPlaying.loop && <span className="ml-1.5 align-middle text-[9px] uppercase tracking-wider text-[#C9A961] border border-[#C9A961]/40 px-1 py-0.5" style={F.ui}>↻ repeat</span>}
+              {nowPlaying.loop && <span className="chip-gold ml-1.5 align-middle text-[9px] uppercase tracking-wider px-1 py-0.5 border" style={F.ui}>↻ repeat</span>}
             </p>
           </div>
         ) : (
@@ -325,7 +325,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
       </button>
 
       {/* Reflections (private) */}
-      <button onClick={onOpenReflections} className="w-full text-left mx-4 mt-3 p-3 border border-[#2A2A2A] bg-[#0F0F0F] hover:border-[#A89968]/40 transition-colors group flex items-center gap-2" style={{ width: 'calc(100% - 2rem)' }}>
+      <button onClick={onOpenReflections} className="tap card w-full text-left mx-4 mt-3 p-3 hover:border-[#A89968]/40 group flex items-center gap-2" style={{ width: 'calc(100% - 2rem)' }}>
         <span className="text-[#C8102E] text-base">✎</span>
         <span className="flex-1">
           <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.ui}>· reflections · only you ·</span>
@@ -336,7 +336,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
       </button>
 
       {/* Dream journal (private) */}
-      <button onClick={onOpenDreams} className="w-full text-left mx-4 mt-3 p-3 border border-[#2A2A2A] bg-[#0F0F0F] hover:border-[#5C5C8A]/50 transition-colors group flex items-center gap-2" style={{ width: 'calc(100% - 2rem)' }}>
+      <button onClick={onOpenDreams} className="tap card w-full text-left mx-4 mt-3 p-3 hover:border-[#5C5C8A]/50 group flex items-center gap-2" style={{ width: 'calc(100% - 2rem)' }}>
         <span className="text-[#A6A6D0] text-base">☾</span>
         <span className="flex-1">
           <span className="text-[10px] uppercase tracking-[0.25em] text-[#A6A6D0]" style={F.ui}>· dream journal · only you ·</span>
@@ -347,20 +347,20 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
       </button>
 
       {/* Your tickets (rites you've bought into) */}
-      <button onClick={onOpenTickets} className="w-full text-left mx-4 mt-3 p-3 border border-[#2A2A2A] bg-[#0F0F0F] hover:border-[#A89968]/40 transition-colors group flex items-center gap-2" style={{ width: 'calc(100% - 2rem)' }}>
+      <button onClick={onOpenTickets} className="tap card w-full text-left mx-4 mt-3 p-3 hover:border-[#A89968]/40 group flex items-center gap-2" style={{ width: 'calc(100% - 2rem)' }}>
         <span className="text-[#C8102E] text-base">𖤐</span>
         <span className="flex-1">
           <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.ui}>· your tickets ·</span>
           <span className="block text-[#A8A29E] text-xs italic" style={F.serif}>rites you've paid into</span>
         </span>
-        <ChevronRight size={16} className="text-[#3F3F3F]" />
+        <ChevronRight size={16} className="text-[#3F3F3F] group-hover:text-[#C9A961]" />
       </button>
 
       {/* Tonight status — clickable */}
-      <button onClick={onOpenTonightStatus} className="w-full text-left mx-4 my-4 p-3 border border-[#2A2A2A] bg-gradient-to-br from-[#5B0F1A]/15 to-transparent hover:border-[#5B0F1A]/50 transition-colors group" style={{ width: 'calc(100% - 2rem)' }}>
+      <button onClick={onOpenTonightStatus} className="tap w-full text-left mx-4 my-4 p-3 border border-[#1C1A1A] bg-gradient-to-br from-[#5B0F1A]/15 to-transparent hover:border-[#5B0F1A]/50 group" style={{ width: 'calc(100% - 2rem)' }}>
         <div className="flex items-center justify-between mb-1">
           <span className="text-[10px] uppercase tracking-[0.25em] text-[#5B0F1A]" style={F.ui}>· tonight ·</span>
-          <Pencil size={11} className="text-[#6B6B6B] group-hover:text-[#A8A29E]" />
+          <Pencil size={11} className="text-[#6B6B6B] group-hover:text-[#C9A961]" />
         </div>
         {profile.status ? (
           <p className="text-[#F5F1E8] text-base leading-snug" style={F.serif}>"{profile.status}"</p>
@@ -376,11 +376,8 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
 
       {/* Memento mori */}
       {mementoMoriOn !== false && (
-        <div className="mx-4 mb-4 p-3 border border-[#2A2A2A] bg-[#0F0F0F]">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· memento mori ·</span>
-            <span className="text-[#6B6B6B] text-base">☠</span>
-          </div>
+        <div className="card mx-4 mb-4 p-3">
+          <SectionLabel rule={false} className="mb-2" action={<span className="ml-auto text-[#6B6B6B] text-base">☠</span>}>memento mori</SectionLabel>
           {daysLived == null ? (
             <p className="text-[#A8A29E] text-sm" style={F.serif}>add your birthday to count the days.</p>
           ) : (
@@ -402,13 +399,12 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
       )}
 
       {/* Graves */}
-      <div className="mx-4 mb-4 border border-[#2A2A2A] bg-[#0F0F0F]">
-        <div className="px-3 py-2 border-b border-[#1A1A1A] flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· in memoriam ·</span>
-          <button onClick={onAddGrave} className="text-[10px] uppercase tracking-wider text-[#C8102E] hover:text-[#C9A961]" style={F.ui}>+ add</button>
+      <div className="card mx-4 mb-4">
+        <div className="px-3 py-2 border-b border-[#1C1A1A]">
+          <SectionLabel rule={false} action={<button onClick={onAddGrave} className="tap ml-auto text-[10px] uppercase tracking-wider text-[#C8102E] hover:text-[#C9A961]" style={F.ui}>+ add</button>}>in memoriam</SectionLabel>
         </div>
         {graves.length > 0 ? (
-          <div className="divide-y divide-[#1A1A1A]">
+          <div className="divide-y divide-[#1C1A1A]">
             {graves.map(g => {
               const candleAge = g.candleLitAt ? Date.now() - g.candleLitAt : Infinity;
               const candleBurning = candleAge < 1000 * 60 * 60 * 24;
@@ -435,7 +431,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
                       </div>
                       <button onClick={() => onLightCandle && onLightCandle(g.id)}
                         disabled={candleBurning}
-                        className={`text-[10px] uppercase tracking-wider px-2 py-0.5 border transition-colors ${candleBurning ? 'border-[#C9A961]/40 text-[#C9A961]/80 cursor-default' : 'border-[#2A2A2A] text-[#C8102E] hover:border-[#C9A961] hover:text-[#C9A961]'}`}
+                        className={`tap text-[10px] uppercase tracking-wider px-2 py-0.5 border ${candleBurning ? 'border-[#C9A961]/40 text-[#C9A961]/80 cursor-default' : 'border-[#1C1A1A] text-[#C8102E] hover:border-[#C9A961] hover:text-[#C9A961]'}`}
                         style={F.ui}>
                         {candleBurning ? '🕯 lit' : '🕯 light a candle'}
                       </button>
@@ -446,7 +442,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
             })}
           </div>
         ) : (
-          <button onClick={onAddGrave} className="w-full px-3 py-5 text-center text-[#6B6B6B] text-xs italic hover:text-[#A8A29E] transition-colors" style={F.serif}>
+          <button onClick={onAddGrave} className="tap w-full px-3 py-5 text-center text-[#6B6B6B] text-xs italic hover:text-[#C9A961]" style={F.serif}>
             lay your dead to rest — add a memorial
           </button>
         )}
@@ -454,12 +450,11 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
 
       {/* Sigil journal */}
       {sigils.length > 0 && (
-        <div className="mx-4 mb-4 border border-[#2A2A2A] bg-[#0F0F0F]">
-          <div className="px-3 py-2 border-b border-[#1A1A1A] flex items-center justify-between">
-            <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· sealed sigils ·</span>
-            <span className="text-[10px] text-[#6B6B6B]" style={F.mono}>{sigils.length}</span>
+        <div className="card mx-4 mb-4">
+          <div className="px-3 py-2 border-b border-[#1C1A1A]">
+            <SectionLabel rule={false} action={<span className="ml-auto text-[10px] text-[#6B6B6B]" style={F.mono}>{sigils.length}</span>}>sealed sigils</SectionLabel>
           </div>
-          <div className="grid grid-cols-3 gap-px bg-[#1A1A1A]">
+          <div className="grid grid-cols-3 gap-px bg-[#1C1A1A]">
             {sigils.slice(0, 9).map(s => (
               <div key={s.id} className="aspect-square bg-[#050204] relative flex items-center justify-center group">
                 <svg viewBox="0 0 100 100" className="w-full h-full">
@@ -487,17 +482,16 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
       )}
 
       {/* Crews */}
-      <div className="mx-4 mb-4 border border-[#2A2A2A] bg-[#0F0F0F]">
-        <div className="px-3 py-2 border-b border-[#1A1A1A] flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· your crews ·</span>
-          <button onClick={onBrowseCrews} className="text-[10px] uppercase tracking-wider text-[#C8102E] hover:text-[#C9A961]" style={F.ui}>browse</button>
+      <div className="card mx-4 mb-4">
+        <div className="px-3 py-2 border-b border-[#1C1A1A]">
+          <SectionLabel rule={false} action={<button onClick={onBrowseCrews} className="tap ml-auto text-[10px] uppercase tracking-wider text-[#C8102E] hover:text-[#C9A961]" style={F.ui}>browse</button>}>your crews</SectionLabel>
         </div>
         {crews.length > 0 ? (
-          <div className="divide-y divide-[#1A1A1A]">
+          <div className="divide-y divide-[#1C1A1A]">
             {crews.map(c => (
               <button key={c.id} onClick={() => onOpenCrew && onOpenCrew(c.id)}
-                className="w-full text-left px-3 py-3 flex items-start gap-3 hover:bg-[#0A0A0A] transition-colors">
-                <div className="w-10 h-10 shrink-0 border border-[#2A2A2A] flex items-center justify-center text-[#C8102E] text-lg">{c.glyph}</div>
+                className="tap w-full text-left px-3 py-3 flex items-start gap-3 hover:bg-[#0A0A0A]">
+                <div className="w-10 h-10 shrink-0 border border-[#1C1A1A] flex items-center justify-center text-[#C8102E] text-lg">{c.glyph}</div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline justify-between gap-2 mb-0.5">
                     <h4 className="text-[#F5F1E8] text-sm truncate" style={F.display}>{c.name}</h4>
@@ -509,26 +503,27 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
             ))}
           </div>
         ) : (
-          <button onClick={onBrowseCrews} className="w-full px-3 py-5 text-center text-[#6B6B6B] text-xs italic hover:text-[#A8A29E] transition-colors" style={F.serif}>
+          <button onClick={onBrowseCrews} className="tap w-full px-3 py-5 text-center text-[#6B6B6B] text-xs italic hover:text-[#C9A961]" style={F.serif}>
             you haven't joined a circle yet — browse crews
           </button>
         )}
       </div>
 
       {/* Anniversaries */}
-      <div className="mx-4 mb-4 border border-[#2A2A2A] bg-[#0F0F0F]">
-        <div className="px-3 py-2 border-b border-[#1A1A1A] flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· anniversaries ·</span>
-          <div className="flex items-center gap-3">
-            <button onClick={onAddAnniversary} className="text-[10px] uppercase tracking-wider text-[#C8102E] hover:text-[#C9A961]" style={F.ui}>+ add</button>
-            {anniversaries.length > 0 && (
-              <button onClick={() => setShowAllAnniv(!showAllAnniv)} className="text-[10px] uppercase tracking-wider text-[#6B6B6B]" style={F.ui}>
-                {showAllAnniv ? 'less' : 'all'}
-              </button>
-            )}
-          </div>
+      <div className="card mx-4 mb-4">
+        <div className="px-3 py-2 border-b border-[#1C1A1A]">
+          <SectionLabel rule={false} action={
+            <div className="ml-auto flex items-center gap-3">
+              <button onClick={onAddAnniversary} className="tap text-[10px] uppercase tracking-wider text-[#C8102E] hover:text-[#C9A961]" style={F.ui}>+ add</button>
+              {anniversaries.length > 0 && (
+                <button onClick={() => setShowAllAnniv(!showAllAnniv)} className="tap text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#C9A961]" style={F.ui}>
+                  {showAllAnniv ? 'less' : 'all'}
+                </button>
+              )}
+            </div>
+          }>anniversaries</SectionLabel>
         </div>
-          <div className="divide-y divide-[#1A1A1A]">
+          <div className="divide-y divide-[#1C1A1A]">
             {anniversaries.filter(a => showAllAnniv || a.visible).map(a => {
               const days = daysBetween(new Date(a.date));
               const years = (days / 365).toFixed(1);
@@ -550,19 +545,18 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
       </div>
 
       {/* Achievements */}
-      <div className="mx-4 mb-4 border border-[#2A2A2A] bg-[#0F0F0F]">
-        <div className="px-3 py-2 border-b border-[#1A1A1A] flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· marks earned ·</span>
-          <span className="text-[10px] text-[#6B6B6B]" style={F.mono}>{earned.length}/{ACHIEVEMENTS.length}</span>
+      <div className="card mx-4 mb-4">
+        <div className="px-3 py-2 border-b border-[#1C1A1A]">
+          <SectionLabel rule={false} action={<span className="ml-auto text-[10px] text-[#6B6B6B]" style={F.mono}>{earned.length}/{ACHIEVEMENTS.length}</span>}>marks earned</SectionLabel>
         </div>
-        <div className="grid grid-cols-4 gap-px bg-[#1A1A1A]">
+        <div className="grid grid-cols-4 gap-px bg-[#1C1A1A]">
           {ACHIEVEMENTS.map(a => {
             const has = earnedIds.has(a.id);
             const active = selectedMark?.id === a.id;
             return (
               <button key={a.id}
                 onClick={() => setSelectedMark(active ? null : a)}
-                className={`relative aspect-square flex flex-col items-center justify-center p-1 transition-colors ${active ? 'bg-[#5B0F1A]/20' : 'bg-[#0F0F0F]'} ${has ? '' : 'opacity-25 grayscale'}`}>
+                className={`tap relative aspect-square flex flex-col items-center justify-center p-1 ${active ? 'bg-[#5B0F1A]/20' : 'bg-[#0F0F0F]'} ${has ? '' : 'opacity-25 grayscale'}`}>
                 <span className={`text-2xl ${has ? 'text-[#C9A961]' : 'text-[#6B6B6B]'}`}>{a.glyph}</span>
                 <span className="text-[8px] text-center uppercase tracking-wider mt-0.5 text-[#A8A29E] line-clamp-1" style={F.ui}>{a.name}</span>
               </button>
@@ -570,7 +564,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
           })}
         </div>
         {/* tap a mark to see what it is + how to earn it */}
-        <div className="px-3 py-2.5 border-t border-[#1A1A1A]">
+        <div className="px-3 py-2.5 border-t border-[#1C1A1A]">
           {selectedMark ? (
             <div className="flex items-center gap-2.5">
               <span className={`text-xl ${earnedIds.has(selectedMark.id) ? 'text-[#C9A961]' : 'text-[#6B6B6B]'}`}>{selectedMark.glyph}</span>
@@ -596,20 +590,21 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
             <div className="text-[#C9A961] text-[11px] uppercase tracking-[0.25em]" style={F.scriptureSC}>· your shrine is unfinished ·</div>
             <p className="text-[#A8A29E] text-xs italic mt-0.5" style={F.serif}>add a portrait so souls recognize you.</p>
           </div>
-          <button onClick={onEditProfile} className="shrink-0 px-3 py-1.5 text-[9px] uppercase tracking-wider bg-[#5B0F1A] hover:bg-[#8B0000] text-[#F5F1E8]" style={F.ui}>tend it</button>
-          <button onClick={() => setNudgeHidden(true)} className="shrink-0 text-[#6B6B6B] hover:text-[#A8A29E] p-1 -m-1" title="dismiss"><X size={14} /></button>
+          <button onClick={onEditProfile} className="btn btn-primary shrink-0">tend it</button>
+          <button onClick={() => setNudgeHidden(true)} className="tap shrink-0 text-[#6B6B6B] hover:text-[#C9A961] p-1 -m-1" title="dismiss"><X size={14} /></button>
         </div>
       )}
 
       {/* Tabs */}
-      <div className="border-y border-[#1A1A1A] flex">
+      <div className="border-y border-[#1C1A1A] flex">
         {['grid', 'saved', 'activity'].map(t => (
           <button key={t} onClick={() => setTab(t)}
-            className={`flex-1 py-3 text-[10px] uppercase tracking-[0.2em] ${tab === t ? 'text-[#F5F1E8] border-b border-[#8B0000]' : 'text-[#6B6B6B]'}`}
+            className={`tap relative flex-1 py-3 text-[10px] uppercase tracking-[0.2em] ${tab === t ? 'text-[#C9A961]' : 'text-[#A8A29E] hover:text-[#C9A961]'}`}
             style={F.ui}>
             {t}
             {t === 'saved' && bookmarks.length > 0 && <span className="ml-1.5 text-[#C9A961]" style={F.mono}>{bookmarks.length}</span>}
             {t === 'activity' && activityLog.length > 0 && <span className="ml-1.5 text-[#C9A961]" style={F.mono}>{activityLog.length}</span>}
+            {tab === t && <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-[#C9A961]" style={{ boxShadow: '0 0 8px rgba(201,169,97,0.5)' }} />}
           </button>
         ))}
       </div>
@@ -624,11 +619,11 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
             \u00b7 nothing saved yet. tap the bookmark on any post \u00b7
           </div>
         ) : (
-          <div className="divide-y divide-[#1A1A1A]">
+          <div className="divide-y divide-[#1C1A1A]">
             {bookmarks.map(post => (
               <button key={post.id} onClick={() => onOpenComments && onOpenComments(post.id)}
-                className="w-full px-4 py-3 flex items-start gap-3 hover:bg-[#0F0F0F] text-left transition-colors">
-                <div className="w-9 h-9 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-base shrink-0">{post.avatar}</div>
+                className="tap w-full px-4 py-3 flex items-start gap-3 hover:bg-[#0F0F0F] text-left">
+                <div className="w-9 h-9 rounded-full bg-[#1A1A1A] border border-[#1C1A1A] flex items-center justify-center text-base shrink-0">{post.avatar}</div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-2">
                     <span className="text-[#F5F1E8] text-sm" style={F.ui}>{post.user}</span>
@@ -649,7 +644,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
             \u00b7 the night is still \u00b7
           </div>
         ) : (
-          <div className="divide-y divide-[#1A1A1A]">
+          <div className="divide-y divide-[#1C1A1A]">
             {activityLog.map(entry => (
               <div key={entry.id} className="px-4 py-3 flex items-start gap-3">
                 <span className="text-[#C8102E] text-base shrink-0 w-6 text-center">{entry.glyph || '\u00b7'}</span>
@@ -676,7 +671,7 @@ function SelfFlame({ flameLitAt = 0, onTend }) {
   const low = lit && pct < 0.25;
   return (
     <button onClick={onTend}
-      className="w-full text-left mx-4 mt-4 p-3 border border-[#2A2A2A] bg-gradient-to-br from-[#5B0F1A]/10 to-transparent hover:border-[#5B0F1A]/50 transition-colors flex items-center gap-3"
+      className="tap w-full text-left mx-4 mt-4 p-3 border border-[#1C1A1A] bg-gradient-to-br from-[#5B0F1A]/10 to-transparent hover:border-[#5B0F1A]/50 flex items-center gap-3"
       style={{ width: 'calc(100% - 2rem)' }}>
       <span className={`text-2xl ${lit ? 'animate-flicker' : 'opacity-40 grayscale'}`}>🕯</span>
       <div className="flex-1 min-w-0">
@@ -707,14 +702,14 @@ function ShrineBlock({ shrine = [], onSetShrine, state = {} }) {
   return (
     <>
       <button onClick={() => setOpen(true)}
-        className="w-full text-left mx-4 mt-4 p-3 border border-[#2A2A2A] bg-[#0F0F0F] hover:border-[#A89968]/40 transition-colors" style={{ width: 'calc(100% - 2rem)' }}>
+        className="tap card w-full text-left mx-4 mt-4 p-3 hover:border-[#A89968]/40" style={{ width: 'calc(100% - 2rem)' }}>
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.ui}>· the altar ·</span>
           <span className="text-[10px] text-[#6B6B6B]" style={F.ui}>{earned.size}/{SHRINE_OBJECTS.length} earned</span>
         </div>
         <div className="flex items-center gap-2">
           {[0, 1, 2, 3, 4].map(i => (
-            <span key={i} className="w-8 h-8 flex items-center justify-center border border-[#1A1A1A] bg-[#0A0204]/60 text-lg">
+            <span key={i} className="w-8 h-8 flex items-center justify-center border border-[#1C1A1A] bg-[#0A0204]/60 text-lg">
               {placed[i] ? placed[i].glyph : <span className="text-[#2A2A2A] text-xs">·</span>}
             </span>
           ))}
@@ -723,13 +718,13 @@ function ShrineBlock({ shrine = [], onSetShrine, state = {} }) {
       </button>
       {open && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center animate-fade-in" onClick={() => setOpen(false)}>
-          <div className="bg-[#0F0F0F] border border-[#2A2A2A] w-full sm:max-w-md sm:m-4 animate-slide-up max-h-[90dvh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A]">
+          <div className="card bg-[#0F0F0F] w-full sm:max-w-md sm:m-4 animate-slide-up max-h-[90dvh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#1C1A1A]">
               <div>
                 <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· place up to 5 · earned by practice ·</span>
                 <h3 className="text-[#F5F1E8] text-lg leading-none mt-1" style={F.display}>THE ALTAR</h3>
               </div>
-              <button onClick={() => setOpen(false)} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1"><X size={20} /></button>
+              <button onClick={() => setOpen(false)} className="tap text-[#A8A29E] hover:text-[#C9A961] p-2 -m-1"><X size={20} /></button>
             </div>
             <div className="p-4 grid grid-cols-2 gap-2">
               {SHRINE_OBJECTS.map(o => {
@@ -737,7 +732,7 @@ function ShrineBlock({ shrine = [], onSetShrine, state = {} }) {
                 const on = shrine.includes(o.id);
                 return (
                   <button key={o.id} onClick={() => toggle(o.id)} disabled={!got}
-                    className={`flex items-start gap-2 p-2 border text-left transition-colors ${on ? 'border-[#C9A961] bg-[#C9A961]/10' : got ? 'border-[#2A2A2A] hover:border-[#3F3F3F]' : 'border-[#1A1A1A] opacity-50'}`}>
+                    className={`tap flex items-start gap-2 p-2 border text-left ${on ? 'border-[#C9A961] bg-[#C9A961]/10' : got ? 'border-[#1C1A1A] hover:border-[#A89968]/40' : 'border-[#1C1A1A] opacity-50'}`}>
                     <span className={`text-2xl shrink-0 leading-none mt-0.5 ${got ? '' : 'grayscale opacity-60'}`}>{o.glyph}</span>
                     <span className="min-w-0">
                       <span className="block text-[#F5F1E8] text-sm" style={F.serif}>{o.name}</span>
@@ -762,7 +757,7 @@ function CrystalsBlock({ crystals, onToggleCrystal }) {
   return (
     <>
       <button onClick={() => setOpen(true)}
-        className="p-3 border border-[#2A2A2A] hover:border-[#A89968]/40 bg-[#0F0F0F] text-left transition-colors">
+        className="tap card p-3 hover:border-[#A89968]/40 text-left">
         <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E] mb-1" style={F.ui}>· crystals carried ·</div>
         {carried.length === 0 ? (
           <div className="text-[#6B6B6B] text-sm italic" style={F.serif}>none yet — carry a stone, set an intention</div>
@@ -782,20 +777,20 @@ function CrystalsBlock({ crystals, onToggleCrystal }) {
 
       {open && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center animate-fade-in" onClick={() => setOpen(false)}>
-          <div className="bg-[#0F0F0F] border border-[#2A2A2A] w-full sm:max-w-md sm:m-4 animate-slide-up" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A]">
+          <div className="card bg-[#0F0F0F] w-full sm:max-w-md sm:m-4 animate-slide-up" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#1C1A1A]">
               <div>
                 <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· choose up to 6 · first sets your focus ·</span>
                 <h3 className="text-[#F5F1E8] text-lg leading-none mt-1" style={F.display}>STONES CARRIED</h3>
               </div>
-              <button onClick={() => setOpen(false)} className="text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1 transition-colors"><X size={20} /></button>
+              <button onClick={() => setOpen(false)} className="tap text-[#A8A29E] hover:text-[#C9A961] p-2 -m-1"><X size={20} /></button>
             </div>
             <div className="p-4 grid grid-cols-2 gap-2">
               {CRYSTAL_OPTIONS.map(c => {
                 const has = crystals.includes(c.id);
                 return (
                   <button key={c.id} onClick={() => onToggleCrystal(c.id)}
-                    className={`flex items-start gap-2 p-2 border text-left transition-colors ${has ? 'border-[#C9A961] bg-[#C9A961]/10' : 'border-[#2A2A2A] hover:border-[#3F3F3F]'}`}>
+                    className={`tap flex items-start gap-2 p-2 border text-left ${has ? 'border-[#C9A961] bg-[#C9A961]/10' : 'border-[#1C1A1A] hover:border-[#A89968]/40'}`}>
                     <span className="text-2xl shrink-0 leading-none mt-0.5" style={{ color: c.tint }}>{c.glyph}</span>
                     <span className="min-w-0">
                       <span className="block text-[#F5F1E8] text-sm" style={F.serif}>{c.name}</span>
