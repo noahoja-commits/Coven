@@ -686,7 +686,7 @@ export default function App() {
     if (!activeEvent) { setActiveEventAttendees([]); setEventWaitlist({ count: 0, mine: false }); return; }
     let active = true;
     fetchEventAttendees(activeEvent)
-      .then(a => { if (active) setActiveEventAttendees(a.map(x => ({ handle: x.handle, avatar: x.avatar }))); })
+      .then(a => { if (active) setActiveEventAttendees(a.map(x => ({ userId: x.user_id, handle: x.handle, avatar: x.avatar, isMutual: !!x.is_mutual }))); })
       .catch(() => {});
     fetchWaitlist(activeEvent, meId)
       .then(w => { if (active) setEventWaitlist(w); })

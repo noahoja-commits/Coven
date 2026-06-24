@@ -101,7 +101,11 @@ export async function toggleEventRsvp(eventId, userId, wasGoing) {
 }
 
 export async function fetchEventAttendees(eventId) {
-  const { data, error } = await supabase.rpc('event_attendees', { p_event_id: eventId });
+  // Prefer the mutuals-aware RPC; fall back to the plain one pre-migration.
+  let { data, error } = await supabase.rpc('event_attendees_with_mutuals', { p_event_id: eventId });
+  if (error) {
+    ({ data, error } = await supabase.rpc('event_attendees', { p_event_id: eventId }));
+  }
   if (error) throw error;
   return data || [];
 }

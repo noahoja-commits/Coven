@@ -108,9 +108,10 @@ export function EventDetail({ event, isGoing, onToggleRsvp, onBack, onOpenUser, 
             )}
             {shown.map(a => (
               <button key={a.handle} onClick={() => onOpenUser && onOpenUser(a.handle)}
-                className="flex items-center gap-1.5 px-2 py-1 border border-[#2A2A2A] hover:border-[#3F3F3F]">
+                className={`flex items-center gap-1.5 px-2 py-1 border transition-colors ${a.isMutual ? 'border-[#C9A961]/60 bg-[#C9A961]/5' : 'border-[#2A2A2A] hover:border-[#3F3F3F]'}`}>
                 <div className="w-6 h-6 rounded-full bg-[#1A1A1A] flex items-center justify-center text-xs">{a.avatar}</div>
-                <span className="text-[#A8A29E] text-xs" style={F.ui}>{a.handle}</span>
+                <span className={`text-xs ${a.isMutual ? 'text-[#F5F1E8]' : 'text-[#A8A29E]'}`} style={F.ui}>{a.handle}</span>
+                {a.isMutual && <span className="text-[#C9A961] text-[10px] leading-none" title="mutual — you follow each other">★</span>}
               </button>
             ))}
             {overflow > 0 && (
