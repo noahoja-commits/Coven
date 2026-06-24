@@ -30,6 +30,32 @@ function InvPentagram({ className = '', color = '#C8102E', circle = true, sw = 1
   );
 }
 const pad = (n) => String(n).padStart(2, '0');
+const PETALS = Array.from({ length: 12 }, (_, i) => ({ l: (i * 29 + 7) % 100, d: (i * 0.9) % 9, dur: 8 + (i % 5) * 2, g: i % 3 === 0 ? '✿' : i % 3 === 1 ? '❧' : '✾' }));
+
+function Rose({ className = '', color = '#cdbb97' }) {
+  return (
+    <svg viewBox="0 0 40 64" className={className} fill="none" stroke={color} strokeWidth="0.8" strokeLinecap="round">
+      <path d="M20 28 q-7 -9 0 -16 q7 7 0 16 M20 28 q-11 -3 -9 -13 M20 28 q11 -3 9 -13 M20 28 q-5 -11 0 -15 M20 28 L20 60 M20 38 q-9 2 -13 -5 M20 46 q9 2 13 -5 M20 52 q-7 1 -10 -4" />
+    </svg>
+  );
+}
+function BoneHand({ className = '', color = '#b8b0a4', opacity = 0.45 }) {
+  return (
+    <svg viewBox="0 0 60 100" className={className} fill={color} opacity={opacity}>
+      <path d="M27 100 L23 52 Q23 46 27 46 L29 46 L29 20 Q29 16 32 16 Q35 16 35 20 L35 44 L37 44 L38 13 Q38 9 41 9 Q44 9 44 13 L43 44 L45 44 L47 21 Q47 17 50 17 Q53 17 52 21 L50 50 Q49 62 43 72 L40 100 Z" />
+    </svg>
+  );
+}
+function CrownedSkull({ className = '', color = '#cfc6b8' }) {
+  return (
+    <svg viewBox="0 0 64 72" className={className} fill="none" stroke={color} strokeWidth="1" strokeLinejoin="round">
+      <path d="M14 24 L7 7 L16 17 L21 4 L27 17 L32 5 L37 17 L43 4 L48 17 L57 7 L50 24" opacity="0.85" />
+      <path d="M17 26 Q17 13 32 13 Q47 13 47 26 Q47 36 40 40 L40 48 Q40 52 32 52 Q24 52 24 48 L24 40 Q17 36 17 26 Z" />
+      <circle cx="25" cy="30" r="3.6" fill={color} /><circle cx="39" cy="30" r="3.6" fill={color} />
+      <path d="M32 34 L28.5 41 L35.5 41 Z" fill={color} />
+    </svg>
+  );
+}
 
 export function ShockOverlay({ mode = 'none', layer = 'front' }) {
   const [tick, setTick] = useState(0);
@@ -310,97 +336,130 @@ CPU ${18 + (tick % 7)}% · PROC 6${6 + (tick % 4)}
     );
   }
 
-  // ── KEEPSAKE — sepia romantic collage: candle glow + torn-paper captions + moon phases ──
+  // ── KEEPSAKE — sepia romantic scrapbook: candles + roses + light-leak (back), torn-paper captions, THE END, moon phases, falling petals (front) ──
   if (mode === 'keepsake') {
     if (back) return (
       <div className={`${BWRAP} text-[#cdbb97]`} aria-hidden>
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 110%, rgba(232,196,90,0.5), rgba(120,90,40,0.16) 42%, transparent 74%)', mixBlendMode: 'screen' }} />
-        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 80px 26px rgba(20,14,6,0.6)' }} />
-        <div className="absolute bottom-[4%] left-1/2 -translate-x-1/2 flex items-end gap-6 opacity-80">
-          {[0, 1, 2].map(i => <span key={i} className="block w-[5px] rounded-full animate-flicker" style={{ height: 14 + (i % 2) * 7, background: 'radial-gradient(circle at 50% 0%, #fff, #ffb14a 45%, #8a4a00)', animationDelay: `${i * 0.3}s` }} />)}
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 112%, rgba(232,196,90,0.55), rgba(120,90,40,0.16) 40%, transparent 74%)', mixBlendMode: 'screen' }} />
+        <div className="absolute -inset-1/3 shock-fog" style={{ background: 'radial-gradient(ellipse at 84% 8%, rgba(232,210,150,0.3), transparent 52%)' }} />
+        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 90px 30px rgba(18,12,5,0.62)' }} />
+        <Rose className="absolute left-[4%] bottom-[6%] w-14 h-24 opacity-25 -rotate-12" color="#a89066" />
+        <Rose className="absolute right-[5%] top-[10%] w-10 h-16 opacity-20 rotate-[18deg]" color="#a89066" />
+        {/* dripping candles + flames */}
+        <div className="absolute bottom-[3%] left-1/2 -translate-x-1/2 flex items-end gap-7 opacity-90">
+          {[0, 1, 2].map(i => (
+            <div key={i} className="relative flex flex-col items-center">
+              <span className="block w-[5px] rounded-full animate-flicker" style={{ height: 15 + (i % 2) * 8, marginBottom: -2, background: 'radial-gradient(circle at 50% 0%, #fff, #ffb14a 45%, #8a4a00)', filter: 'blur(0.3px)', animationDelay: `${i * 0.3}s` }} />
+              <span className="block w-[10px] rounded-[2px]" style={{ height: 26 + (i % 3) * 7, background: 'linear-gradient(180deg, #e8dcc0, #b9a886 70%, #8a7a58)', boxShadow: '0 0 12px rgba(232,196,90,0.35)' }} />
+            </div>
+          ))}
         </div>
       </div>
     );
     return (
       <div className={`${FWRAP} text-[#3a2c18]`} aria-hidden>
         {[
-          { t: "look up — you'll see the stars", top: '15%', left: '7%', rot: -3 },
-          { t: "if it's meant to be, it'll be", top: '43%', left: '36%', rot: 2 },
-          { t: 'forever & always', top: '71%', left: '13%', rot: -1.5 },
+          { t: 'she loves moonlight & rainstorms', top: '9%', left: '6%', rot: -3, s: 10 },
+          { t: "look up — you'll see the stars", top: '30%', left: '40%', rot: 2.5, s: 10 },
+          { t: "if it's meant to be, it'll be", top: '52%', left: '10%', rot: -1.5, s: 11 },
+          { t: 'forever & always', top: '68%', left: '52%', rot: 2, s: 10 },
+          { t: 'the things we love most, destroy us', top: '84%', left: '14%', rot: -2, s: 9 },
         ].map((c, i) => (
-          <span key={i} className="absolute px-1.5 py-0.5 text-[10px] tracking-wide" style={{ top: c.top, left: c.left, transform: `rotate(${c.rot}deg)`, background: 'rgba(226,212,182,0.82)', boxShadow: '0 1px 4px rgba(0,0,0,0.35)' }}>{c.t}</span>
+          <span key={i} className="absolute px-1.5 py-[3px] tracking-wide" style={{ top: c.top, left: c.left, fontSize: c.s, transform: `rotate(${c.rot}deg)`, background: 'rgba(228,214,184,0.85)', boxShadow: '0 1px 5px rgba(0,0,0,0.4)' }}>{c.t}</span>
         ))}
-        <div className="absolute top-[8%] right-[8%] flex gap-1.5 opacity-50">
+        <span className="absolute top-[20%] right-[8%] px-2 py-[3px] text-[10px] tracking-[0.2em] rotate-[-6deg] border border-[#3a2c18]/40" style={{ background: 'rgba(228,214,184,0.85)' }}>THE END</span>
+        <div className="absolute top-[6%] right-[10%] flex gap-1.5 opacity-55">
           {['#1a1208', '#5a4424', '#cdbb97', '#5a4424', '#1a1208'].map((c, i) => <span key={i} className="block w-2.5 h-2.5 rounded-full" style={{ background: c, boxShadow: '0 0 5px rgba(232,196,90,0.4)' }} />)}
         </div>
-        <div className="absolute inset-0" style={{ backgroundImage: GRAIN, backgroundSize: '120px 120px', mixBlendMode: 'overlay', opacity: 0.22 }} />
+        <span className="absolute bottom-[28%] right-[14%] text-base opacity-50">🦋</span>
+        {PETALS.slice(0, 8).map((p, i) => <span key={i} className="absolute top-0 text-[10px] shock-leaf" style={{ left: `${p.l}%`, color: 'rgba(180,140,90,0.55)', animationDelay: `${p.d}s`, animationDuration: `${p.dur}s` }}>{p.g}</span>)}
+        <div className="absolute inset-0" style={{ backgroundImage: GRAIN, backgroundSize: '110px 110px', mixBlendMode: 'overlay', opacity: 0.24 }} />
       </div>
     );
   }
 
-  // ── XEROX — zine photocopy: heavy b&w grain + huge faint word + scattered lyric annotations ──
+  // ── XEROX — zine photocopy: noise + halftone face + layered words (back), lyric scatter + crop marks + barcode + editorial stamp (front) ──
   if (mode === 'xerox') {
     if (back) return (
       <div className={`${BWRAP} text-white`} aria-hidden>
         <div className="absolute inset-0" style={{ background: 'rgba(8,8,8,0.22)' }} />
+        <div className="absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 w-[70%] aspect-square rounded-full opacity-[0.16]" style={{ backgroundImage: 'radial-gradient(#fff 32%, transparent 33%)', backgroundSize: '7px 7px', maskImage: 'radial-gradient(circle, #000 35%, transparent 70%)', WebkitMaskImage: 'radial-gradient(circle, #000 35%, transparent 70%)' }} />
         <div className="absolute inset-0 shock-burst" style={{ backgroundImage: GRAIN, backgroundSize: '70px 70px', opacity: 0.85, mixBlendMode: 'screen' }} />
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[32vw] leading-none whitespace-nowrap opacity-[0.06]">REMEMBER</div>
+        <div className="absolute left-1/2 top-[26%] -translate-x-1/2 -translate-y-1/2 text-[30vw] leading-none whitespace-nowrap opacity-[0.05]">REMEMBER</div>
+        <div className="absolute left-1/2 bottom-[8%] -translate-x-1/2 text-[24vw] leading-none whitespace-nowrap opacity-[0.04]">FORGET</div>
       </div>
     );
     return (
       <div className={`${FWRAP} text-[#EDEDED]`} aria-hidden>
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'repeating-linear-gradient(91deg, rgba(0,0,0,0.6) 0 1px, transparent 1px 7px)' }} />
+        <div className="absolute left-3 right-3 top-[40%] text-[13px] leading-[1.05] font-bold uppercase opacity-80" style={{ letterSpacing: '-0.01em' }}>now i have to remember you<br />for longer than i&apos;ve known you</div>
         {[
-          { t: 'I MISS YOU', top: '20%', left: '11%' }, { t: 'do you remember us?', top: '33%', left: '50%' },
-          { t: 'where are you now?', top: '58%', left: '18%' }, { t: 'if i knew', top: '74%', left: '58%' },
-          { t: 'sorry', top: '46%', left: '7%' },
-        ].map((a, i) => <span key={i} className="absolute text-[9px] uppercase tracking-[0.2em] opacity-60 shock-blink" style={{ top: a.top, left: a.left, animationDelay: `${(i % 5) * 0.4}s` }}>{a.t}</span>)}
-        <div className="absolute inset-0 shock-burst" style={{ backgroundImage: GRAIN, backgroundSize: '50px 50px', mixBlendMode: 'overlay', opacity: 0.5 }} />
+          { t: 'I MISS YOU', top: '12%', left: '11%' }, { t: 'do you remember us?', top: '24%', left: '48%' },
+          { t: 'where are you now?', top: '58%', left: '16%' }, { t: 'if i knew', top: '70%', left: '60%' },
+          { t: 'sorry', top: '34%', left: '7%' }, { t: 'maybe we…', top: '64%', left: '46%' },
+          { t: 'what could have been?', top: '86%', left: '10%' }, { t: 'guess i never will', top: '90%', left: '58%' },
+        ].map((a, i) => <span key={i} className="absolute text-[9px] uppercase tracking-[0.18em] opacity-60 shock-blink" style={{ top: a.top, left: a.left, animationDelay: `${(i % 6) * 0.4}s` }}>{a.t}</span>)}
+        {/* crop / registration marks */}
+        {['top-2 left-2 border-l border-t', 'top-2 right-2 border-r border-t', 'bottom-2 left-2 border-l border-b', 'bottom-2 right-2 border-r border-b'].map((p, i) => <span key={i} className={`absolute ${p} w-3 h-3 border-white/50`} />)}
+        {/* barcode + stamp */}
+        <div className="absolute bottom-2 right-3 flex items-end gap-[1.5px] h-4 opacity-70">{[2,1,3,1,2,1,1,3,2,1,2,3,1,2].map((w,i)=><span key={i} className="bg-white" style={{ width: w, height: '100%' }} />)}</div>
+        <div className="absolute bottom-2.5 left-3 text-[8px] uppercase tracking-[0.25em] opacity-60">WK 51 / 52 · COVEN.JPG</div>
+        <div className="absolute inset-0 shock-burst" style={{ backgroundImage: GRAIN, backgroundSize: '50px 50px', mixBlendMode: 'overlay', opacity: 0.55 }} />
       </div>
     );
   }
 
-  // ── DUOTONE — blue grunge: coarse halftone + cracked texture + big stencil word ──
+  // ── SEE NO EVIL — blue riso grunge: halftone + crack + figure (back), big stencil + micro-text + double crack + torn edge (front) ──
   if (mode === 'duotone') {
     if (back) return (
       <div className={`${BWRAP} text-[#9fc0e8]`} aria-hidden>
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 38%, rgba(40,90,200,0.16), transparent 76%)', mixBlendMode: 'screen' }} />
-        <div className="absolute inset-0 shock-halftone-drift" style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.55) 1px, transparent 2px)', backgroundSize: '7px 7px', mixBlendMode: 'overlay', opacity: 0.35 }} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 62% 40%, rgba(40,90,200,0.2), transparent 74%)', mixBlendMode: 'screen' }} />
+        <div className="absolute inset-0 shock-halftone-drift" style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.6) 1.1px, transparent 2.2px)', backgroundSize: '8px 8px', mixBlendMode: 'overlay', opacity: 0.4 }} />
+        <div className="absolute right-[6%] top-1/2 -translate-y-1/2 w-[55%] aspect-[3/4] opacity-[0.1]" style={{ backgroundImage: 'radial-gradient(#cfe0f5 36%, transparent 38%)', backgroundSize: '6px 6px', maskImage: 'radial-gradient(ellipse at 50% 40%, #000 30%, transparent 68%)', WebkitMaskImage: 'radial-gradient(ellipse at 50% 40%, #000 30%, transparent 68%)' }} />
       </div>
     );
     return (
       <div className={`${FWRAP} text-[#cfe0f5]`} aria-hidden>
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-6 text-[17vw] leading-[0.82] text-center opacity-[0.13]">SEE<br />NO<br />EVIL</div>
-        <svg className="absolute inset-0 w-full h-full opacity-25" preserveAspectRatio="none" viewBox="0 0 100 100"><g stroke="#dfeaf7" strokeWidth="0.18" fill="none">
-          <path d="M0 30 L20 34 L34 26 L52 38 L70 30 L88 42 L100 36" /><path d="M10 0 L16 22 L8 40 L20 60 L12 82 L22 100" /><path d="M60 0 L66 26 L58 48 L72 70 L64 100" /><path d="M0 70 L24 66 L46 76 L70 68 L100 78" />
+        <div className="absolute left-[6%] top-1/2 -translate-y-1/2 -rotate-3 text-[19vw] leading-[0.78] opacity-[0.16]">SEE<br />NO<br />EVIL</div>
+        <div className="absolute top-[30%] left-2 right-2 text-[7px] uppercase tracking-[0.1em] opacity-30 leading-[1.4] break-words">{'who knows you · '.repeat(18)}</div>
+        <svg className="absolute inset-0 w-full h-full opacity-30" preserveAspectRatio="none" viewBox="0 0 100 100"><g stroke="#dfeaf7" strokeWidth="0.16" fill="none">
+          <path d="M0 30 L20 34 L34 26 L52 38 L70 30 L88 42 L100 36" /><path d="M10 0 L16 22 L8 40 L20 60 L12 82 L22 100" /><path d="M60 0 L66 26 L58 48 L72 70 L64 100" /><path d="M0 70 L24 66 L46 76 L70 68 L100 78" /><path d="M40 0 L44 18 L36 36 L46 54 L40 100" /><path d="M80 0 L86 30 L78 56 L88 100" /><path d="M0 50 L30 46 L60 56 L100 48" />
         </g></svg>
-        <div className="absolute inset-0" style={{ backgroundImage: GRAIN, backgroundSize: '90px 90px', mixBlendMode: 'overlay', opacity: 0.3 }} />
+        <div className="absolute bottom-2 left-3 text-[8px] uppercase tracking-[0.25em] opacity-50">no light in our descent</div>
+        <div className="absolute inset-0" style={{ backgroundImage: GRAIN, backgroundSize: '80px 80px', mixBlendMode: 'overlay', opacity: 0.34 }} />
       </div>
     );
   }
 
-  // ── THE VOW — black-metal: thorned filigree corners + crowned skull + oxblood blackletter ──
+  // ── THE VOW — black-metal insert: full thorn frame + crowned skull + reaching bone-hands + script (back), oxblood blackletter vow + daggers (front) ──
   if (mode === 'vow') {
     if (back) return (
       <div className={`${BWRAP} text-[#b8b0a4]`} aria-hidden>
-        <div className="absolute inset-0" style={{ background: 'rgba(6,4,6,0.3)' }} />
-        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 70px 20px rgba(0,0,0,0.72)' }} />
+        <div className="absolute inset-0" style={{ background: 'rgba(6,4,6,0.32)' }} />
+        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 80px 24px rgba(0,0,0,0.78)' }} />
+        <CrownedSkull className="absolute left-1/2 top-[5%] -translate-x-1/2 w-24 h-28 opacity-30" color="#cfc6b8" />
+        <BoneHand className="absolute left-[6%] top-[8%] w-16 h-28 -rotate-[18deg]" opacity={0.32} />
+        <BoneHand className="absolute right-[8%] bottom-[4%] w-16 h-28 rotate-[200deg] scale-x-[-1]" opacity={0.3} />
         <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
-          <rect x="3" y="3" width="94" height="94" fill="none" stroke="#cfc6b8" strokeWidth="0.22" opacity="0.35" />
+          <rect x="2.5" y="2.5" width="95" height="95" fill="none" stroke="#cfc6b8" strokeWidth="0.2" opacity="0.32" />
+          <rect x="5" y="5" width="90" height="90" fill="none" stroke="#cfc6b8" strokeWidth="0.12" opacity="0.22" />
           <g stroke="#cfc6b8" strokeWidth="0.3" fill="none" opacity="0.55">
-            {[[6, 6, 0], [94, 6, 90], [94, 94, 180], [6, 94, 270]].map(([x, y, r], i) => (
-              <path key={i} d="M0 17 Q0 0 17 0 M3 12 q4 -8 9 -9 M0 9 q5 0 6 5 M9 0 q0 5 5 6" transform={`translate(${x},${y}) rotate(${r})`} />
+            {[[5, 5, 0], [95, 5, 90], [95, 95, 180], [5, 95, 270]].map(([x, y, r], i) => (
+              <path key={i} d="M0 20 Q0 0 20 0 M3 13 q5 -9 10 -10 M0 9 q6 0 7 6 M9 0 q0 6 6 7 M0 28 q-1 -6 4 -8 M28 0 q-6 -1 -8 4" transform={`translate(${x},${y}) rotate(${r})`} />
             ))}
+            {/* edge thorns mid-side */}
+            <path d="M50 4 l-3 4 l3 -2 l3 2 z M50 96 l-3 -4 l3 2 l3 -2 z M4 50 l4 -3 l-2 3 l2 3 z M96 50 l-4 -3 l2 3 l-2 3 z" />
           </g>
         </svg>
-        <div className="absolute left-1/2 top-[5%] -translate-x-1/2 text-2xl opacity-25">☠</div>
+        <div className="absolute left-1.5 top-[30%] text-[8px] leading-[1.7] opacity-15 italic" style={{ writingMode: 'vertical-rl' }}>per omnia saecula saeculorum amen</div>
       </div>
     );
     return (
       <div className={`${FWRAP} text-[#8B0000]`} aria-hidden>
-        <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 text-center text-[15px] tracking-[0.18em] opacity-80 shock-twinkle" style={{ textShadow: '0 0 10px rgba(139,0,0,0.6)' }}>· till death do us part ·</div>
-        {['top-2 left-2', 'top-2 right-2', 'bottom-2 left-2', 'bottom-2 right-2'].map((p, i) => <span key={i} className={`absolute ${p} text-sm text-[#cfc6b8] opacity-50`}>✟</span>)}
-        <div className="absolute inset-0" style={{ backgroundImage: GRAIN, backgroundSize: '130px 130px', mixBlendMode: 'overlay', opacity: 0.2 }} />
+        <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 text-center text-[17px] tracking-[0.16em] opacity-85 shock-twinkle" style={{ textShadow: '0 0 12px rgba(139,0,0,0.7), 0 0 2px rgba(0,0,0,0.9)' }}>· till death do us part ·</div>
+        <div className="absolute left-0 right-0 top-[58%] text-center text-[9px] tracking-[0.35em] text-[#cfc6b8]/50">⸸ · ⸸ · ⸸</div>
+        {['top-2 left-2', 'top-2 right-2', 'bottom-2 left-2', 'bottom-2 right-2'].map((p, i) => <span key={i} className={`absolute ${p} text-sm text-[#cfc6b8] opacity-55`}>†</span>)}
+        <div className="absolute inset-0" style={{ backgroundImage: GRAIN, backgroundSize: '120px 120px', mixBlendMode: 'overlay', opacity: 0.22 }} />
       </div>
     );
   }
