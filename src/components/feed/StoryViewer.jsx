@@ -22,7 +22,7 @@ function ago(ts) {
   return `${Math.floor(m / 60)}h ago`;
 }
 
-export function StoryViewer({ stories = [], startIndex = 0, onReply, onReactStory, onDelete, onClose }) {
+export function StoryViewer({ stories = [], startIndex = 0, onReply, onReactStory, onDelete, onClose, onSeen }) {
   const [index, setIndex] = useState(startIndex);
   const [reply, setReply] = useState('');
   const [progress, setProgress] = useState(0);
@@ -34,6 +34,9 @@ export function StoryViewer({ stories = [], startIndex = 0, onReply, onReactStor
   const story = stories[index];
 
   useEffect(() => { setProgress(0); startRef.current = Date.now(); }, [index]);
+
+  // Mark each story watched as it's shown (drives the "seen" ring on the rail). Skip your own.
+  useEffect(() => { if (story?.id && !story.mine) onSeen?.(story.id); }, [story?.id, story?.mine, onSeen]);
 
   // When viewing your own story, load who reacted to it.
   useEffect(() => {

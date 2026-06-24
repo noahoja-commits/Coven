@@ -238,6 +238,7 @@ export default function App() {
   const [blockedIds, setBlockedIds] = useState(() => new Set());
   const [divinationLog, setDivinationLog] = useLocalStorage('divinationLog', []);
   const [storyHighlights, setStoryHighlights] = useLocalStorage('storyHighlights', []);
+  const [seenStories, setSeenStories] = useLocalStorage('seenStories', {}); // { [storyId]: 1 } — watched stories
 
   // Load fonts
   useEffect(() => {
@@ -1775,6 +1776,7 @@ export default function App() {
         onOpenStory={(i) => setActiveStoryIndex(i)}
         onCreateStory={() => setShowStoryComposer(true)}
         stories={stories}
+        seenStories={seenStories}
         meHandle={meHandle}
         meAvatar={meAvatar}
         tonightStatus={tonightStatus}
@@ -2123,6 +2125,7 @@ export default function App() {
           onReply={(authorHandle, body) => sendMessageToUser(authorHandle, body)}
           onReactStory={(storyId, kind) => { if (meId) reactToStory(storyId, kind, meId).catch(() => {}); }}
           onDelete={removeStory}
+          onSeen={(id) => setSeenStories(prev => (prev[id] ? prev : { ...prev, [id]: 1 }))}
           onClose={() => setActiveStoryIndex(null)}
         />
       )}

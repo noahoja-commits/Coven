@@ -17,7 +17,7 @@ export function HomeScreen({
   posts, onReact, onOpenComments, onOpenCommunity, onOpenUser, onDeletePost, onHidePost, onQuotePost, onWhisperPost, onTogglePin, pinnedPostId, feedSort = 'latest', onSetFeedSort,
   feedScope = 'everyone', onSetFeedScope, onLoadMore, feedHasMore = false, onReportPost,
   bookmarks = {}, onToggleBookmark, postCandles = {}, onToggleCandle, onOpenEvent, onVotePoll,
-  onOpenStory, onCreateStory, stories = [], meHandle = 'you', meAvatar = '🦇',
+  onOpenStory, onCreateStory, stories = [], seenStories = {}, meHandle = 'you', meAvatar = '🦇',
   tonightStatus, onOpenTonightStatus, onOpenTarot, onOpenEphemeris, onOpenCodex, onOpenHashtag, onOpenVespersArchive,
   ritual, ritualDoneToday, onPerformRitual, crystals = [], trackers = {}, onUpdateTracker, onOpenReflections,
   feedLoading = false, suggestedSouls = [], following = {}, onFollow, witching = false, vigil = false,
@@ -36,13 +36,16 @@ export function HomeScreen({
   const ghostOn = !!settings.ghostMode;
   const hasMyStory = stories.some(s => s.mine);
   const storyGroups = useMemo(() => {
-    const seen = new Map();
+    const map = new Map();
     stories.forEach((s, i) => {
-      if (s.mine || seen.has(s.user)) return;
-      seen.set(s.user, { user: s.user, avatar: s.avatar, firstIndex: i });
+      if (s.mine) return;
+      if (!map.has(s.user)) map.set(s.user, { user: s.user, avatar: s.avatar, firstIndex: i, ids: [] });
+      map.get(s.user).ids.push(s.id);
     });
-    return [...seen.values()];
-  }, [stories]);
+    // A group is "watched" once every story in it has been seen. Unwatched float to the front.
+    const groups = [...map.values()].map(g => ({ ...g, seen: g.ids.length > 0 && g.ids.every(id => seenStories[id]) }));
+    return groups.sort((a, b) => (a.seen === b.seen ? 0 : a.seen ? 1 : -1));
+  }, [stories, seenStories]);
   const [openMenu, setOpenMenu] = useState(null);
   const [activeTag, setActiveTag] = useState(null);
 
@@ -243,10 +246,10 @@ export function HomeScreen({
           {storyGroups.map(g => (
             <button key={g.user} onClick={() => onOpenStory && onOpenStory(g.firstIndex)}
               className="flex flex-col items-center gap-1.5 shrink-0 focus:outline-none">
-              <div className="relative w-14 h-14 rounded-full flex items-center justify-center text-xl bg-[#141414] border border-[#2A2A2A] ring-2 ring-[#8B0000] ring-offset-2 ring-offset-[#0A0A0A] animate-pulse-slow">
+              <div className={`relative w-14 h-14 rounded-full flex items-center justify-center text-xl bg-[#141414] border border-[#2A2A2A] ring-2 ring-offset-2 ring-offset-[#0A0A0A] ${g.seen ? 'ring-[#3A3A3A] opacity-60' : 'ring-[#8B0000] animate-pulse-slow'}`}>
                 {g.avatar}
               </div>
-              <span className="text-[10px] text-[#A8A29E] max-w-[60px] truncate" style={F.ui}>{g.user}</span>
+              <span className={`text-[10px] max-w-[60px] truncate ${g.seen ? 'text-[#6B6B6B]' : 'text-[#A8A29E]'}`} style={F.ui}>{g.user}</span>
             </button>
           ))}
         </div>
