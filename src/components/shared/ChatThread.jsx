@@ -4,7 +4,7 @@ import { F } from '../../styles/fonts';
 
 const REACTION_KINDS = [['bat', '🦇'], ['fire', '🔥'], ['skull', '💀'], ['smoke', '💨']];
 
-export function ChatThread({ conversation, messages, onSend, onBack, onRetry, onReact, initialDraft = '' }) {
+export function ChatThread({ conversation, messages, onSend, onBack, onRetry, onReact, onOpenPost, initialDraft = '' }) {
   const [draft, setDraft] = useState(initialDraft);
   const [seenAt, setSeenAt] = useState(null); // simulated remote read after delay
   const [trayFor, setTrayFor] = useState(null); // message id whose reaction tray is open
@@ -75,6 +75,25 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
                 }`}
                 style={F.serif}
               >
+                {m.forwardedPost && (
+                  <div
+                    onClick={(e) => { e.stopPropagation(); if (!m.forwardedPost.removed && onOpenPost) onOpenPost(m.forwardedPost.id); }}
+                    className={`${m.body ? 'mb-1.5' : ''} px-2 py-1.5 rounded-lg bg-black/30 border border-white/10 ${m.forwardedPost.removed ? '' : 'cursor-pointer'}`}
+                  >
+                    {m.forwardedPost.removed ? (
+                      <div className="text-[11px] italic opacity-70">post removed</div>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-1.5 mb-0.5 opacity-80">
+                          <span className="text-xs leading-none">{m.forwardedPost.avatar || '✦'}</span>
+                          <span className="text-[10px] uppercase tracking-wider truncate">{m.forwardedPost.handle || 'someone'}</span>
+                        </div>
+                        {m.forwardedPost.img && <div className="text-[11px] opacity-70 mb-0.5">🖼 image</div>}
+                        {m.forwardedPost.body && <div className="text-[12px] leading-snug opacity-90">{m.forwardedPost.body.slice(0, 140)}{m.forwardedPost.body.length > 140 ? '…' : ''}</div>}
+                      </>
+                    )}
+                  </div>
+                )}
                 {m.body}
               </div>
               {/* reaction tray — tap a whisper to open */}

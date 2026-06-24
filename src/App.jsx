@@ -9,7 +9,7 @@ import { insertProfile, updateProfile, getProfileStats, getProfileByHandle, fetc
 import { fetchFollowing, fetchFollowers, followUser, unfollowUser } from './lib/db/social';
 import { FollowListOverlay } from './components/profile/FollowListOverlay';
 import { joinCommunity, leaveCommunity, fetchCommunityMemberCounts } from './lib/db/communities';
-import { fetchConversations, getOrCreateDM, createGroup, fetchMessages as fetchDMMessages, sendDM, markRead as dmMarkRead, setBuried as dmSetBuried, subscribeDMs, toggleDMReaction, subscribeDMReactions } from './lib/db/dm';
+import { fetchConversations, getOrCreateDM, createGroup, fetchMessages as fetchDMMessages, sendDM, markRead as dmMarkRead, setBuried as dmSetBuried, subscribeDMs, toggleDMReaction, subscribeDMReactions, sendPostToDM } from './lib/db/dm';
 import { fetchActiveStories, postStory as dbPostStory, deleteStory, reactToStory } from './lib/db/stories';
 import { fetchListings, createListing } from './lib/db/listings';
 import { fetchShops, createShop, deleteShop as dbDeleteShop } from './lib/db/shops';
@@ -51,6 +51,7 @@ import { ProfileScreen } from './components/profile/ProfileScreen';
 import { TonightStatusModal } from './components/profile/TonightStatusModal';
 import { ProfileEditModal } from './components/profile/ProfileEditModal';
 import { MoodModal } from './components/profile/MoodModal';
+import { ShareToDMModal } from './components/shared/ShareToDMModal';
 import { UserProfileOverlay } from './components/profile/UserProfileOverlay';
 import { StoryViewer } from './components/feed/StoryViewer';
 import { StoryComposer } from './components/feed/StoryComposer';
@@ -131,6 +132,7 @@ export default function App() {
   const [showTonightModal, setShowTonightModal] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showMood, setShowMood] = useState(false);
+  const [sharePostTarget, setSharePostTarget] = useState(null); // postId being forwarded to a DM
   const [showBlocked, setShowBlocked] = useState(false);
   const [showLegal, setShowLegal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -1481,6 +1483,24 @@ export default function App() {
     }
   };
 
+  // Forward the currently-shared post into a whisper (existing thread or a new one).
+  const whisperPost = async ({ convId, userId, handle, avatar }) => {
+    const postId = sharePostTarget;
+    setSharePostTarget(null);
+    if (!postId || !meId) return;
+    try {
+      let cid = convId;
+      if (!cid && userId) cid = await getOrCreateDM(userId);
+      if (!cid) return;
+      await sendPostToDM(cid, meId, postId);
+      fetchConversations().then(setConversations).catch(() => {});
+      openConversation(cid, { user: handle, avatar });
+      showToast('whispered.');
+    } catch {
+      showToast("couldn't whisper that — try again.", 'error');
+    }
+  };
+
   // Set/clear the self-set profile mood (public, expiring aura). Pass {} to clear.
   const saveMood = async (mood) => {
     setProfile(p => (p ? { ...p, mood: mood || {} } : p)); // optimistic
@@ -1503,7 +1523,7 @@ export default function App() {
   const anyOverlayOpen = !!(
     showSigilDraw ||
     ticketSuccess || activeStoryIndex !== null || showStoryComposer || venueEditorEvent ||
-    ticketManagerEvent || showCreateEvent || showEditProfile || showMood || showSettings || showBlocked || showLegal || showDeleteConfirm || reportSheet || legalEscalation ||
+    ticketManagerEvent || showCreateEvent || showEditProfile || showMood || sharePostTarget || showSettings || showBlocked || showLegal || showDeleteConfirm || reportSheet || legalEscalation ||
     showMyTickets || showReflections || showDreams || showNowPlaying || showAddGrave || showAddAnniv ||
     showVespersArchive || showNewGroup || showTonightModal || quoteTarget || showOddityCompose ||
     activeOddity || activeText || activePostComments || followList || activeConversation || activeUserHandle ||
@@ -1521,6 +1541,7 @@ export default function App() {
     if (showCreateEvent) { setShowCreateEvent(false); return true; }
     if (showEditProfile) { setShowEditProfile(false); return true; }
     if (showMood) { setShowMood(false); return true; }
+    if (sharePostTarget) { setSharePostTarget(null); return true; }
     if (showSettings) { setShowSettings(false); return true; }
     if (legalEscalation) { setLegalEscalation(null); return true; }
     if (reportSheet) { setReportSheet(null); return true; }
@@ -1705,6 +1726,7 @@ export default function App() {
         onDeletePost={deletePost}
         onHidePost={hidePost}
         onQuotePost={(id) => setQuoteTarget(id)}
+        onWhisperPost={(id) => setSharePostTarget(id)}
         onTogglePin={togglePin}
         pinnedPostId={pinnedPostId}
         feedSort={feedSort}
@@ -1972,6 +1994,7 @@ export default function App() {
           onSend={(body) => sendMessage(activeConversation, body)}
           onRetry={(messageId) => retryMessage(activeConversation, messageId)}
           onReact={(messageId, kind) => reactToMessage(activeConversation, messageId, kind)}
+          onOpenPost={(id) => { setActiveConversation(null); setActiveConvMeta(null); setActivePostComments(id); }}
           onBack={() => { setActiveConversation(null); setActiveConvMeta(null); }}
         />
       )}
@@ -2046,6 +2069,14 @@ export default function App() {
           current={profile?.mood}
           onSave={saveMood}
           onClose={() => setShowMood(false)}
+        />
+      )}
+      {sharePostTarget && (
+        <ShareToDMModal
+          post={posts.find(p => p.id === sharePostTarget)}
+          conversations={conversations}
+          onPick={whisperPost}
+          onClose={() => setSharePostTarget(null)}
         />
       )}
       {activeStoryIndex !== null && (

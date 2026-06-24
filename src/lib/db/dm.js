@@ -33,7 +33,7 @@ export async function createGroup(title, memberIds) {
 export async function fetchMessages(convId, myId) {
   const { data, error } = await supabase
     .from('messages_dm')
-    .select('id, body, created_at, sender_id, sender:profiles(handle)')
+    .select('id, body, created_at, sender_id, forwarded_post_id, sender:profiles(handle)')
     .eq('conversation_id', convId)
     .order('created_at', { ascending: true });
   if (error) throw error;
@@ -42,9 +42,22 @@ export async function fetchMessages(convId, myId) {
     from: m.sender_id === myId ? 'me' : (m.sender?.handle || 'someone'),
     body: m.body,
     time: relativeTime(m.created_at),
+    forwardedPostId: m.forwarded_post_id || null,
+    forwardedPost: null,
     reactions: { bat: 0, fire: 0, skull: 0, smoke: 0 },
     myReactions: {},
   }));
+  // Attach forwarded-post previews from the PUBLIC feed_posts view (masks anon authors,
+  // and RLS-safe — the recipient can't read the raw posts table). Pre-migration the
+  // forwarded_post_id column is absent → the select above errors and we never get here.
+  const fwIds = [...new Set(msgs.map(m => m.forwardedPostId).filter(Boolean))];
+  if (fwIds.length) {
+    const { data: fp } = await supabase
+      .from('feed_posts').select('id, handle, avatar, avatar_url, body, img').in('id', fwIds);
+    const fwMap = {};
+    (fp || []).forEach(p => { fwMap[p.id] = { id: p.id, handle: p.handle, avatar: p.avatar, avatarUrl: p.avatar_url || null, body: p.body || '', img: p.img || null }; });
+    msgs.forEach(m => { if (m.forwardedPostId) m.forwardedPost = fwMap[m.forwardedPostId] || { id: m.forwardedPostId, removed: true }; });
+  }
   // Aggregate per-message reactions. Pre-migration the table doesn't exist → the
   // query errors, we ignore it, and messages simply render with no chips.
   const ids = msgs.map(m => m.id);
@@ -95,6 +108,16 @@ export async function sendDM(convId, senderId, body) {
     .select('id, body, created_at').single();
   if (error) throw error;
   return { id: data.id, from: 'me', body: data.body, time: relativeTime(data.created_at) };
+}
+
+// Forward a feed post into a whisper (optionally with a note).
+export async function sendPostToDM(convId, senderId, postId, body = '') {
+  const { data, error } = await supabase
+    .from('messages_dm')
+    .insert({ conversation_id: convId, sender_id: senderId, body: body || '', forwarded_post_id: postId })
+    .select('id, created_at').single();
+  if (error) throw error;
+  return { id: data.id, from: 'me', body: body || '', time: relativeTime(data.created_at) };
 }
 
 export async function markRead(convId, userId) {

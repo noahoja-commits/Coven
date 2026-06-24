@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { MessageCircle, MoreHorizontal, Eye, Bookmark, Trash2, Flame, EyeOff, Repeat, Pin, Loader2 } from 'lucide-react';
+import { MessageCircle, MoreHorizontal, Eye, Bookmark, Trash2, Flame, EyeOff, Repeat, Pin, Loader2, Send } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { Reaction } from '../shared/Reaction';
 import { PostImage } from '../shared/Visuals';
@@ -14,7 +14,7 @@ import { TEXTS } from '../../data/library';
 import { CODEX } from '../../data/codex';
 
 export function HomeScreen({
-  posts, onReact, onOpenComments, onOpenCommunity, onOpenUser, onDeletePost, onHidePost, onQuotePost, onTogglePin, pinnedPostId, feedSort = 'latest', onSetFeedSort,
+  posts, onReact, onOpenComments, onOpenCommunity, onOpenUser, onDeletePost, onHidePost, onQuotePost, onWhisperPost, onTogglePin, pinnedPostId, feedSort = 'latest', onSetFeedSort,
   feedScope = 'everyone', onSetFeedScope, onLoadMore, feedHasMore = false, onReportPost,
   bookmarks = {}, onToggleBookmark, postCandles = {}, onToggleCandle, onOpenEvent, onVotePoll,
   onOpenStory, onCreateStory, stories = [], meHandle = 'you', meAvatar = '🦇',
@@ -406,6 +406,10 @@ export function HomeScreen({
                         <button onClick={() => { onQuotePost && onQuotePost(post.id); setOpenMenu(null); }}
                           className="w-full px-3 py-2 text-left text-xs text-[#A8A29E] hover:bg-[#1A1A1A] flex items-center gap-2" style={F.ui}>
                           <Repeat size={12} /> repost
+                        </button>
+                        <button onClick={() => { onWhisperPost && onWhisperPost(post.id); setOpenMenu(null); }}
+                          className="w-full px-3 py-2 text-left text-xs text-[#A8A29E] hover:bg-[#1A1A1A] flex items-center gap-2" style={F.ui}>
+                          <Send size={12} /> whisper this
                         </button>
                         {mine && (
                           <button onClick={() => { onTogglePin && onTogglePin(post.id); setOpenMenu(null); }}
