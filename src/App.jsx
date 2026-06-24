@@ -677,17 +677,18 @@ export default function App() {
     setNearby([]);
   }, [settings.ghostMode]);
 
-  // Refresh privacy-fuzzed proximity only when the map is open and you're sharing (lazy —
-  // never prompts for location on a normal page load).
+  // Refresh privacy-fuzzed proximity whenever the map is open (lazy — only asks for location
+  // when you actually open the map). You can always SEE the living map; sharing only decides
+  // whether you appear ON it. Reading others' fuzzed pins is public; your own coords stay local.
   useEffect(() => {
-    if (tab !== 'map' || !meId || !tonightStatus?.share || settings.ghostMode) return undefined;
+    if (tab !== 'map' || !meId || settings.ghostMode) return undefined;
     let active = true;
     getPosition()
       .then(({ latitude, longitude }) => fetchNearby(latitude, longitude))
       .then(list => { if (active) setNearby(list); })
       .catch(() => { if (active) setNearby([]); });
     return () => { active = false; };
-  }, [tab, meId, tonightStatus?.share, settings.ghostMode]);
+  }, [tab, meId, settings.ghostMode]);
 
   // Load an event's attendees + waitlist + recap posts when its detail opens.
   useEffect(() => {

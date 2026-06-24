@@ -469,6 +469,17 @@ body.shock-duo-sepia .phone-frame { filter: sepia(0.8) saturate(1.4) contrast(0.
 @keyframes shockMote { 0% { transform: translateY(0) translateX(0); opacity: 0; } 20% { opacity: 0.8; } 80% { opacity: 0.6; } 100% { transform: translateY(-40vh) translateX(14px); opacity: 0; } }
 .shock-mote { animation-name: shockMote; animation-timing-function: linear; animation-iteration-count: infinite; }
 
+/* ── LAMENT (ink across parchment in a dark castle) ── */
+/* ink blot blooming wet across the page — one-shot spread that holds */
+@keyframes shockInkBloom { 0% { transform: scale(0.12); opacity: 0; } 45% { opacity: 0.92; } 100% { transform: scale(1); opacity: 0.85; } }
+.shock-ink-bloom { transform-box: fill-box; transform-origin: center; animation: shockInkBloom 5s cubic-bezier(0.3,0.7,0.3,1) forwards; }
+/* the calligraphy line drying into legibility */
+@keyframes shockInkWrite { 0% { opacity: 0; filter: blur(3px); letter-spacing: 0.22em; } 100% { opacity: 0.94; filter: blur(0); letter-spacing: 0.06em; } }
+.shock-ink-write { animation: shockInkWrite 4.5s ease-out forwards; }
+/* the hopeful dawn shaft, slowly breathing brighter */
+@keyframes shockDawn { 0%, 100% { opacity: 0.22; } 50% { opacity: 0.72; } }
+.shock-dawn { animation: shockDawn 9s ease-in-out infinite; }
+
 /* Opt-in shock modes keep their motion even under reduced-motion; only soften the frame shake. */
 @media (prefers-reduced-motion: reduce) {
   .shock-shake { animation-duration: 6s; }

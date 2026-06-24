@@ -6,6 +6,17 @@ import { getPosition } from '../../lib/weather';
 
 // Free, no-key, dark-by-default vector tiles. No API key, no billing.
 const DARK_STYLE = 'https://tiles.openfreemap.org/styles/dark';
+// A neutral fallback center so the map ALWAYS renders — even before (or without) a location fix.
+const DEFAULT_CENTER = [-73.99, 40.71];
+const LAST_KEY = 'mapLastCenter';
+
+function lastCenter() {
+  try {
+    const v = JSON.parse(localStorage.getItem(LAST_KEY) || 'null');
+    if (Array.isArray(v) && v.length === 2 && Number.isFinite(v[0]) && Number.isFinite(v[1])) return v;
+  } catch { /* noop */ }
+  return DEFAULT_CENTER;
+}
 
 // A geographic circle (meters) as a GeoJSON polygon — so it scales with zoom,
 // unlike a pixel-radius circle layer. Used to draw the user's own privacy circle.
@@ -35,64 +46,86 @@ function markerEl({ glyph, avatarUrl, mine }) {
   return el;
 }
 
+// The living map. It ALWAYS renders the tiles immediately at a sensible default center and
+// never blocks on geolocation — your location is requested in parallel and the map flies to it
+// when (if) it arrives. You can always SEE the map; sharing only decides whether you appear ON it
+// (your own pin + privacy circle). A load failsafe guarantees it never sits on "summoning…".
 export default function RealMap({ nearby = [], tonightStatus, ghost = false, onOpenUser, onOpenTonightStatus }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef([]);
-  const meRef = useRef(null); // { lat, lng }
-  const [state, setState] = useState('loading'); // loading | ready | denied
-  const sharing = !!tonightStatus?.share;
+  const meRef = useRef(null); // { lat, lng } once we have a fix
+  const [state, setState] = useState('loading'); // loading | ready | error
+  const [located, setLocated] = useState(false);
+  const sharing = !!tonightStatus?.share && !ghost;
   const fuzzM = tonightStatus?.fuzzM || 1609;
 
-  // Build the map once we have the user's position (only when sharing).
+  // Build the map ONCE, immediately, at the last-known/default center. Never gated on location.
   useEffect(() => {
-    if (!sharing) return undefined;
+    if (!containerRef.current || mapRef.current) return undefined;
     let cancelled = false;
-    setState('loading');
-    getPosition().then(({ latitude, longitude }) => {
-      if (cancelled || !containerRef.current) return;
-      meRef.current = { lat: latitude, lng: longitude };
-      const map = new maplibregl.Map({
+    let map;
+    try {
+      map = new maplibregl.Map({
         container: containerRef.current,
         style: DARK_STYLE,
-        center: [longitude, latitude],
-        zoom: 12.5,
+        center: lastCenter(),
+        zoom: 11.5,
         attributionControl: { compact: true },
       });
-      map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-left');
-      map.on('error', () => {}); // swallow transient tile errors
-      map.on('load', () => { if (!cancelled) { map.resize(); setState('ready'); } });
-      mapRef.current = map;
-    }).catch(() => { if (!cancelled) setState('denied'); });
+    } catch {
+      setState('error');
+      return undefined;
+    }
+    mapRef.current = map;
+    try { map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-left'); } catch { /* noop */ }
+    map.on('error', () => {}); // swallow transient tile errors
+    map.on('load', () => { if (!cancelled) { map.resize(); setState('ready'); } });
+    // Failsafe: never sit on "summoning…" — if the style/tiles stall, reveal the map anyway after 8s.
+    const failsafe = setTimeout(() => { if (!cancelled) setState(s => (s === 'loading' ? 'ready' : s)); }, 8000);
+
+    // Locate the user in parallel (non-blocking). Recenter + remember on success; ignore failures.
+    getPosition().then(({ latitude, longitude }) => {
+      if (cancelled) return;
+      meRef.current = { lat: latitude, lng: longitude };
+      try { localStorage.setItem(LAST_KEY, JSON.stringify([longitude, latitude])); } catch { /* noop */ }
+      setLocated(true);
+      try { map.flyTo({ center: [longitude, latitude], zoom: 12.5, duration: 1400 }); } catch { /* noop */ }
+    }).catch(() => { /* no location — the map stays at the default center, which is fine */ });
+
     return () => {
       cancelled = true;
+      clearTimeout(failsafe);
       markersRef.current.forEach(m => m.remove());
       markersRef.current = [];
       if (mapRef.current) { mapRef.current.remove(); mapRef.current = null; }
     };
-  }, [sharing]);
+  }, []);
 
-  // Draw the privacy circle + (re)place markers when ready or the data changes.
+  // (Re)draw the privacy circle + markers when the map is ready or the data/sharing changes.
   useEffect(() => {
     const map = mapRef.current;
-    if (state !== 'ready' || !map || !meRef.current) return;
-    const { lat, lng } = meRef.current;
+    if (state !== 'ready' || !map) return;
+    const me = meRef.current;
+    const wantMine = sharing && me; // my circle + pin only when I'm sharing and located
 
-    const data = circlePolygon(lng, lat, fuzzM);
-    if (map.getSource('me-circle')) {
-      map.getSource('me-circle').setData(data);
-    } else {
-      map.addSource('me-circle', { type: 'geojson', data });
-      map.addLayer({ id: 'me-circle-fill', type: 'fill', source: 'me-circle', paint: { 'fill-color': '#8B0000', 'fill-opacity': 0.12 } });
-      map.addLayer({ id: 'me-circle-line', type: 'line', source: 'me-circle', paint: { 'line-color': '#C8102E', 'line-width': 1.5, 'line-opacity': 0.6 } });
+    if (wantMine) {
+      const data = circlePolygon(me.lng, me.lat, fuzzM);
+      if (map.getSource('me-circle')) {
+        map.getSource('me-circle').setData(data);
+      } else {
+        map.addSource('me-circle', { type: 'geojson', data });
+        map.addLayer({ id: 'me-circle-fill', type: 'fill', source: 'me-circle', paint: { 'fill-color': '#8B0000', 'fill-opacity': 0.12 } });
+        map.addLayer({ id: 'me-circle-line', type: 'line', source: 'me-circle', paint: { 'line-color': '#C8102E', 'line-width': 1.5, 'line-opacity': 0.6 } });
+      }
+    } else if (map.getLayer && map.getLayer('me-circle-fill')) {
+      try { map.removeLayer('me-circle-fill'); map.removeLayer('me-circle-line'); map.removeSource('me-circle'); } catch { /* noop */ }
     }
 
     markersRef.current.forEach(m => m.remove());
     markersRef.current = [];
-
-    if (!ghost) {
-      const mk = new maplibregl.Marker({ element: markerEl({ glyph: '☽', mine: true }) }).setLngLat([lng, lat]).addTo(map);
-      markersRef.current.push(mk);
+    if (wantMine) {
+      markersRef.current.push(new maplibregl.Marker({ element: markerEl({ glyph: '☽', mine: true }) }).setLngLat([me.lng, me.lat]).addTo(map));
     }
     nearby.forEach(p => {
       if (p.fuzzLat == null || p.fuzzLng == null) return;
@@ -101,28 +134,27 @@ export default function RealMap({ nearby = [], tonightStatus, ghost = false, onO
       el.addEventListener('click', () => onOpenUser && onOpenUser(p.handle));
       markersRef.current.push(new maplibregl.Marker({ element: el }).setLngLat([p.fuzzLng, p.fuzzLat]).addTo(map));
     });
-  }, [state, nearby, ghost, fuzzM, onOpenUser]);
-
-  if (!sharing) {
-    return (
-      <div className="absolute inset-0 top-[100px] bottom-0 flex flex-col items-center justify-center text-center px-8 bg-[#070708]">
-        <div className="text-4xl mb-3">🜨</div>
-        <p className="text-[#A8A29E] text-sm mb-1" style={F.serif}>the living map needs your location.</p>
-        <p className="text-[#6B6B6B] text-xs mb-4 leading-relaxed" style={F.serif}>share an approximate circle — others only ever see a fuzzed area, never your exact spot.</p>
-        <button onClick={onOpenTonightStatus} className="px-4 py-2 text-[10px] uppercase tracking-wider bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8]" style={F.ui}>share location →</button>
-      </div>
-    );
-  }
+  }, [state, nearby, sharing, fuzzM, onOpenUser]);
 
   return (
-    <div className="absolute inset-0 top-[100px] bottom-0 bg-[#070708]">
+    <div className="absolute inset-0 bg-[#070708]">
       <div ref={containerRef} className="absolute inset-0" />
-      {state === 'loading' && <div className="absolute inset-0 flex items-center justify-center text-[#6B6B6B] text-xs pointer-events-none" style={F.ui}>summoning the map…</div>}
-      {state === 'denied' && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-8">
-          <p className="text-[#A8A29E] text-sm" style={F.serif}>couldn't read your location.</p>
-          <p className="text-[#6B6B6B] text-xs mt-1" style={F.serif}>allow location access, then reopen the map.</p>
+      {state === 'loading' && (
+        <div className="absolute inset-0 flex items-center justify-center text-[#6B6B6B] text-xs pointer-events-none" style={F.ui}>summoning the map…</div>
+      )}
+      {state === 'error' && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-8 bg-[#070708]">
+          <div className="text-4xl mb-3">🜨</div>
+          <p className="text-[#A8A29E] text-sm" style={F.serif}>the map couldn't be summoned.</p>
+          <p className="text-[#6B6B6B] text-xs mt-1" style={F.serif}>check your connection, then reopen the map.</p>
         </div>
+      )}
+      {/* Non-blocking nudge — never a dead-end. Tap to drop your pin / share. */}
+      {state === 'ready' && !sharing && !ghost && (
+        <button onClick={onOpenTonightStatus}
+          className="absolute top-3 left-1/2 -translate-x-1/2 z-10 px-3 py-1.5 bg-black/75 backdrop-blur-sm border border-[#8B0000]/50 text-[#C9A961] text-[10px] uppercase tracking-[0.18em] hover:border-[#C9A961] transition-colors" style={F.ui}>
+          {located ? 'go live · drop your pin →' : 'share location to appear →'}
+        </button>
       )}
     </div>
   );

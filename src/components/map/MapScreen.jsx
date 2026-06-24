@@ -1,7 +1,8 @@
-import { useState, lazy, Suspense } from 'react';
-import { Plus, Map as MapIcon, List, Navigation } from 'lucide-react';
+import { lazy, Suspense, useState } from 'react';
+import { Plus, Map as MapIcon, List } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { Avatar } from '../shared/Avatar';
+import { ErrorBoundary } from '../ErrorBoundary';
 
 // The real dark map (MapLibre + free OpenFreeMap tiles) is heavy — load it only when opened.
 const RealMap = lazy(() => import('./RealMap'));
@@ -16,45 +17,19 @@ function hashStr(s) {
 const areaKey = (pin) => (pin.neighborhood || pin.city || '').trim().toLowerCase();
 const areaLabel = (pin) => (pin.neighborhood || pin.city || 'somewhere unspoken');
 
-// Cluster center for an area (no real geolocation) — people in the same place
-// sit together.
-function areaCenter(area) {
-  const hc = hashStr('a:' + area);
-  return { cx: 18 + (hc % 64), cy: 28 + (Math.floor(hc / 64) % 50) };
-}
-
-// Approximate-by-area placement: cluster center from the area + a small per-user
-// jitter so overlapping pins don't stack. No area → a stable per-user spot.
-function pinPos(pin) {
-  const area = areaKey(pin);
-  if (!area) {
-    const h = hashStr('u:' + pin.userId);
-    return { left: `${10 + (h % 80)}%`, top: `${24 + (Math.floor(h / 80) % 58)}%` };
-  }
-  const { cx, cy } = areaCenter(area);
-  const hu = hashStr('u:' + pin.userId);
-  const jx = (hu % 13) - 6;                         // jitter -6..+6
-  const jy = (Math.floor(hu / 13) % 13) - 6;
-  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-  return { left: `${clamp(cx + jx, 6, 94)}%`, top: `${clamp(cy + jy, 22, 84)}%` };
-}
-
 export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = [], onOpenUser, onOpenTonightStatus, festivalEvent = null, onEnterFestival }) {
-  const [view, setView] = useState('map'); // 'map' | 'list'
+  const [view, setView] = useState('real'); // 'real' (the living map) | 'list' (by area)
   const [query, setQuery] = useState('');
-  const [activeArea, setActiveArea] = useState(null); // filter to one area cluster
   const [sort, setSort] = useState('active'); // 'active' | 'az'
 
-  // Filter the souls by the search box + selected area.
+  // Filter the souls by the search box (used by the by-area list).
   const q = query.trim().toLowerCase();
   const filtered = pins.filter(p => {
-    if (activeArea && (areaKey(p) || '__none__') !== activeArea) return false;
     if (!q) return true;
     return (p.handle || '').toLowerCase().includes(q) || (p.text || '').toLowerCase().includes(q);
   });
-  const filtering = !!(q || activeArea);
 
-  // Group the (filtered) souls by area — for cluster headings + the by-area list.
+  // Group the (filtered) souls by area — for the by-area list.
   const groups = {};
   filtered.forEach(p => {
     const key = areaKey(p) || '__none__';
@@ -62,20 +37,12 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = []
     groups[key].pins.push(p);
   });
   const grouped = Object.values(groups).sort((a, b) => sort === 'az' ? a.label.localeCompare(b.label) : b.pins.length - a.pins.length);
-  const located = grouped.filter(g => g.key !== '__none__');
-  // Privacy-fuzzed proximity: real "X mi away" from the tonight_nearby RPC (only when you share location).
+  // Privacy-fuzzed proximity: real "X mi away" from the tonight_nearby RPC.
   const distById = {};
   nearby.forEach(n => { if (n && n.userId != null) distById[n.userId] = n.distanceMi; });
   const hasDist = Object.keys(distById).length > 0;
   const fmtDist = (id) => { const d = distById[id]; if (d == null) return null; return d <= 0 ? '< 0.5 mi' : `~${d} mi`; };
   const byDist = (arr) => hasDist ? [...arr].sort((a, b) => (distById[a.userId] ?? 1e9) - (distById[b.userId] ?? 1e9)) : arr;
-  const maxCount = located[0]?.pins.length || 1;
-  const topArea = located[0];
-  // Resolve the active area's label from ALL pins (not the filtered groups) so a search
-  // that empties the area still shows the proper label instead of the raw lowercased key.
-  const areaLabels = {};
-  pins.forEach(p => { const k = areaKey(p); if (k && !areaLabels[k]) areaLabels[k] = areaLabel(p); });
-  const activeAreaLabel = activeArea ? (groups[activeArea]?.label || areaLabels[activeArea] || activeArea) : null;
 
   return (
     <div className="absolute inset-0">
@@ -89,7 +56,7 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = []
       {/* map / by-area toggle + sort */}
       <div className="absolute top-2 left-2 z-30 flex items-center gap-1.5">
         <div className="flex border border-[#2A2A2A] bg-black/70 backdrop-blur-sm">
-          {[['map', MapIcon, 'map'], ['list', List, 'by area'], ['real', Navigation, 'live']].map(([v, Icon, lbl]) => (
+          {[['real', MapIcon, 'map'], ['list', List, 'by area']].map(([v, Icon, lbl]) => (
             <button key={v} onClick={() => setView(v)}
               className={`flex items-center gap-1 px-2.5 py-1.5 text-[9px] uppercase tracking-[0.18em] transition-colors ${view === v ? 'bg-[#8B0000] text-[#F5F1E8]' : 'text-[#A8A29E] hover:text-[#F5F1E8]'}`}
               style={F.ui}>
@@ -97,13 +64,15 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = []
             </button>
           ))}
         </div>
-        <button onClick={() => setSort(s => s === 'active' ? 'az' : 'active')}
-          className="px-2.5 py-1.5 border border-[#2A2A2A] bg-black/70 backdrop-blur-sm text-[9px] uppercase tracking-[0.18em] text-[#A8A29E] hover:text-[#F5F1E8] transition-colors" style={F.ui}
-          title="sort">{sort === 'active' ? 'active' : 'a–z'}</button>
+        {view === 'list' && (
+          <button onClick={() => setSort(s => s === 'active' ? 'az' : 'active')}
+            className="px-2.5 py-1.5 border border-[#2A2A2A] bg-black/70 backdrop-blur-sm text-[9px] uppercase tracking-[0.18em] text-[#A8A29E] hover:text-[#F5F1E8] transition-colors" style={F.ui}
+            title="sort">{sort === 'active' ? 'active' : 'a–z'}</button>
+        )}
       </div>
 
-      {/* search */}
-      {view !== 'real' && (
+      {/* search (by-area list only) */}
+      {view === 'list' && (
         <div className="absolute top-11 left-2 right-2 z-30">
           <input value={query} onChange={e => setQuery(e.target.value)}
             placeholder="search souls or status…"
@@ -111,138 +80,15 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = []
         </div>
       )}
 
-      {/* filter chip + counter */}
-      {view !== 'real' && filtering && (
-        <div className="absolute top-[78px] left-2 right-2 z-30 flex items-center gap-1.5 text-[9px] uppercase tracking-[0.15em]" style={F.ui}>
-          <span className="text-[#C9A961] bg-black/75 px-2 py-1 border border-[#5B0F1A]/50">{filtered.length} of {pins.length}{activeAreaLabel ? ` · ${activeAreaLabel}` : ''}</span>
-          <button onClick={() => { setQuery(''); setActiveArea(null); }} className="text-[#A8A29E] hover:text-[#F5F1E8] bg-black/75 px-2 py-1 border border-[#2A2A2A]">clear ✕</button>
-        </div>
-      )}
-
       {view === 'real' ? (
-        <Suspense fallback={<div className="absolute inset-0 top-[100px] bottom-0 flex items-center justify-center text-[#6B6B6B] text-xs bg-[#070708]" style={F.ui}>summoning the map…</div>}>
-          <RealMap nearby={nearby} tonightStatus={tonightStatus} ghost={ghost} onOpenUser={onOpenUser} onOpenTonightStatus={onOpenTonightStatus} />
-        </Suspense>
-      ) : view === 'map' ? (
-        <>
-          <div className="absolute inset-0 overflow-hidden bg-[#070708]">
-            <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice">
-              <defs>
-                <pattern id="grid" width="6" height="6" patternUnits="userSpaceOnUse">
-                  <path d="M 6 0 L 0 0 0 6" fill="none" stroke="#161618" strokeWidth="0.15" />
-                </pattern>
-                <radialGradient id="mapBg" cx="50%" cy="50%">
-                  <stop offset="0%" stopColor="#0F0F12" />
-                  <stop offset="100%" stopColor="#050506" />
-                </radialGradient>
-              </defs>
-              <rect width="100" height="100" fill="url(#mapBg)" />
-              <rect width="100" height="100" fill="url(#grid)" />
-              <path d="M -5 35 Q 20 40, 35 50 T 70 65 T 110 75" stroke="#0A0E14" strokeWidth="6" fill="none" opacity="0.9" />
-              <path d="M -5 35 Q 20 40, 35 50 T 70 65 T 110 75" stroke="#1A1F2E" strokeWidth="0.3" fill="none" opacity="0.5" />
-              <rect x="55" y="20" width="14" height="10" fill="#0E1410" opacity="0.8" />
-              <rect x="20" y="65" width="10" height="12" fill="#0E1410" opacity="0.8" />
-              <rect x="75" y="40" width="8" height="6" fill="#0E1410" opacity="0.8" />
-              <line x1="0" y1="50" x2="100" y2="55" stroke="#15151A" strokeWidth="0.4" />
-              <line x1="50" y1="0" x2="48" y2="100" stroke="#15151A" strokeWidth="0.4" />
-              <line x1="0" y1="80" x2="100" y2="78" stroke="#15151A" strokeWidth="0.3" />
-            </svg>
-
-            <div className="absolute inset-0 opacity-40 mix-blend-overlay pointer-events-none"
-              style={{ backgroundImage: 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'120\' height=\'120\'><filter id=\'n\'><feTurbulence baseFrequency=\'0.85\'/></filter><rect width=\'120\' height=\'120\' filter=\'url(%23n)\' opacity=\'0.3\'/></svg>")' }} />
-          </div>
-
-          {/* Area heat — glow intensity scales with how many souls are clustered there */}
-          {located.map(g => {
-            const { cx, cy } = areaCenter(g.key);
-            const size = 16 + Math.min(46, (g.pins.length / maxCount) * 46);
-            const opacity = Math.min(0.5, 0.14 + g.pins.length * 0.08);
-            return (
-              <div key={`heat-${g.key}`} className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
-                style={{ left: `${cx}%`, top: `${cy}%`, width: `${size}%`, height: `${size}%`,
-                  background: `radial-gradient(circle, rgba(139,0,0,${opacity}) 0%, rgba(139,0,0,0) 70%)` }} />
-            );
-          })}
-
-          {/* Hottest area tonight */}
-          {topArea && (
-            <div className="absolute top-2 right-2 z-30 px-2.5 py-1.5 bg-black/70 backdrop-blur-sm border border-[#8B0000]/40 text-[9px] uppercase tracking-[0.15em] text-[#C9A961] pointer-events-none" style={F.ui}>
-              hottest · {topArea.label} · {topArea.pins.length}
-            </div>
-          )}
-
-          {/* Empty state — only when no other souls are out */}
-          {pins.length === 0 && (
-            <div className="absolute top-14 left-1/2 -translate-x-1/2 text-center px-8">
-              <div className="text-[10px] uppercase tracking-[0.3em] text-[#C8102E]/70 bg-black/50 backdrop-blur-sm px-3 py-1.5 border border-[#2A2A2A]" style={F.ui}>
-                · the streets are quiet ·
-              </div>
-              {!ghost && (
-                <button onClick={onOpenTonightStatus} className="mt-2 text-[10px] text-[#C9A961] hover:text-[#F5F1E8] uppercase tracking-wider" style={F.ui}>
-                  be the first out tonight →
-                </button>
-              )}
-            </div>
-          )}
-          {pins.length > 0 && filtering && filtered.length === 0 && (
-            <div className="absolute top-[112px] left-1/2 -translate-x-1/2 text-center px-8">
-              <div className="text-[10px] uppercase tracking-[0.3em] text-[#C8102E]/70 bg-black/60 backdrop-blur-sm px-3 py-1.5 border border-[#2A2A2A]" style={F.ui}>· no souls match ·</div>
-            </div>
-          )}
-
-          {/* Area headings — tap to filter the map to that cluster */}
-          {located.map(g => {
-            const { cx, cy } = areaCenter(g.key);
-            const on = activeArea === g.key;
-            return (
-              <button key={`lbl-${g.key}`} onClick={() => setActiveArea(on ? null : g.key)}
-                className="absolute -translate-x-1/2" style={{ left: `${cx}%`, top: `${Math.max(14, cy - 11)}%` }}>
-                <div className={`text-[8px] uppercase tracking-[0.25em] whitespace-nowrap px-1 py-0.5 border transition-colors ${on ? 'text-[#F5F1E8] border-[#C9A961] bg-[#8B0000]/50' : 'text-[#C9A961]/70 border-transparent hover:text-[#C9A961]'}`} style={F.ui}>
-                  {g.label} · {g.pins.length}
-                </div>
-              </button>
-            );
-          })}
-
-          {/* Other souls out tonight (respecting search + area filter) */}
-          {filtered.map(p => {
-            const pos = pinPos(p);
-            return (
-              <button key={p.userId} onClick={() => onOpenUser && onOpenUser(p.handle)}
-                className="absolute group" style={pos}>
-                <div className="relative -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-                  <span className="absolute inset-0 -m-2 rounded-full bg-[#8B0000] opacity-25 animate-ping-slow" />
-                  <Avatar url={p.avatarUrl} glyph={p.avatar} size={28} className="relative ring-2 ring-[#8B0000]/70" />
-                  <div className="mt-1 whitespace-nowrap px-1.5 py-0.5 bg-black/80 backdrop-blur-sm border border-[#8B0000]/40 text-[9px] text-[#F5F1E8] max-w-[180px] truncate" style={F.ui}>
-                    {p.handle} · {p.text ? p.text.slice(0, 28) : areaLabel(p)}{fmtDist(p.userId) ? ` · ${fmtDist(p.userId)}` : ''}
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-
-          {/* Your own pin tonight — hidden while ghosted (you're invisible) */}
-          {ghost ? (
-            <div className="absolute left-1/2 bottom-20 -translate-x-1/2 text-center pointer-events-none px-8">
-              <div className="text-[10px] uppercase tracking-[0.3em] text-[#7B2CBF] bg-black/60 backdrop-blur-sm px-3 py-1.5 border border-[#7B2CBF]/40" style={F.ui}>
-                · ghosted · you're off the map ·
-              </div>
-            </div>
-          ) : (
-            <button onClick={onOpenTonightStatus} className="absolute" style={{ left: '48%', top: '52%' }}>
-              <div className="relative -translate-x-1/2 -translate-y-1/2">
-                <span className="absolute inset-0 -m-3 rounded-full bg-[#7B2CBF] opacity-30 animate-ping-slow" />
-                <span className="relative block w-3 h-3 rounded-full bg-[#7B2CBF] ring-2 ring-[#0A0A0A]" />
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 whitespace-nowrap px-2 py-0.5 bg-black/80 backdrop-blur-sm border border-[#7B2CBF]/40 text-[10px] text-[#F5F1E8]" style={F.ui}>
-                  you{tonightStatus?.text ? ` · ${tonightStatus.text.slice(0, 24)}` : ' · drop a status'}
-                </div>
-              </div>
-            </button>
-          )}
-        </>
+        <ErrorBoundary>
+          <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-[#6B6B6B] text-xs bg-[#070708]" style={F.ui}>summoning the map…</div>}>
+            <RealMap nearby={nearby} tonightStatus={tonightStatus} ghost={ghost} onOpenUser={onOpenUser} onOpenTonightStatus={onOpenTonightStatus} />
+          </Suspense>
+        </ErrorBoundary>
       ) : (
         /* By-area list */
-        <div className="absolute inset-0 top-[100px] bottom-0 overflow-y-auto bg-[#070708] safe-pb">
+        <div className="absolute inset-0 top-[88px] bottom-0 overflow-y-auto bg-[#070708] safe-pb">
           {filtered.length === 0 ? (
             <div className="text-center py-20 text-[#6B6B6B]" style={F.serif}>
               <div className="text-3xl mb-3">🜨</div>

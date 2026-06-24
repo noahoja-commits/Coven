@@ -582,40 +582,74 @@ THREAT ${['LOW', 'ELEV', 'HIGH', 'CRIT'][tick % 4]}
     );
   }
 
-  // ── LAMENT — hauntingly beautiful: moonlit veil, drifting spirits, a mourning apparition.
-  //    back: indigo→black moon-wash, glowing moon, silver fog veils, the veiled figure, soft halo.
-  //    front: floating silver motes, rising will-o-wisps, slow tears, an elegant epitaph, stars, vignette.
+  // ── LAMENT — liquid ink across a page of parchment in a dark castle. gothic, heart-wrenching,
+  //    stark yet beautiful — and hopeful: a shaft of dawn through a gothic window.
+  //    back: castle-dark + arched window/dawn shaft + the parchment page + ink blooming + a written line.
+  //    front: ink rivulets + fine flecks + a warm dawn glow at the crown + paper grain + vignette.
   if (mode === 'lament') {
     if (back) return (
       <div className={BWRAP} aria-hidden>
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 18%, rgba(72,86,140,0.42), rgba(20,24,46,0.6) 46%, rgba(4,5,12,0.9) 100%)' }} />
-        {/* the moon */}
-        <div className="absolute left-[64%] top-[10%] w-24 h-24 rounded-full shock-moon" style={{ background: 'radial-gradient(circle at 38% 36%, #f2f4ff, #c8d2f0 52%, #8b97c4 100%)' }}>
-          <div className="absolute inset-0 rounded-full opacity-30" style={{ background: 'radial-gradient(circle at 60% 62%, rgba(80,90,140,0.6) 8%, transparent 22%), radial-gradient(circle at 40% 30%, rgba(80,90,140,0.5) 6%, transparent 18%)' }} />
+        {/* cold castle stone, deep dark */}
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(34,30,34,0.5), rgba(10,8,10,0.82) 58%, #050405 100%)' }} />
+        {/* gothic arched window — a hopeful shaft of dawn pouring through */}
+        <div className="absolute left-1/2 top-[2%] -translate-x-1/2 w-44 h-60">
+          <svg viewBox="0 0 100 150" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMin meet">
+            <defs>
+              <linearGradient id="lamentDawn" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor="#f6e6c2" /><stop offset="0.4" stopColor="#e0c890" stopOpacity="0.55" /><stop offset="1" stopColor="#c9a961" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <path d="M50 6 Q14 11 14 50 L14 150 L86 150 L86 50 Q86 11 50 6 Z" fill="url(#lamentDawn)" className="shock-dawn" />
+            <path d="M50 6 L50 150 M14 50 L86 50 M32 28 L32 150 M68 28 L68 150" stroke="#0b0907" strokeWidth="1.1" fill="none" opacity="0.85" />
+            <path d="M50 6 Q14 11 14 50 L14 150 M50 6 Q86 11 86 50 L86 150" stroke="#1c1610" strokeWidth="2.4" fill="none" />
+          </svg>
         </div>
-        {/* drifting silver fog */}
-        <div className="absolute -inset-1/3 shock-fog shock-veil" style={{ background: 'radial-gradient(ellipse at 30% 64%, rgba(150,170,220,0.34), transparent 56%)' }} />
-        <div className="absolute -inset-1/3 shock-fog2 shock-veil" style={{ background: 'radial-gradient(ellipse at 72% 78%, rgba(120,140,200,0.3), transparent 56%)' }} />
-        {/* the mourning apparition, swaying */}
-        <VeiledFigure className="absolute left-1/2 bottom-0 w-44 h-[82%] shock-apparition" color="#d8e2f5" />
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,12,24,0.6), transparent 42%)' }} />
-        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 110px 34px rgba(4,6,16,0.7)' }} />
+        {/* a wide downward shaft of dawn light falling into the room */}
+        <div className="absolute left-1/2 top-0 -translate-x-1/2 w-[58%] h-[78%] shock-dawn" style={{ background: 'linear-gradient(180deg, rgba(228,201,140,0.28), rgba(201,169,97,0.08) 46%, transparent 78%)', mixBlendMode: 'screen', clipPath: 'polygon(34% 0, 66% 0, 88% 100%, 12% 100%)' }} />
+        {/* the page of parchment, candle-warmed */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[82%] h-[66%]"
+          style={{ background: 'radial-gradient(ellipse at 50% 38%, #e8dcc0, #cdbf99 64%, #a99970 100%)', opacity: 0.46, boxShadow: '0 0 70px 14px rgba(0,0,0,0.7), inset 0 0 44px rgba(120,88,46,0.4)' }}>
+          {/* liquid ink blooming across the page (organic wet edges via turbulence + displacement) */}
+          <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
+            <defs>
+              <filter id="lamentInk" x="-40%" y="-40%" width="180%" height="180%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="7" result="n" />
+                <feDisplacementMap in="SourceGraphic" in2="n" scale="16" xChannelSelector="R" yChannelSelector="G" />
+              </filter>
+            </defs>
+            <g filter="url(#lamentInk)" fill="#221208">
+              <circle cx="36" cy="42" r="15" className="shock-ink-bloom" />
+              <circle cx="62" cy="58" r="11" className="shock-ink-bloom" style={{ animationDelay: '1.2s' }} />
+              <ellipse cx="50" cy="50" rx="30" ry="6" className="shock-ink-bloom" style={{ animationDelay: '2.2s' }} />
+              <circle cx="24" cy="66" r="6" className="shock-ink-bloom" style={{ animationDelay: '3s' }} />
+            </g>
+          </svg>
+          {/* a written line, drying into legibility */}
+          <div className="absolute left-0 right-0 top-[60%] text-center px-5 shock-ink-write" style={{ fontFamily: '"IM Fell English", serif', color: '#2a1810', fontSize: '15px', lineHeight: 1.5 }}>
+            grief is only love<br />with nowhere left to go
+          </div>
+        </div>
+        {/* castle vignette swallowing the edges */}
+        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 130px 44px rgba(4,4,6,0.86)' }} />
       </div>
     );
     return (
-      <div className={`${FWRAP} text-[#d8e2f5]`} aria-hidden>
-        {/* faint stars in the upper sky */}
-        {STARS.map((s, i) => <span key={i} className="absolute rounded-full shock-twinkle" style={{ left: `${s.l}%`, top: `${s.t}%`, width: s.s, height: s.s, background: '#eaf0ff', boxShadow: '0 0 4px rgba(210,222,248,0.9)', animationDelay: `${s.d}s` }} />)}
-        {/* moonlit motes */}
-        {MOTES.map((m, i) => <span key={i} className="absolute rounded-full shock-mote" style={{ left: `${m.l}%`, top: `${m.t}%`, width: m.s, height: m.s, background: 'rgba(216,226,245,0.85)', boxShadow: '0 0 5px rgba(180,200,240,0.8)', animationDelay: `${m.d}s`, animationDuration: `${m.dur}s` }} />)}
-        {/* rising will-o-wisps */}
-        {WISPS.map((w, i) => <span key={i} className="absolute bottom-0 rounded-full shock-floatup" style={{ left: `${w.l}%`, width: w.s, height: w.s, background: 'radial-gradient(circle, rgba(200,220,255,0.9), rgba(120,150,220,0.4) 55%, transparent)', boxShadow: '0 0 10px rgba(160,190,250,0.7)', animationDelay: `${w.d}s`, animationDuration: `${w.dur}s` }} />)}
-        {/* slow silver tears */}
-        {TEARS.slice(0, 7).map((t, i) => <span key={i} className="absolute top-0 w-[1.5px] shock-tear" style={{ left: `${t.l}%`, height: '4%', background: 'linear-gradient(to bottom, rgba(216,226,245,0.8), transparent)', animationDelay: `${t.d}s`, animationDuration: `${t.dur}s` }} />)}
-        {/* the lament */}
-        <div className="absolute left-0 right-0 top-[16%] text-center text-[13px] tracking-[0.3em] opacity-80 shock-veil" style={{ fontFamily: '"UnifrakturCook", serif', textShadow: '0 0 14px rgba(150,180,240,0.6)' }}>do not grieve</div>
-        <div className="absolute left-0 right-0 bottom-[15%] text-center text-[11px] tracking-[0.34em] opacity-70 shock-rise" style={{ fontFamily: '"UnifrakturCook", serif', textShadow: '0 0 12px rgba(150,180,240,0.5)' }}>· i am the wind now ·</div>
-        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 70px 16px rgba(20,28,56,0.5)' }} />
+      <div className={`${FWRAP} text-[#2a1810]`} aria-hidden>
+        {/* ink rivulets bleeding down the page */}
+        {[[19, 0], [43, 2.6], [71, 1.3], [88, 3.4]].map(([l, d], i) => (
+          <span key={i} className="absolute top-0 w-[2px] shock-drip" style={{ left: `${l}%`, height: '30%', opacity: 0.55, background: 'linear-gradient(to bottom, #160c06, #2a1810 72%, transparent)', animationDelay: `${d}s`, animationDuration: '4.6s' }}>
+            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[5px] h-[5px] rounded-full" style={{ background: '#160c06' }} />
+          </span>
+        ))}
+        {/* fine ink flecks settling */}
+        {MOTES.slice(0, 14).map((m, i) => <span key={i} className="absolute rounded-full shock-mote" style={{ left: `${m.l}%`, top: `${m.t}%`, width: m.s, height: m.s, background: 'rgba(22,12,6,0.6)', animationDelay: `${m.d}s`, animationDuration: `${m.dur}s` }} />)}
+        {/* the hopeful dawn glow at the crown — warm light above everything */}
+        <div className="absolute -top-[6%] left-1/2 -translate-x-1/2 w-[70%] h-[22%] shock-dawn" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(232,201,140,0.5), rgba(201,169,97,0.12) 50%, transparent 76%)', mixBlendMode: 'screen' }} />
+        {/* the turning of the line — heartbreak into light */}
+        <div className="absolute left-0 right-0 bottom-[13%] text-center text-[12px] tracking-[0.3em] italic shock-dawn" style={{ fontFamily: '"IM Fell English", serif', color: '#cdb98a', textShadow: '0 0 10px rgba(201,169,97,0.5)' }}>· so let it become light ·</div>
+        {/* paper grain + the dark of the keep */}
+        <div className="absolute inset-0" style={{ backgroundImage: GRAIN, backgroundSize: '120px 120px', mixBlendMode: 'overlay', opacity: 0.2 }} />
+        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 90px 26px rgba(8,6,5,0.55)' }} />
       </div>
     );
   }
