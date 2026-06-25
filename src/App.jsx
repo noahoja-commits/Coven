@@ -102,6 +102,7 @@ import { earnedAchievements } from './data/achievements';
 import { inQuietHours } from './lib/quietHours';
 import { FloatingCat } from './components/shared/FloatingCat';
 import { ForbiddenReveal } from './components/shared/ForbiddenReveal';
+import { ShockHaunt } from './components/shared/ShockHaunt';
 import { ShockQuickSwitch } from './components/shared/ShockQuickSwitch';
 import { ShockSparks } from './components/shared/ShockSparks';
 
@@ -1871,6 +1872,7 @@ export default function App() {
     if (tab === 'profile') return (
       <ProfileScreen
         profile={{ ...profile, status: tonightStatus?.text || null }}
+        onUnravel={() => summonShock('egodeath')}
         graves={graves}
         anniversaries={anniversaries}
         trackers={trackers}
@@ -2500,6 +2502,8 @@ export default function App() {
         </Suspense>
       )}
       {settings.familiar !== false && !anyOverlayOpen && <FloatingCat active onSummon={summonShock} />}
+      {/* the haunt — when a horror mode is on, it roams the whole app and strikes unpredictably */}
+      {!settings.parchmentMode && <ShockHaunt mode={settings.shockMode} active={!anyOverlayOpen && !revealTarget} />}
       {settings.shockMode !== 'none' && settings.reactiveTaps !== false && !anyOverlayOpen && !settings.parchmentMode && (
         <ShockSparks mode={settings.shockMode} />
       )}

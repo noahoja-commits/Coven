@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Settings, Pencil, Plus, Heart, MoreHorizontal, ChevronRight, Music, X, Lock, Share2 } from 'lucide-react';
 import { shareCoven } from '../../lib/share';
+import { buzz } from '../../lib/haptics';
 import { F } from '../../styles/fonts';
 import { TrackerGrid } from '../trackers/TrackerGrid';
 import { timeAgo, daysBetween, sunSign } from '../../data/helpers';
@@ -26,7 +27,16 @@ const SHRINE_THEMES = {
 };
 
 export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpdateTracker, onOpenTonightStatus, onOpenSettings, mementoMoriOn, settings, onEditProfile, onLightCandle, crews = [], onOpenCrew, onBrowseCrews, onAddGrave, onAddAnniversary, onOpenNowPlaying, onOpenReflections, onOpenDreams, dreamsCount = 0, onOpenTickets, reflectionsCount = 0, nowPlaying, activityLog = [], sigils = [], bookmarks = [], onOpenComments, onOpenPost, ritual, ritualDoneToday, onPerformRitual, crystals = [], onToggleCrystal, pinnedPost, shrineTheme = 'oxblood', onSetShrineTheme, storyHighlights = [], onRemoveHighlight, achievementState = {}, onShowFollowers, onShowFollowing, joinedScenes = [], onOpenScene, onOpenMood,
-shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
+shrine = [], onSetShrine, flameLitAt = 0, onTendFlame, onUnravel }) {
+  // Hidden ritual — stare into your own face (tap your avatar 6×) and the I comes apart.
+  const selfTaps = useRef(0);
+  const selfTimer = useRef(null);
+  const stareIntoSelf = () => {
+    selfTaps.current += 1;
+    clearTimeout(selfTimer.current);
+    selfTimer.current = setTimeout(() => { selfTaps.current = 0; }, 1500);
+    if (selfTaps.current >= 6) { selfTaps.current = 0; clearTimeout(selfTimer.current); buzz('secret'); onUnravel && onUnravel(); }
+  };
   const mood = moodActive(profile.mood) ? profile.mood : null;
   const arche = archetypeById(profile.archetype);
   const earned = earnedAchievements(achievementState);
@@ -122,7 +132,8 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame }) {
         <div className="relative flex items-start gap-4">
           {/* Avatar with candle */}
           <div className="relative shrink-0">
-            <div className={`w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#3B0A12] to-[#0A0A0A] border ${settings?.ghostMode ? 'border-[#7B2CBF]' : 'border-[#3F3F3F]'} flex items-center justify-center text-3xl`}
+            <div onClick={stareIntoSelf}
+              className={`w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#3B0A12] to-[#0A0A0A] border cursor-pointer ${settings?.ghostMode ? 'border-[#7B2CBF]' : 'border-[#3F3F3F]'} flex items-center justify-center text-3xl`}
               style={settings?.ghostMode ? { boxShadow: '0 0 20px rgba(123, 44, 191, 0.5)' } : mood ? { boxShadow: `0 0 22px ${mood.color}88` } : borderStyle(profile.decor?.border)}>{profile.avatarUrl ? <img src={profile.avatarUrl} alt="" className="w-full h-full object-cover" /> : (profile.avatar || '🦇')}</div>
             {/* Candle indicator */}
             {candleActive && (
