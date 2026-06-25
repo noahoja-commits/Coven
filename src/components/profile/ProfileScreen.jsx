@@ -134,7 +134,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame, onUnravel }) {
           <div className="relative shrink-0">
             <div onClick={stareIntoSelf}
               className={`w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#3B0A12] to-[#0A0A0A] border cursor-pointer ${settings?.ghostMode ? 'border-[#7B2CBF]' : 'border-[#3F3F3F]'} flex items-center justify-center text-3xl`}
-              style={settings?.ghostMode ? { boxShadow: '0 0 20px rgba(123, 44, 191, 0.5)' } : mood ? { boxShadow: `0 0 22px ${mood.color}88` } : borderStyle(profile.decor?.border)}>{profile.avatarUrl ? <img src={profile.avatarUrl} alt="" className="w-full h-full object-cover" /> : (profile.avatar || '🦇')}</div>
+              style={settings?.ghostMode ? { boxShadow: '0 0 20px rgba(123, 44, 191, 0.5)' } : mood ? { boxShadow: `0 0 22px ${mood.color}88` } : borderStyle(profile.decor?.border)}>{profile.avatarUrl ? <img src={profile.avatarUrl} alt="" className="w-full h-full object-cover" /> : (profile.avatar || '☾')}</div>
             {/* Candle indicator */}
             {candleActive && (
               <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[#0A0A0A] border border-[#C9A961]/40 flex items-center justify-center" title={`lit by ${profile.candleLit.lastBy}`}>

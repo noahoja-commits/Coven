@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft, Users, Check, Plus, X } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { SectionLabel } from '../shared/SectionLabel';
-
-const GLYPHS = ['✦', '🦇', '🕯', '✟', '🌹', '⛧', '☾', '🜏', '⚰', '🔮', '🌑', '⛧'];
+import { GLYPHS } from '../../data/glyphs';
 
 export function CrewBrowse({ crews = [], busy = {}, onJoin, onCreate, onOpen, onClose }) {
   const [creating, setCreating] = useState(false);

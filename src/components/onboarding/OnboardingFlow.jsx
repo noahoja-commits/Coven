@@ -2,8 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { ChevronRight, ChevronLeft, Loader2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { checkHandleAvailable, fetchProfiles } from '../../lib/db/profiles';
-
-const GLYPHS = ['🦇', '✟', '☠', '🌹', '🩸', '⚰', '✶', '⛧', '☩', '⚱', '✦', '⌬', '☾', '✽', '⚜'];
+import { GLYPHS, DEFAULT_GLYPH } from '../../data/glyphs';
 const SCENES = [
   { id: 'goth', label: 'Goth & Alt' },
   { id: 'music', label: 'Music & Bands' },
@@ -18,7 +17,7 @@ const VIBES = ['romantic', 'darkwave', 'industrial', 'punk', 'witchy', 'religiou
 export function OnboardingFlow({ onComplete, onSignOut }) {
   const [step, setStep] = useState(0);
   const [handle, setHandle] = useState('');
-  const [glyph, setGlyph] = useState('🦇');
+  const [glyph, setGlyph] = useState(DEFAULT_GLYPH);
   const [city, setCity] = useState('');
   const [birthday, setBirthday] = useState('');
   const [scenes, setScenes] = useState([]);

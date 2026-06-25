@@ -3,8 +3,7 @@ import { X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { SectionLabel } from '../shared/SectionLabel';
 import { uploadImage } from '../../lib/db/storage';
-
-const GLYPHS = ['🦇', '🕯', '✟', '⚱', '☠', '🩸', '🌹', '🌙', '⛧', '☩', '✦', '☽', '⚰', '♰', '🜏', '⛤'];
+import { GLYPHS, DEFAULT_GLYPH } from '../../data/glyphs';
 const BACKGROUNDS = [
   { id: 'red', label: 'oxblood', bg: 'linear-gradient(135deg, #5B0F1A 0%, #1A0408 70%, #0A0204 100%)' },
   { id: 'violet', label: 'violet', bg: 'linear-gradient(135deg, #2D0F3F 0%, #14081F 70%, #0A0410 100%)' },
@@ -14,7 +13,7 @@ const BACKGROUNDS = [
 ];
 
 export function StoryComposer({ meId, onClose, onPost }) {
-  const [glyph, setGlyph] = useState('🦇');
+  const [glyph, setGlyph] = useState(DEFAULT_GLYPH);
   const [caption, setCaption] = useState('');
   const [bg, setBg] = useState(BACKGROUNDS[0]);
   const [imgFile, setImgFile] = useState(null);

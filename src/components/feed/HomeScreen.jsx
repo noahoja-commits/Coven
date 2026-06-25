@@ -19,7 +19,7 @@ export function HomeScreen({
   posts, onReact, onOpenComments, onOpenCommunity, onOpenUser, onDeletePost, onHidePost, onQuotePost, onWhisperPost, onTogglePin, pinnedPostId, feedSort = 'latest', onSetFeedSort,
   feedScope = 'everyone', onSetFeedScope, onLoadMore, feedHasMore = false, onReportPost,
   bookmarks = {}, onToggleBookmark, postCandles = {}, onToggleCandle, onOpenEvent, onVotePoll,
-  onOpenStory, onCreateStory, stories = [], seenStories = {}, meHandle = 'you', meAvatar = '🦇',
+  onOpenStory, onCreateStory, stories = [], seenStories = {}, meHandle = 'you', meAvatar = '☾',
   tonightStatus, onOpenTonightStatus, onOpenTarot, onOpenEphemeris, onOpenCodex, onOpenHashtag, onOpenVespersArchive,
   ritual, ritualDoneToday, onPerformRitual, crystals = [], trackers = {}, onUpdateTracker, onOpenReflections,
   feedLoading = false, suggestedSouls = [], following = {}, onFollow, witching = false, vigil = false,

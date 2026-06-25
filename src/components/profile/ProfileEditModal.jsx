@@ -6,9 +6,7 @@ import { uploadImage } from '../../lib/db/storage';
 import { BORDERS, BANNERS, borderStyle, bannerStyle } from '../../data/decor';
 import { ARCHETYPES } from '../../data/archetypes';
 import { PRESET_AVATARS } from '../../lib/avatars';
-
-// A cohesive occult/gothic sigil set — mourning, moon, cross, and alchemical marks.
-const AVATAR_OPTIONS = ['🦇', '🕯', '🥀', '🌹', '🌙', '🌑', '☾', '☽', '⛧', '⛤', '🜏', '𖤐', '☠', '💀', '⚰', '⚱', '✝', '✟', '☦', '♰', '†', '⸸', '☥', '🔮', '🕸', '🗝', '🦴', '⚜', '✦', '✧'];
+import { GLYPHS as AVATAR_OPTIONS, DEFAULT_GLYPH } from '../../data/glyphs';
 const VIBE_OPTIONS = ['goth', 'raver', 'smoker', 'witch', 'mystic', 'darkwave', 'tradgoth', 'industrial', 'romantic', 'doomer', 'punk', 'NYC', 'LA', 'PDX', 'Berlin', 'sober', 'soft', 'feral'];
 
 export function ProfileEditModal({ profile, meId, onSave, onClose, onSetShrineTheme }) {
@@ -16,7 +14,7 @@ export function ProfileEditModal({ profile, meId, onSave, onClose, onSetShrineTh
   const [pronouns, setPronouns] = useState(profile.pronouns || '');
   const [bio, setBio] = useState(profile.bio || '');
   const [birthday, setBirthday] = useState(profile.birthday || '');
-  const [avatar, setAvatar] = useState(profile.avatar || '🦇');
+  const [avatar, setAvatar] = useState(profile.avatar || DEFAULT_GLYPH);
   const [avatarUrl, setAvatarUrl] = useState(profile.avatarUrl || null);
   const [tags, setTags] = useState(profile.tags || []);
   const [border, setBorder] = useState(profile.decor?.border || 'none');
@@ -138,7 +136,7 @@ export function ProfileEditModal({ profile, meId, onSave, onClose, onSetShrineTh
               ))}
             </div>
             <div className="mt-2 flex items-center gap-2">
-              <span className="w-12 h-12 rounded-full bg-[#1A1A1A] flex items-center justify-center text-xl" style={borderStyle(border)}>{avatarUrl ? '🦇' : avatar}</span>
+              <span className="w-12 h-12 rounded-full bg-[#1A1A1A] flex items-center justify-center text-xl" style={borderStyle(border)}>{avatarUrl ? DEFAULT_GLYPH : avatar}</span>
               <span className="text-[10px] text-[#6B6B6B] italic" style={F.serif}>preview</span>
             </div>
           </div>
