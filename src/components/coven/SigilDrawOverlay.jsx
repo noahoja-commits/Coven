@@ -86,7 +86,7 @@ export function SigilDrawOverlay({ unlocked, onUnlock, onClose }) {
         style={{ background: 'radial-gradient(ellipse at 50% 0%, #1A0710 0%, #0A0408 60%, #050204 100%)' }}>
         <div className="sticky top-0 bg-black/50 backdrop-blur-md border-b border-[#5B0F1A]/30 safe-pt">
           <div className="px-4 h-[60px] flex items-center justify-between">
-            <button onClick={onClose} className="text-[#C8102E] hover:text-[#C9A961] p-2 -m-1"><X size={20} /></button>
+            <button onClick={onClose} className="text-[#9E2A33] hover:text-[#C9A961] p-2 -m-1"><X size={20} /></button>
             <div className="text-[#C9A961] text-sm tracking-[0.3em]" style={F.display}>⛧ THE HIDDEN LEAF ⛧</div>
             <span className="w-5" />
           </div>
@@ -107,8 +107,8 @@ export function SigilDrawOverlay({ unlocked, onUnlock, onClose }) {
   return (
     <div className="absolute inset-0 z-[60] bg-[#050204]/95 backdrop-blur-sm flex flex-col animate-fade-in">
       <div className="safe-pt px-4 h-[60px] flex items-center justify-between">
-        <button onClick={onClose} className="text-[#C8102E] hover:text-[#C9A961] p-2 -m-1"><X size={20} /></button>
-        <div className="text-[#C8102E] text-[10px] uppercase tracking-[0.4em]" style={F.scriptureSC}>{hint}</div>
+        <button onClick={onClose} className="text-[#9E2A33] hover:text-[#C9A961] p-2 -m-1"><X size={20} /></button>
+        <div className="text-[#9E2A33] text-[10px] uppercase tracking-[0.4em]" style={F.scriptureSC}>{hint}</div>
         <span className="w-5" />
       </div>
       <canvas

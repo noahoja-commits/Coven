@@ -53,7 +53,7 @@ function OddityCard({ item, onOpen }) {
         <div className="p-2.5 bg-[#0F0F0F]">
           <div className="flex items-baseline justify-between gap-2 mb-1">
             <span className="text-[#F5F1E8] text-base" style={F.mono}>${item.price}</span>
-            <span className="text-[9px] text-[#C8102E] uppercase tracking-wider" style={F.ui}>{CONDITION_LABELS[item.condition]}</span>
+            <span className="text-[9px] text-[#9E2A33] uppercase tracking-wider" style={F.ui}>{CONDITION_LABELS[item.condition]}</span>
           </div>
           <p className="text-[#A8A29E] text-xs leading-tight line-clamp-2" style={F.serif}>{item.title}</p>
         </div>
@@ -75,7 +75,7 @@ function UserOddityCard({ item, onOpen }) {
         <div className="p-2.5 bg-[#0F0F0F]">
           <div className="flex items-baseline justify-between gap-2 mb-1">
             <span className="text-[#F5F1E8] text-base" style={F.mono}>${item.price || '—'}</span>
-            <span className="text-[9px] text-[#C8102E] uppercase tracking-wider" style={F.ui}>{item.priceMode}</span>
+            <span className="text-[9px] text-[#9E2A33] uppercase tracking-wider" style={F.ui}>{item.priceMode}</span>
           </div>
           <p className="text-[#A8A29E] text-xs leading-tight line-clamp-2" style={F.serif}>{item.title}</p>
         </div>
@@ -169,7 +169,7 @@ function ShopsTab({ shops = [], meId, onAddShop, onDeleteShop, onBoostShop }) {
           {shops.map(s => (
             <div key={s.id} className={`border p-3 ${s.isBoosted ? 'border-[#C9A961]/60 bg-[#C9A961]/[0.04]' : 'border-[#2A2A2A] bg-[#0F0F0F]'}`}>
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 border flex items-center justify-center ${s.isBoosted ? 'border-[#C9A961]/50 text-[#C9A961] bg-[#1A1A1A]' : 'border-[#2A2A2A] text-[#C8102E] bg-[#1A1A1A]'}`} style={F.display}>☩</div>
+                <div className={`w-10 h-10 border flex items-center justify-center ${s.isBoosted ? 'border-[#C9A961]/50 text-[#C9A961] bg-[#1A1A1A]' : 'border-[#2A2A2A] text-[#9E2A33] bg-[#1A1A1A]'}`} style={F.display}>☩</div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline justify-between gap-2">
                     {s.url ? (
@@ -179,7 +179,7 @@ function ShopsTab({ shops = [], meId, onAddShop, onDeleteShop, onBoostShop }) {
                     )}
                     <span className="flex items-center gap-1.5 shrink-0">
                       {s.isBoosted && <span className="text-[9px] text-[#C9A961] tracking-wider" style={F.ui}>★ boosted</span>}
-                      {s.verified && <span className="text-[9px] text-[#C8102E]" style={F.ui}>✓ verified</span>}
+                      {s.verified && <span className="text-[9px] text-[#9E2A33]" style={F.ui}>✓ verified</span>}
                     </span>
                   </div>
                   <div className="text-[10px] text-[#6B6B6B] uppercase tracking-wider" style={F.ui}>{[s.kind, s.neighborhood].filter(Boolean).join(' · ')}</div>
@@ -249,10 +249,10 @@ export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, listings = [
           <div className="px-4 h-[60px] flex items-center justify-between">
             {embedded
               ? <span className="w-9" />
-              : <button onClick={onClose} className="tap text-[#C8102E] hover:text-[#C9A961] p-2 -m-1 transition-colors"><X size={20} /></button>}
+              : <button onClick={onClose} className="tap text-[#9E2A33] hover:text-[#C9A961] p-2 -m-1 transition-colors"><X size={20} /></button>}
             <div className="text-[#C9A961] text-base tracking-[0.3em]" style={F.scriptureSC}>ODDITIES</div>
             <button onClick={() => { setTab('market'); setSearchOpen(o => !o); if (searchOpen) setQuery(''); }}
-              className={`tap p-2 -m-1 transition-colors ${searchOpen ? 'text-[#C9A961]' : 'text-[#C8102E] hover:text-[#C9A961]'}`}><Search size={18} /></button>
+              className={`tap p-2 -m-1 transition-colors ${searchOpen ? 'text-[#C9A961]' : 'text-[#9E2A33] hover:text-[#C9A961]'}`}><Search size={18} /></button>
           </div>
           {searchOpen && (
             <div className="px-4 pb-3">
@@ -278,9 +278,9 @@ export function OdditiesOverlay({ onClose, onOpenOddity, onCompose, listings = [
         <div className="flex-1 overflow-y-auto pt-3 safe-pb">
           {tab === 'market' && (<>
             <div className="px-4 pt-2 pb-3 text-center">
-              <div className="text-[#C8102E] text-[10px] uppercase tracking-[0.4em] mb-2" style={F.scriptureSC}>· of curiosities & wares ·</div>
+              <div className="text-[#9E2A33] text-[10px] uppercase tracking-[0.4em] mb-2" style={F.scriptureSC}>· of curiosities & wares ·</div>
               <h1 className="text-[#C9A961] text-2xl mb-1" style={F.scripture}>The Marketplace</h1>
-              <p className="text-[#C8102E]/80 text-[11px] italic" style={F.scripture}>"objects with stories, sold by those who held them."</p>
+              <p className="text-[#9E2A33]/80 text-[11px] italic" style={F.scripture}>"objects with stories, sold by those who held them."</p>
             </div>
             <MarketplaceTab onOpenOddity={onOpenOddity} onCompose={() => onCompose('sale')} listings={wares} />
           </>)}

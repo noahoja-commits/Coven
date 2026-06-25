@@ -166,7 +166,7 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
         </div>
         {pendingDraft && !text && (
           <div className="px-4 py-2 bg-[#5B0F1A]/15 border-b border-[#5B0F1A]/30 flex items-center gap-3 text-[11px]" style={F.ui}>
-            <span className="flex-1 text-[#C8102E]">you have an unsent draft.</span>
+            <span className="flex-1 text-[#9E2A33]">you have an unsent draft.</span>
             <button onClick={restoreDraft} className="btn btn-quiet text-[#C9A961] hover:text-[#F5F1E8]">restore</button>
             <button onClick={discardDraft} className="btn btn-quiet">discard</button>
           </div>
@@ -191,25 +191,25 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
             </div>
           )}
           {mediaKind === 'video' && (
-            <p className="mt-1.5 text-[10px] text-[#C8102E]/70 italic" style={F.serif}>
+            <p className="mt-1.5 text-[10px] text-[#9E2A33]/70 italic" style={F.serif}>
               heads up — camera videos can carry your location; Coven can't strip that from video yet.
             </p>
           )}
           {poll && (
-            <div className="mt-4 border border-[#7B2CBF]/30 bg-[#7B2CBF]/5 p-3 space-y-2">
-              <div className="text-[10px] uppercase tracking-[0.25em] text-[#7B2CBF] mb-1" style={F.scriptureSC}>· poll ·</div>
+            <div className="mt-4 border border-[#5E3B73]/30 bg-[#5E3B73]/5 p-3 space-y-2">
+              <div className="text-[10px] uppercase tracking-[0.25em] text-[#5E3B73] mb-1" style={F.scriptureSC}>· poll ·</div>
               {poll.options.map((opt, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <input value={opt} onChange={e => updateOption(i, e.target.value.slice(0, 48))}
                     placeholder={`option ${i + 1}`}
-                    className="field flex-1 focus:border-[#7B2CBF] text-sm" />
+                    className="field flex-1 focus:border-[#5E3B73] text-sm" />
                   {poll.options.length > 2 && (
                     <button onClick={() => removeOption(i)} className="tap text-[#6B6B6B] hover:text-[#C9A961]"><Minus size={14} /></button>
                   )}
                 </div>
               ))}
               {poll.options.length < 4 && (
-                <button onClick={addOption} className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-[#C8102E] hover:text-[#C9A961]" style={F.ui}>
+                <button onClick={addOption} className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-[#9E2A33] hover:text-[#C9A961]" style={F.ui}>
                   <Plus size={11} /> add option
                 </button>
               )}
@@ -237,9 +237,9 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
           <input ref={fileRef} type="file" accept="image/*,video/*" onChange={onPickMedia} className="hidden" />
           <button onClick={() => fileRef.current?.click()} disabled={!!poll}
             className={`tap ${mediaPreview ? 'text-[#C9A961]' : 'text-[#A8A29E] hover:text-[#C9A961]'} disabled:opacity-30`} title="add a photo or video"><ImageIcon size={18} /></button>
-          <button onClick={togglePoll} disabled={!!mediaFile} className={`tap ${poll ? 'text-[#7B2CBF]' : 'text-[#A8A29E] hover:text-[#C9A961]'} disabled:opacity-30`} title="poll"><BarChart2 size={18} /></button>
+          <button onClick={togglePoll} disabled={!!mediaFile} className={`tap ${poll ? 'text-[#5E3B73]' : 'text-[#A8A29E] hover:text-[#C9A961]'} disabled:opacity-30`} title="poll"><BarChart2 size={18} /></button>
           <button onClick={() => setAnonymous(!anonymous)}
-            className={`flex items-center gap-1.5 text-[10px] uppercase tracking-wider transition-colors ${anonymous ? 'text-[#7B2CBF]' : 'text-[#6B6B6B] hover:text-[#A8A29E]'}`}
+            className={`flex items-center gap-1.5 text-[10px] uppercase tracking-wider transition-colors ${anonymous ? 'text-[#5E3B73]' : 'text-[#6B6B6B] hover:text-[#A8A29E]'}`}
             style={F.ui} title="post as confession">
             {anonymous ? <EyeOff size={14} /> : <Eye size={14} />}
             <span>{anonymous ? 'confession' : 'identified'}</span>
@@ -270,8 +270,8 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
           <span className="ml-auto text-[10px] text-[#6B6B6B]" style={F.mono}>{text.length}</span>
         </div>
         {anonymous && (
-          <div className="px-4 py-2 bg-[#7B2CBF]/10 border-t border-[#7B2CBF]/30 text-[10px] text-[#C8102E] text-center" style={F.serif}>
-            · posted as <span className="text-[#7B2CBF]">anonymous · the confessor</span> ·
+          <div className="px-4 py-2 bg-[#5E3B73]/10 border-t border-[#5E3B73]/30 text-[10px] text-[#9E2A33] text-center" style={F.serif}>
+            · posted as <span className="text-[#5E3B73]">anonymous · the confessor</span> ·
           </div>
         )}
       </div>

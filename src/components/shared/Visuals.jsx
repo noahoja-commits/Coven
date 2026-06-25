@@ -126,13 +126,13 @@ export function AmbientGlow() {
       style={{ opacity: 0.5 * intensity, mixBlendMode: 'screen' }}>
       {/* warm ember, lower-left, breathing */}
       <div className="absolute -left-[22%] bottom-[4%] w-[90%] h-[68%] ambient-breathe"
-        style={{ background: 'radial-gradient(ellipse at center, rgba(200,16,46,0.42), rgba(139,0,0,0.18) 42%, transparent 70%)' }} />
+        style={{ background: 'radial-gradient(ellipse at center, rgba(158,42,51,0.42), rgba(139,0,0,0.18) 42%, transparent 70%)' }} />
       {/* second oxblood bloom, bottom-center, a deep restrained floor */}
       <div className="absolute left-[15%] -bottom-[18%] w-[70%] h-[55%] ambient-breathe"
         style={{ background: 'radial-gradient(ellipse at center, rgba(139,0,0,0.26), transparent 68%)', animationDelay: '-8s' }} />
       {/* cool violet counter-light, upper-right, drifting + offset phase */}
       <div className="absolute -right-[15%] top-[4%] w-[78%] h-[60%] ambient-drift"
-        style={{ background: 'radial-gradient(ellipse at center, rgba(123,44,191,0.28), rgba(43,7,16,0.08) 50%, transparent 72%)' }} />
+        style={{ background: 'radial-gradient(ellipse at center, rgba(94,59,115,0.28), rgba(43,7,16,0.08) 50%, transparent 72%)' }} />
     </div>
   );
 }

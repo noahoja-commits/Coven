@@ -151,7 +151,7 @@ export function HomeScreen({
       )}
       {vigil && (
         <button onClick={onOpenReflections}
-          className="w-full px-4 py-2.5 border-b border-[#7B2CBF]/40 flex items-center justify-center gap-2 animate-pulse-slow"
+          className="w-full px-4 py-2.5 border-b border-[#5E3B73]/40 flex items-center justify-center gap-2 animate-pulse-slow"
           style={{ background: 'linear-gradient(90deg, rgba(45,15,63,0.45), rgba(10,4,16,0.6), rgba(45,15,63,0.45))' }}>
           <span className="text-[#C9A961]">☩</span>
           <span className="text-[10px] uppercase tracking-[0.4em] text-[#C9A961]" style={F.scriptureSC}>the vigil · souls keep watch</span>
@@ -197,11 +197,11 @@ export function HomeScreen({
             <span className="text-[#C9A961] text-xl">{daily.card.symbol || '✦'}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-[10px] uppercase tracking-[0.3em] text-[#C8102E]/70" style={F.scriptureSC}>· today's pull ·</div>
+            <div className="text-[10px] uppercase tracking-[0.3em] text-[#9E2A33]/70" style={F.scriptureSC}>· today's pull ·</div>
             <div className="text-[#F5F1E8] text-sm mt-0.5 truncate" style={F.scripture}>
               {daily.card.name}{daily.reversed && ' · reversed'}
             </div>
-            <div className="text-[10px] text-[#C8102E]/50 italic truncate" style={F.scripture}>
+            <div className="text-[10px] text-[#9E2A33]/50 italic truncate" style={F.scripture}>
               "{daily.reversed ? daily.card.reversed : daily.card.upright}"
             </div>
           </div>
@@ -215,12 +215,12 @@ export function HomeScreen({
           className="w-full text-left border-b border-[#1A1A1A] hover:bg-[#0F0F0F] transition-colors group">
           <div className="px-4 py-3">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[#C8102E]">⌬</span>
-              <span className="text-[10px] uppercase tracking-[0.3em] text-[#C8102E]" style={F.scriptureSC}>· word of the day ·</span>
+              <span className="text-[#9E2A33]">⌬</span>
+              <span className="text-[10px] uppercase tracking-[0.3em] text-[#9E2A33]" style={F.scriptureSC}>· word of the day ·</span>
             </div>
             <div className="flex items-baseline gap-2">
               <span className="text-[#F5F1E8] text-base" style={F.scripture}>{codexToday.term}</span>
-              <span className="text-[10px] text-[#C8102E]/60 uppercase tracking-wider" style={F.scriptureSC}>{codexToday.category}</span>
+              <span className="text-[10px] text-[#9E2A33]/60 uppercase tracking-wider" style={F.scriptureSC}>{codexToday.category}</span>
             </div>
             <p className="text-[#A8A29E] text-xs italic mt-0.5 line-clamp-2" style={F.serif}>{codexToday.def}</p>
           </div>
@@ -233,19 +233,19 @@ export function HomeScreen({
           <div className="flex-1 text-left">
             <div className="px-4 py-3">
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-[#C8102E]" style={F.scriptureSC}>✟</span>
-                <span className="text-[10px] uppercase tracking-[0.3em] text-[#C8102E]" style={F.scriptureSC}>· today's vespers ·</span>
+                <span className="text-[#9E2A33]" style={F.scriptureSC}>✟</span>
+                <span className="text-[10px] uppercase tracking-[0.3em] text-[#9E2A33]" style={F.scriptureSC}>· today's vespers ·</span>
               </div>
               <p className="text-[#F5F1E8] text-sm italic leading-snug line-clamp-2" style={F.scripture}>
                 "{vespers.verse.text}"
               </p>
-              <p className="text-[10px] text-[#C8102E]/70 mt-1" style={F.scriptureSC}>
+              <p className="text-[10px] text-[#9E2A33]/70 mt-1" style={F.scriptureSC}>
                 · {vespers.chapterTitle} ·
               </p>
             </div>
           </div>
           <button onClick={onOpenVespersArchive} title="archive"
-            className="px-3 border-l border-[#1A1A1A] text-[10px] uppercase tracking-wider text-[#C8102E] hover:text-[#C9A961] hover:bg-[#0F0F0F]"
+            className="px-3 border-l border-[#1A1A1A] text-[10px] uppercase tracking-wider text-[#9E2A33] hover:text-[#C9A961] hover:bg-[#0F0F0F]"
             style={F.scriptureSC}>
             past ·
           </button>
@@ -279,13 +279,13 @@ export function HomeScreen({
       {/* Trending hashtags */}
       {trendingTags.length > 0 && (
         <div className="px-4 pt-3 pb-3 border-b border-[#1A1A1A]">
-          <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E] mb-2" style={F.ui}>· trending ·</div>
+          <div className="text-[10px] uppercase tracking-[0.25em] text-[#9E2A33] mb-2" style={F.ui}>· trending ·</div>
           <div className="flex flex-wrap gap-1.5">
             {trendingTags.map(([tag, count]) => (
               <button key={tag} onClick={() => setActiveTag(tag)}
                 className="flex items-center gap-1.5 px-2 py-1 border border-[#2A2A2A] text-[#A8A29E] hover:text-[#F5F1E8] hover:border-[#A89968]"
                 style={F.ui}>
-                <span className="text-[#C8102E] text-xs">#{tag}</span>
+                <span className="text-[#9E2A33] text-xs">#{tag}</span>
                 <span className="text-[9px] text-[#6B6B6B]" style={F.mono}>{count}</span>
               </button>
             ))}
@@ -316,7 +316,7 @@ export function HomeScreen({
       <div className="px-4 py-2 border-b border-[#1A1A1A] flex items-center gap-3">
         {['latest', 'trending'].map(s => (
           <button key={s} onClick={() => onSetFeedSort && onSetFeedSort(s)}
-            className={`text-[10px] uppercase tracking-[0.25em] py-1 ${feedSort === s ? (s === 'trending' ? 'text-[#F5F1E8] border-b border-[#C8102E]' : 'text-[#F5F1E8] border-b border-[#8B0000]') : 'text-[#6B6B6B]'}`}
+            className={`text-[10px] uppercase tracking-[0.25em] py-1 ${feedSort === s ? (s === 'trending' ? 'text-[#F5F1E8] border-b border-[#9E2A33]' : 'text-[#F5F1E8] border-b border-[#8B0000]') : 'text-[#6B6B6B]'}`}
             style={F.ui}>
             {s}
           </button>
@@ -327,7 +327,7 @@ export function HomeScreen({
           const random = pool[Math.floor(Math.random() * pool.length)];
           onOpenComments && onOpenComments(random.id);
         }}
-          className="ml-auto text-[10px] uppercase tracking-wider text-[#C8102E] hover:text-[#C9A961] px-2 py-1"
+          className="ml-auto text-[10px] uppercase tracking-wider text-[#9E2A33] hover:text-[#C9A961] px-2 py-1"
           style={F.ui}>
           ⚄ feeling lucky
         </button>
@@ -339,7 +339,7 @@ export function HomeScreen({
       {/* Active hashtag filter */}
       {activeTag && (
         <div className="px-4 py-2 border-b border-[#1A1A1A] bg-[#A89968]/5 flex items-center gap-2">
-          <span className="text-[10px] uppercase tracking-wider text-[#C8102E]" style={F.ui}>filtering by</span>
+          <span className="text-[10px] uppercase tracking-wider text-[#9E2A33]" style={F.ui}>filtering by</span>
           <span className="text-[#C9A961] text-sm" style={F.scripture}>#{activeTag}</span>
           <span className="text-[10px] text-[#6B6B6B] ml-1" style={F.mono}>{tagFilteredPosts.length}</span>
           <button onClick={() => setActiveTag(null)} className="ml-auto text-[#A8A29E] hover:text-[#F5F1E8] text-xs">×</button>
@@ -375,14 +375,14 @@ export function HomeScreen({
               {burst === post.id && (
                 <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
                   <span className="absolute w-40 h-40 rounded-full animate-heat-flash"
-                    style={{ background: 'radial-gradient(circle, rgba(200,16,46,0.55), transparent 70%)' }} />
-                  <span className="animate-like-burst text-[#C8102E] drop-shadow-[0_0_18px_rgba(200,16,46,0.85)]"><Bat width={64} height={64} /></span>
+                    style={{ background: 'radial-gradient(circle, rgba(158,42,51,0.55), transparent 70%)' }} />
+                  <span className="animate-like-burst text-[#9E2A33] drop-shadow-[0_0_18px_rgba(158,42,51,0.85)]"><Bat width={64} height={64} /></span>
                 </div>
               )}
               {isHot && (
                 <span aria-hidden className="absolute left-0 top-2 bottom-2 w-[3px] pointer-events-none"
-                  style={{ background: 'linear-gradient(180deg, transparent, #C8102E 35%, #C8102E 65%, transparent)',
-                    boxShadow: '0 0 10px rgba(200,16,46,0.6)' }} />
+                  style={{ background: 'linear-gradient(180deg, transparent, #9E2A33 35%, #9E2A33 65%, transparent)',
+                    boxShadow: '0 0 10px rgba(158,42,51,0.6)' }} />
               )}
               {(bookmarked || pinned) && (
                 <span aria-hidden title={pinned ? 'pinned' : 'saved'}
@@ -403,7 +403,7 @@ export function HomeScreen({
                   <button
                     onClick={() => !mine && !post.anonymous && onOpenUser && onOpenUser(post.user, post.avatar)}
                     disabled={!!post.anonymous}
-                    className={`text-[#F5F1E8] text-sm ${post.anonymous ? 'italic text-[#C8102E]' : 'hover:underline'}`}
+                    className={`text-[#F5F1E8] text-sm ${post.anonymous ? 'italic text-[#9E2A33]' : 'hover:underline'}`}
                     style={F.ui}>{post.user}</button>
                   {post.coauthorHandle && !post.anonymous && (
                     <button onClick={(e) => { e.stopPropagation(); onOpenUser && onOpenUser(post.coauthorHandle); }}
@@ -464,7 +464,7 @@ export function HomeScreen({
               </div>
 
               {post.kind === 'repost' && (
-                <div className="text-[10px] uppercase tracking-wider text-[#C8102E] mb-2 flex items-center gap-1" style={F.ui}>
+                <div className="text-[10px] uppercase tracking-wider text-[#9E2A33] mb-2 flex items-center gap-1" style={F.ui}>
                   <Repeat size={11} /> reposted from {post.quoted?.user}
                 </div>
               )}
@@ -485,19 +485,19 @@ export function HomeScreen({
                 const totalVotes = post.poll.options.reduce((s, o) => s + o.votes, 0);
                 const myVote = post.poll.myVote;
                 return (
-                  <div className="mb-3 border border-[#7B2CBF]/30 bg-[#7B2CBF]/5 p-3 space-y-2">
-                    <div className="text-[10px] uppercase tracking-[0.25em] text-[#7B2CBF] mb-1" style={F.scriptureSC}>· poll · {totalVotes} {totalVotes === 1 ? 'voice' : 'voices'} ·</div>
+                  <div className="mb-3 border border-[#5E3B73]/30 bg-[#5E3B73]/5 p-3 space-y-2">
+                    <div className="text-[10px] uppercase tracking-[0.25em] text-[#5E3B73] mb-1" style={F.scriptureSC}>· poll · {totalVotes} {totalVotes === 1 ? 'voice' : 'voices'} ·</div>
                     {post.poll.options.map(opt => {
                       const pct = totalVotes > 0 ? Math.round((opt.votes / totalVotes) * 100) : 0;
                       const mine = myVote === opt.id;
                       return (
                         <button key={opt.id}
                           onClick={() => onVotePoll && onVotePoll(post.id, opt.id)}
-                          className={`relative block w-full text-left border px-3 py-2 transition-colors ${mine ? 'border-[#7B2CBF] bg-[#7B2CBF]/10' : 'border-[#2A2A2A] hover:border-[#7B2CBF]/60'}`}>
-                          <div className="absolute inset-y-0 left-0 bg-[#7B2CBF]/15 transition-all" style={{ width: `${pct}%` }} />
+                          className={`relative block w-full text-left border px-3 py-2 transition-colors ${mine ? 'border-[#5E3B73] bg-[#5E3B73]/10' : 'border-[#2A2A2A] hover:border-[#5E3B73]/60'}`}>
+                          <div className="absolute inset-y-0 left-0 bg-[#5E3B73]/15 transition-all" style={{ width: `${pct}%` }} />
                           <div className="relative flex items-center justify-between gap-2">
                             <span className="text-[#F5F1E8] text-sm flex items-center gap-2" style={F.serif}>
-                              {mine && <span className="text-[#7B2CBF]">✓</span>}
+                              {mine && <span className="text-[#5E3B73]">✓</span>}
                               {opt.label}
                             </span>
                             <span className="text-[#A8A29E] text-xs" style={F.mono}>{pct}%</span>
@@ -514,7 +514,7 @@ export function HomeScreen({
               {post.kind === 'event' && (
                 <button onClick={() => onOpenEvent && onOpenEvent({ id: post.event.id, name: post.event.name })}
                   className="block w-full text-left mb-3 border border-[#2A2A2A] bg-[#0F0F0F] overflow-hidden hover:border-[#3F3F3F] transition-colors">
-                  <div className="h-1.5" style={{ background: 'linear-gradient(90deg, #8B0000, #7B2CBF)' }} />
+                  <div className="h-1.5" style={{ background: 'linear-gradient(90deg, #8B0000, #5E3B73)' }} />
                   <div className="p-4">
                     <div className="text-[10px] text-[#8B0000] uppercase tracking-[0.2em] mb-1" style={F.ui}>upcoming · tap for detail</div>
                     <div className="text-[#F5F1E8] text-xl mb-1" style={F.display}>{post.event.name}</div>
@@ -526,7 +526,7 @@ export function HomeScreen({
                     </div>
                     <div className="mt-3 pt-3 border-t border-[#1A1A1A] flex items-center justify-between">
                       <span className="text-[#A8A29E] text-xs" style={F.ui}>{post.event.going} going</span>
-                      <span className="text-[10px] uppercase tracking-wider text-[#C8102E]" style={F.ui}>open →</span>
+                      <span className="text-[10px] uppercase tracking-wider text-[#9E2A33]" style={F.ui}>open →</span>
                     </div>
                   </div>
                 </button>
@@ -547,7 +547,7 @@ export function HomeScreen({
                     </span>
                   )}
                   <button onClick={() => onToggleCandle && onToggleCandle(post.id)}
-                    className={`p-2 tap transition-colors ${candled ? 'text-[#C9A961]' : 'text-[#6B6B6B] hover:text-[#C8102E]'}`}
+                    className={`p-2 tap transition-colors ${candled ? 'text-[#C9A961]' : 'text-[#6B6B6B] hover:text-[#9E2A33]'}`}
                     title={candled ? 'candle lit' : 'light a candle'}>
                     <Flame size={14} fill={candled ? '#C9A961' : 'none'} />
                   </button>
@@ -581,7 +581,7 @@ export function HomeScreen({
         {/* Discover real souls — surfaced when your feed is sparse */}
         {!feedLoading && suggestedSouls.length > 0 && (sortedPosts.length === 0 || feedScope === 'following') && (
           <div className="px-4 py-4 bg-[#0A0204]/40">
-            <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E] mb-3" style={F.ui}>· souls who've gathered ·</div>
+            <div className="text-[10px] uppercase tracking-[0.25em] text-[#9E2A33] mb-3" style={F.ui}>· souls who've gathered ·</div>
             <div className="space-y-2">
               {suggestedSouls.slice(0, 6).map(s => {
                 const followed = !!following[s.handle];

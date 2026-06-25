@@ -18,9 +18,9 @@ export function DarkRecapModal({ stats, onClose }) {
       <div className="relative w-full max-w-xs border border-[#5B0F1A]/40 p-6 animate-slide-up overflow-hidden"
         style={{ background: 'radial-gradient(ellipse at 50% 0%, #2A0710 0%, #0A0408 60%, #050204 100%)' }}
         onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} className="absolute top-3 right-3 text-[#C8102E]/60 hover:text-[#C9A961]" aria-label="close"><X size={18} /></button>
+        <button onClick={onClose} className="absolute top-3 right-3 text-[#9E2A33]/60 hover:text-[#C9A961]" aria-label="close"><X size={18} /></button>
         <div className="text-center mb-5">
-          <div className="text-[#C8102E] text-[10px] uppercase tracking-[0.5em] mb-1" style={F.scriptureSC}>· your dark recap ·</div>
+          <div className="text-[#9E2A33] text-[10px] uppercase tracking-[0.5em] mb-1" style={F.scriptureSC}>· your dark recap ·</div>
           <div className="text-[#C9A961] text-3xl" style={F.brand}>Coven</div>
         </div>
         <div className="space-y-3">
@@ -31,7 +31,7 @@ export function DarkRecapModal({ stats, onClose }) {
             </div>
           ))}
           {stats.topScene && (
-            <div className="text-center pt-1 text-[#C8102E] text-xs italic" style={F.scripture}>most at home in · {stats.topScene} ·</div>
+            <div className="text-center pt-1 text-[#9E2A33] text-xs italic" style={F.scripture}>most at home in · {stats.topScene} ·</div>
           )}
         </div>
         <button onClick={() => shareCoven({ title: 'my coven recap', text, path: '' })}

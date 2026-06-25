@@ -12,7 +12,7 @@ export function Reaction({ icon, glyph: Glyph, count, onClick, active }) {
   };
   return (
     <button onClick={handle}
-      className={`flex items-center gap-1 px-2 py-1 transition-colors ${active ? 'text-[#C8102E] drop-shadow-[0_0_3px_rgba(200,16,46,0.3)]' : 'text-[#6B6B6B] hover:text-[#A8A29E]'}`}>
+      className={`flex items-center gap-1 px-2 py-1 transition-colors ${active ? 'text-[#9E2A33] drop-shadow-[0_0_3px_rgba(158,42,51,0.3)]' : 'text-[#6B6B6B] hover:text-[#A8A29E]'}`}>
       <span className={`leading-none flex items-center ${animate ? 'flutter' : ''}`}>
         {Glyph ? <Glyph width={15} height={15} /> : <span className="text-sm">{icon}</span>}
       </span>

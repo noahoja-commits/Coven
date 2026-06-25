@@ -14,7 +14,7 @@ function CardFace({ card, reversed, large = false }) {
       }}
     >
       <div className="absolute inset-0 m-2 border border-[#A89968]/20 pointer-events-none" />
-      <div className="text-[#C8102E] text-xs uppercase tracking-[0.3em]" style={F.scriptureSC}>
+      <div className="text-[#9E2A33] text-xs uppercase tracking-[0.3em]" style={F.scriptureSC}>
         {card.type === 'major' ? `· ${String(card.id).padStart(2, '0')} ·` : '· minor ·'}
       </div>
       <div className="flex-1 flex flex-col items-center justify-center gap-3">
@@ -25,7 +25,7 @@ function CardFace({ card, reversed, large = false }) {
           {card.name}
         </div>
       </div>
-      <div className="text-[#C8102E] text-[10px] uppercase tracking-[0.3em]" style={F.scriptureSC}>
+      <div className="text-[#9E2A33] text-[10px] uppercase tracking-[0.3em]" style={F.scriptureSC}>
         · the deck ·
       </div>
     </div>
@@ -88,22 +88,22 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
 
       <div className="sticky top-0 z-10 bg-[#050204]/95 backdrop-blur-md border-b border-[#A89968]/15 safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onClose} className="text-[#C8102E] hover:text-[#C9A961] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
+          <button onClick={onClose} className="text-[#9E2A33] hover:text-[#C9A961] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
           <div className="text-[#C9A961] text-base tracking-[0.3em]" style={F.display}>THE DECK</div>
           <div className="flex items-center gap-3">
-            <button onClick={() => setMode('history')} className={`text-[10px] uppercase tracking-wider ${mode === 'history' ? 'text-[#C9A961]' : 'text-[#C8102E]'}`} style={F.ui} title="history">
+            <button onClick={() => setMode('history')} className={`text-[10px] uppercase tracking-wider ${mode === 'history' ? 'text-[#C9A961]' : 'text-[#9E2A33]'}`} style={F.ui} title="history">
               <Clock size={14} />
             </button>
             <button onClick={() => setMode(mode === 'oracle' ? 'daily' : 'oracle')}
-              className={`text-[10px] uppercase tracking-wider ${mode === 'oracle' ? 'text-[#C9A961]' : 'text-[#C8102E]'}`} style={F.ui}>
+              className={`text-[10px] uppercase tracking-wider ${mode === 'oracle' ? 'text-[#C9A961]' : 'text-[#9E2A33]'}`} style={F.ui}>
               oracle
             </button>
             <button onClick={() => setMode(mode === 'spread' ? 'daily' : 'spread')}
-              className={`text-[10px] uppercase tracking-wider ${mode === 'spread' ? 'text-[#C9A961]' : 'text-[#C8102E]'}`} style={F.ui}>
+              className={`text-[10px] uppercase tracking-wider ${mode === 'spread' ? 'text-[#C9A961]' : 'text-[#9E2A33]'}`} style={F.ui}>
               spread
             </button>
             <button onClick={() => setMode(mode === 'browse' ? 'daily' : 'browse')}
-              className="text-[#C8102E] text-[10px] uppercase tracking-wider" style={F.ui}>
+              className="text-[#9E2A33] text-[10px] uppercase tracking-wider" style={F.ui}>
               {mode === 'browse' ? 'today' : 'browse'}
             </button>
           </div>
@@ -113,8 +113,8 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
       {mode === 'daily' && (
         <div className="relative px-6 pt-8 pb-12">
           <div className="text-center mb-6">
-            <div className="text-[#C8102E] text-[10px] uppercase tracking-[0.5em] mb-1" style={F.scriptureSC}>· today’s pull ·</div>
-            <div className="text-[#C8102E]/60 text-xs italic" style={F.scripture}>
+            <div className="text-[#9E2A33] text-[10px] uppercase tracking-[0.5em] mb-1" style={F.scriptureSC}>· today’s pull ·</div>
+            <div className="text-[#9E2A33]/60 text-xs italic" style={F.scripture}>
               {pull.reversed ? 'drawn reversed' : 'drawn upright'}
             </div>
           </div>
@@ -129,7 +129,7 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
               "{pull.reversed ? pull.card.reversed : pull.card.upright}"
             </p>
             {pull.card.element && (
-              <div className="text-[#C8102E]/60 text-[10px] uppercase tracking-[0.3em]" style={F.scriptureSC}>
+              <div className="text-[#9E2A33]/60 text-[10px] uppercase tracking-[0.3em]" style={F.scriptureSC}>
                 · {pull.card.element} ·
               </div>
             )}
@@ -137,20 +137,20 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
 
           <div className="mt-8 flex justify-center gap-2">
             <button onClick={reshuffle}
-              className="flex items-center gap-2 px-5 py-2.5 border border-[#A89968]/40 text-[#C8102E] hover:border-[#C9A961] hover:text-[#C9A961] text-xs uppercase tracking-[0.25em]"
+              className="flex items-center gap-2 px-5 py-2.5 border border-[#A89968]/40 text-[#9E2A33] hover:border-[#C9A961] hover:text-[#C9A961] text-xs uppercase tracking-[0.25em]"
               style={F.ui}>
               <Shuffle size={13} /> pull another
             </button>
             {onShare && (
               <button onClick={() => onShare(pull)}
-                className="flex items-center gap-2 px-5 py-2.5 border border-[#A89968]/40 text-[#C8102E] hover:border-[#C9A961] hover:text-[#C9A961] text-xs uppercase tracking-[0.25em]"
+                className="flex items-center gap-2 px-5 py-2.5 border border-[#A89968]/40 text-[#9E2A33] hover:border-[#C9A961] hover:text-[#C9A961] text-xs uppercase tracking-[0.25em]"
                 style={F.ui}>
                 <Send size={13} /> share
               </button>
             )}
           </div>
 
-          <p className="mt-10 text-center text-[#C8102E]/40 text-[10px] italic" style={F.scripture}>
+          <p className="mt-10 text-center text-[#9E2A33]/40 text-[10px] italic" style={F.scripture}>
             · the deck remembers ·
           </p>
         </div>
@@ -159,17 +159,17 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
       {mode === 'history' && (
         <div className="relative px-4 pt-6 pb-12">
           <div className="text-center mb-5">
-            <div className="text-[#C8102E] text-[10px] uppercase tracking-[0.4em]" style={F.scriptureSC}>· the deck remembers ·</div>
-            <p className="text-[#C8102E]/60 text-xs italic mt-1" style={F.scripture}>{historyEntries.length} days recorded</p>
+            <div className="text-[#9E2A33] text-[10px] uppercase tracking-[0.4em]" style={F.scriptureSC}>· the deck remembers ·</div>
+            <p className="text-[#9E2A33]/60 text-xs italic mt-1" style={F.scripture}>{historyEntries.length} days recorded</p>
           </div>
           {divinationLog.length > 0 && (
             <div className="mb-6 max-w-sm mx-auto">
-              <div className="text-[10px] uppercase tracking-[0.3em] text-[#C8102E]/60 mb-2" style={F.scriptureSC}>· questions asked ·</div>
+              <div className="text-[10px] uppercase tracking-[0.3em] text-[#9E2A33]/60 mb-2" style={F.scriptureSC}>· questions asked ·</div>
               <div className="space-y-1">
                 {divinationLog.slice(0, 8).map(d => (
                   <div key={d.id} className="px-3 py-2 border border-[#A89968]/15 bg-[#0A0204]/30">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-[9px] uppercase tracking-wider text-[#C8102E]/60" style={F.scriptureSC}>{d.kind === 'pendulum' ? '◯ pendulum' : '✦ oracle'}</span>
+                      <span className="text-[9px] uppercase tracking-wider text-[#9E2A33]/60" style={F.scriptureSC}>{d.kind === 'pendulum' ? '◯ pendulum' : '✦ oracle'}</span>
                     </div>
                     <p className="text-[#A8A29E] text-xs italic" style={F.scripture}>"{d.question}"</p>
                     <p className="text-[#C9A961] text-xs mt-0.5" style={F.scripture}>→ {d.answer}</p>
@@ -179,14 +179,14 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
             </div>
           )}
           {historyEntries.length === 0 && divinationLog.length === 0 ? (
-            <div className="text-center py-12 text-[#C8102E]/40 text-sm italic" style={F.scripture}>
+            <div className="text-center py-12 text-[#9E2A33]/40 text-sm italic" style={F.scripture}>
               · no pulls yet · today is your first ·
             </div>
           ) : historyEntries.length > 0 && (
             <div className="space-y-1 max-w-sm mx-auto">
               {historyEntries.map(entry => (
                 <div key={entry.date} className="flex items-center gap-3 px-3 py-2 border border-[#A89968]/20 bg-[#0A0204]/40">
-                  <div className="w-10 text-[10px] text-[#C8102E]" style={F.mono}>
+                  <div className="w-10 text-[10px] text-[#9E2A33]" style={F.mono}>
                     {entry.date.slice(5).replace('-', '/')}
                   </div>
                   <div className="w-7 h-10 border border-[#A89968]/40 flex items-center justify-center"
@@ -195,7 +195,7 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-[#F5F1E8] text-sm truncate" style={F.scripture}>{entry.card}</div>
-                    <div className="text-[10px] text-[#C8102E]/60" style={F.scriptureSC}>
+                    <div className="text-[10px] text-[#9E2A33]/60" style={F.scriptureSC}>
                       {entry.reversed ? 'reversed' : 'upright'}
                     </div>
                   </div>
@@ -209,8 +209,8 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
       {mode === 'oracle' && (
         <div className="relative px-6 pt-8 pb-12">
           <div className="text-center mb-6">
-            <div className="text-[#C8102E] text-[10px] uppercase tracking-[0.4em]" style={F.scriptureSC}>· ask the deck ·</div>
-            <p className="text-[#C8102E]/60 text-xs italic mt-1" style={F.scripture}>one question. one card. trust what falls.</p>
+            <div className="text-[#9E2A33] text-[10px] uppercase tracking-[0.4em]" style={F.scriptureSC}>· ask the deck ·</div>
+            <p className="text-[#9E2A33]/60 text-xs italic mt-1" style={F.scripture}>one question. one card. trust what falls.</p>
           </div>
           {!oracleAnswer ? (
             <div className="max-w-sm mx-auto">
@@ -220,12 +220,12 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
                 className="w-full bg-[#0A0204] border border-[#A89968]/30 focus:border-[#C9A961] outline-none p-3 text-[#F5F1E8] text-base italic resize-none"
                 style={F.scripture} />
               <button onClick={drawOracle} disabled={!oracleQ.trim()}
-                className="mt-3 w-full py-3 border border-[#A89968]/40 text-[#C8102E] hover:border-[#C9A961] hover:text-[#C9A961] disabled:opacity-40 text-xs uppercase tracking-[0.3em]"
+                className="mt-3 w-full py-3 border border-[#A89968]/40 text-[#9E2A33] hover:border-[#C9A961] hover:text-[#C9A961] disabled:opacity-40 text-xs uppercase tracking-[0.3em]"
                 style={F.ui}>draw a card</button>
             </div>
           ) : (
             <div className="max-w-sm mx-auto text-center space-y-4">
-              <p className="text-[#C8102E]/60 text-xs italic" style={F.scripture}>"{oracleQ}"</p>
+              <p className="text-[#9E2A33]/60 text-xs italic" style={F.scripture}>"{oracleQ}"</p>
               <CardFace card={oracleAnswer.card} reversed={oracleAnswer.reversed} />
               <h2 className="text-[#F5F1E8] text-xl" style={F.brand}>
                 {oracleAnswer.card.name}{oracleAnswer.reversed && ' · reversed'}
@@ -234,7 +234,7 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
                 "{oracleAnswer.reversed ? oracleAnswer.card.reversed : oracleAnswer.card.upright}"
               </p>
               <button onClick={resetOracle}
-                className="px-4 py-2 text-[10px] uppercase tracking-wider border border-[#2A2A2A] text-[#C8102E] hover:border-[#C9A961]" style={F.ui}>
+                className="px-4 py-2 text-[10px] uppercase tracking-wider border border-[#2A2A2A] text-[#9E2A33] hover:border-[#C9A961]" style={F.ui}>
                 ask again
               </button>
             </div>
@@ -245,8 +245,8 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
       {mode === 'spread' && (
         <div className="relative px-4 pt-6 pb-12">
           <div className="text-center mb-5">
-            <div className="text-[#C8102E] text-[10px] uppercase tracking-[0.4em]" style={F.scriptureSC}>· past · present · future ·</div>
-            <p className="text-[#C8102E]/60 text-xs italic mt-1" style={F.scripture}>three cards. one breath.</p>
+            <div className="text-[#9E2A33] text-[10px] uppercase tracking-[0.4em]" style={F.scriptureSC}>· past · present · future ·</div>
+            <p className="text-[#9E2A33]/60 text-xs italic mt-1" style={F.scripture}>three cards. one breath.</p>
           </div>
           {!spread ? (
             <div className="flex flex-col items-center pt-12">
@@ -254,12 +254,12 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
                 {[0, 1, 2].map(i => (
                   <div key={i} className="w-[80px] h-[120px] border border-[#A89968]/30 flex items-center justify-center"
                     style={{ background: 'linear-gradient(180deg, #14080C 0%, #0A0204 100%)' }}>
-                    <span className="text-[#C8102E]/30 text-2xl">✦</span>
+                    <span className="text-[#9E2A33]/30 text-2xl">✦</span>
                   </div>
                 ))}
               </div>
               <button onClick={drawSpread}
-                className="px-5 py-2.5 border border-[#A89968]/40 text-[#C8102E] hover:border-[#C9A961] hover:text-[#C9A961] text-xs uppercase tracking-[0.3em]" style={F.ui}>
+                className="px-5 py-2.5 border border-[#A89968]/40 text-[#9E2A33] hover:border-[#C9A961] hover:text-[#C9A961] text-xs uppercase tracking-[0.3em]" style={F.ui}>
                 draw the spread
               </button>
             </div>
@@ -270,7 +270,7 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
                   const label = ['past', 'present', 'future'][i];
                   return (
                     <div key={i} className="flex flex-col items-center">
-                      <div className="text-[9px] uppercase tracking-[0.3em] text-[#C8102E]/60 mb-1" style={F.scriptureSC}>· {label} ·</div>
+                      <div className="text-[9px] uppercase tracking-[0.3em] text-[#9E2A33]/60 mb-1" style={F.scriptureSC}>· {label} ·</div>
                       <div className="w-[90px] h-[135px] border-2 border-[#A89968]/40 flex flex-col items-center justify-center p-2"
                         style={{
                           background: 'linear-gradient(180deg, #14080C 0%, #0A0204 100%)',
@@ -289,7 +289,7 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
                   const label = ['past', 'present', 'future'][i];
                   return (
                     <div key={i} className="border border-[#A89968]/20 bg-[#0A0204]/40 p-3">
-                      <div className="text-[10px] uppercase tracking-[0.3em] text-[#C8102E]" style={F.scriptureSC}>· {label} · {s.card.name}{s.reversed ? ' · reversed' : ''} ·</div>
+                      <div className="text-[10px] uppercase tracking-[0.3em] text-[#9E2A33]" style={F.scriptureSC}>· {label} · {s.card.name}{s.reversed ? ' · reversed' : ''} ·</div>
                       <p className="text-[#A8A29E] text-xs italic mt-1.5 leading-relaxed" style={F.scripture}>
                         "{s.reversed ? s.card.reversed : s.card.upright}"
                       </p>
@@ -299,7 +299,7 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
               </div>
               <div className="flex justify-center pt-2">
                 <button onClick={drawSpread}
-                  className="px-4 py-2 text-[10px] uppercase tracking-wider border border-[#2A2A2A] text-[#C8102E] hover:border-[#C9A961]" style={F.ui}>
+                  className="px-4 py-2 text-[10px] uppercase tracking-wider border border-[#2A2A2A] text-[#9E2A33] hover:border-[#C9A961]" style={F.ui}>
                   draw again
                 </button>
               </div>
@@ -324,17 +324,17 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
 
       {mode === 'browse' && browseCard && (
         <div className="relative px-6 pt-6 pb-12">
-          <button onClick={() => setBrowseCard(null)} className="text-[10px] uppercase tracking-wider text-[#C8102E] hover:text-[#C9A961] mb-4" style={F.ui}>
+          <button onClick={() => setBrowseCard(null)} className="text-[10px] uppercase tracking-wider text-[#9E2A33] hover:text-[#C9A961] mb-4" style={F.ui}>
             ← back to deck
           </button>
           <div className="max-w-sm mx-auto text-center space-y-4">
-            <div className="text-[#C8102E]/60 text-[10px] uppercase tracking-[0.4em]" style={F.scriptureSC}>
+            <div className="text-[#9E2A33]/60 text-[10px] uppercase tracking-[0.4em]" style={F.scriptureSC}>
               · {browseCard.type === 'major' ? `arcanum ${String(browseCard.id).padStart(2, '0')}` : `${browseCard.suit} · ${browseCard.rank || ''}`} ·
             </div>
             <CardFace card={browseCard} large />
             <h2 className="text-[#F5F1E8] text-2xl" style={F.brand}>{browseCard.name}</h2>
             {browseCard.element && (
-              <div className="text-[#C8102E]/70 text-[10px] uppercase tracking-[0.3em]" style={F.scriptureSC}>· {browseCard.element} ·</div>
+              <div className="text-[#9E2A33]/70 text-[10px] uppercase tracking-[0.3em]" style={F.scriptureSC}>· {browseCard.element} ·</div>
             )}
             <div className="text-left space-y-3 pt-2">
               <div className="border border-[#C9A961]/20 bg-[#0A0204]/40 p-3">
@@ -347,7 +347,7 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
               </div>
             </div>
             <button onClick={() => { setPull({ card: browseCard, reversed: false }); setBrowseCard(null); setMode('daily'); }}
-              className="mt-2 px-4 py-2 text-[10px] uppercase tracking-wider border border-[#A89968]/40 text-[#C8102E] hover:border-[#C9A961] hover:text-[#C9A961]" style={F.ui}>
+              className="mt-2 px-4 py-2 text-[10px] uppercase tracking-wider border border-[#A89968]/40 text-[#9E2A33] hover:border-[#C9A961] hover:text-[#C9A961]" style={F.ui}>
               draw this card
             </button>
           </div>

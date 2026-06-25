@@ -113,16 +113,16 @@ export function SigilOverlay({ onClose, onSave }) {
 
       <div className="sticky top-0 z-10 bg-[#050204]/95 backdrop-blur-md border-b border-[#A89968]/15 safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onClose} className="text-[#C8102E] hover:text-[#C9A961] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
+          <button onClick={onClose} className="text-[#9E2A33] hover:text-[#C9A961] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
           <div className="text-[#C9A961] text-base tracking-[0.3em]" style={F.display}>SIGILS</div>
-          <button onClick={reset} className="text-[#C8102E] hover:text-[#C9A961] p-2 -m-1 transition-colors" title="reset"><RotateCcw size={16} /></button>
+          <button onClick={reset} className="text-[#9E2A33] hover:text-[#C9A961] p-2 -m-1 transition-colors" title="reset"><RotateCcw size={16} /></button>
         </div>
       </div>
 
       <div className="relative px-6 pt-8 pb-12">
         <div className="text-center mb-6">
-          <div className="text-[#C8102E]/60 text-[10px] uppercase tracking-[0.4em]" style={F.scriptureSC}>· the working ·</div>
-          <p className="text-[#C8102E]/50 text-xs italic mt-1 max-w-xs mx-auto" style={F.scripture}>
+          <div className="text-[#9E2A33]/60 text-[10px] uppercase tracking-[0.4em]" style={F.scriptureSC}>· the working ·</div>
+          <p className="text-[#9E2A33]/50 text-xs italic mt-1 max-w-xs mx-auto" style={F.scripture}>
             give your intention a body. write, then let go.
           </p>
         </div>
@@ -132,7 +132,7 @@ export function SigilOverlay({ onClose, onSave }) {
         </div>
 
         <div className="max-w-sm mx-auto">
-          <label className="block text-[10px] uppercase tracking-[0.3em] text-[#C8102E]/70 mb-2" style={F.scriptureSC}>· statement of intent ·</label>
+          <label className="block text-[10px] uppercase tracking-[0.3em] text-[#9E2A33]/70 mb-2" style={F.scriptureSC}>· statement of intent ·</label>
           <textarea
             value={intention}
             onChange={(e) => { setIntention(e.target.value); setSealed(false); }}
@@ -145,11 +145,11 @@ export function SigilOverlay({ onClose, onSave }) {
 
           {cleaned.length > 0 && (
             <div className="mt-3 text-center">
-              <div className="text-[10px] uppercase tracking-[0.3em] text-[#C8102E]/70 mb-1" style={F.scriptureSC}>· reduced to ·</div>
+              <div className="text-[10px] uppercase tracking-[0.3em] text-[#9E2A33]/70 mb-1" style={F.scriptureSC}>· reduced to ·</div>
               <div className="text-[#C9A961] text-lg tracking-[0.4em]" style={F.scripture}>
                 {letters.join(' ').toUpperCase() || '—'}
               </div>
-              <div className="text-[10px] text-[#C8102E]/40 mt-1" style={F.mono}>
+              <div className="text-[10px] text-[#9E2A33]/40 mt-1" style={F.mono}>
                 vowels removed · {letters.length} unique
               </div>
             </div>
@@ -159,7 +159,7 @@ export function SigilOverlay({ onClose, onSave }) {
             <button
               onClick={seal}
               disabled={letters.length < 2 || sealed}
-              className="flex-1 flex items-center justify-center gap-2 py-3 border border-[#A89968]/40 text-[#C8102E] hover:border-[#C9A961] hover:text-[#C9A961] disabled:opacity-40 disabled:hover:border-[#A89968]/40 disabled:hover:text-[#C8102E] text-xs uppercase tracking-[0.25em] transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 py-3 border border-[#A89968]/40 text-[#9E2A33] hover:border-[#C9A961] hover:text-[#C9A961] disabled:opacity-40 disabled:hover:border-[#A89968]/40 disabled:hover:text-[#9E2A33] text-xs uppercase tracking-[0.25em] transition-colors"
               style={F.ui}>
               <Lock size={13} /> {sealed ? 'sealed' : 'seal the sigil'}
             </button>
@@ -168,7 +168,7 @@ export function SigilOverlay({ onClose, onSave }) {
           {sealed && (
             <div className="mt-6 flex flex-col items-center gap-3 animate-fade-in">
               <WaxSeal size={52} glyph="⛧" />
-              <p className="text-center text-[#C8102E]/60 text-xs italic max-w-xs mx-auto" style={F.scripture}>
+              <p className="text-center text-[#9E2A33]/60 text-xs italic max-w-xs mx-auto" style={F.scripture}>
                 "the sigil is sealed. forget the meaning. let it work in the dark."
               </p>
             </div>

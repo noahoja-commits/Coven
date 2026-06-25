@@ -11,7 +11,7 @@ export function renderRichText(text, { onOpenUser, onOpenHashtag } = {}) {
       if (!onOpenHashtag) return <span key={i}>{part}</span>;
       return (
         <button key={i} onClick={(e) => { e.stopPropagation(); onOpenHashtag(tag); }}
-          className="text-[#C8102E] hover:text-[#C9A961] hover:underline">{part}</button>
+          className="text-[#9E2A33] hover:text-[#C9A961] hover:underline">{part}</button>
       );
     }
     if (/^@[a-zA-Z0-9_.]+$/.test(part)) {

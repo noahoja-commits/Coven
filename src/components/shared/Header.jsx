@@ -35,11 +35,11 @@ export function Header({ tab, onDMs, onCompose, onLibrary, onLogo, onNotificatio
             <button onClick={logoTap}
               onPointerDown={startPress} onPointerUp={endPress} onPointerLeave={endPress}
               className={`${textColor} text-4xl leading-none hover:text-[#C9A961] transition-colors select-none`}
-              style={{ ...F.brand, textShadow: '0 0 22px rgba(200,16,46,0.55), 0 0 4px rgba(0,0,0,0.6)' }} title="the coven · portals">Coven</button>
+              style={{ ...F.brand, textShadow: '0 0 22px rgba(158,42,51,0.55), 0 0 4px rgba(0,0,0,0.6)' }} title="the coven · portals">Coven</button>
           ) : (
             <button onClick={onLogo}
-              className="text-[#C8102E] text-xl tracking-[0.18em] hover:text-[#F5F1E8] transition-colors"
-              style={{ ...F.displayOrnate, textShadow: '0 0 16px rgba(200,16,46,0.45)' }}>
+              className="text-[#9E2A33] text-xl tracking-[0.18em] hover:text-[#F5F1E8] transition-colors"
+              style={{ ...F.displayOrnate, textShadow: '0 0 16px rgba(158,42,51,0.45)' }}>
               {(titles[tab] || tab.toUpperCase())}
             </button>
           )}

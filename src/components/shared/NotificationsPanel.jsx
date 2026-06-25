@@ -7,13 +7,13 @@ const KIND_ICON = {
   reaction: { icon: Heart, color: '#8B0000' },
   react: { icon: Heart, color: '#8B0000' },
   story_react: { icon: Heart, color: '#C9A961' },
-  follow: { icon: UserPlus, color: '#7B2CBF' },
+  follow: { icon: UserPlus, color: '#5E3B73' },
   dm: { icon: MessageCircle, color: '#A8A29E' },
   comment: { icon: MessageCircle, color: '#A89968' },
   reply: { icon: MessageCircle, color: '#A89968' },
   event: { icon: Calendar, color: '#C9A961' },
-  crew: { icon: MessageCircle, color: '#7B2CBF' },
-  crew_join: { icon: UserPlus, color: '#7B2CBF' },
+  crew: { icon: MessageCircle, color: '#5E3B73' },
+  crew_join: { icon: UserPlus, color: '#5E3B73' },
   rsvp: { icon: Calendar, color: '#C9A961' },
   mention: { icon: AtSign, color: '#A89968' },
   oddity: { icon: ShoppingBag, color: '#5B0F1A' },
@@ -69,7 +69,7 @@ export function NotificationsPanel({ notifications, onClose, onMarkAllRead, onMa
             onMouseLeave={handlePressEnd}
             onTouchStart={handlePressStart}
             onTouchEnd={handlePressEnd}
-            className="tap text-[#C8102E] hover:text-[#C9A961] text-[10px] uppercase tracking-wider"
+            className="tap text-[#9E2A33] hover:text-[#C9A961] text-[10px] uppercase tracking-wider"
             style={F.ui}
             title="long press to mark all read">
             {unread > 0 ? `${unread} new` : '—'}
@@ -77,7 +77,7 @@ export function NotificationsPanel({ notifications, onClose, onMarkAllRead, onMa
         </div>
       </div>
       {unread > 0 && (
-        <div className="px-4 py-2 bg-[#5B0F1A]/10 border-b border-[#5B0F1A]/30 text-[10px] text-[#C8102E] uppercase tracking-wider text-center" style={F.ui}>
+        <div className="px-4 py-2 bg-[#5B0F1A]/10 border-b border-[#5B0F1A]/30 text-[10px] text-[#9E2A33] uppercase tracking-wider text-center" style={F.ui}>
           long-press "{unread} new" to mark all read
         </div>
       )}
@@ -114,7 +114,7 @@ export function NotificationsPanel({ notifications, onClose, onMarkAllRead, onMa
                   <div className="flex-1 min-w-0">
                     <p className="text-[#F5F1E8] text-sm leading-snug" style={F.serif}>
                       {n.user && <span style={F.ui}>{n.user} </span>}
-                      {extra > 0 && <span style={F.ui} className="text-[#C8102E]">and {extra} {extra === 1 ? 'other' : 'others'} </span>}
+                      {extra > 0 && <span style={F.ui} className="text-[#9E2A33]">and {extra} {extra === 1 ? 'other' : 'others'} </span>}
                       <span className="text-[#A8A29E]">{n.text}</span>
                     </p>
                     {n.target && <p className="text-[10px] text-[#6B6B6B] truncate mt-0.5" style={F.serif}>"{n.target}"</p>}

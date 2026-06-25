@@ -30,14 +30,14 @@ export function AddGraveModal({ onSave, onClose }) {
         </div>
         <div className="p-4 space-y-4">
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.scriptureSC}>· name ·</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#9E2A33]" style={F.scriptureSC}>· name ·</label>
             <input value={name} onChange={e => setName(e.target.value.slice(0, 40))}
               placeholder="who or what"
               className="field mt-1.5"
               style={F.display} />
           </div>
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.scriptureSC}>· kind ·</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#9E2A33]" style={F.scriptureSC}>· kind ·</label>
             <div className="flex flex-wrap gap-1.5 mt-1.5">
               {KINDS.map(k => (
                 <button key={k} onClick={() => setKind(k)}
@@ -47,14 +47,14 @@ export function AddGraveModal({ onSave, onClose }) {
             </div>
           </div>
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.scriptureSC}>· dates ·</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#9E2A33]" style={F.scriptureSC}>· dates ·</label>
             <input value={dates} onChange={e => setDates(e.target.value.slice(0, 40))}
               placeholder="2021 — 2024"
               className="field mt-1.5"
               style={F.mono} />
           </div>
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.scriptureSC}>· epitaph ·</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#9E2A33]" style={F.scriptureSC}>· epitaph ·</label>
             <textarea value={epitaph} onChange={e => setEpitaph(e.target.value.slice(0, 140))}
               placeholder="what it was. how it ended."
               rows={3}

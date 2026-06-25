@@ -29,7 +29,7 @@ export function TrackerGrid({ trackers, onUpdate }) {
   return (
     <div className="border border-[#2A2A2A] bg-[#0F0F0F]">
       <div className="px-3 py-2 border-b border-[#1A1A1A] flex items-center justify-between">
-        <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>· the log ·</div>
+        <div className="text-[10px] uppercase tracking-[0.25em] text-[#9E2A33]" style={F.scriptureSC}>· the log ·</div>
         <button onClick={() => setEditing(!editing)} className="text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#A8A29E]" style={F.ui}>
           {editing ? 'done' : 'edit'}
         </button>
@@ -72,7 +72,7 @@ export function TrackerGrid({ trackers, onUpdate }) {
                 </div>
               ) : (
                 <button onClick={() => onUpdate(cat.id, 'log')}
-                  className="px-2 py-1 text-[9px] uppercase tracking-wider border border-[#2A2A2A] text-[#C8102E] hover:border-[#5B0F1A] hover:text-[#5B0F1A]"
+                  className="px-2 py-1 text-[9px] uppercase tracking-wider border border-[#2A2A2A] text-[#9E2A33] hover:border-[#5B0F1A] hover:text-[#5B0F1A]"
                   style={F.ui}>now</button>
               )}
             </div>
@@ -99,7 +99,7 @@ export function TrackerGrid({ trackers, onUpdate }) {
             </div>
           ) : (
             <button onClick={() => setAdding(true)}
-              className="w-full py-2 flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider text-[#C8102E] hover:text-[#C9A961] border border-dashed border-[#3F3F3F] hover:border-[#5B0F1A]" style={F.ui}>
+              className="w-full py-2 flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider text-[#9E2A33] hover:text-[#C9A961] border border-dashed border-[#3F3F3F] hover:border-[#5B0F1A]" style={F.ui}>
               <Plus size={11} /> custom tracker
             </button>
           )}

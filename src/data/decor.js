@@ -27,7 +27,7 @@ export function borderStyle(id) {
     case 'gilded': return { boxShadow: '0 0 0 1px #6B5418, 0 0 0 3px #C9A961, 0 0 0 4px #6B5418, 0 0 18px rgba(201,169,97,0.5)' };
     case 'bone': return { boxShadow: '0 0 0 1px #8A7A5C, 0 0 0 3px #D8C7A8, 0 0 0 4px #4A4030, 0 0 8px rgba(216,199,168,0.3)' };
     case 'thorns': return { boxShadow: '0 0 0 1px #0A0A0A, 0 0 0 2px #2E3B2A, 0 0 0 4px #0A0A0A, 0 0 0 5px #3C4A35, 0 0 12px rgba(60,80,55,0.55)' };
-    case 'amethyst': return { boxShadow: '0 0 0 1px rgba(0,0,0,0.8), 0 0 0 3px #7B2CBF, 0 0 0 4px rgba(0,0,0,0.5), 0 0 18px rgba(123,44,191,0.55)' };
+    case 'amethyst': return { boxShadow: '0 0 0 1px rgba(0,0,0,0.8), 0 0 0 3px #5E3B73, 0 0 0 4px rgba(0,0,0,0.5), 0 0 18px rgba(94,59,115,0.55)' };
     case 'silver': return { boxShadow: '0 0 0 1px #3A3A40, 0 0 0 3px #B8BAC2, 0 0 0 4px #3A3A40, 0 0 14px rgba(184,186,194,0.4)' };
     default: return {};
   }

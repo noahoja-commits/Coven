@@ -52,7 +52,7 @@ export function MyTicketsOverlay({ meId, onBack, onOpenEvent }) {
                     style={{ backgroundImage: 'radial-gradient(circle at left, #0A0A0A 2px, transparent 2px)', backgroundSize: '8px 8px', backgroundPosition: 'left center', backgroundRepeat: 'repeat-y' }} />
                   <div className="flex-1 min-w-0 p-3">
                     <div className="text-[#F5F1E8] text-sm truncate" style={F.display}>{(ev.name || 'a rite').toUpperCase()}</div>
-                    <div className="text-[10px] text-[#C8102E] mt-0.5" style={F.ui}>
+                    <div className="text-[10px] text-[#9E2A33] mt-0.5" style={F.ui}>
                       {[ev.event_date, ev.venue].filter(Boolean).join(' · ') || 'details soon'}
                     </div>
                     <div className="text-[10px] text-[#6B6B6B] mt-1" style={F.mono}>{money(t.amount_cents, t.currency)} · admit one</div>
@@ -62,7 +62,7 @@ export function MyTicketsOverlay({ meId, onBack, onOpenEvent }) {
                     {checkedIn ? (
                       <span className="text-[9px] uppercase tracking-[0.15em] text-[#C9A961] border border-[#C9A961]/50 px-1.5 py-0.5 rotate-[-8deg] flex items-center gap-0.5" style={F.ui}><Check size={9} /> kept</span>
                     ) : (
-                      <span className="text-[9px] uppercase tracking-[0.15em] text-[#C8102E]/70" style={F.ui}>stub</span>
+                      <span className="text-[9px] uppercase tracking-[0.15em] text-[#9E2A33]/70" style={F.ui}>stub</span>
                     )}
                     <span className="text-[8px] text-[#5B5B5B] mt-1" style={F.mono}>№{String(t.id || '').replace(/\D/g, '').slice(0, 4) || '0000'}</span>
                   </div>

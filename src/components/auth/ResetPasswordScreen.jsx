@@ -49,7 +49,7 @@ export function ResetPasswordScreen() {
           </div>
         ) : (
           <form onSubmit={submit} className="w-full max-w-xs animate-fade-in">
-            <div className="text-[10px] uppercase tracking-[0.3em] text-[#C8102E] mb-3" style={F.scriptureSC}>· set a new password ·</div>
+            <div className="text-[10px] uppercase tracking-[0.3em] text-[#9E2A33] mb-3" style={F.scriptureSC}>· set a new password ·</div>
 
             <div className="flex items-center gap-2 border border-[#2A2A2A] focus-within:border-[#5B0F1A] bg-[#0A0204] px-3 py-2.5 transition-colors">
               <Lock size={16} className="text-[#6B6B6B] shrink-0" />

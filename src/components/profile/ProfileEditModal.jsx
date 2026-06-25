@@ -161,7 +161,7 @@ export function ProfileEditModal({ profile, meId, onSave, onClose, onSetShrineTh
 
           {/* Handle */}
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.scriptureSC}>· handle ·</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#9E2A33]" style={F.scriptureSC}>· handle ·</label>
             <input type="text" value={name} onChange={e => setName(e.target.value.slice(0, 30))}
               placeholder="your_handle"
               className="field mt-1.5" />
@@ -169,7 +169,7 @@ export function ProfileEditModal({ profile, meId, onSave, onClose, onSetShrineTh
 
           {/* Pronouns */}
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.scriptureSC}>· pronouns ·</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#9E2A33]" style={F.scriptureSC}>· pronouns ·</label>
             <input type="text" value={pronouns} onChange={e => setPronouns(e.target.value.slice(0, 20))}
               placeholder="she / they"
               className="field mt-1.5"
@@ -178,7 +178,7 @@ export function ProfileEditModal({ profile, meId, onSave, onClose, onSetShrineTh
 
           {/* Bio */}
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.scriptureSC}>· bio ·</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#9E2A33]" style={F.scriptureSC}>· bio ·</label>
             <textarea value={bio} onChange={e => setBio(e.target.value.slice(0, 140))}
               placeholder="velvet & venom · brooklyn"
               rows={3}
@@ -188,7 +188,7 @@ export function ProfileEditModal({ profile, meId, onSave, onClose, onSetShrineTh
 
           {/* Birthday */}
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.scriptureSC}>· born ·</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#9E2A33]" style={F.scriptureSC}>· born ·</label>
             <input type="date" value={birthday} onChange={e => setBirthday(e.target.value)}
               className="field mt-1.5"
               style={F.mono} />
@@ -197,7 +197,7 @@ export function ProfileEditModal({ profile, meId, onSave, onClose, onSetShrineTh
 
           {/* Vibes */}
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.scriptureSC}>· vibes · ({tags.length}/6)</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#9E2A33]" style={F.scriptureSC}>· vibes · ({tags.length}/6)</label>
             <div className="flex flex-wrap gap-1.5 mt-2">
               {VIBE_OPTIONS.map(v => (
                 <button key={v} onClick={() => toggleTag(v)}

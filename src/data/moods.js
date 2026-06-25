@@ -7,8 +7,8 @@ export const MOODS = [
   { id: 'drunk', label: 'drunk', glyph: '🜄', color: '#7A1020' },        // alchemical water
   { id: 'high', label: 'high', glyph: '🜁', color: '#3E7A5A' },          // alchemical air
   { id: 'wired', label: 'wired', glyph: 'ϟ', color: '#C8A02E' },         // koppa / lightning
-  { id: 'euphoric', label: 'euphoric', glyph: '✺', color: '#B048C8' },
-  { id: 'in-love', label: 'in love', glyph: '♡', color: '#C8102E' },    // outline heart
+  { id: 'euphoric', label: 'euphoric', glyph: '✺', color: '#7E5A8E' },
+  { id: 'in-love', label: 'in love', glyph: '♡', color: '#9E2A33' },    // outline heart
   { id: 'dissociating', label: 'dissociating', glyph: '◌', color: '#5A5A8A' },
   { id: 'numb', label: 'numb', glyph: '∅', color: '#4A4A4A' },
   { id: 'feral', label: 'feral', glyph: '🜂', color: '#6E2A0A' },         // alchemical fire

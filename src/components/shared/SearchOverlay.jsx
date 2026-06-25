@@ -167,7 +167,7 @@ export function SearchOverlay({ posts = [], events = [], onClose, onOpenPost, on
 function Section({ title, children }) {
   return (
     <div>
-      <div className="px-4 py-2 bg-[#0F0F0F] text-[10px] uppercase tracking-[0.3em] text-[#C8102E] sticky top-0" style={F.scriptureSC}>
+      <div className="px-4 py-2 bg-[#0F0F0F] text-[10px] uppercase tracking-[0.3em] text-[#9E2A33] sticky top-0" style={F.scriptureSC}>
         · {title} ·
       </div>
       <div className="divide-y divide-[#1A1A1A]">{children}</div>

@@ -30,7 +30,7 @@ export function SoulsOverlay({ meId, following = {}, onClose, onOpenUser }) {
       style={{ background: 'radial-gradient(ellipse at 50% 20%, #14080C 0%, #050204 80%)' }}>
       <div className="sticky top-0 z-10 bg-[#050204]/95 backdrop-blur-md border-b border-[#A89968]/15 safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onClose} className="text-[#C8102E] hover:text-[#C9A961] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
+          <button onClick={onClose} className="text-[#9E2A33] hover:text-[#C9A961] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
           <div className="text-[#C9A961] text-base tracking-[0.3em]" style={F.display}>SOULS</div>
           <span className="w-5" />
         </div>
@@ -38,16 +38,16 @@ export function SoulsOverlay({ meId, following = {}, onClose, onOpenUser }) {
 
       <div className="relative px-4 pt-4 pb-12">
         <div className="text-center mb-4">
-          <div className="text-[#C8102E]/60 text-[10px] uppercase tracking-[0.4em]" style={F.scriptureSC}>· {allUsers.length} known · counted in the coven ·</div>
+          <div className="text-[#9E2A33]/60 text-[10px] uppercase tracking-[0.4em]" style={F.scriptureSC}>· {allUsers.length} known · counted in the coven ·</div>
         </div>
 
         <div className="flex items-center gap-2 px-3 py-2 mb-3 bg-[#0F0F0F] border border-[#A89968]/20">
-          <Search size={14} className="text-[#C8102E]/60" />
+          <Search size={14} className="text-[#9E2A33]/60" />
           <input value={query} onChange={e => setQuery(e.target.value)}
             placeholder="search souls"
-            className="flex-1 bg-transparent text-[#F5F1E8] text-sm outline-none placeholder:text-[#C8102E]/40"
+            className="flex-1 bg-transparent text-[#F5F1E8] text-sm outline-none placeholder:text-[#9E2A33]/40"
             style={F.ui} />
-          {query && <button onClick={() => setQuery('')} className="text-[#C8102E]/60 hover:text-[#C9A961]"><X size={12} /></button>}
+          {query && <button onClick={() => setQuery('')} className="text-[#9E2A33]/60 hover:text-[#C9A961]"><X size={12} /></button>}
         </div>
 
         <div className="flex gap-1.5 mb-3">
@@ -59,7 +59,7 @@ export function SoulsOverlay({ meId, following = {}, onClose, onOpenUser }) {
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-[#C8102E]/40 text-sm italic" style={F.scripture}>· gathering souls ·</div>
+          <div className="text-center py-12 text-[#9E2A33]/40 text-sm italic" style={F.scripture}>· gathering souls ·</div>
         ) : filtered.length === 0 ? (
           <EmptyState glyph="✦" text={allUsers.length === 0 ? '· you are the first soul here ·' : '· no souls match ·'} />
         ) : (

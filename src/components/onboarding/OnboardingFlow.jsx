@@ -117,15 +117,15 @@ export function OnboardingFlow({ onComplete, onSignOut }) {
       <div className="relative z-10 flex-1 overflow-y-auto px-6 pt-8 pb-8">
         {step === 0 && (
           <div className="flex flex-col items-center text-center max-w-xs mx-auto pt-12 animate-fade-in">
-            <div className="text-[#C8102E] text-[10px] uppercase tracking-[0.5em] mb-4" style={F.scriptureSC}>· welcome to ·</div>
+            <div className="text-[#9E2A33] text-[10px] uppercase tracking-[0.5em] mb-4" style={F.scriptureSC}>· welcome to ·</div>
             <h1 className="text-[#C9A961] text-7xl mb-6" style={F.brand}>Coven</h1>
             <p className="text-[#F5F1E8] text-2xl leading-snug mb-3" style={F.scripture}>You have found the Coven.</p>
-            <p className="text-[#C8102E]/80 text-sm italic" style={F.scripture}>"a quiet place for the dark-clad, the dramatic, the devout, and the wandering. proceed when ready."</p>
+            <p className="text-[#9E2A33]/80 text-sm italic" style={F.scripture}>"a quiet place for the dark-clad, the dramatic, the devout, and the wandering. proceed when ready."</p>
             <div className="mt-8 text-[#6B6B6B] text-[10px] uppercase tracking-[0.3em]" style={F.ui}>goth & alt only · 18+</div>
             <button onClick={() => setAdult(a => !a)}
               className="mt-6 flex items-center gap-3 text-left max-w-[16rem] group">
               <span className={`shrink-0 w-5 h-5 border flex items-center justify-center transition-all ${adult ? 'border-[#8B0000] bg-[#5B0F1A]/30 text-[#C9A961]' : 'border-[#2A2A2A] text-transparent'}`}>✓</span>
-              <span className="text-[#C8102E]/80 text-xs leading-snug" style={F.serif}>I confirm I am 18 years of age or older.</span>
+              <span className="text-[#9E2A33]/80 text-xs leading-snug" style={F.serif}>I confirm I am 18 years of age or older.</span>
             </button>
           </div>
         )}
@@ -133,12 +133,12 @@ export function OnboardingFlow({ onComplete, onSignOut }) {
         {step === 1 && (
           <div className="max-w-xs mx-auto pt-8 animate-fade-in">
             <div className="text-center mb-8">
-              <div className="text-[#C8102E] text-[10px] uppercase tracking-[0.4em] mb-2" style={F.scriptureSC}>· chapter the first ·</div>
+              <div className="text-[#9E2A33] text-[10px] uppercase tracking-[0.4em] mb-2" style={F.scriptureSC}>· chapter the first ·</div>
               <h2 className="text-[#F5F1E8] text-3xl" style={F.scripture}>What shall we call you?</h2>
             </div>
             <div className="space-y-5">
               <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-1.5 block" style={F.scriptureSC}>· handle ·</label>
+                <label className="text-[10px] uppercase tracking-[0.2em] text-[#9E2A33] mb-1.5 block" style={F.scriptureSC}>· handle ·</label>
                 <div className="flex items-center bg-[#0F0F0F] border border-[#2A2A2A] focus-within:border-[#5B0F1A]">
                   <span className="pl-3 text-[#6B6B6B]" style={F.mono}>@</span>
                   <input value={handle} onChange={e => setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g, '').slice(0, 20))}
@@ -151,7 +151,7 @@ export function OnboardingFlow({ onComplete, onSignOut }) {
                 {handleStatus === 'taken' && <p className="text-[10px] text-[#8B0000] mt-1.5" style={F.ui}>@{handle} is already taken</p>}
               </div>
               <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-2 block" style={F.scriptureSC}>· your sigil ·</label>
+                <label className="text-[10px] uppercase tracking-[0.2em] text-[#9E2A33] mb-2 block" style={F.scriptureSC}>· your sigil ·</label>
                 <div className="grid grid-cols-5 gap-2">
                   {GLYPHS.map(g => (
                     <button key={g} onClick={() => setGlyph(g)}
@@ -168,9 +168,9 @@ export function OnboardingFlow({ onComplete, onSignOut }) {
         {step === 2 && (
           <div className="max-w-sm mx-auto pt-8 animate-fade-in">
             <div className="text-center mb-8">
-              <div className="text-[#C8102E] text-[10px] uppercase tracking-[0.4em] mb-2" style={F.scriptureSC}>· chapter the second ·</div>
+              <div className="text-[#9E2A33] text-[10px] uppercase tracking-[0.4em] mb-2" style={F.scriptureSC}>· chapter the second ·</div>
               <h2 className="text-[#F5F1E8] text-3xl mb-2" style={F.scripture}>Find your scenes.</h2>
-              <p className="text-[#C8102E]/70 text-sm italic" style={F.scripture}>"pick all that pull at you. you can change later."</p>
+              <p className="text-[#9E2A33]/70 text-sm italic" style={F.scripture}>"pick all that pull at you. you can change later."</p>
             </div>
             <div className="space-y-2">
               {SCENES.map(s => {
@@ -192,20 +192,20 @@ export function OnboardingFlow({ onComplete, onSignOut }) {
         {step === 3 && (
           <div className="max-w-xs mx-auto pt-8 animate-fade-in">
             <div className="text-center mb-8">
-              <div className="text-[#C8102E] text-[10px] uppercase tracking-[0.4em] mb-2" style={F.scriptureSC}>· chapter the third ·</div>
+              <div className="text-[#9E2A33] text-[10px] uppercase tracking-[0.4em] mb-2" style={F.scriptureSC}>· chapter the third ·</div>
               <h2 className="text-[#F5F1E8] text-3xl mb-2" style={F.scripture}>Where & when.</h2>
-              <p className="text-[#C8102E]/70 text-sm italic" style={F.scripture}>"so we know when the moon is full above you."</p>
+              <p className="text-[#9E2A33]/70 text-sm italic" style={F.scripture}>"so we know when the moon is full above you."</p>
             </div>
             <div className="space-y-5">
               <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-1.5 block" style={F.scriptureSC}>· your city ·</label>
+                <label className="text-[10px] uppercase tracking-[0.2em] text-[#9E2A33] mb-1.5 block" style={F.scriptureSC}>· your city ·</label>
                 <input value={city} onChange={e => setCity(e.target.value.slice(0, 40))}
                   placeholder="brooklyn, NY"
                   className="w-full bg-[#0F0F0F] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none p-3 text-[#F5F1E8]"
                   style={F.serif} />
               </div>
               <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] mb-1.5 block" style={F.scriptureSC}>· your birthday ·</label>
+                <label className="text-[10px] uppercase tracking-[0.2em] text-[#9E2A33] mb-1.5 block" style={F.scriptureSC}>· your birthday ·</label>
                 <input type="date" value={birthday} onChange={e => setBirthday(e.target.value)}
                   className="w-full bg-[#0F0F0F] border border-[#2A2A2A] focus:border-[#5B0F1A] outline-none p-3 text-[#F5F1E8]"
                   style={F.serif} />
@@ -218,9 +218,9 @@ export function OnboardingFlow({ onComplete, onSignOut }) {
         {step === 4 && (
           <div className="max-w-sm mx-auto pt-8 animate-fade-in">
             <div className="text-center mb-8">
-              <div className="text-[#C8102E] text-[10px] uppercase tracking-[0.4em] mb-2" style={F.scriptureSC}>· chapter the fourth ·</div>
+              <div className="text-[#9E2A33] text-[10px] uppercase tracking-[0.4em] mb-2" style={F.scriptureSC}>· chapter the fourth ·</div>
               <h2 className="text-[#F5F1E8] text-3xl mb-2" style={F.scripture}>Your vibe.</h2>
-              <p className="text-[#C8102E]/70 text-sm italic" style={F.scripture}>"optional. tap any that resonate."</p>
+              <p className="text-[#9E2A33]/70 text-sm italic" style={F.scripture}>"optional. tap any that resonate."</p>
             </div>
             <div className="flex flex-wrap gap-2 justify-center">
               {VIBES.map(v => {
@@ -238,9 +238,9 @@ export function OnboardingFlow({ onComplete, onSignOut }) {
         {step === 5 && (
           <div className="max-w-sm mx-auto pt-8 animate-fade-in">
             <div className="text-center mb-8">
-              <div className="text-[#C8102E] text-[10px] uppercase tracking-[0.4em] mb-2" style={F.scriptureSC}>· chapter the fifth ·</div>
+              <div className="text-[#9E2A33] text-[10px] uppercase tracking-[0.4em] mb-2" style={F.scriptureSC}>· chapter the fifth ·</div>
               <h2 className="text-[#F5F1E8] text-3xl mb-2" style={F.scripture}>Summon your first souls.</h2>
-              <p className="text-[#C8102E]/70 text-sm italic" style={F.scripture}>"optional — follow a few to fill your feed."</p>
+              <p className="text-[#9E2A33]/70 text-sm italic" style={F.scripture}>"optional — follow a few to fill your feed."</p>
             </div>
             {soulsLoading ? (
               <div className="text-center py-12 text-[#6B6B6B] text-sm italic" style={F.scripture}>· gathering souls ·</div>
@@ -275,7 +275,7 @@ export function OnboardingFlow({ onComplete, onSignOut }) {
       {onSignOut && (
         <div className="relative z-20 text-center pb-1">
           <button onClick={() => onSignOut()}
-            className={`text-[10px] uppercase tracking-[0.2em] transition-colors ${error ? 'text-[#8B0000] hover:text-[#C9A961]' : 'text-[#5B5B5B] hover:text-[#C8102E]'}`}
+            className={`text-[10px] uppercase tracking-[0.2em] transition-colors ${error ? 'text-[#8B0000] hover:text-[#C9A961]' : 'text-[#5B5B5B] hover:text-[#9E2A33]'}`}
             style={F.ui}>
             {error ? 'still stuck? · sign out & start over' : 'not you? · leave'}
           </button>
@@ -285,7 +285,7 @@ export function OnboardingFlow({ onComplete, onSignOut }) {
       {/* Footer nav — a real flex child (NOT absolute) so the scroll area can never overlay/block the buttons */}
       <div className="relative z-20 bg-[#0A0A0A]/95 backdrop-blur-md border-t border-[#1A1A1A] p-4 safe-pb flex items-center justify-between">
         {step > 0 ? (
-          <button onClick={() => setStep(step - 1)} className="text-[#C8102E] flex items-center gap-1 text-sm" style={F.ui}>
+          <button onClick={() => setStep(step - 1)} className="text-[#9E2A33] flex items-center gap-1 text-sm" style={F.ui}>
             <ChevronLeft size={16} /> back
           </button>
         ) : <span />}

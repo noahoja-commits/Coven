@@ -41,7 +41,7 @@ export function OddityCompose({ meId, onClose, onCreate, kind = 'sale' }) {
     <div className="absolute inset-0 z-50 bg-[#0A0608] animate-fade-in flex flex-col">
       <div className="bg-black/60 backdrop-blur-md border-b border-[#5B0F1A]/40 safe-pt">
         <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={() => step > 1 ? setStep(step - 1) : onClose()} className="tap text-[#C8102E] hover:text-[#C9A961] p-2 -m-1 transition-colors">
+          <button onClick={() => step > 1 ? setStep(step - 1) : onClose()} className="tap text-[#9E2A33] hover:text-[#C9A961] p-2 -m-1 transition-colors">
             <X size={20} />
           </button>
           <div className="text-[#C9A961] text-sm tracking-[0.3em]" style={F.scriptureSC}>{copy.head} — {step}/3</div>
@@ -57,7 +57,7 @@ export function OddityCompose({ meId, onClose, onCreate, kind = 'sale' }) {
               <label className="text-[10px] uppercase tracking-[0.2em] text-[#C9A961] mb-2 block" style={F.scriptureSC}>{copy.img}</label>
               <input ref={fileRef} type="file" accept="image/*" onChange={onPickImage} className="hidden" />
               <button onClick={() => fileRef.current?.click()}
-                className="tap w-full aspect-[4/3] border border-dashed border-[#3F3F3F] hover:border-[#C9A961]/60 flex flex-col items-center justify-center gap-2 text-[#C8102E] overflow-hidden relative">
+                className="tap w-full aspect-[4/3] border border-dashed border-[#3F3F3F] hover:border-[#C9A961]/60 flex flex-col items-center justify-center gap-2 text-[#9E2A33] overflow-hidden relative">
                 {uploading ? <Loader2 size={28} className="animate-spin text-[#C9A961]" />
                   : data.image_url ? <img src={data.image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
                   : <><Camera size={28} /><span className="text-xs uppercase tracking-wider" style={F.ui}>tap to add</span></>}

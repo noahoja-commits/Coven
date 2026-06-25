@@ -4,9 +4,9 @@ export const FONT_HREF =
   'https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=Cinzel:wght@400;500;600;700&family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Manrope:wght@300;400;500;600;700&family=Oswald:wght@400;500;600;700&family=Grenze+Gotisch:wght@400;500;600;700&family=Pirata+One&family=New+Rocker&family=Metal+Mania&family=Shippori+Mincho:wght@400;600&family=VT323&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap';
 
 export const F = {
-  brand: { fontFamily: '"UnifrakturCook", serif', fontWeight: 700, textShadow: '0 0 18px rgba(200,16,46,0.45), 0 1px 2px rgba(0,0,0,0.5)' },
-  display: { fontFamily: '"Cinzel", serif', letterSpacing: '0.1em', fontWeight: 600, textShadow: '0 0 10px rgba(200,16,46,0.3)' },
-  displayOrnate: { fontFamily: '"Cinzel Decorative", "Cinzel", serif', letterSpacing: '0.04em', fontWeight: 700, textShadow: '0 0 12px rgba(200,16,46,0.38)' },
+  brand: { fontFamily: '"UnifrakturCook", serif', fontWeight: 700, textShadow: '0 1px 2px rgba(0,0,0,0.6)' },
+  display: { fontFamily: '"Cinzel", serif', letterSpacing: '0.1em', fontWeight: 600 },
+  displayOrnate: { fontFamily: '"Cinzel Decorative", "Cinzel", serif', letterSpacing: '0.04em', fontWeight: 700 },
   kanji: { fontFamily: '"Shippori Mincho", serif' },
   serif: { fontFamily: '"Cormorant Garamond", serif' },
   ui: { fontFamily: '"Manrope", sans-serif' },
@@ -27,9 +27,9 @@ export const C = {
   textFaint: '#6B6B6B',
   oxblood: '#8B0000',
   oxbloodDark: '#5B0F1A',
-  blood: '#C8102E',                  // bright crimson — HEAT/desire (vs structural oxblood)
-  bloodGlow: 'rgba(200,16,46,0.85)',
-  violet: '#7B2CBF',
+  blood: '#9E2A33',                  // muted oxblood-crimson — HEAT/desire (vs structural oxblood)
+  bloodGlow: 'rgba(158,42,51,0.55)',
+  violet: '#5E3B73',
   gold: '#C9A961',
   goldDark: '#A89968',
   parchment: '#EDE0C2',

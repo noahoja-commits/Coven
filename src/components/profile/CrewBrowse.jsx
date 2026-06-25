@@ -39,7 +39,7 @@ export function CrewBrowse({ crews = [], busy = {}, onJoin, onCreate, onOpen, on
           <div className="flex flex-wrap gap-1.5">
             {GLYPHS.map((g, i) => (
               <button key={i} onClick={() => setGlyph(g)}
-                className={`tap w-9 h-9 border flex items-center justify-center text-lg ${glyph === g ? 'border-[#C9A961]/70 text-[#F5F1E8]' : 'border-[#2A2A2A] text-[#C8102E] hover:border-[#5B0F1A]'}`}
+                className={`tap w-9 h-9 border flex items-center justify-center text-lg ${glyph === g ? 'border-[#C9A961]/70 text-[#F5F1E8]' : 'border-[#2A2A2A] text-[#9E2A33] hover:border-[#5B0F1A]'}`}
                 style={{ boxShadow: glyph === g ? '0 0 12px rgba(201,169,97,0.18)' : 'none' }}>{g}</button>
             ))}
           </div>
@@ -64,7 +64,7 @@ export function CrewBrowse({ crews = [], busy = {}, onJoin, onCreate, onOpen, on
           return (
             <div key={c.id} className="px-4 py-4 flex items-start gap-3">
               <button onClick={() => isMember && onOpen && onOpen(c.id)}
-                className="tap w-12 h-12 shrink-0 border border-[#2A2A2A] flex items-center justify-center text-[#C8102E] text-xl">
+                className="tap w-12 h-12 shrink-0 border border-[#2A2A2A] flex items-center justify-center text-[#9E2A33] text-xl">
                 {c.glyph}
               </button>
               <div className="flex-1 min-w-0">

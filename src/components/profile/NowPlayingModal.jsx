@@ -40,13 +40,13 @@ export function NowPlayingModal({ current, onSave, onShare, onClose }) {
             type in the track you're listening to — Coven doesn't read your music apps, this is yours to set and share.
           </p>
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.scriptureSC}>· artist ·</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#9E2A33]" style={F.scriptureSC}>· artist ·</label>
             <input value={artist} onChange={e => setArtist(e.target.value.slice(0, 60))}
               placeholder="Drab Majesty"
               className="field mt-1.5" />
           </div>
           <div>
-            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E]" style={F.scriptureSC}>· track ·</label>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#9E2A33]" style={F.scriptureSC}>· track ·</label>
             <input value={track} onChange={e => setTrack(e.target.value.slice(0, 80))}
               placeholder="the song on repeat"
               className="field mt-1.5 italic" />
@@ -54,7 +54,7 @@ export function NowPlayingModal({ current, onSave, onShare, onClose }) {
           <button onClick={() => setLoop(l => !l)}
             className={`tap w-full flex items-center justify-between p-2.5 border ${loop ? 'border-[#C9A961]/70' : 'border-[#2A2A2A] hover:border-[#5B0F1A]/60'}`}
             style={{ boxShadow: loop ? '0 0 12px rgba(201,169,97,0.18)' : 'none' }}>
-            <span className="text-[10px] uppercase tracking-[0.2em] text-[#C8102E] flex items-center gap-1.5" style={F.ui}>↻ on repeat</span>
+            <span className="text-[10px] uppercase tracking-[0.2em] text-[#9E2A33] flex items-center gap-1.5" style={F.ui}>↻ on repeat</span>
             <span className={`text-xs ${loop ? 'text-[#C9A961]' : 'text-[#6B6B6B]'}`} style={F.ui}>{loop ? 'looping' : 'off'}</span>
           </button>
         </div>

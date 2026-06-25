@@ -24,7 +24,7 @@ export function DailyAltar({
   const tier = streak >= 30 ? 4 : streak >= 14 ? 3 : streak >= 7 ? 2 : streak >= 3 ? 1 : 0;
   const flameSize = [14, 18, 22, 26, 30][tier];
   const flameGlow = [0.25, 0.4, 0.55, 0.7, 0.9][tier];
-  const flameColor = tier >= 3 ? '#C9A961' : '#C8102E';
+  const flameColor = tier >= 3 ? '#C9A961' : '#9E2A33';
   const atRisk = !ritualDoneToday && streak > 0;
   const milestone = ritualDoneToday && (streak === 7 || streak === 30);
   const keepRite = () => {
@@ -50,18 +50,18 @@ export function DailyAltar({
         <button onClick={onOpenEphemeris} className="flex items-center gap-2 group" title="the heavens">
           <span className="text-[#C9A961] text-2xl leading-none group-hover:text-[#F5F1E8] transition-colors">{moon.glyph}</span>
           <span className="text-left">
-            <span className="block text-[10px] uppercase tracking-[0.25em] text-[#C8102E]" style={F.scriptureSC}>{moon.name}</span>
+            <span className="block text-[10px] uppercase tracking-[0.25em] text-[#9E2A33]" style={F.scriptureSC}>{moon.name}</span>
             <span className="block text-[10px] text-[#6B6B6B]" style={F.mono}>{Math.round(moon.illum * 100)}% lit</span>
           </span>
         </button>
         <div className="ml-auto flex items-center gap-2">
           {/* Streak ember — sized + glowing by tier, flares on keep, dims when at risk */}
           <span className="relative inline-flex items-center"
-            style={{ filter: `drop-shadow(0 0 ${6 + tier * 3}px rgba(200,16,46,${flameGlow}))`, opacity: atRisk ? 0.5 : 1 }}>
+            style={{ filter: `drop-shadow(0 0 ${6 + tier * 3}px rgba(158,42,51,${flameGlow}))`, opacity: atRisk ? 0.5 : 1 }}>
             <NavSigil name="events" size={flameSize} className="animate-flicker" style={{ color: flameColor }} />
             {flare > 0 && (
               <span key={flare} aria-hidden className="absolute inset-0 animate-like-burst rounded-full"
-                style={{ background: 'radial-gradient(circle, rgba(200,16,46,0.6), transparent 70%)' }} />
+                style={{ background: 'radial-gradient(circle, rgba(158,42,51,0.6), transparent 70%)' }} />
             )}
           </span>
           <span className="text-[10px] uppercase tracking-wider tabular-nums" style={{ ...F.ui, color: streak > 0 ? (tier >= 3 ? '#C9A961' : '#A8A29E') : '#6B6B6B' }}>
@@ -88,15 +88,15 @@ export function DailyAltar({
         {focus && (
           <div className="flex items-center gap-2 text-[11px]" style={F.serif}>
             <span style={{ color: focus.tint }} className="text-sm">{focus.glyph}</span>
-            <span className="text-[#C8102E] uppercase tracking-wider text-[10px]" style={F.ui}>focus</span>
+            <span className="text-[#9E2A33] uppercase tracking-wider text-[10px]" style={F.ui}>focus</span>
             <span className="text-[#A8A29E]">{focus.intention} — <span className="italic text-[#6B6B6B]">{focus.meaning}</span></span>
           </div>
         )}
         <button onClick={onOpenReflections}
           className="w-full text-left flex items-start gap-2 p-2.5 border border-[#2A2A2A] hover:border-[#A89968]/40 bg-[#0A0204]/40 transition-colors group">
-          <span className="text-[#C8102E] text-sm mt-0.5">✎</span>
+          <span className="text-[#9E2A33] text-sm mt-0.5">✎</span>
           <span className="flex-1 min-w-0">
-            <span className="block text-[9px] uppercase tracking-[0.3em] text-[#C8102E]/70 mb-0.5" style={F.scriptureSC}>· reflect ·</span>
+            <span className="block text-[9px] uppercase tracking-[0.3em] text-[#9E2A33]/70 mb-0.5" style={F.scriptureSC}>· reflect ·</span>
             <span className="block text-[#F5F1E8] text-sm italic leading-snug" style={F.scripture}>{prompt}</span>
           </span>
           <span className="text-[9px] uppercase tracking-wider text-[#6B6B6B] group-hover:text-[#C9A961] self-center" style={F.ui}>write</span>

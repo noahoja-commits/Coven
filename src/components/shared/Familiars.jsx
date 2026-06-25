@@ -69,7 +69,7 @@ export function DemonFamiliar({ size = 32, className = '', style }) {
         </linearGradient>
         <radialGradient id="demonEye" cx="0.5" cy="0.5" r="0.5">
           <stop offset="0" stopColor="#ff6a52" />
-          <stop offset="0.5" stopColor="#C8102E" />
+          <stop offset="0.5" stopColor="#9E2A33" />
           <stop offset="1" stopColor="#5b0f1a" />
         </radialGradient>
       </defs>
@@ -88,7 +88,7 @@ export function DemonFamiliar({ size = 32, className = '', style }) {
       {/* heavy brow casting the eyes into a glare */}
       <path d="M13.4 13.6 L18.4 15.4 M26.6 13.6 L21.6 15.4" stroke="#4a121c" strokeWidth="0.9" strokeLinecap="round" />
       {/* glowing ember eyes */}
-      <g style={{ filter: 'drop-shadow(0 0 3px rgba(200,16,46,0.95))' }}>
+      <g style={{ filter: 'drop-shadow(0 0 3px rgba(158,42,51,0.95))' }}>
         <path d="M13.8 16 Q16.4 13.9 18.6 16.2 Q16.2 17.7 13.8 16 Z" fill="url(#demonEye)" />
         <path d="M26.2 16 Q23.6 13.9 21.4 16.2 Q23.8 17.7 26.2 16 Z" fill="url(#demonEye)" />
         <ellipse cx="16.1" cy="15.9" rx="0.5" ry="1.6" fill="#1a0205" />

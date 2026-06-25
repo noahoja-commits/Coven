@@ -33,7 +33,7 @@ function circlePolygon(lng, lat, radiusM, steps = 64) {
 
 function markerEl({ glyph, avatarUrl, mine }) {
   const el = document.createElement('div');
-  const ring = mine ? '#7B2CBF' : '#8B0000';
+  const ring = mine ? '#5E3B73' : '#8B0000';
   el.style.cssText = `width:34px;height:34px;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-size:16px;background:#0A0A0A;border:2px solid ${ring};box-shadow:0 0 10px ${ring}99;cursor:pointer;overflow:hidden;`;
   if (avatarUrl) {
     const img = document.createElement('img');
@@ -124,7 +124,7 @@ export default function RealMap({ nearby = [], tonightStatus, ghost = false, onO
       } else {
         map.addSource('me-circle', { type: 'geojson', data });
         map.addLayer({ id: 'me-circle-fill', type: 'fill', source: 'me-circle', paint: { 'fill-color': '#8B0000', 'fill-opacity': 0.12 } });
-        map.addLayer({ id: 'me-circle-line', type: 'line', source: 'me-circle', paint: { 'line-color': '#C8102E', 'line-width': 1.5, 'line-opacity': 0.6 } });
+        map.addLayer({ id: 'me-circle-line', type: 'line', source: 'me-circle', paint: { 'line-color': '#9E2A33', 'line-width': 1.5, 'line-opacity': 0.6 } });
       }
     } else if (map.getLayer && map.getLayer('me-circle-fill')) {
       try { map.removeLayer('me-circle-fill'); map.removeLayer('me-circle-line'); map.removeSource('me-circle'); } catch { /* noop */ }

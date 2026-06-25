@@ -19,7 +19,7 @@ function Burst({ x, y, kind }) {
   if (kind === 'sigil') {
     return (
       <span className="absolute shock-spark-pop"
-        style={{ left: x, top: y, color: '#C8102E', fontSize: 22, textShadow: '0 0 10px rgba(200,16,46,0.9)' }}>⛧</span>
+        style={{ left: x, top: y, color: '#9E2A33', fontSize: 22, textShadow: '0 0 10px rgba(158,42,51,0.9)' }}>⛧</span>
     );
   }
   const c = CFG[kind];

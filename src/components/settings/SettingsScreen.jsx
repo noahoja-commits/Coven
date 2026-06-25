@@ -278,7 +278,7 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
         <div className="px-4 mt-4 space-y-2">
           {onRerunOnboarding && (
             <button onClick={onRerunOnboarding}
-              className="tap w-full py-3 text-[#C8102E] text-xs uppercase tracking-[0.25em] border border-[#2A2A2A] hover:border-[#A89968]" style={F.ui}>
+              className="tap w-full py-3 text-[#9E2A33] text-xs uppercase tracking-[0.25em] border border-[#2A2A2A] hover:border-[#A89968]" style={F.ui}>
               re-do onboarding
             </button>
           )}

@@ -3,7 +3,7 @@
 export const CRYSTAL_OPTIONS = [
   { id: 'obsidian', name: 'obsidian', glyph: '◆', color: '#1A1A1A', tint: '#2A2A2A', intention: 'protection', meaning: 'a shield against harm and ill intent' },
   { id: 'onyx', name: 'onyx', glyph: '◆', color: '#0A0A0A', tint: '#5B0F1A', intention: 'willpower', meaning: 'grounding and steady resolve' },
-  { id: 'amethyst', name: 'amethyst', glyph: '◇', color: '#2D0F3F', tint: '#7B2CBF', intention: 'clarity', meaning: 'intuition and a quiet mind' },
+  { id: 'amethyst', name: 'amethyst', glyph: '◇', color: '#2D0F3F', tint: '#5E3B73', intention: 'clarity', meaning: 'intuition and a quiet mind' },
   { id: 'jet', name: 'jet', glyph: '◆', color: '#0A0204', tint: '#1F1F1F', intention: 'mourning', meaning: 'carrying grief without drowning in it' },
   { id: 'garnet', name: 'garnet', glyph: '◆', color: '#3B0A12', tint: '#8B0000', intention: 'passion', meaning: 'vitality and the will to want' },
   { id: 'moonstone', name: 'moonstone', glyph: '◯', color: '#1A1A2A', tint: '#8A8A92', intention: 'new beginnings', meaning: 'change, cycles, what comes next' },

@@ -48,10 +48,10 @@ export function ShockQuickSwitch({ onNext, onShuffle, onPicker }) {
       style={{
         background: 'radial-gradient(circle at 50% 38%, rgba(46,0,0,0.94), rgba(8,0,0,0.94))',
         border: '1px solid #5B0F1A',
-        color: '#C8102E',
+        color: '#9E2A33',
         fontSize: '20px',
         lineHeight: 1,
-        textShadow: '0 0 8px rgba(200,16,46,0.9)',
+        textShadow: '0 0 8px rgba(158,42,51,0.9)',
       }}
     >⛧</button>
   );

@@ -59,23 +59,23 @@ export function EventDetail({ event, isGoing, onToggleRsvp, onBack, onOpenUser, 
       <div className="px-4 py-4 space-y-2 border-b border-[#1A1A1A]">
         {(event.venue || event.neighborhood) && (
           <div className="flex items-center gap-2 text-sm">
-            <MapPin size={14} className="text-[#C8102E]" />
+            <MapPin size={14} className="text-[#9E2A33]" />
             {event.venue && <span className="text-[#F5F1E8]" style={F.serif}>{event.venue}</span>}
             {event.neighborhood && <span className="text-[#6B6B6B]" style={F.ui}>· {event.neighborhood}</span>}
           </div>
         )}
         {event.time && (
           <div className="flex items-center gap-2 text-sm">
-            <Calendar size={14} className="text-[#C8102E]" />
+            <Calendar size={14} className="text-[#9E2A33]" />
             <span className="text-[#A8A29E]" style={F.mono}>{event.time}</span>
           </div>
         )}
         <div className="flex items-center gap-2 text-sm">
-          <Users size={14} className="text-[#C8102E]" />
+          <Users size={14} className="text-[#9E2A33]" />
           <span className="text-[#A8A29E]" style={F.mono}>{goingCount} going</span>
         </div>
         <button onClick={() => onOpenUser && onOpenUser(event.host)}
-          className="tap text-[10px] uppercase tracking-wider text-[#C8102E] hover:text-[#C9A961]" style={F.ui}>
+          className="tap text-[10px] uppercase tracking-wider text-[#9E2A33] hover:text-[#C9A961]" style={F.ui}>
           · hosted by {event.host} ·
         </button>
       </div>
@@ -170,7 +170,7 @@ export function EventDetail({ event, isGoing, onToggleRsvp, onBack, onOpenUser, 
               className={`tap w-full py-3 text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-2 transition-colors ${
                 waitlist.mine
                   ? 'bg-[#5B0F1A] text-[#F5F1E8] hover:bg-[#3a0a12]'
-                  : 'bg-[#1A1A1A] border border-[#5B0F1A] text-[#C8102E] hover:bg-[#5B0F1A]/20'
+                  : 'bg-[#1A1A1A] border border-[#5B0F1A] text-[#9E2A33] hover:bg-[#5B0F1A]/20'
               }`} style={F.ui}>
               {waitlist.mine
                 ? <><Check size={14} /> on the waitlist{waitlist.count ? ` · ${waitlist.count}` : ''}</>

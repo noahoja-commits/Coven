@@ -106,7 +106,7 @@ export function CreateEventModal({ onCreate, onClose }) {
               ))}
             </div>
             {ageRestriction !== 'all' && (
-              <p className="text-[10px] text-[#C8102E]/60 italic mt-1.5" style={F.serif}>guests confirm their age at the door.</p>
+              <p className="text-[10px] text-[#9E2A33]/60 italic mt-1.5" style={F.serif}>guests confirm their age at the door.</p>
             )}
           </div>
 
