@@ -73,8 +73,20 @@ export function Candle(p) {
   );
 }
 
+// heart — a plain line heart (used for comment reactions)
+export function Heart(p) {
+  return (
+    <svg {...C} {...p}>
+      <path d="M12 20s-6.5-4.2-6.5-9A3.5 3.5 0 0 1 12 9a3.5 3.5 0 0 1 6.5 2c0 4.8-6.5 9-6.5 9z" />
+    </svg>
+  );
+}
+
 // keyed by the reaction field names used on posts (post.reactions.bat / fire / skull / smoke)
 export const REACTION_GLYPHS = { bat: Bat, fire: Flame, skull: Skull, smoke: Smoke };
+
+// comment reactions — a small two-kind set (heart · skull), rendered as monochrome glyphs
+export const COMMENT_REACTIONS = [{ kind: 'heart', Glyph: Heart }, { kind: 'skull', Glyph: Skull }];
 
 // story reactions are stored by their original emoji "kind" — map each to a sigil so we
 // can render them monochrome without changing the data model.

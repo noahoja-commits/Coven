@@ -4,7 +4,7 @@ import { useAuth } from './auth/AuthProvider';
 import { isSupabaseConfigured } from './lib/supabase';
 import { SignInScreen } from './components/auth/SignInScreen';
 import { ResetPasswordScreen } from './components/auth/ResetPasswordScreen';
-import { fetchFeed, createPost, deletePost as dbDeletePost, togglePostReaction, fetchComments, createComment, castPollVote, clearPollVote, fetchEventRecaps } from './lib/db/posts';
+import { fetchFeed, createPost, deletePost as dbDeletePost, togglePostReaction, fetchComments, createComment, toggleCommentReaction, castPollVote, clearPollVote, fetchEventRecaps } from './lib/db/posts';
 import { insertProfile, updateProfile, getProfileStats, getProfileByHandle, fetchProfiles } from './lib/db/profiles';
 import { fetchFollowing, fetchFollowers, followUser, unfollowUser } from './lib/db/social';
 import { FollowListOverlay } from './components/profile/FollowListOverlay';
@@ -970,6 +970,9 @@ export default function App() {
   };
 
   const reactToComment = (postId, commentId, kind) => {
+    // Read the prior state up front so persistence sees the correct wasMine, then optimistic-update.
+    const comment = posts.find(p => p.id === postId)?.comments?.find(c => c.id === commentId);
+    const wasMine = !!comment?.myReactions?.[kind];
     setPosts(prev => prev.map(p => {
       if (p.id !== postId) return p;
       return {
@@ -978,7 +981,6 @@ export default function App() {
           if (c.id !== commentId) return c;
           const myReactions = c.myReactions || {};
           const reactions = c.reactions || { heart: 0, skull: 0 };
-          const wasMine = !!myReactions[kind];
           return {
             ...c,
             myReactions: { ...myReactions, [kind]: !wasMine },
@@ -987,6 +989,7 @@ export default function App() {
         }),
       };
     }));
+    if (meId) toggleCommentReaction(commentId, kind, meId, wasMine).catch(() => {});
   };
 
   const sendMessage = (conversationId, body) => {

@@ -36,7 +36,14 @@ export function hydratePost(row, myReactionSet, myId) {
 }
 
 // Map a post_comments() RPC row -> the comment shape CommentsOverlay renders.
-export function hydrateComment(row, myId) {
+export function hydrateComment(row, myId, myReactionSet) {
+  const reactions = { heart: 0, skull: 0, ...(row.reactions || {}) };
+  const myReactions = {};
+  if (myReactionSet) {
+    for (const kind of Object.keys(reactions)) {
+      if (myReactionSet.has(`${row.id}:${kind}`)) myReactions[kind] = true;
+    }
+  }
   return {
     id: row.id,
     user: row.handle,
@@ -46,7 +53,7 @@ export function hydrateComment(row, myId) {
     time: relativeTime(row.created_at),
     mine: !!myId && row.author_id === myId,
     parentId: row.parent_id || null,
-    reactions: { heart: 0, skull: 0 }, // comment reactions ephemeral in MVP
-    myReactions: {},
+    reactions,
+    myReactions,
   };
 }

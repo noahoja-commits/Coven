@@ -183,7 +183,30 @@ export async function togglePostReaction(postId, kind, userId, wasMine) {
 export async function fetchComments(postId, myId) {
   const { data, error } = await supabase.rpc('post_comments', { p_post_id: postId });
   if (error) throw error;
-  return (data || []).map(r => hydrateComment(r, myId));
+  // The caller's own comment reactions (mirrors how fetchFeed loads post reactions).
+  const myReactionSet = new Set();
+  if (myId && data && data.length) {
+    const { data: rx } = await supabase
+      .from('comment_reactions')
+      .select('comment_id, kind')
+      .eq('user_id', myId)
+      .in('comment_id', data.map(c => c.id));
+    (rx || []).forEach(r => myReactionSet.add(`${r.comment_id}:${r.kind}`));
+  }
+  return (data || []).map(r => hydrateComment(r, myId, myReactionSet));
+}
+
+// Toggle a comment reaction. `wasMine` = whether the user already had this reaction.
+export async function toggleCommentReaction(commentId, kind, userId, wasMine) {
+  if (wasMine) {
+    const { error } = await supabase.from('comment_reactions')
+      .delete().match({ comment_id: commentId, user_id: userId, kind });
+    if (error) throw error;
+  } else {
+    const { error } = await supabase.from('comment_reactions')
+      .insert({ comment_id: commentId, user_id: userId, kind });
+    if (error && error.code !== '23505') throw error; // ignore duplicate
+  }
 }
 
 export async function createComment({ postId, body, parentId }, me) {

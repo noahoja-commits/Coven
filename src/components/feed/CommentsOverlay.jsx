@@ -5,6 +5,7 @@ import { EmptyState } from '../shared/EmptyState';
 import { Reaction } from '../shared/Reaction';
 import { PostImage } from '../shared/Visuals';
 import { renderRichText } from '../shared/RichText';
+import { COMMENT_REACTIONS } from '../shared/ReactionGlyphs';
 
 export function CommentsOverlay({ post, onClose, onComment, onReact, onReactComment, isBookmarked, onToggleBookmark, onOpenUser }) {
   const [draft, setDraft] = useState('');
@@ -155,7 +156,7 @@ export function CommentsOverlay({ post, onClose, onComment, onReact, onReactComm
   );
 }
 
-function CommentRow({ c, reply, onOpenUser, onReply }) {
+function CommentRow({ c, reply, onOpenUser, onReactComment, onReply }) {
   return (
     <div className="flex gap-2.5">
       <button onClick={() => !c.mine && onOpenUser && onOpenUser(c.user, c.avatar)}
@@ -169,7 +170,18 @@ function CommentRow({ c, reply, onOpenUser, onReply }) {
           <span className="text-[9px] text-[#6B6B6B]" style={F.mono}>{c.time}</span>
         </div>
         <p className="text-[#F5F1E8] text-sm mt-0.5 leading-relaxed" style={F.serif}>{renderRichText(c.body, { onOpenUser })}</p>
-        <div className="flex items-center gap-2 mt-1 -ml-1">
+        <div className="flex items-center gap-1.5 mt-1 -ml-1">
+          {COMMENT_REACTIONS.map(({ kind, Glyph }) => {
+            const n = c.reactions?.[kind] || 0;
+            const active = !!c.myReactions?.[kind];
+            return (
+              <button key={kind} onClick={() => onReactComment && onReactComment(c.id, kind)} title={kind}
+                className={`tap flex items-center gap-1 px-1.5 py-0.5 transition-colors ${active ? 'text-[#9E2A33]' : 'text-[#6B6B6B] hover:text-[#A8A29E]'}`}>
+                <Glyph width={12} height={12} />
+                {n > 0 && <span className="text-[10px]" style={F.mono}>{n}</span>}
+              </button>
+            );
+          })}
           {!reply && (
             <button onClick={onReply}
               className="text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#A8A29E] px-1.5 py-0.5" style={F.ui}>
