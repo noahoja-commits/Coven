@@ -16,6 +16,8 @@
   --faint: #6B6B6B;
   --hair: rgba(201, 169, 97, 0.16);
   --hair-strong: rgba(201, 169, 97, 0.42);
+  /* one z-index scale so fixed layers stack predictably (nav < overlays < modals < toast) */
+  --z-nav: 20; --z-familiar: 45; --z-overlay: 40; --z-modal: 60; --z-toast: 100; --z-haunt: 120;
 }
 
 @layer components {
@@ -24,6 +26,16 @@
   .tap:active { transform: scale(0.95); }
   .btn:focus-visible, .field:focus-visible, .tap:focus-visible {
     outline: none; box-shadow: 0 0 0 1px rgba(201, 169, 97, 0.5);
+  }
+
+  /* layout primitives — one consistent screen padding + overlay header, so spacing stays
+     uniform as screens get applied to them (the main content area already clears the fixed
+     header/nav via top-[60px]/bottom-[68px]; .screen adds the horizontal + a little bottom). */
+  .screen { padding-left: 1rem; padding-right: 1rem; padding-bottom: 1.5rem; }
+  .overlay-header {
+    display: flex; align-items: center; justify-content: space-between; height: 60px;
+    padding-left: 1rem; padding-right: 1rem; background: rgba(10, 10, 10, 0.9);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid #1A1A1A;
   }
 
   /* buttons — one padding scale, uppercase tracking, ember/hairline variants */
