@@ -300,8 +300,8 @@ button:active, [role="button"]:active {
 
 /* Fun pack — quick-switch sigil pulse + reactive-tap sparks */
 @keyframes shockQsPulse {
-  0%, 100% { box-shadow: 0 0 14px rgba(158, 42, 51, 0.5), inset 0 0 8px rgba(158, 42, 51, 0.22); }
-  50%      { box-shadow: 0 0 22px rgba(158, 42, 51, 0.85), inset 0 0 10px rgba(158, 42, 51, 0.38); }
+  0%, 100% { box-shadow: 0 0 14px rgba(200, 16, 46, 0.5), inset 0 0 8px rgba(200, 16, 46, 0.22); }
+  50%      { box-shadow: 0 0 22px rgba(200, 16, 46, 0.9), inset 0 0 10px rgba(200, 16, 46, 0.42); }
 }
 .shock-qs { animation: shockQsPulse 3.2s ease-in-out infinite; }
 .shock-qs:active { transform: scale(0.9); }
@@ -417,7 +417,7 @@ body.shock-duo-sepia .phone-frame { filter: sepia(0.8) saturate(1.4) contrast(0.
 .shock-scan-v { animation: shockScanV 3.5s linear infinite; }
 @keyframes shockBurst { 0% { opacity: 1; } 100% { opacity: 0; } }
 .shock-burst { animation: shockBurst 0.6s ease-out forwards; }
-@keyframes shockSummon { 0%,100% { opacity: 0.5; filter: drop-shadow(0 0 5px rgba(158,42,51,0.6)); } 50% { opacity: 0.9; filter: drop-shadow(0 0 16px rgba(158,42,51,0.95)); } }
+@keyframes shockSummon { 0%,100% { opacity: 0.55; filter: drop-shadow(0 0 6px rgba(200,16,46,0.7)); } 50% { opacity: 1; filter: drop-shadow(0 0 18px rgba(200,16,46,1)); } }
 .shock-summon { animation: shockSummon 3s ease-in-out infinite; }
 @keyframes shockRise { 0% { transform: translateY(10px); opacity: 0; } 30% { opacity: 0.8; } 100% { transform: translateY(-6px); opacity: 0; } }
 .shock-rise { animation: shockRise 5s ease-out infinite; }
