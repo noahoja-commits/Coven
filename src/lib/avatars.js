@@ -11,9 +11,12 @@
 // user's avatarUrl to that path. Empty list = the picker section stays hidden and the
 // app falls back to the existing emoji glyphs, so this is safe to leave empty.
 export const PRESET_AVATARS = [
-  // { id: 'raven',   src: '/avatars/raven.png',   label: 'raven' },
-  // { id: 'reaper',  src: '/avatars/reaper.png',  label: 'reaper' },
-  // { id: 'moth',    src: '/avatars/moth.png',    label: 'moth' },
+  { id: 'pentacle', src: '/avatars/pentacle.svg', label: 'pentacle' },
+  { id: 'moon',     src: '/avatars/moon.svg',     label: 'triple moon' },
+  { id: 'eye',      src: '/avatars/eye.svg',      label: 'all-seeing eye' },
+  { id: 'heart',    src: '/avatars/heart.svg',    label: 'sacred heart' },
+  { id: 'skull',    src: '/avatars/skull.svg',    label: 'skull' },
+  { id: 'bat',      src: '/avatars/bat.svg',      label: 'bat' },
 ];
 
 // True if an avatarUrl is one of our preset assets (vs. a user-uploaded photo).

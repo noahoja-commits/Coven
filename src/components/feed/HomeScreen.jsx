@@ -13,6 +13,7 @@ import { DailyAltar } from './DailyAltar';
 import { TEXTS } from '../../data/library';
 import { CODEX } from '../../data/codex';
 import { recordView, fetchViewCounts } from '../../lib/db/views';
+import { Bat, Flame as FlameGlyph, Skull as SkullGlyph, Smoke } from '../shared/ReactionGlyphs';
 
 export function HomeScreen({
   posts, onReact, onOpenComments, onOpenCommunity, onOpenUser, onDeletePost, onHidePost, onQuotePost, onWhisperPost, onTogglePin, pinnedPostId, feedSort = 'latest', onSetFeedSort,
@@ -375,7 +376,7 @@ export function HomeScreen({
                 <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
                   <span className="absolute w-40 h-40 rounded-full animate-heat-flash"
                     style={{ background: 'radial-gradient(circle, rgba(200,16,46,0.55), transparent 70%)' }} />
-                  <span className="text-6xl animate-like-burst drop-shadow-[0_0_24px_rgba(200,16,46,0.95)]">🦇</span>
+                  <span className="animate-like-burst text-[#C8102E] drop-shadow-[0_0_18px_rgba(200,16,46,0.85)]"><Bat width={64} height={64} /></span>
                 </div>
               )}
               {isHot && (
@@ -534,10 +535,10 @@ export function HomeScreen({
               <div className="rule opacity-40 mb-2.5 mt-1" />
               <div className="flex items-center justify-between -ml-2">
                 <div className="flex items-center">
-                  <Reaction icon="🦇" count={post.reactions.bat} active={post.myReactions?.bat} onClick={() => onReact && onReact(post.id, 'bat')} />
-                  <Reaction icon="🔥" count={post.reactions.fire} active={post.myReactions?.fire} onClick={() => onReact && onReact(post.id, 'fire')} />
-                  <Reaction icon="💀" count={post.reactions.skull} active={post.myReactions?.skull} onClick={() => onReact && onReact(post.id, 'skull')} />
-                  <Reaction icon="💨" count={post.reactions.smoke} active={post.myReactions?.smoke} onClick={() => onReact && onReact(post.id, 'smoke')} />
+                  <Reaction glyph={Bat} count={post.reactions.bat} active={post.myReactions?.bat} onClick={() => onReact && onReact(post.id, 'bat')} />
+                  <Reaction glyph={FlameGlyph} count={post.reactions.fire} active={post.myReactions?.fire} onClick={() => onReact && onReact(post.id, 'fire')} />
+                  <Reaction glyph={SkullGlyph} count={post.reactions.skull} active={post.myReactions?.skull} onClick={() => onReact && onReact(post.id, 'skull')} />
+                  <Reaction glyph={Smoke} count={post.reactions.smoke} active={post.myReactions?.smoke} onClick={() => onReact && onReact(post.id, 'smoke')} />
                 </div>
                 <div className="flex items-center gap-1">
                   {postViews[post.id] > 0 && (

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { F } from '../../styles/fonts';
 import { buzz } from '../../lib/haptics';
 
-export function Reaction({ icon, count, onClick, active }) {
+export function Reaction({ icon, glyph: Glyph, count, onClick, active }) {
   const [animate, setAnimate] = useState(false);
   const handle = () => {
     buzz('react');
@@ -12,8 +12,10 @@ export function Reaction({ icon, count, onClick, active }) {
   };
   return (
     <button onClick={handle}
-      className={`flex items-center gap-1 px-2 py-1 transition-colors ${active ? 'text-[#C8102E] drop-shadow-[0_0_6px_rgba(200,16,46,0.5)]' : 'text-[#6B6B6B] hover:text-[#A8A29E]'}`}>
-      <span className={`text-sm leading-none ${animate ? 'flutter' : ''}`}>{icon}</span>
+      className={`flex items-center gap-1 px-2 py-1 transition-colors ${active ? 'text-[#C8102E] drop-shadow-[0_0_3px_rgba(200,16,46,0.3)]' : 'text-[#6B6B6B] hover:text-[#A8A29E]'}`}>
+      <span className={`leading-none flex items-center ${animate ? 'flutter' : ''}`}>
+        {Glyph ? <Glyph width={15} height={15} /> : <span className="text-sm">{icon}</span>}
+      </span>
       <span className="text-xs" style={F.mono}>{count}</span>
     </button>
   );
