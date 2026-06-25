@@ -38,6 +38,7 @@ export function HomeScreen({
   const vespersOn = settings.vespersEnabled !== false;
   const ghostOn = !!settings.ghostMode;
   const hasMyStory = stories.some(s => s.mine);
+  const storyOrderRef = useRef([]);
   const storyGroups = useMemo(() => {
     const map = new Map();
     stories.forEach((s, i) => {
@@ -45,9 +46,21 @@ export function HomeScreen({
       if (!map.has(s.user)) map.set(s.user, { user: s.user, avatar: s.avatar, firstIndex: i, ids: [] });
       map.get(s.user).ids.push(s.id);
     });
-    // A group is "watched" once every story in it has been seen. Unwatched float to the front.
+    // A group is "watched" once every story in it has been seen (drives the dimmed ring).
     const groups = [...map.values()].map(g => ({ ...g, seen: g.ids.length > 0 && g.ids.every(id => seenStories[id]) }));
-    return groups.sort((a, b) => (a.seen === b.seen ? 0 : a.seen ? 1 : -1));
+    // Order is STABLE within a session: unwatched-first is computed only when the set of
+    // storytellers changes, then held — so watching a story updates the ring but never
+    // re-sorts the rail under you. (Re-sorts when new stories actually arrive.)
+    const users = groups.map(g => g.user);
+    const prev = storyOrderRef.current;
+    const sameSet = prev.length === users.length && users.every(u => prev.includes(u));
+    if (sameSet) {
+      groups.sort((a, b) => prev.indexOf(a.user) - prev.indexOf(b.user));
+    } else {
+      groups.sort((a, b) => (a.seen === b.seen ? 0 : a.seen ? 1 : -1));
+      storyOrderRef.current = groups.map(g => g.user);
+    }
+    return groups;
   }, [stories, seenStories]);
   const [openMenu, setOpenMenu] = useState(null);
   const [activeTag, setActiveTag] = useState(null);
