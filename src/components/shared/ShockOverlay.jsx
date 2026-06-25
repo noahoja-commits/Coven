@@ -883,7 +883,7 @@ THREAT ${['LOW', 'ELEV', 'HIGH', 'CRIT'][tick % 4]}
         {/* a second figure, faint and unmoving, already in the dark */}
         <HorrorImage src={HORROR_SRC.peer} className="absolute left-[62%] top-[16%] w-32" style={{ aspectRatio: '2 / 3', opacity: 0.3 }} />
         {/* the entity — looming out of the black, then lunging at you */}
-        <HorrorImage src={HORROR_SRC.wraith} className="absolute left-1/2 top-[10%] w-56 shock-loom" style={{ aspectRatio: '3 / 2' }} />
+        <HorrorImage src={HORROR_SRC.scream} className="absolute left-1/2 top-[8%] w-52 shock-loom" style={{ aspectRatio: '2 / 3' }} />
         {/* the watcher, creeping in from the edge — closer than it was a moment ago */}
         <div className="absolute left-0 top-[22%] w-28 h-[48%] shock-creep"><HorrorImage src={HORROR_SRC.mask} className="w-full h-full" /></div>
         {/* skeletal hands reaching from the edges */}
@@ -898,8 +898,8 @@ THREAT ${['LOW', 'ELEV', 'HIGH', 'CRIT'][tick % 4]}
         {/* the jumpscare — a sudden blinding flash on the lunge */}
         <div className="absolute inset-0 shock-jump" style={{ background: 'rgba(224,224,230,0.92)' }} />
         {/* SUBLIMINAL — faces you're not sure you saw, gone in a frame, at four different beats */}
-        <HorrorImage src={HORROR_SRC.skull} variant="slam" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] shock-subliminal" style={{ aspectRatio: '2 / 3' }} />
-        <HorrorImage src={HORROR_SRC.torn} className="absolute left-[58%] top-[40%] -translate-x-1/2 -translate-y-1/2 w-[46%] shock-subliminal-2" style={{ aspectRatio: '3 / 4' }} />
+        <HorrorImage src={HORROR_SRC.scream} variant="slam" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[82%] shock-subliminal" style={{ aspectRatio: '2 / 3' }} />
+        <HorrorImage src={HORROR_SRC.half} className="absolute left-[58%] top-[40%] -translate-x-1/2 -translate-y-1/2 w-[50%] shock-subliminal-2" style={{ aspectRatio: '2 / 3' }} />
         <HorrorImage src={HORROR_SRC.wraith} className="absolute left-[28%] top-[62%] -translate-x-1/2 -translate-y-1/2 w-[48%] shock-subliminal" style={{ aspectRatio: '3 / 2', animationDelay: '-6.5s' }} />
         <HorrorImage src={HORROR_SRC.mask} className="absolute left-[78%] top-[70%] -translate-x-1/2 -translate-y-1/2 w-[38%] shock-subliminal-2" style={{ aspectRatio: '3 / 4', animationDelay: '-11s' }} />
         {/* labored-breath vignette — heavy, the room closing in (still a sliver of sight between breaths) */}

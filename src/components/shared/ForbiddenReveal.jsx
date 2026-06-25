@@ -84,7 +84,7 @@ export function ForbiddenReveal({ target = 'paralysis', name = 'you', onComplete
       {phase === 5 && (
         <>
           <div className="absolute inset-0 reveal-slam shock-jitter">
-            <HorrorImage src={target === 'egodeath' ? HORROR_SRC.torn : HORROR_SRC.skull} variant="slam" className="w-full h-full" />
+            <HorrorImage src={target === 'egodeath' ? HORROR_SRC.hollow : HORROR_SRC.scream} variant="slam" className="w-full h-full" />
           </div>
           <div className="absolute inset-0 pointer-events-none" style={{ background: 'rgba(236,236,240,0.92)', animation: 'hauntFlash 0.42s ease-out forwards' }} />
         </>
