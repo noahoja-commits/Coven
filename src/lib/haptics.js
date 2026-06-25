@@ -19,7 +19,7 @@ const can = () => {
 };
 
 // Short, distinct patterns per reward moment (ms; arrays are vibrate/pause sequences).
-const P = { tap: 8, like: [0, 14], react: 10, rite: [0, 18, 40, 28], secret: [0, 30, 60, 30], nav: 6 };
+const P = { tap: 8, like: [0, 14], react: 10, rite: [0, 18, 40, 28], secret: [0, 30, 60, 30], nav: 6, dread: [0, 70, 30, 240] };
 
 export function buzz(kind = 'tap') {
   if (can()) { try { navigator.vibrate(P[kind] || P.tap); } catch {} }

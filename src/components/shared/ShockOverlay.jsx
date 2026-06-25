@@ -112,7 +112,7 @@ function WraithFace({ className = '', style }) {
 
 // A blown-out, high-contrast B&W decayed skull-face with a too-wide grin — threshold photocopy
 // horror. Stark white cranium dissolving at the edges, hollow eyes, jagged white teeth.
-function GrinningFace({ className = '', style }) {
+export function GrinningFace({ className = '', style }) {
   return (
     <svg viewBox="0 0 100 124" className={className} style={style} aria-hidden>
       <defs>
@@ -864,8 +864,8 @@ THREAT ${['LOW', 'ELEV', 'HIGH', 'CRIT'][tick % 4]}
 export const SHOCK_MODES = [
   { id: 'none', label: 'None', desc: 'pure brutalist base' },
   { id: 'lament', label: 'Lament', desc: 'a mourning letter · rain & candlelight · heartbreaking' },
-  { id: 'egodeath', label: 'Ego Death', desc: 'the I dissolves · hypnotic vortex · the watching eye' },
-  { id: 'paralysis', label: 'Sleep Paralysis', desc: 'pure horror · a wraith lunges from the dark' },
+  { id: 'egodeath', label: 'Ego Death', desc: 'the I dissolves · hypnotic vortex · the watching eye', secret: true },
+  { id: 'paralysis', label: 'Sleep Paralysis', desc: 'pure horror · a wraith lunges from the dark', secret: true },
   { id: 'insomnia', label: 'Insomnia', desc: 'electric blue · heartbeat · 3:33am' },
   { id: 'dead-channel', label: 'Dead Channel', desc: '1-bit dither · tracking roll · no signal' },
   { id: 'emergency', label: 'Emergency', desc: 'twin radar · alert ticker · infernal signal' },

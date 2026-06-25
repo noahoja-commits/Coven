@@ -26,7 +26,9 @@ const SWATCH = {
 };
 
 // Live mode picker — translucent so the effect plays behind it while you try modes.
-export function ShockModePicker({ current = 'none', onPick, onClose }) {
+// Secret modes stay hidden until they've been discovered (then they appear here, unlocked).
+export function ShockModePicker({ current = 'none', unlocked = [], onPick, onClose }) {
+  const modes = SHOCK_MODES.filter(m => !m.secret || unlocked.includes(m.id));
   return (
     <div className="fixed inset-0 z-[70] bg-black/45 backdrop-blur-[2px] flex flex-col animate-fade-in">
       <div className="flex items-center justify-between px-4 h-[60px] safe-pt">
@@ -39,7 +41,7 @@ export function ShockModePicker({ current = 'none', onPick, onClose }) {
       <div className="flex-1 overflow-y-auto px-3 pb-6 safe-pb">
         <p className="text-[10px] text-[#6B6B6B] italic px-1 pb-3" style={F.serif}>tap a mode to feel it live · this menu stays open so you can flip between them.</p>
         <div className="grid grid-cols-2 gap-2.5">
-          {SHOCK_MODES.map(m => {
+          {modes.map(m => {
             const active = current === m.id;
             return (
               <button key={m.id} onClick={() => onPick && onPick(m.id)}

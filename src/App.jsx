@@ -101,6 +101,7 @@ import { livingTheme, meetsAge, isVigil } from './data/helpers';
 import { earnedAchievements } from './data/achievements';
 import { inQuietHours } from './lib/quietHours';
 import { FloatingCat } from './components/shared/FloatingCat';
+import { ForbiddenReveal } from './components/shared/ForbiddenReveal';
 import { ShockQuickSwitch } from './components/shared/ShockQuickSwitch';
 import { ShockSparks } from './components/shared/ShockSparks';
 
@@ -149,6 +150,11 @@ export default function App() {
   const [showReflections, setShowReflections] = useState(false);
   const [showDreams, setShowDreams] = useState(false);
   const [showShockPicker, setShowShockPicker] = useState(false);
+  // Hidden horror modes: discovered via secret rituals (anger the familiar, unravel the self).
+  // Once summoned, they unlock in the picker. `revealTarget` plays the forbidden intro first.
+  const [unlockedShock, setUnlockedShock] = useLocalStorage('unlockedShock', []);
+  const [revealTarget, setRevealTarget] = useState(null);
+  const summonShock = (mode) => { if (!revealTarget) setRevealTarget(mode); };
   const [quoteTarget, setQuoteTarget] = useState(null);
   const [showVespersArchive, setShowVespersArchive] = useState(false);
 
@@ -567,7 +573,8 @@ export default function App() {
     const od = params.get('oddity');
     const po = params.get('post');
     const boost = params.get('boost');
-    if (!t && !connect && !u && !ev && !od && !po && !boost) return;
+    const haunt = params.get('haunt'); // a cursed link: ?haunt=paralysis|egodeath plays the reveal
+    if (!t && !connect && !u && !ev && !od && !po && !boost && !haunt) return;
     history.replaceState(null, '', window.location.pathname);
     if (u) setActiveUserHandle(u.toLowerCase().replace(/[^a-z0-9_.]/g, ''));
     if (ev) { setActiveEvent(ev); setTab('events'); }
@@ -576,6 +583,7 @@ export default function App() {
     if (t === 'success') { setTicketSuccess(true); setPendingTicketRefresh(true); }
     if (connect === 'done') setPendingConnectRefresh(true);
     if (boost === 'success') { setTab('oddities'); setPendingBoostRefresh(true); }
+    if (haunt === 'paralysis' || haunt === 'egodeath') setTimeout(() => setRevealTarget(haunt), 700);
   }, []);
 
   // Run the meId-gated post-payment refreshes once auth is ready (covers the cold-load case
@@ -1655,7 +1663,8 @@ export default function App() {
   }, []);
 
   // ── Shock-mode fun pack: quick-switch handlers + shake-to-shuffle (hooks ABOVE the render gate) ──
-  const ACTIVE_SHOCK_IDS = SHOCK_MODES.map((m) => m.id).filter((id) => id !== 'none');
+  // Locked secret modes never appear in the cycle/shuffle until they've been discovered.
+  const ACTIVE_SHOCK_IDS = SHOCK_MODES.filter((m) => m.id !== 'none' && (!m.secret || unlockedShock.includes(m.id))).map((m) => m.id);
   const nextShock = () => setSettings((s) => {
     const i = ACTIVE_SHOCK_IDS.indexOf(s.shockMode);
     return { ...s, shockMode: ACTIVE_SHOCK_IDS[(i + 1) % ACTIVE_SHOCK_IDS.length] };
@@ -2315,8 +2324,20 @@ export default function App() {
       {showShockPicker && (
         <ShockModePicker
           current={settings.shockMode}
+          unlocked={unlockedShock}
           onPick={(id) => setSettings({ ...settings, shockMode: id })}
           onClose={() => setShowShockPicker(false)}
+        />
+      )}
+      {/* the forbidden reveal — plays the intro, then hands you to the summoned mode + unlocks it */}
+      {revealTarget && (
+        <ForbiddenReveal
+          target={revealTarget}
+          onComplete={(m) => {
+            setSettings((s) => ({ ...s, shockMode: m }));
+            setUnlockedShock((u) => (u.includes(m) ? u : [...u, m]));
+            setRevealTarget(null);
+          }}
         />
       )}
       {showLegal && (
@@ -2478,7 +2499,7 @@ export default function App() {
           />
         </Suspense>
       )}
-      {settings.familiar !== false && !anyOverlayOpen && <FloatingCat active />}
+      {settings.familiar !== false && !anyOverlayOpen && <FloatingCat active onSummon={summonShock} />}
       {settings.shockMode !== 'none' && settings.reactiveTaps !== false && !anyOverlayOpen && !settings.parchmentMode && (
         <ShockSparks mode={settings.shockMode} />
       )}
