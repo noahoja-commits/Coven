@@ -882,8 +882,8 @@ THREAT ${['LOW', 'ELEV', 'HIGH', 'CRIT'][tick % 4]}
         <div className="absolute left-1/2 top-[6%] -translate-x-1/2 w-[60%] h-[50%] animate-flicker" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(180,180,190,0.12), transparent 62%)', mixBlendMode: 'screen' }} />
         {/* a second figure, faint and unmoving, already in the dark */}
         <HorrorImage src={HORROR_SRC.peer} className="absolute left-[62%] top-[16%] w-32" style={{ aspectRatio: '2 / 3', opacity: 0.3 }} />
-        {/* the entity — looming out of the black, then lunging at you */}
-        <HorrorImage src={HORROR_SRC.scream} className="absolute left-1/2 top-[8%] w-52 shock-loom" style={{ aspectRatio: '2 / 3' }} />
+        {/* the entity — a grinning thing looming out of the black, then lunging at you */}
+        <HorrorImage src={HORROR_SRC.grin} className="absolute left-1/2 top-[8%] w-52 shock-loom" style={{ aspectRatio: '2 / 3' }} />
         {/* the watcher, creeping in from the edge — closer than it was a moment ago */}
         <div className="absolute left-0 top-[22%] w-28 h-[48%] shock-creep"><HorrorImage src={HORROR_SRC.mask} className="w-full h-full" /></div>
         {/* skeletal hands reaching from the edges */}

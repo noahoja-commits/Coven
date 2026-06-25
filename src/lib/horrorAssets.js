@@ -15,12 +15,14 @@ export const HORROR_SRC = {
   scream: '/horror/scream.jpg', // bald gaunt SCREAMING face out of black — the slam
   hollow: '/horror/hollow.jpg', // hollow-eyed dead stare emerging from black
   half:   '/horror/half.jpg',   // half a withered face, one bulging eye — half in the dark
+  grin:   '/horror/grin.jpg',   // cracked face, a WRONG too-wide grin baring teeth — the loomer
+  lunger: '/horror/lunger.jpg', // a clawed creature lunging at you, hands reaching — the slam
 };
 
 // the faces that work full-bleed as a lunge/jumpscare
-export const SCARE_FACES = [HORROR_SRC.scream, HORROR_SRC.skull, HORROR_SRC.half, HORROR_SRC.wraith, HORROR_SRC.torn];
+export const SCARE_FACES = [HORROR_SRC.lunger, HORROR_SRC.scream, HORROR_SRC.grin, HORROR_SRC.skull, HORROR_SRC.half, HORROR_SRC.wraith, HORROR_SRC.torn];
 // the quieter "it's watching from the corner" set
-export const LURK_FACES = [HORROR_SRC.hollow, HORROR_SRC.mask, HORROR_SRC.half, HORROR_SRC.peer];
+export const LURK_FACES = [HORROR_SRC.hollow, HORROR_SRC.mask, HORROR_SRC.grin, HORROR_SRC.half, HORROR_SRC.peer];
 
 let primed = false;
 // Warm the browser cache on the arming gesture so a jumpscare never flashes a blank
