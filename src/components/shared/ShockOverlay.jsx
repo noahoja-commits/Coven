@@ -117,64 +117,71 @@ export function GrinningFace({ className = '', style }) {
   return (
     <svg viewBox="0 0 120 150" className={className} style={style} aria-hidden>
       <defs>
-        <radialGradient id="gfCran" cx="42%" cy="30%" r="64%">
-          <stop offset="0" stopColor="#f7f5ef" /><stop offset="0.38" stopColor="#d4cfc4" />
-          <stop offset="0.68" stopColor="#6a6760" /><stop offset="1" stopColor="#100e0c" />
+        <radialGradient id="gfSkin" cx="46%" cy="36%" r="68%">
+          <stop offset="0" stopColor="#cdc4b6" /><stop offset="0.34" stopColor="#8d8478" />
+          <stop offset="0.62" stopColor="#403a32" /><stop offset="0.85" stopColor="#16130f" /><stop offset="1" stopColor="#050403" />
         </radialGradient>
-        <radialGradient id="gfSocket" cx="50%" cy="44%" r="58%">
-          <stop offset="0" stopColor="#000" /><stop offset="0.62" stopColor="#050403" /><stop offset="1" stopColor="#050403" stopOpacity="0" />
+        <radialGradient id="gfPit" cx="50%" cy="45%" r="58%">
+          <stop offset="0" stopColor="#000" /><stop offset="0.62" stopColor="#040302" /><stop offset="1" stopColor="#040302" stopOpacity="0" />
         </radialGradient>
-        <radialGradient id="gfMouth" cx="50%" cy="32%" r="68%">
-          <stop offset="0" stopColor="#000" /><stop offset="0.7" stopColor="#0b0907" /><stop offset="1" stopColor="#241f1a" />
+        <radialGradient id="gfMaw" cx="50%" cy="28%" r="72%">
+          <stop offset="0" stopColor="#000" /><stop offset="0.5" stopColor="#0a0604" /><stop offset="1" stopColor="#1e1410" />
         </radialGradient>
-        <filter id="gfDread" x="-28%" y="-28%" width="156%" height="156%">
-          {/* torn, rotted edges */}
-          <feTurbulence type="fractalNoise" baseFrequency="0.013 0.019" numOctaves="3" seed="8" result="w" />
-          <feDisplacementMap in="SourceGraphic" in2="w" scale="13" xChannelSelector="R" yChannelSelector="G" result="d" />
-          {/* skin grain, multiplied in */}
-          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="2" result="g" />
-          <feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.45 0" result="ga" />
+        <filter id="gfDread" x="-35%" y="-35%" width="170%" height="170%">
+          {/* heavy rot — torn, displaced, decaying edges */}
+          <feTurbulence type="fractalNoise" baseFrequency="0.016 0.022" numOctaves="4" seed="11" result="w" />
+          <feDisplacementMap in="SourceGraphic" in2="w" scale="22" xChannelSelector="R" yChannelSelector="G" result="d" />
+          {/* coarse grime grain, multiplied in */}
+          <feTurbulence type="fractalNoise" baseFrequency="0.45 0.6" numOctaves="3" seed="4" result="g" />
+          <feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.7 0" result="ga" />
           <feComposite in="ga" in2="d" operator="in" result="gm" />
           <feBlend in="d" in2="gm" mode="multiply" result="grained" />
-          {/* crush the midtones toward a high-contrast, blown-out photocopy */}
           <feComponentTransfer in="grained">
-            <feFuncR type="gamma" amplitude="1.25" exponent="0.8" offset="-0.06" />
-            <feFuncG type="gamma" amplitude="1.25" exponent="0.8" offset="-0.06" />
-            <feFuncB type="gamma" amplitude="1.25" exponent="0.8" offset="-0.06" />
+            <feFuncR type="gamma" amplitude="1.2" exponent="0.78" offset="-0.05" />
+            <feFuncG type="gamma" amplitude="1.2" exponent="0.78" offset="-0.05" />
+            <feFuncB type="gamma" amplitude="1.2" exponent="0.78" offset="-0.05" />
           </feComponentTransfer>
         </filter>
       </defs>
       <g filter="url(#gfDread)">
-        {/* gaunt, asymmetric skull (shaded) */}
-        <path d="M60 4 C34 5 21 24 23 52 C24 74 31 104 46 130 C52 140 56 146 60 146 C65 146 70 139 76 128 C90 102 97 73 98 51 C100 24 86 5 60 4 Z" fill="url(#gfCran)" />
-        {/* temple + cheek hollows for gauntness */}
-        <path d="M26 44 C29 60 30 78 38 96 C30 86 24 66 24 48 Z" fill="#000" opacity="0.42" />
-        <path d="M96 46 C93 62 92 80 84 98 C92 88 98 68 98 50 Z" fill="#000" opacity="0.42" />
-        {/* brow ridge catching light */}
-        <path d="M32 41 Q48 34 60 38 Q72 32 90 42 Q74 45 60 43 Q46 46 32 41 Z" fill="#ebe6db" opacity="0.5" />
-        {/* eye sockets — deep asymmetric pits */}
-        <ellipse cx="44" cy="55" rx="13" ry="16.5" fill="url(#gfSocket)" />
-        <ellipse cx="79" cy="53" rx="11" ry="15" fill="url(#gfSocket)" />
-        {/* the wet glint deep in the dark */}
-        <circle cx="47" cy="59" r="2" fill="#dfe2e8" opacity="0.85" />
-        <circle cx="77" cy="57" r="1.7" fill="#dfe2e8" opacity="0.8" />
-        {/* nasal cavity */}
-        <path d="M60 65 L53 84 Q60 89 67 84 Z" fill="#040302" />
-        {/* cheekbone highlights */}
-        <path d="M37 73 Q44 82 42 94 Q35 85 35 75 Z" fill="#d0cabe" opacity="0.38" />
-        <path d="M85 71 Q80 82 82 94 Q89 84 89 73 Z" fill="#d0cabe" opacity="0.38" />
-        {/* the gaping grin — irregular, wider & higher on one side */}
-        <path d="M33 97 Q60 126 91 92 Q86 111 74 117 Q60 123 47 117 Q37 110 33 97 Z" fill="url(#gfMouth)" />
-        {/* uneven, broken teeth */}
-        <g fill="#d6d0c2">
-          <path d="M40 101 l4.5 0 l-0.5 9 l-4 -2 Z" />
-          <path d="M46 103 l5 0 l-0.5 13 l-4.5 -2 Z" />
-          <path d="M53 104 l4.5 0 l0 7 l-4.5 -1 Z" opacity="0.8" />
-          <path d="M59 104 l5 0 l-0.5 14 l-4.5 -2 Z" />
-          <path d="M66 103 l4 0 l-1 9 l-3.5 -1 Z" opacity="0.78" />
-          <path d="M71 102 l5 0 l-1.5 12 l-4 -2 Z" />
-          <path d="M78 100 l4 0 l-1.5 8 l-3 -2 Z" opacity="0.72" />
+        {/* a gaunt, asymmetric human head emerging from the dark */}
+        <path d="M59 3 C36 3 23 21 24 47 C25 66 28 84 36 104 C42 122 50 140 60 147 C71 139 78 121 84 103 C92 82 96 64 97 46 C98 20 84 3 59 3 Z" fill="url(#gfSkin)" />
+        {/* sunken temples / hollow cheeks (deep shadow) */}
+        <path d="M27 40 C30 58 30 80 39 102 C30 88 23 64 24 44 Z" fill="#000" opacity="0.5" />
+        <path d="M96 42 C93 60 92 82 82 104 C90 90 97 66 97 46 Z" fill="#000" opacity="0.5" />
+        <path d="M34 78 C40 88 41 100 38 110 C32 100 31 86 33 78 Z" fill="#000" opacity="0.4" />
+        <path d="M86 76 C81 86 80 100 83 110 C89 100 89 86 87 76 Z" fill="#000" opacity="0.4" />
+        {/* heavy brow shadow above the eyes */}
+        <path d="M30 44 Q46 36 58 41 Q72 35 90 45 L90 52 Q72 44 58 49 Q46 45 30 51 Z" fill="#000" opacity="0.55" />
+        {/* sunken HUMAN eyes — asymmetric almonds, dark, with a faint wet stare */}
+        <path d="M33 55 Q44 47 55 56 Q45 66 33 60 Z" fill="url(#gfPit)" />
+        <path d="M67 53 Q78 46 89 54 Q79 64 67 58 Z" fill="url(#gfPit)" />
+        <ellipse cx="44" cy="56" rx="3.4" ry="3.8" fill="#1a1814" />
+        <ellipse cx="78" cy="55" rx="3" ry="3.4" fill="#1a1814" />
+        <circle cx="45.5" cy="55" r="1.1" fill="#c9ccd2" opacity="0.8" />
+        <circle cx="79" cy="54" r="1" fill="#c9ccd2" opacity="0.75" />
+        {/* nose — a lit ridge + two dark nostrils */}
+        <path d="M60 58 Q62 74 60 82" stroke="#cfc6b6" strokeWidth="1.6" fill="none" opacity="0.3" />
+        <path d="M54 84 Q58 80 60 84 Q62 80 66 84 Q63 89 60 87 Q57 89 54 84 Z" fill="#040302" />
+        {/* the too-wide grin — lopsided, dark maw, drawn-back lips */}
+        <path d="M30 96 Q60 130 92 90 Q88 110 74 118 Q60 124 46 117 Q34 110 30 96 Z" fill="url(#gfMaw)" />
+        <path d="M30 96 Q60 130 92 90" stroke="#1a0f0c" strokeWidth="2.2" fill="none" opacity="0.7" />
+        {/* dark gums */}
+        <path d="M37 100 Q60 120 86 96 Q60 108 37 100 Z" fill="#1c0d0a" opacity="0.85" />
+        {/* irregular, broken, yellowed teeth — uneven, gapped, some missing/dark */}
+        <g>
+          <path d="M40 102 l4 1 l-1 8 l-3.5 -2 Z" fill="#b3a584" />
+          <path d="M45.5 104 l5 0.5 l-1 12 l-4.5 -2 Z" fill="#a89a78" />
+          <path d="M52 105 l4 0 l-0.5 6 l-4 -1 Z" fill="#2a2018" />
+          <path d="M57 105 l5 0.5 l-0.5 13 l-4.5 -2 Z" fill="#b3a584" />
+          <path d="M64 104 l4 0 l-1 9 l-3.5 -1 Z" fill="#9b8d6c" />
+          <path d="M69.5 103 l5 -0.5 l-1.5 11 l-4 -2 Z" fill="#a89a78" />
+          <path d="M76 101 l4 -0.5 l-1.5 7 l-3 -2 Z" fill="#7d7058" />
         </g>
+        {/* decay blotches on the skin */}
+        <ellipse cx="38" cy="70" rx="5" ry="7" fill="#000" opacity="0.3" />
+        <ellipse cx="70" cy="88" rx="6" ry="5" fill="#000" opacity="0.28" />
+        <ellipse cx="52" cy="124" rx="9" ry="7" fill="#000" opacity="0.3" />
       </g>
     </svg>
   );
