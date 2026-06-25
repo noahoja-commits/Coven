@@ -162,7 +162,7 @@ function PeekingFace({ className = '', style }) {
 
 // Two emaciated figures whose raised arms meet in a pointed arch — stack them at receding scale
 // to make a corridor of the damned (the procession tunnel).
-function ProcessionArch({ className = '', style, opacity = 0.92, fill = '#070510', stroke = 'rgba(180,160,210,0.22)' }) {
+function ProcessionArch({ className = '', style, opacity = 0.92, fill = '#0b0818', stroke = 'rgba(204,184,232,0.42)' }) {
   return (
     <svg viewBox="0 0 100 100" className={className} style={style} aria-hidden fill={fill} stroke={stroke} strokeWidth="0.5" strokeLinejoin="round">
       <path d="M22 100 C18 80 20 60 24 44 C20 38 16 30 18 22 C24 30 30 36 38 40 C34 30 30 18 34 6 C40 20 44 34 48 48 L48 100 Z" opacity={opacity} />
