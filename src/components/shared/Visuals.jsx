@@ -7,11 +7,11 @@ export function PostImage({ kind }) {
   if (typeof kind === 'string' && /^(https?:|blob:|data:)/.test(kind)) {
     const isVideo = /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(kind);
     return (
-      <div className="relative w-full overflow-hidden bg-[#0A0608] border border-[#1A1A1A]">
+      <div className="relative w-full aspect-[4/5] overflow-hidden bg-[#0A0608] border border-[#1A1A1A]">
         {isVideo ? (
-          <video src={kind} controls playsInline preload="metadata" className="post-media w-full h-auto max-h-[80vh] object-contain bg-black" />
+          <video src={kind} controls playsInline preload="metadata" className="post-media absolute inset-0 w-full h-full object-contain bg-black" />
         ) : (
-          <img src={kind} alt="" loading="lazy" className="post-media w-full h-auto max-h-[80vh] object-contain" />
+          <img src={kind} alt="" loading="lazy" className="post-media absolute inset-0 w-full h-full object-contain" />
         )}
       </div>
     );

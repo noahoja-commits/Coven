@@ -543,11 +543,10 @@ export function HomeScreen({
                   <Reaction glyph={Smoke} count={post.reactions.smoke} active={post.myReactions?.smoke} onClick={() => onReact && onReact(post.id, 'smoke')} />
                 </div>
                 <div className="flex items-center gap-1">
-                  {postViews[post.id] > 0 && (
-                    <span className="flex items-center gap-1 text-[10px] text-[#6B6B6B] px-1" style={F.mono} title="unique views">
-                      <Eye size={12} /> {postViews[post.id]}
-                    </span>
-                  )}
+                  {/* reserved slot — keeps the count from shoving the buttons when it loads in async */}
+                  <span className="flex items-center justify-center gap-1 text-[10px] text-[#6B6B6B] px-1 min-w-[30px]" style={F.mono} title="unique views">
+                    {postViews[post.id] > 0 ? <><Eye size={12} /> {postViews[post.id]}</> : null}
+                  </span>
                   <button onClick={() => onToggleCandle && onToggleCandle(post.id)}
                     className={`p-2 tap transition-colors ${candled ? 'text-[#C9A961]' : 'text-[#6B6B6B] hover:text-[#9E2A33]'}`}
                     title={candled ? 'candle lit' : 'light a candle'}>
