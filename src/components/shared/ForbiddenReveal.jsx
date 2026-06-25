@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { buzz } from '../../lib/haptics';
 import { GrinningFace } from './ShockOverlay';
+import { primeHorror, stinger, whisper, startDread, stopDread } from '../../lib/horror';
 
 // THE FORBIDDEN REVEAL — the intro that plays when a hidden horror mode is summoned. The dread
-// lives in the build-up, not the payoff: the screen cuts to black, a warning trembles in, then it
-// corrupts and multiplies and whispers, then a sudden, total silence — then the slam. Worse than
-// the mode it opens. ~5.5s, then onComplete(target) hands you over to the mode.
+// lives in the build, not the payoff: black-out, a warning trembles in, it corrupts & whispers,
+// a face CREEPS toward you, then the heartbeat stops — dead silence — and the slam (face + scream).
+// ~7s, then onComplete(target) hands you to the mode. Worse than the thing it warns of.
 const CONTENT = {
   paralysis: {
     line: "you aren't supposed to be here",
@@ -18,19 +19,24 @@ const CONTENT = {
 };
 
 export function ForbiddenReveal({ target = 'paralysis', onComplete }) {
-  const [phase, setPhase] = useState(0); // 0 cut · 1 warn · 2 corrupt · 3 silence · 4 slam
+  const [phase, setPhase] = useState(0); // 0 cut · 1 warn · 2 corrupt · 3 creep · 4 silence · 5 slam
   const c = CONTENT[target] || CONTENT.paralysis;
 
   useEffect(() => {
+    primeHorror();
     buzz('secret');
+    startDread(1050); // a faster, building heartbeat under the whole intro
     const t = [
-      setTimeout(() => { setPhase(1); buzz('react'); }, 650),
-      setTimeout(() => { setPhase(2); buzz('react'); }, 2600),
-      setTimeout(() => setPhase(3), 4300),
-      setTimeout(() => { setPhase(4); buzz('dread'); }, 4900),
-      setTimeout(() => onComplete && onComplete(target), 5550),
+      setTimeout(() => { setPhase(1); buzz('react'); }, 700),
+      setTimeout(() => { setPhase(2); buzz('react'); whisper(); }, 2700),
+      setTimeout(() => whisper(), 3500),
+      setTimeout(() => { setPhase(3); buzz('secret'); whisper(); }, 4400),
+      setTimeout(() => whisper(), 5100),
+      setTimeout(() => { setPhase(4); stopDread(); }, 5600), // the heartbeat STOPS — dead air
+      setTimeout(() => { setPhase(5); buzz('dread'); stinger(1.25); }, 6300), // SLAM + scream
+      setTimeout(() => onComplete && onComplete(target), 7050),
     ];
-    return () => t.forEach(clearTimeout);
+    return () => { t.forEach(clearTimeout); stopDread(); };
   }, []);
 
   return (
@@ -52,20 +58,29 @@ export function ForbiddenReveal({ target = 'paralysis', onComplete }) {
             <span key={i} className="absolute text-[11px] tracking-[0.2em] text-[#b0b0b8] shock-blink"
               style={{ top: `${(i * 53 + 12) % 86}%`, left: `${(i * 37 + 6) % 76}%`, opacity: 0.5, animationDelay: `${(i % 4) * 0.3}s` }}>{w}</span>
           ))}
-          {/* a face resolving out of the dark, almost subliminal */}
           <GrinningFace className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[56%]" style={{ opacity: 0.12 }} />
           <div className="absolute inset-0 reveal-heart pointer-events-none" />
           <div className="absolute inset-0 shock-rgb-r pointer-events-none" style={{ background: 'rgba(255,0,40,0.05)', mixBlendMode: 'screen' }} />
           <div className="absolute inset-0 pointer-events-none" style={{ background: 'repeating-linear-gradient(to bottom, rgba(0,0,0,0.4) 0 1px, transparent 1px 3px)' }} />
         </div>
       )}
-      {/* phase 3 — total silence, total black. the held breath. */}
-      {/* (nothing rendered — the bare black root IS the silence) */}
-      {/* phase 4 — the slam */}
-      {phase === 4 && (
+      {/* phase 3 — it CREEPS toward you, filling the dark, whispering your sentence */}
+      {phase === 3 && (
+        <div className="absolute inset-0 reveal-tremor">
+          <GrinningFace className="absolute left-1/2 top-1/2 w-[80%]" style={{ animation: 'revealCreepFace 1.2s ease-in forwards' }} />
+          {c.whispers.slice(0, 4).map((w, i) => (
+            <span key={i} className="absolute text-[11px] tracking-[0.2em] text-[#c8c8d0] shock-blink"
+              style={{ top: `${(i * 67 + 8) % 88}%`, left: `${(i * 41 + 5) % 80}%`, opacity: 0.55, animationDelay: `${(i % 3) * 0.25}s` }}>{w}</span>
+          ))}
+          <div className="absolute inset-0 reveal-heart pointer-events-none" />
+        </div>
+      )}
+      {/* phase 4 — the heartbeat stops. total black. the held breath. (nothing rendered) */}
+      {/* phase 5 — the slam */}
+      {phase === 5 && (
         <>
           <div className="absolute inset-0" style={{ background: 'rgba(232,232,236,0.96)' }} />
-          <GrinningFace className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] reveal-slam" />
+          <GrinningFace className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[155%] reveal-slam" />
         </>
       )}
     </div>

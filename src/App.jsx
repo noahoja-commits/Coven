@@ -103,6 +103,7 @@ import { inQuietHours } from './lib/quietHours';
 import { FloatingCat } from './components/shared/FloatingCat';
 import { ForbiddenReveal } from './components/shared/ForbiddenReveal';
 import { ShockHaunt } from './components/shared/ShockHaunt';
+import { primeHorror, startDread, stopDread } from './lib/horror';
 import { ShockQuickSwitch } from './components/shared/ShockQuickSwitch';
 import { ShockSparks } from './components/shared/ShockSparks';
 
@@ -155,7 +156,7 @@ export default function App() {
   // Once summoned, they unlock in the picker. `revealTarget` plays the forbidden intro first.
   const [unlockedShock, setUnlockedShock] = useLocalStorage('unlockedShock', []);
   const [revealTarget, setRevealTarget] = useState(null);
-  const summonShock = (mode) => { if (!revealTarget) setRevealTarget(mode); };
+  const summonShock = (mode) => { if (!revealTarget) { primeHorror(); setRevealTarget(mode); } };
   const [quoteTarget, setQuoteTarget] = useState(null);
   const [showVespersArchive, setShowVespersArchive] = useState(false);
 
@@ -287,6 +288,14 @@ export default function App() {
     const dc = SHOCK_DUO[settings.shockMode];
     if (dc && !settings.parchmentMode) document.body.classList.add(dc);
   }, [settings.parchmentMode, settings.mediaTreatment, settings.shockMode]);
+
+  // Dread bed — a heartbeat + whispers run for as long as a horror mode is active. (Audio only
+  // starts once a gesture has resumed the context; the trigger tap primes it.)
+  useEffect(() => {
+    if (settings.shockMode === 'paralysis' || settings.shockMode === 'egodeath') startDread();
+    else stopDread();
+    return () => stopDread();
+  }, [settings.shockMode]);
 
   // Ambient drone. The AudioContext MUST be started/resumed synchronously inside
   // the user's tap (toggleSound, called straight from the toggle) — iOS drops audio
@@ -2327,7 +2336,7 @@ export default function App() {
         <ShockModePicker
           current={settings.shockMode}
           unlocked={unlockedShock}
-          onPick={(id) => setSettings({ ...settings, shockMode: id })}
+          onPick={(id) => { if (id === 'paralysis' || id === 'egodeath') primeHorror(); setSettings({ ...settings, shockMode: id }); }}
           onClose={() => setShowShockPicker(false)}
         />
       )}
@@ -2502,8 +2511,9 @@ export default function App() {
         </Suspense>
       )}
       {settings.familiar !== false && !anyOverlayOpen && <FloatingCat active onSummon={summonShock} />}
-      {/* the haunt — when a horror mode is on, it roams the whole app and strikes unpredictably */}
-      {!settings.parchmentMode && <ShockHaunt mode={settings.shockMode} active={!anyOverlayOpen && !revealTarget} />}
+      {/* the haunt — when a horror mode is on, it roams the WHOLE app (even mid-modal) and strikes
+          unpredictably. no safe corner. only held back during the reveal itself. */}
+      {!settings.parchmentMode && <ShockHaunt mode={settings.shockMode} active={!revealTarget} />}
       {settings.shockMode !== 'none' && settings.reactiveTaps !== false && !anyOverlayOpen && !settings.parchmentMode && (
         <ShockSparks mode={settings.shockMode} />
       )}

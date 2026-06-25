@@ -811,7 +811,7 @@ THREAT ${['LOW', 'ELEV', 'HIGH', 'CRIT'][tick % 4]}
   if (mode === 'paralysis') {
     if (back) return (
       <div className={BWRAP} aria-hidden>
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 42%, rgba(18,16,20,0.4), rgba(4,4,5,0.78) 72%)' }} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 42%, rgba(16,14,18,0.46), rgba(3,3,4,0.9) 66%)' }} />
         {/* a failing, flickering light */}
         <div className="absolute left-1/2 top-[6%] -translate-x-1/2 w-[60%] h-[50%] animate-flicker" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(180,180,190,0.12), transparent 62%)', mixBlendMode: 'screen' }} />
         {/* a second figure, faint and unmoving, already in the dark */}
@@ -823,19 +823,21 @@ THREAT ${['LOW', 'ELEV', 'HIGH', 'CRIT'][tick % 4]}
         {/* skeletal hands reaching from the edges */}
         <BoneHand className="absolute left-[4%] bottom-[5%] w-16 h-28 -rotate-[24deg]" opacity={0.3} />
         <BoneHand className="absolute right-[5%] bottom-[2%] w-16 h-28 rotate-[206deg] scale-x-[-1]" opacity={0.28} />
-        {/* a creeping shadow rising from below, breathing */}
-        <div className="absolute inset-x-0 bottom-0 h-[30%] shock-breath-heavy" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)' }} />
+        {/* a creeping shadow rising from below, breathing — oppressive */}
+        <div className="absolute inset-x-0 bottom-0 h-[40%] shock-breath-heavy" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.92), transparent)' }} />
       </div>
     );
     return (
       <div className={`${FWRAP} text-[#b8b0a8]`} aria-hidden>
         {/* the jumpscare — a sudden blinding flash on the lunge */}
         <div className="absolute inset-0 shock-jump" style={{ background: 'rgba(224,224,230,0.92)' }} />
-        {/* SUBLIMINAL — the face you're not sure you saw, gone in a frame */}
-        <GrinningFace className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[68%] shock-subliminal" />
-        <GrinningFace className="absolute left-[58%] top-[40%] -translate-x-1/2 -translate-y-1/2 w-[40%] shock-subliminal-2" />
-        {/* labored-breath vignette closing in (eased so the app stays readable between breaths) */}
-        <div className="absolute inset-0 shock-breath-heavy" style={{ boxShadow: 'inset 0 0 80px 20px rgba(0,0,0,0.6)' }} />
+        {/* SUBLIMINAL — faces you're not sure you saw, gone in a frame, at four different beats */}
+        <GrinningFace className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[72%] shock-subliminal" />
+        <GrinningFace className="absolute left-[58%] top-[40%] -translate-x-1/2 -translate-y-1/2 w-[42%] shock-subliminal-2" />
+        <GrinningFace className="absolute left-[28%] top-[62%] -translate-x-1/2 -translate-y-1/2 w-[40%] shock-subliminal" style={{ animationDelay: '-6.5s' }} />
+        <GrinningFace className="absolute left-[78%] top-[70%] -translate-x-1/2 -translate-y-1/2 w-[34%] shock-subliminal-2" style={{ animationDelay: '-11s' }} />
+        {/* labored-breath vignette — heavy, the room closing in (still a sliver of sight between breaths) */}
+        <div className="absolute inset-0 shock-breath-heavy" style={{ boxShadow: 'inset 0 0 100px 34px rgba(0,0,0,0.8)' }} />
         {/* claw marks torn down the screen */}
         <svg className="absolute inset-0 w-full h-full opacity-40" preserveAspectRatio="none" viewBox="0 0 100 100"><g stroke="#5b0f1a" strokeWidth="0.5" fill="none" strokeLinecap="round">
           <path d="M20 6 L24 70" /><path d="M26 4 L31 72" /><path d="M32 8 L36 66" /><path d="M70 10 L74 78" /><path d="M76 6 L80 74" />

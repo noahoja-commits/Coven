@@ -512,6 +512,8 @@ body.shock-duo-warp .phone-frame { animation: shockHueBreathe 7s ease-in-out inf
 .reveal-heart { animation: revealHeart 0.86s ease-in-out infinite; }
 @keyframes revealSlam { 0% { transform: scale(0.4); opacity: 0; } 100% { transform: scale(1.08); opacity: 1; } }
 .reveal-slam { animation: revealSlam 0.18s cubic-bezier(0.2,0.8,0.2,1) forwards; }
+/* the face creeping closer through the dark — small & faint, then right in front of you */
+@keyframes revealCreepFace { 0% { transform: translate(-50%,-50%) scale(0.4); opacity: 0.14; } 70% { opacity: 0.7; } 100% { transform: translate(-50%,-50%) scale(1.18); opacity: 0.9; } }
 /* a roaming apparition fading in and out at the edge of sight */
 @keyframes hauntFade { 0% { opacity: 0; transform: translateY(6px) scale(0.95); } 26% { opacity: 1; } 72% { opacity: 0.88; } 100% { opacity: 0; transform: translateY(-5px) scale(1.03); } }
 @keyframes hauntFlash { 0% { opacity: 0; } 12% { opacity: 0.55; } 30% { opacity: 0; } 100% { opacity: 0; } }
