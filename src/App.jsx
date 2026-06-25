@@ -185,6 +185,13 @@ export default function App() {
   // shock-mode fun pack would mount with no mode selected). First render is correct.
   const settings = { ...DEFAULT_SETTINGS, ...rawSettings };
 
+  // A 'transient' horror mode (paralysis) is NOT a selectable theme — angering the demon plays it
+  // for ~10s, then it clears itself. While it plays it overrides the chosen shockMode everywhere
+  // the effect renders, but it never persists.
+  const [transientShock, setTransientShock] = useState(null);
+  const transientTimer = useRef(null);
+  const effectiveShockMode = transientShock || settings.shockMode;
+
   // Live content state (Supabase-backed)
   const [posts, setPosts] = useState([]);
   const [feedError, setFeedError] = useState(false);
@@ -282,24 +289,24 @@ export default function App() {
       egodeath: 'shock-type-grenze', paralysis: 'shock-type-metal',
     };
     document.body.classList.remove('shock-type-grenze', 'shock-type-pirata', 'shock-type-metal', 'shock-type-unifraktur', 'shock-type-rocker', 'shock-type-fell', 'shock-type-oswald');
-    const fc = SHOCK_FONT[settings.shockMode];
+    const fc = SHOCK_FONT[effectiveShockMode];
     if (fc && !settings.parchmentMode) document.body.classList.add(fc);
     // Some modes recolour the WHOLE app via a reliable element filter on .phone-frame (backdrop-filter
     // wouldn't override the red base): insomnia=electric blue, requiem=stark B&W, mist=sepia,
     // ego-death=a breathing uncanny hue-warp, paralysis=drained b&w horror.
     const SHOCK_DUO = { insomnia: 'shock-duo-blue', requiem: 'shock-duo-bw', mist: 'shock-duo-sepia', keepsake: 'shock-duo-sepia', xerox: 'shock-duo-bw', duotone: 'shock-duo-blue', egodeath: 'shock-duo-warp', paralysis: 'shock-duo-bw' };
     document.body.classList.remove('shock-duo-blue', 'shock-duo-bw', 'shock-duo-sepia', 'shock-duo-warp');
-    const dc = SHOCK_DUO[settings.shockMode];
+    const dc = SHOCK_DUO[effectiveShockMode];
     if (dc && !settings.parchmentMode) document.body.classList.add(dc);
-  }, [settings.parchmentMode, settings.mediaTreatment, settings.shockMode]);
+  }, [settings.parchmentMode, settings.mediaTreatment, effectiveShockMode]);
 
   // Dread bed — a heartbeat + whispers run for as long as a horror mode is active. (Audio only
   // starts once a gesture has resumed the context; the trigger tap primes it.)
   useEffect(() => {
-    if (settings.shockMode === 'paralysis' || settings.shockMode === 'egodeath') startDread();
+    if (effectiveShockMode === 'paralysis' || effectiveShockMode === 'egodeath') startDread();
     else stopDread();
     return () => stopDread();
-  }, [settings.shockMode]);
+  }, [effectiveShockMode]);
 
   // Ambient drone. The AudioContext MUST be started/resumed synchronously inside
   // the user's tap (toggleSound, called straight from the toggle) — iOS drops audio
@@ -1682,7 +1689,7 @@ export default function App() {
 
   // ── Shock-mode fun pack: quick-switch handlers + shake-to-shuffle (hooks ABOVE the render gate) ──
   // Locked secret modes never appear in the cycle/shuffle until they've been discovered.
-  const ACTIVE_SHOCK_IDS = SHOCK_MODES.filter((m) => m.id !== 'none' && (!m.secret || unlockedShock.includes(m.id))).map((m) => m.id);
+  const ACTIVE_SHOCK_IDS = SHOCK_MODES.filter((m) => m.id !== 'none' && !m.transient && (!m.secret || unlockedShock.includes(m.id))).map((m) => m.id);
   const nextShock = () => setSettings((s) => {
     const i = ACTIVE_SHOCK_IDS.indexOf(s.shockMode);
     return { ...s, shockMode: ACTIVE_SHOCK_IDS[(i + 1) % ACTIVE_SHOCK_IDS.length] };
@@ -1952,10 +1959,10 @@ export default function App() {
   const vigil = settings.vigilEnabled !== false && !settings.parchmentMode && isVigil();
 
   return (
-    <div className={`phone-frame max-w-md mx-auto relative overflow-hidden h-[100dvh] text-[#F5F1E8] ${settings.shockMode === 'scream' || settings.shockMode === 'paralysis' ? 'shock-shake' : settings.shockMode === 'glitch' ? 'shock-jitter' : ''}`}
+    <div className={`phone-frame max-w-md mx-auto relative overflow-hidden h-[100dvh] text-[#F5F1E8] ${effectiveShockMode === 'scream' || effectiveShockMode === 'paralysis' ? 'shock-shake' : effectiveShockMode === 'glitch' ? 'shock-jitter' : ''}`}
       style={{ background: settings.parchmentMode ? '#EDE0C2' : '#0A0A0A' }}>
       {/* Shock mode — BACK layer: bold occult motifs render BEHIND the app content so it stays readable */}
-      {!settings.parchmentMode && !isInsideOverlay && <ShockOverlay mode={settings.shockMode} layer="back" />}
+      {!settings.parchmentMode && !isInsideOverlay && <ShockOverlay mode={effectiveShockMode} layer="back" />}
       {/* Living ambient glow — breathing ember/candle light for depth (behind mood washes) */}
       {settings.ambientGlow !== false && !isInsideOverlay && !settings.parchmentMode && <AmbientGlow />}
       {/* Restrained oxblood breath — a hint at top + bottom over a deep near-black base, so the
@@ -2025,7 +2032,7 @@ export default function App() {
       )}
 
       {/* Shock mode — FRONT layer: only translucent texture/chrome, on top (z-30, pointer-events-none) */}
-      {!settings.parchmentMode && !isInsideOverlay && <ShockOverlay mode={settings.shockMode} layer="front" />}
+      {!settings.parchmentMode && !isInsideOverlay && <ShockOverlay mode={effectiveShockMode} layer="front" />}
       {/* Grain — floored so the film texture stays visibly present (still slider-controlled above the floor) */}
       {settings.grainIntensity > 0 && (
         settings.grainStyle === 'print'
@@ -2360,9 +2367,17 @@ export default function App() {
           target={revealTarget}
           name={meHandle}
           onComplete={(m) => {
-            setSettings((s) => ({ ...s, shockMode: m }));
-            setUnlockedShock((u) => (u.includes(m) ? u : [...u, m]));
             setRevealTarget(null);
+            // A transient scare (paralysis) plays for ~10s then clears itself — it never becomes a
+            // selectable theme. Other secret modes (egodeath) unlock + persist as before.
+            if (SHOCK_MODES.find((x) => x.id === m)?.transient) {
+              setTransientShock(m);
+              clearTimeout(transientTimer.current);
+              transientTimer.current = setTimeout(() => setTransientShock(null), 10000);
+            } else {
+              setSettings((s) => ({ ...s, shockMode: m }));
+              setUnlockedShock((u) => (u.includes(m) ? u : [...u, m]));
+            }
           }}
         />
       )}
@@ -2532,7 +2547,7 @@ export default function App() {
       {settings.familiar !== false && !anyOverlayOpen && <FloatingCat active onSummon={summonShock} />}
       {/* the haunt — when a horror mode is on, it roams the WHOLE app (even mid-modal) and strikes
           unpredictably. no safe corner. only held back during the reveal itself. */}
-      {!settings.parchmentMode && <ShockHaunt mode={settings.shockMode} name={meHandle} active={!revealTarget} />}
+      {!settings.parchmentMode && <ShockHaunt mode={effectiveShockMode} name={meHandle} active={!revealTarget} />}
       {settings.shockMode !== 'none' && settings.reactiveTaps !== false && !anyOverlayOpen && !settings.parchmentMode && (
         <ShockSparks mode={settings.shockMode} />
       )}

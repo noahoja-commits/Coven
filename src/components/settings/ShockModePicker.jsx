@@ -28,7 +28,8 @@ const SWATCH = {
 // Live mode picker — translucent so the effect plays behind it while you try modes.
 // Secret modes stay hidden until they've been discovered (then they appear here, unlocked).
 export function ShockModePicker({ current = 'none', unlocked = [], onPick, onClose }) {
-  const modes = SHOCK_MODES.filter(m => !m.secret || unlocked.includes(m.id));
+  // Transient modes (e.g. paralysis) are NOT selectable themes — they only play as timed scares.
+  const modes = SHOCK_MODES.filter(m => !m.transient && (!m.secret || unlocked.includes(m.id)));
   return (
     <div className="fixed inset-0 z-[70] bg-black/45 backdrop-blur-[2px] flex flex-col animate-fade-in">
       <div className="flex items-center justify-between px-4 h-[60px] safe-pt">

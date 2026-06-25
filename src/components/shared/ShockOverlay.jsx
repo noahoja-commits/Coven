@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { HorrorImage } from './HorrorImage';
+import { HorrorVideo } from './HorrorVideo';
 import { HORROR_SRC } from '../../lib/horrorAssets';
 
 // Selectable full-screen "shock" visual modes, split into TWO layers so you can always read the app:
@@ -737,10 +738,10 @@ THREAT ${['LOW', 'ELEV', 'HIGH', 'CRIT'][tick % 4]}
         <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 42%, rgba(16,14,18,0.46), rgba(3,3,4,0.9) 66%)' }} />
         {/* a failing, flickering light */}
         <div className="absolute left-1/2 top-[6%] -translate-x-1/2 w-[60%] h-[50%] animate-flicker" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(180,180,190,0.12), transparent 62%)', mixBlendMode: 'screen' }} />
-        {/* a second figure, faint and unmoving, already in the dark */}
-        <HorrorImage src={HORROR_SRC.peer} className="absolute left-[62%] top-[16%] w-32" style={{ aspectRatio: '2 / 3', opacity: 0.3 }} />
-        {/* the entity — a grinning thing looming out of the black, then lunging at you */}
-        <HorrorImage src={HORROR_SRC.grin} className="absolute left-1/2 top-[8%] w-52 shock-loom" style={{ aspectRatio: '2 / 3' }} />
+        {/* a second figure, crouched in the dark, already there — unmoving */}
+        <HorrorImage src={HORROR_SRC.crouchA} className="absolute left-[60%] top-[18%] w-36" style={{ aspectRatio: '1 / 1', opacity: 0.34 }} />
+        {/* THE ENTITY — a gaunt ghoul (moving video) looming out of the black, then lunging at you */}
+        <HorrorVideo variant="slam" className="absolute left-1/2 top-[6%] w-60 shock-loom" style={{ aspectRatio: '2 / 3' }} />
         {/* the watcher, creeping in from the edge — closer than it was a moment ago */}
         <div className="absolute left-0 top-[22%] w-28 h-[48%] shock-creep"><HorrorImage src={HORROR_SRC.mask} className="w-full h-full" /></div>
         {/* skeletal hands reaching from the edges */}
@@ -790,7 +791,7 @@ export const SHOCK_MODES = [
   { id: 'none', label: 'None', desc: 'pure brutalist base' },
   { id: 'lament', label: 'Lament', desc: 'a mourning letter · rain & candlelight · heartbreaking' },
   { id: 'egodeath', label: 'Ego Death', desc: 'the I dissolves · hypnotic vortex · the watching eye', secret: true },
-  { id: 'paralysis', label: 'Sleep Paralysis', desc: 'pure horror · a wraith lunges from the dark', secret: true },
+  { id: 'paralysis', label: 'Sleep Paralysis', desc: 'pure horror · a wraith lunges from the dark', secret: true, transient: true },
   { id: 'insomnia', label: 'Insomnia', desc: 'electric blue · heartbeat · 3:33am' },
   { id: 'dead-channel', label: 'Dead Channel', desc: '1-bit dither · tracking roll · no signal' },
   { id: 'emergency', label: 'Emergency', desc: 'twin radar · alert ticker · infernal signal' },
