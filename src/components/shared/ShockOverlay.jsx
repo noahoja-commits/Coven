@@ -110,32 +110,70 @@ function WraithFace({ className = '', style }) {
   );
 }
 
-// A blown-out, high-contrast B&W decayed skull-face with a too-wide grin — threshold photocopy
-// horror. Stark white cranium dissolving at the edges, hollow eyes, jagged white teeth.
+// A decayed, screaming face — SHADED with tonal gradients (real 3-D form, not flat cartoon shapes),
+// its edges torn and rotted by turbulence displacement, skin grained, asymmetric and wrong. The
+// photographic processing (warp + grain + contrast crush) is what pulls it out of cartoon territory.
 export function GrinningFace({ className = '', style }) {
   return (
-    <svg viewBox="0 0 100 124" className={className} style={style} aria-hidden>
+    <svg viewBox="0 0 120 150" className={className} style={style} aria-hidden>
       <defs>
-        <filter id="grinRot" x="-25%" y="-25%" width="150%" height="150%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.62 0.5" numOctaves="2" seed="5" result="n" />
-          <feDisplacementMap in="SourceGraphic" in2="n" scale="8" />
+        <radialGradient id="gfCran" cx="42%" cy="30%" r="64%">
+          <stop offset="0" stopColor="#f7f5ef" /><stop offset="0.38" stopColor="#d4cfc4" />
+          <stop offset="0.68" stopColor="#6a6760" /><stop offset="1" stopColor="#100e0c" />
+        </radialGradient>
+        <radialGradient id="gfSocket" cx="50%" cy="44%" r="58%">
+          <stop offset="0" stopColor="#000" /><stop offset="0.62" stopColor="#050403" /><stop offset="1" stopColor="#050403" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id="gfMouth" cx="50%" cy="32%" r="68%">
+          <stop offset="0" stopColor="#000" /><stop offset="0.7" stopColor="#0b0907" /><stop offset="1" stopColor="#241f1a" />
+        </radialGradient>
+        <filter id="gfDread" x="-28%" y="-28%" width="156%" height="156%">
+          {/* torn, rotted edges */}
+          <feTurbulence type="fractalNoise" baseFrequency="0.013 0.019" numOctaves="3" seed="8" result="w" />
+          <feDisplacementMap in="SourceGraphic" in2="w" scale="13" xChannelSelector="R" yChannelSelector="G" result="d" />
+          {/* skin grain, multiplied in */}
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="2" result="g" />
+          <feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.45 0" result="ga" />
+          <feComposite in="ga" in2="d" operator="in" result="gm" />
+          <feBlend in="d" in2="gm" mode="multiply" result="grained" />
+          {/* crush the midtones toward a high-contrast, blown-out photocopy */}
+          <feComponentTransfer in="grained">
+            <feFuncR type="gamma" amplitude="1.25" exponent="0.8" offset="-0.06" />
+            <feFuncG type="gamma" amplitude="1.25" exponent="0.8" offset="-0.06" />
+            <feFuncB type="gamma" amplitude="1.25" exponent="0.8" offset="-0.06" />
+          </feComponentTransfer>
         </filter>
       </defs>
-      <g filter="url(#grinRot)">
-        {/* blown-out cranium + gaunt lower face */}
-        <g fill="#f2f2ec">
-          <ellipse cx="44" cy="38" rx="33" ry="36" />
-          <path d="M18 56 Q50 48 84 60 Q82 96 50 116 Q24 100 18 56 Z" />
-        </g>
-        {/* the dark within — hollow asymmetric eyes + the too-wide grin */}
-        <g fill="#000">
-          <ellipse cx="36" cy="40" rx="9" ry="13" />
-          <ellipse cx="62" cy="40" rx="7" ry="11" opacity="0.92" />
-          <path d="M26 70 Q52 104 84 68 Q72 92 52 94 Q36 92 26 70 Z" />
-        </g>
-        {/* jagged teeth raking the grin */}
-        <g stroke="#e8e6df" strokeWidth="2.1">
-          {[32, 38, 44, 50, 56, 62, 68, 74, 80].map((x, i) => <line key={i} x1={x} y1="71" x2={x + 1} y2={89 - (i % 2) * 4} />)}
+      <g filter="url(#gfDread)">
+        {/* gaunt, asymmetric skull (shaded) */}
+        <path d="M60 4 C34 5 21 24 23 52 C24 74 31 104 46 130 C52 140 56 146 60 146 C65 146 70 139 76 128 C90 102 97 73 98 51 C100 24 86 5 60 4 Z" fill="url(#gfCran)" />
+        {/* temple + cheek hollows for gauntness */}
+        <path d="M26 44 C29 60 30 78 38 96 C30 86 24 66 24 48 Z" fill="#000" opacity="0.42" />
+        <path d="M96 46 C93 62 92 80 84 98 C92 88 98 68 98 50 Z" fill="#000" opacity="0.42" />
+        {/* brow ridge catching light */}
+        <path d="M32 41 Q48 34 60 38 Q72 32 90 42 Q74 45 60 43 Q46 46 32 41 Z" fill="#ebe6db" opacity="0.5" />
+        {/* eye sockets — deep asymmetric pits */}
+        <ellipse cx="44" cy="55" rx="13" ry="16.5" fill="url(#gfSocket)" />
+        <ellipse cx="79" cy="53" rx="11" ry="15" fill="url(#gfSocket)" />
+        {/* the wet glint deep in the dark */}
+        <circle cx="47" cy="59" r="2" fill="#dfe2e8" opacity="0.85" />
+        <circle cx="77" cy="57" r="1.7" fill="#dfe2e8" opacity="0.8" />
+        {/* nasal cavity */}
+        <path d="M60 65 L53 84 Q60 89 67 84 Z" fill="#040302" />
+        {/* cheekbone highlights */}
+        <path d="M37 73 Q44 82 42 94 Q35 85 35 75 Z" fill="#d0cabe" opacity="0.38" />
+        <path d="M85 71 Q80 82 82 94 Q89 84 89 73 Z" fill="#d0cabe" opacity="0.38" />
+        {/* the gaping grin — irregular, wider & higher on one side */}
+        <path d="M33 97 Q60 126 91 92 Q86 111 74 117 Q60 123 47 117 Q37 110 33 97 Z" fill="url(#gfMouth)" />
+        {/* uneven, broken teeth */}
+        <g fill="#d6d0c2">
+          <path d="M40 101 l4.5 0 l-0.5 9 l-4 -2 Z" />
+          <path d="M46 103 l5 0 l-0.5 13 l-4.5 -2 Z" />
+          <path d="M53 104 l4.5 0 l0 7 l-4.5 -1 Z" opacity="0.8" />
+          <path d="M59 104 l5 0 l-0.5 14 l-4.5 -2 Z" />
+          <path d="M66 103 l4 0 l-1 9 l-3.5 -1 Z" opacity="0.78" />
+          <path d="M71 102 l5 0 l-1.5 12 l-4 -2 Z" />
+          <path d="M78 100 l4 0 l-1.5 8 l-3 -2 Z" opacity="0.72" />
         </g>
       </g>
     </svg>
