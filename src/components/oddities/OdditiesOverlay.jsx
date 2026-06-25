@@ -106,7 +106,8 @@ function MarketplaceTab({ onOpenOddity, onCompose, listings = [] }) {
           {filtered.map(item => <OddityCard key={item.id} item={item} onOpen={onOpenOddity} />)}
         </div>
       )}
-      <button onClick={onCompose} className="tap fixed bottom-6 right-6 z-10 w-14 h-14 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] flex items-center justify-center shadow-xl"
+      {/* lifted clear of the 68px bottom nav (+ safe area) so it isn't cut off behind it */}
+      <button onClick={onCompose} className="tap fixed bottom-[calc(80px+env(safe-area-inset-bottom))] right-5 z-30 w-14 h-14 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] flex items-center justify-center shadow-xl"
         style={{ boxShadow: '0 0 24px rgba(91, 15, 26, 0.6)' }}>
         <Plus size={22} />
       </button>
