@@ -191,6 +191,8 @@ export default function App() {
   const [transientShock, setTransientShock] = useState(null);
   const transientTimer = useRef(null);
   const effectiveShockMode = transientShock || settings.shockMode;
+  // hygiene: clear any pending transient-scare timer if the app ever unmounts
+  useEffect(() => () => clearTimeout(transientTimer.current), []);
 
   // Live content state (Supabase-backed)
   const [posts, setPosts] = useState([]);
@@ -2548,10 +2550,12 @@ export default function App() {
       {/* the haunt — when a horror mode is on, it roams the WHOLE app (even mid-modal) and strikes
           unpredictably. no safe corner. only held back during the reveal itself. */}
       {!settings.parchmentMode && <ShockHaunt mode={effectiveShockMode} name={meHandle} active={!revealTarget} />}
-      {settings.shockMode !== 'none' && settings.reactiveTaps !== false && !anyOverlayOpen && !settings.parchmentMode && (
+      {/* theme chrome (tap sparks + mode switcher) hides during a transient scare so the
+          10s paralysis takeover stays pure horror — only the overlay + haunt show */}
+      {!transientShock && settings.shockMode !== 'none' && settings.reactiveTaps !== false && !anyOverlayOpen && !settings.parchmentMode && (
         <ShockSparks mode={settings.shockMode} />
       )}
-      {settings.shockMode !== 'none' && settings.quickSwitch !== false && !anyOverlayOpen && !settings.parchmentMode && (
+      {!transientShock && settings.shockMode !== 'none' && settings.quickSwitch !== false && !anyOverlayOpen && !settings.parchmentMode && (
         <ShockQuickSwitch onNext={nextShock} onShuffle={shuffleShock} onPicker={() => setShowShockPicker(true)} />
       )}
       <Toast toast={toast} onDone={() => setToast(null)} />
