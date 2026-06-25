@@ -1,12 +1,23 @@
-import { ChevronLeft, MessageCircle, Share2, MapPin } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChevronLeft, MessageCircle, Share2, MapPin, Eye } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { CONDITION_LABELS } from '../../data/oddities';
 import { OddityImage } from './OdditiesOverlay';
 import { shareCoven } from '../../lib/share';
+import { recordView, fetchViewCounts } from '../../lib/db/views';
 
 const PRICE_MODE = { firm: 'firm', obo: 'or best offer', trade: 'open to trades' };
 
 export function OddityDetail({ item, onBack, onWhisper, onOpenUser }) {
+  const [views, setViews] = useState(0);
+  // Record a unique view when a listing is opened (not your own), and load the count.
+  useEffect(() => {
+    if (!item?.id) return undefined;
+    if (!item.mine) recordView('listing', item.id);
+    let on = true;
+    fetchViewCounts('listing', [item.id]).then(m => { if (on) setViews(m[item.id] || 0); }).catch(() => {});
+    return () => { on = false; };
+  }, [item?.id, item?.mine]);
   if (!item) return null;
   const seller = item.seller || {};
   const share = () => shareCoven({ title: item.title, text: `${item.title} — $${item.price} on Coven`, path: `?oddity=${item.id}` });
@@ -46,7 +57,10 @@ export function OddityDetail({ item, onBack, onWhisper, onOpenUser }) {
                 <div className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-lg">{seller.avatar}</div>
                 <div className="flex-1">
                   <div className="text-[#F5F1E8] text-sm" style={F.ui}>{seller.user}</div>
-                  <div className="text-[10px] text-[#6B6B6B]" style={F.ui}>{item.mine ? 'your listing' : 'seller'} · posted {item.posted}</div>
+                  <div className="text-[10px] text-[#6B6B6B] flex items-center gap-1.5" style={F.ui}>
+                    <span>{item.mine ? 'your listing' : 'seller'} · posted {item.posted}</span>
+                    {views > 0 && <span className="flex items-center gap-0.5" title="unique views"><Eye size={10} /> {views}</span>}
+                  </div>
                 </div>
                 <span className="text-[#C8102E] text-xs uppercase tracking-wider px-3 py-1.5 border border-[#2A2A2A]" style={F.ui}>profile</span>
               </button>

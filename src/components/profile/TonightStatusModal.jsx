@@ -94,7 +94,8 @@ export function TonightStatusModal({ current, onSave, onClose }) {
               </div>
               <button type="button" role="switch" aria-checked={share} onClick={() => setShare(s => !s)}
                 className={`w-11 h-6 rounded-full relative shrink-0 transition-colors ${share ? 'bg-[#8B0000]' : 'bg-[#2A2A2A]'}`}>
-                <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-[#F5F1E8] transition-transform ${share ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
+                <span className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-[#F5F1E8] transition-transform"
+                  style={{ transform: share ? 'translateX(20px)' : 'translateX(0)' }} />
               </button>
             </div>
             {share && (

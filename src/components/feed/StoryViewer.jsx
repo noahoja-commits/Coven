@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, ChevronLeft, ChevronRight, Send, Trash2 } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Send, Trash2, Eye } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { fetchStoryReactors } from '../../lib/db/stories';
+import { recordView, fetchViewCounts } from '../../lib/db/views';
 
 const STORY_REACTIONS = ['🦇', '🔥', '💀', '🥀', '🕯'];
 
@@ -29,20 +30,26 @@ export function StoryViewer({ stories = [], startIndex = 0, onReply, onReactStor
   const [paused, setPaused] = useState(false);
   const [myReactions, setMyReactions] = useState({}); // {storyId: kind}
   const [reactors, setReactors] = useState([]);        // who reacted to my story
+  const [seenCount, setSeenCount] = useState(0);       // unique views of my story
   const startRef = useRef(Date.now());
 
   const story = stories[index];
 
   useEffect(() => { setProgress(0); startRef.current = Date.now(); }, [index]);
 
-  // Mark each story watched as it's shown (drives the "seen" ring on the rail). Skip your own.
-  useEffect(() => { if (story?.id && !story.mine) onSeen?.(story.id); }, [story?.id, story?.mine, onSeen]);
+  // Mark each story watched as it's shown (drives the "seen" ring on the rail) and record a
+  // real unique view server-side. Skip your own — viewing your own story shouldn't count.
+  useEffect(() => {
+    if (story?.id && !story.mine) { onSeen?.(story.id); recordView('story', story.id); }
+  }, [story?.id, story?.mine, onSeen]);
 
-  // When viewing your own story, load who reacted to it.
+  // When viewing your own story, load who reacted + the unique-view count.
   useEffect(() => {
     let on = true;
-    if (story?.mine && story?.id) fetchStoryReactors(story.id).then(r => { if (on) setReactors(r); }).catch(() => {});
-    else setReactors([]);
+    if (story?.mine && story?.id) {
+      fetchStoryReactors(story.id).then(r => { if (on) setReactors(r); }).catch(() => {});
+      fetchViewCounts('story', [story.id]).then(m => { if (on) setSeenCount(m[story.id] || 0); }).catch(() => {});
+    } else { setReactors([]); setSeenCount(0); }
     return () => { on = false; };
   }, [story?.id, story?.mine]);
 
@@ -137,6 +144,9 @@ export function StoryViewer({ stories = [], startIndex = 0, onReply, onReactStor
             </div>
           )}
           <div className="flex items-center gap-2">
+            {seenCount > 0 && (
+              <span className="flex items-center gap-1 text-white/70 text-xs" style={F.mono} title="unique views"><Eye size={12} /> {seenCount}</span>
+            )}
             <p className="text-white/60 text-xs italic" style={F.serif}>disappears in {Math.max(0, Math.floor((story.expiresAt - Date.now()) / 3600000))}h</p>
             <button onClick={() => { onDelete && onDelete(story.id); onClose && onClose(); }}
               className="flex items-center gap-1 px-3 py-1 text-[10px] uppercase tracking-wider border border-white/30 text-white/80 hover:border-[#8B0000] hover:text-[#8B0000] transition-colors" style={F.ui}>

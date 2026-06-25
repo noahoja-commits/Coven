@@ -12,6 +12,7 @@ import { darkDay, todaysVespers, todaysCodex } from '../../data/helpers';
 import { DailyAltar } from './DailyAltar';
 import { TEXTS } from '../../data/library';
 import { CODEX } from '../../data/codex';
+import { recordView, fetchViewCounts } from '../../lib/db/views';
 
 export function HomeScreen({
   posts, onReact, onOpenComments, onOpenCommunity, onOpenUser, onDeletePost, onHidePost, onQuotePost, onWhisperPost, onTogglePin, pinnedPostId, feedSort = 'latest', onSetFeedSort,
@@ -66,6 +67,28 @@ export function HomeScreen({
     ? [...tagFilteredPosts].sort((a, b) => postScore(b) - postScore(a))
     : tagFilteredPosts;
 
+  // Real unique-view counts — one per soul; a repeat visit never re-counts. We fetch the
+  // counts for the visible posts, and record a view the first time each post scrolls in.
+  const [postViews, setPostViews] = useState({});
+  const postIdsKey = sortedPosts.map(p => p.id).join(',');
+  useEffect(() => {
+    const ids = sortedPosts.map(p => p.id);
+    if (!ids.length) { setPostViews({}); return; }
+    fetchViewCounts('post', ids).then(setPostViews).catch(() => {});
+  }, [postIdsKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (typeof IntersectionObserver === 'undefined') return undefined;
+    const els = document.querySelectorAll('article[data-post-id]');
+    if (!els.length) return undefined;
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) { recordView('post', e.target.getAttribute('data-post-id')); io.unobserve(e.target); }
+      }
+    }, { threshold: 0.5 });
+    els.forEach(el => io.observe(el));
+    return () => io.disconnect();
+  }, [postIdsKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Double-tap to like (IG-style): bat-react + a burst animation.
   const [burst, setBurst] = useState(null);
   const doubleTapLike = (post) => {
@@ -105,9 +128,6 @@ export function HomeScreen({
     }
   }
   const trendingTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-  const witnesses = tonightStatus?.setAt
-    ? Math.min(24, Math.max(0, Math.floor((Date.now() - tonightStatus.setAt) / (1000 * 60 * 3))))
-    : 0;
   const toneColor = today
     ? today.tone === 'red' ? '#8B0000'
     : today.tone === 'silver' ? '#8A8A92'
@@ -279,11 +299,6 @@ export function HomeScreen({
           <span className="w-1.5 h-1.5 rounded-full bg-[#8B0000] animate-pulse" />
           <span className="text-[10px] uppercase tracking-[0.2em] text-[#8B0000]" style={F.ui}>your tonight</span>
           <span className="text-[#F5F1E8] text-sm flex-1 truncate ml-2" style={F.serif}>"{tonightStatus.text}"</span>
-          {witnesses > 0 && (
-            <span className="flex items-center gap-1 text-[10px] text-[#C8102E]" style={F.mono} title="witnesses">
-              <Eye size={11} /> {witnesses}
-            </span>
-          )}
         </button>
       )}
 
@@ -355,7 +370,7 @@ export function HomeScreen({
           // "Hot" heat marker — only in trending, only for genuinely high-score posts.
           const isHot = feedSort === 'trending' && postScore(post) >= 8;
           return (
-            <article key={post.id} className="px-4 py-4 relative select-none border-b border-[#141318]" style={postAgeStyle(post.createdAt)} onDoubleClick={() => doubleTapLike(post)}>
+            <article key={post.id} data-post-id={post.id} className="px-4 py-4 relative select-none border-b border-[#141318]" style={postAgeStyle(post.createdAt)} onDoubleClick={() => doubleTapLike(post)}>
               {burst === post.id && (
                 <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
                   <span className="absolute w-40 h-40 rounded-full animate-heat-flash"
@@ -525,6 +540,11 @@ export function HomeScreen({
                   <Reaction icon="💨" count={post.reactions.smoke} active={post.myReactions?.smoke} onClick={() => onReact && onReact(post.id, 'smoke')} />
                 </div>
                 <div className="flex items-center gap-1">
+                  {postViews[post.id] > 0 && (
+                    <span className="flex items-center gap-1 text-[10px] text-[#6B6B6B] px-1" style={F.mono} title="unique views">
+                      <Eye size={12} /> {postViews[post.id]}
+                    </span>
+                  )}
                   <button onClick={() => onToggleCandle && onToggleCandle(post.id)}
                     className={`p-2 tap transition-colors ${candled ? 'text-[#C9A961]' : 'text-[#6B6B6B] hover:text-[#C8102E]'}`}
                     title={candled ? 'candle lit' : 'light a candle'}>
