@@ -1,0 +1,15 @@
+Horror imagery — source & licensing
+====================================
+All images below are used as in-app horror effects (heavily processed at render time).
+Every source license permits commercial use and modification with no attribution
+required. This file is kept as a courtesy record.
+
+skull.jpg   — Pexels (pexels.com/photo/11189239)  — Pexels License (free, commercial, no attribution)
+mask.jpg    — Unsplash (unsplash.com/photos/A_ODEwShYX4) — Unsplash License (free, commercial, no attribution)
+torn.jpg    — Pexels (pexels.com/photo/9679166)   — Pexels License
+wraith.jpg  — Pexels (pexels.com/photo/10225367)  — Pexels License
+eyes.jpg    — Pexels (pexels.com/photo/18870805)  — Pexels License
+peer.jpg    — Pexels (pexels.com/photo/7531999)   — Pexels License
+
+Pexels License:   https://www.pexels.com/license/
+Unsplash License: https://unsplash.com/license

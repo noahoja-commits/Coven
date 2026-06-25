@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { HorrorImage } from './HorrorImage';
+import { HORROR_SRC } from '../../lib/horrorAssets';
 
 // Selectable full-screen "shock" visual modes, split into TWO layers so you can always read the app:
 //   layer="back"  → renders BEHIND the app content (bold motifs: pentagrams, summoning circle, fog,
@@ -879,11 +881,11 @@ THREAT ${['LOW', 'ELEV', 'HIGH', 'CRIT'][tick % 4]}
         {/* a failing, flickering light */}
         <div className="absolute left-1/2 top-[6%] -translate-x-1/2 w-[60%] h-[50%] animate-flicker" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(180,180,190,0.12), transparent 62%)', mixBlendMode: 'screen' }} />
         {/* a second figure, faint and unmoving, already in the dark */}
-        <WraithFace className="absolute left-[64%] top-[20%] w-28 opacity-20" />
+        <HorrorImage src={HORROR_SRC.peer} className="absolute left-[62%] top-[16%] w-32" style={{ aspectRatio: '2 / 3', opacity: 0.3 }} />
         {/* the entity — looming out of the black, then lunging at you */}
-        <GrinningFace className="absolute left-1/2 top-[12%] w-48 shock-loom" />
+        <HorrorImage src={HORROR_SRC.wraith} className="absolute left-1/2 top-[10%] w-56 shock-loom" style={{ aspectRatio: '3 / 2' }} />
         {/* the watcher, creeping in from the edge — closer than it was a moment ago */}
-        <div className="absolute left-0 top-[24%] w-24 h-[46%] shock-creep"><PeekingFace className="w-full h-full" /></div>
+        <div className="absolute left-0 top-[22%] w-28 h-[48%] shock-creep"><HorrorImage src={HORROR_SRC.mask} className="w-full h-full" /></div>
         {/* skeletal hands reaching from the edges */}
         <BoneHand className="absolute left-[4%] bottom-[5%] w-16 h-28 -rotate-[24deg]" opacity={0.3} />
         <BoneHand className="absolute right-[5%] bottom-[2%] w-16 h-28 rotate-[206deg] scale-x-[-1]" opacity={0.28} />
@@ -896,10 +898,10 @@ THREAT ${['LOW', 'ELEV', 'HIGH', 'CRIT'][tick % 4]}
         {/* the jumpscare — a sudden blinding flash on the lunge */}
         <div className="absolute inset-0 shock-jump" style={{ background: 'rgba(224,224,230,0.92)' }} />
         {/* SUBLIMINAL — faces you're not sure you saw, gone in a frame, at four different beats */}
-        <GrinningFace className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[72%] shock-subliminal" />
-        <GrinningFace className="absolute left-[58%] top-[40%] -translate-x-1/2 -translate-y-1/2 w-[42%] shock-subliminal-2" />
-        <GrinningFace className="absolute left-[28%] top-[62%] -translate-x-1/2 -translate-y-1/2 w-[40%] shock-subliminal" style={{ animationDelay: '-6.5s' }} />
-        <GrinningFace className="absolute left-[78%] top-[70%] -translate-x-1/2 -translate-y-1/2 w-[34%] shock-subliminal-2" style={{ animationDelay: '-11s' }} />
+        <HorrorImage src={HORROR_SRC.skull} variant="slam" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] shock-subliminal" style={{ aspectRatio: '2 / 3' }} />
+        <HorrorImage src={HORROR_SRC.torn} className="absolute left-[58%] top-[40%] -translate-x-1/2 -translate-y-1/2 w-[46%] shock-subliminal-2" style={{ aspectRatio: '3 / 4' }} />
+        <HorrorImage src={HORROR_SRC.wraith} className="absolute left-[28%] top-[62%] -translate-x-1/2 -translate-y-1/2 w-[48%] shock-subliminal" style={{ aspectRatio: '3 / 2', animationDelay: '-6.5s' }} />
+        <HorrorImage src={HORROR_SRC.mask} className="absolute left-[78%] top-[70%] -translate-x-1/2 -translate-y-1/2 w-[38%] shock-subliminal-2" style={{ aspectRatio: '3 / 4', animationDelay: '-11s' }} />
         {/* labored-breath vignette — heavy, the room closing in (still a sliver of sight between breaths) */}
         <div className="absolute inset-0 shock-breath-heavy" style={{ boxShadow: 'inset 0 0 100px 34px rgba(0,0,0,0.8)' }} />
         {/* claw marks torn down the screen */}

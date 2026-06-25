@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { buzz } from '../../lib/haptics';
-import { GrinningFace } from './ShockOverlay';
+import { HorrorImage } from './HorrorImage';
+import { HORROR_SRC, SCARE_FACES, LURK_FACES, pick } from '../../lib/horrorAssets';
 import { scream, whisper } from '../../lib/horror';
 
 // THE HAUNT — when a horror mode is active, the thing hunts you across every tab. Quick strikes
@@ -69,15 +70,17 @@ export function ShockHaunt({ mode, name = 'you', active = true }) {
         <div key={lurk.key} className="fixed z-[118] pointer-events-none" aria-hidden
           style={{ left: `${lurk.x}%`, top: `${lurk.y}%`, animation: 'lurkIn 2.6s ease-out forwards' }}>
           {lurk.kind === 'eyes'
-            ? <span className="text-xl" style={{ filter: 'drop-shadow(0 0 8px rgba(230,235,255,0.7))', letterSpacing: '0.18em' }}>👁👁</span>
-            : <GrinningFace className="w-16" style={{ opacity: 0.55 }} />}
+            ? <HorrorImage src={HORROR_SRC.eyes} className="w-24" style={{ aspectRatio: '4 / 3', opacity: 0.7 }} />
+            : <HorrorImage src={pick(LURK_FACES, lurk.key)} className="w-20" style={{ aspectRatio: '3 / 4', opacity: 0.62 }} />}
         </div>
       )}
       {/* quick strikes */}
       {app && (app.big ? (
-        <div key={app.key} className="fixed inset-0 z-[120] pointer-events-none flex items-center justify-center overflow-hidden" aria-hidden>
-          <div className="absolute inset-0" style={{ background: 'rgba(222,222,228,0.9)', animation: 'hauntFlash 0.78s ease-out forwards' }} />
-          <GrinningFace className="w-[170%] reveal-slam" />
+        <div key={app.key} className="fixed inset-0 z-[120] pointer-events-none overflow-hidden" aria-hidden>
+          <div className="absolute inset-0 reveal-slam shock-jitter">
+            <HorrorImage src={pick(SCARE_FACES, app.key)} variant="slam" className="w-full h-full" />
+          </div>
+          <div className="absolute inset-0" style={{ background: 'rgba(228,228,234,0.85)', animation: 'hauntFlash 0.6s ease-out forwards' }} />
         </div>
       ) : app.kind === 'corrupt' ? (
         <div key={app.key} className="fixed inset-0 z-[120] pointer-events-none flex items-center justify-center overflow-hidden reveal-tremor px-4" aria-hidden>
@@ -87,8 +90,8 @@ export function ShockHaunt({ mode, name = 'you', active = true }) {
       ) : (
         <div key={app.key} className="fixed z-[120] pointer-events-none -translate-x-1/2 -translate-y-1/2" aria-hidden
           style={{ left: `${app.x}%`, top: `${app.y}%`, animation: 'hauntFade 1.7s ease-in-out forwards' }}>
-          {app.kind === 'face' && <GrinningFace className="w-32" style={{ opacity: 0.78 }} />}
-          {app.kind === 'eye' && <span className="text-3xl" style={{ opacity: 0.7, filter: 'drop-shadow(0 0 7px rgba(230,235,255,0.6))' }}>👁</span>}
+          {app.kind === 'face' && <HorrorImage src={pick(SCARE_FACES, app.key)} className="w-36" style={{ aspectRatio: '3 / 4', opacity: 0.82 }} />}
+          {app.kind === 'eye' && <HorrorImage src={HORROR_SRC.eyes} className="w-28" style={{ aspectRatio: '4 / 3', opacity: 0.78 }} />}
           {app.kind === 'watch' && <span className="text-xl tracking-[0.25em] text-[#b8b0a8]" style={{ opacity: 0.62, fontFamily: '"VT323", monospace' }}>i see you, {who}</span>}
           {app.kind === 'self' && <span className="text-[15vw] leading-none text-white/[0.07]" style={{ fontFamily: '"Grenze Gotisch", serif' }}>I</span>}
         </div>

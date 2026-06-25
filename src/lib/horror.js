@@ -2,6 +2,8 @@
 // whispers. EVERYTHING is routed through a hard DynamicsCompressor limiter so peaks can never
 // exceed a safe level — no matter how violent the sound, it can't damage hearing. Browsers block
 // audio until a user gesture, so primeHorror() resumes the context from a tap (with a safety net).
+import { preloadHorrorImages } from './horrorAssets';
+
 let ctx = null, master = null, limiter = null;
 let dreadTimer = null, whisperTimer = null, bedNodes = [];
 
@@ -23,6 +25,7 @@ function ensure() {
 function resume() { if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {}); }
 
 export function primeHorror() {
+  preloadHorrorImages(); // warm the JPEGs so a jumpscare never flashes blank
   if (!ensure()) return;
   resume();
   if (ctx.state === 'suspended') {

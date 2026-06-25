@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { buzz } from '../../lib/haptics';
-import { GrinningFace } from './ShockOverlay';
+import { HorrorImage } from './HorrorImage';
+import { HORROR_SRC } from '../../lib/horrorAssets';
 import { primeHorror, scream, whisper, startDread, stopDread } from '../../lib/horror';
 
 // THE FORBIDDEN REVEAL — the intro that plays when a hidden horror mode is summoned. The dread
@@ -61,7 +62,7 @@ export function ForbiddenReveal({ target = 'paralysis', name = 'you', onComplete
             <span key={i} className="absolute text-[11px] tracking-[0.2em] text-[#b0b0b8] shock-blink"
               style={{ top: `${(i * 53 + 12) % 86}%`, left: `${(i * 37 + 6) % 76}%`, opacity: 0.5, animationDelay: `${(i % 4) * 0.3}s` }}>{w}</span>
           ))}
-          <GrinningFace className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[56%]" style={{ opacity: 0.12 }} />
+          <HorrorImage src={HORROR_SRC.torn} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%]" style={{ aspectRatio: '3 / 4', opacity: 0.16 }} />
           <div className="absolute inset-0 reveal-heart pointer-events-none" />
           <div className="absolute inset-0 shock-rgb-r pointer-events-none" style={{ background: 'rgba(255,0,40,0.05)', mixBlendMode: 'screen' }} />
           <div className="absolute inset-0 pointer-events-none" style={{ background: 'repeating-linear-gradient(to bottom, rgba(0,0,0,0.4) 0 1px, transparent 1px 3px)' }} />
@@ -70,7 +71,7 @@ export function ForbiddenReveal({ target = 'paralysis', name = 'you', onComplete
       {/* phase 3 — it CREEPS toward you, filling the dark, whispering your sentence */}
       {phase === 3 && (
         <div className="absolute inset-0 reveal-tremor">
-          <GrinningFace className="absolute left-1/2 top-1/2 w-[80%]" style={{ animation: 'revealCreepFace 1.2s ease-in forwards' }} />
+          <HorrorImage src={HORROR_SRC.mask} className="absolute left-1/2 top-1/2 w-[84%]" style={{ aspectRatio: '3 / 4', animation: 'revealCreepFace 1.2s ease-in forwards' }} />
           {c.whispers.slice(0, 4).map((w, i) => (
             <span key={i} className="absolute text-[11px] tracking-[0.2em] text-[#c8c8d0] shock-blink"
               style={{ top: `${(i * 67 + 8) % 88}%`, left: `${(i * 41 + 5) % 80}%`, opacity: 0.55, animationDelay: `${(i % 3) * 0.25}s` }}>{w}</span>
@@ -82,8 +83,10 @@ export function ForbiddenReveal({ target = 'paralysis', name = 'you', onComplete
       {/* phase 5 — the slam */}
       {phase === 5 && (
         <>
-          <div className="absolute inset-0" style={{ background: 'rgba(232,232,236,0.96)' }} />
-          <GrinningFace className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[178%] reveal-slam" />
+          <div className="absolute inset-0 reveal-slam shock-jitter">
+            <HorrorImage src={target === 'egodeath' ? HORROR_SRC.torn : HORROR_SRC.skull} variant="slam" className="w-full h-full" />
+          </div>
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'rgba(236,236,240,0.92)', animation: 'hauntFlash 0.42s ease-out forwards' }} />
         </>
       )}
     </div>
