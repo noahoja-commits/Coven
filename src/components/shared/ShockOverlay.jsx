@@ -110,6 +110,67 @@ function WraithFace({ className = '', style }) {
   );
 }
 
+// A blown-out, high-contrast B&W decayed skull-face with a too-wide grin — threshold photocopy
+// horror. Stark white cranium dissolving at the edges, hollow eyes, jagged white teeth.
+function GrinningFace({ className = '', style }) {
+  return (
+    <svg viewBox="0 0 100 124" className={className} style={style} aria-hidden>
+      <defs>
+        <filter id="grinRot" x="-25%" y="-25%" width="150%" height="150%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.62 0.5" numOctaves="2" seed="5" result="n" />
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="8" />
+        </filter>
+      </defs>
+      <g filter="url(#grinRot)">
+        {/* blown-out cranium + gaunt lower face */}
+        <g fill="#f2f2ec">
+          <ellipse cx="44" cy="38" rx="33" ry="36" />
+          <path d="M18 56 Q50 48 84 60 Q82 96 50 116 Q24 100 18 56 Z" />
+        </g>
+        {/* the dark within — hollow asymmetric eyes + the too-wide grin */}
+        <g fill="#000">
+          <ellipse cx="36" cy="40" rx="9" ry="13" />
+          <ellipse cx="62" cy="40" rx="7" ry="11" opacity="0.92" />
+          <path d="M26 70 Q52 104 84 68 Q72 92 52 94 Q36 92 26 70 Z" />
+        </g>
+        {/* jagged teeth raking the grin */}
+        <g stroke="#e8e6df" strokeWidth="2.1">
+          {[32, 38, 44, 50, 56, 62, 68, 74, 80].map((x, i) => <line key={i} x1={x} y1="71" x2={x + 1} y2={89 - (i % 2) * 4} />)}
+        </g>
+      </g>
+    </svg>
+  );
+}
+
+// A face emerging from the shadow at the edge — dead glowing eyes, a smile that shouldn't be there.
+function PeekingFace({ className = '', style }) {
+  return (
+    <svg viewBox="0 0 80 130" className={className} style={style} aria-hidden>
+      <defs>
+        <radialGradient id="peekG" cx="0.5" cy="0.38" r="0.62">
+          <stop offset="0" stopColor="#3a3a42" /><stop offset="0.7" stopColor="#16161a" /><stop offset="1" stopColor="#0a0a0c" />
+        </radialGradient>
+      </defs>
+      <path d="M40 4 C20 4 14 24 16 46 C17 70 26 110 40 128 L80 128 L80 4 Z" fill="url(#peekG)" />
+      <ellipse cx="32" cy="44" rx="3.6" ry="4.8" fill="#eef0f4" style={{ filter: 'drop-shadow(0 0 4px rgba(220,230,255,0.85))' }} />
+      <ellipse cx="50" cy="44" rx="3.6" ry="4.8" fill="#eef0f4" style={{ filter: 'drop-shadow(0 0 4px rgba(220,230,255,0.85))' }} />
+      <circle cx="32" cy="44.5" r="1.4" fill="#000" /><circle cx="50" cy="44.5" r="1.4" fill="#000" />
+      <path d="M28 62 Q40 76 54 60" stroke="#b8b8c0" strokeWidth="1.6" fill="none" opacity="0.6" />
+    </svg>
+  );
+}
+
+// Two emaciated figures whose raised arms meet in a pointed arch — stack them at receding scale
+// to make a corridor of the damned (the procession tunnel).
+function ProcessionArch({ className = '', style, opacity = 0.92, fill = '#070510', stroke = 'rgba(180,160,210,0.22)' }) {
+  return (
+    <svg viewBox="0 0 100 100" className={className} style={style} aria-hidden fill={fill} stroke={stroke} strokeWidth="0.5" strokeLinejoin="round">
+      <path d="M22 100 C18 80 20 60 24 44 C20 38 16 30 18 22 C24 30 30 36 38 40 C34 30 30 18 34 6 C40 20 44 34 48 48 L48 100 Z" opacity={opacity} />
+      <path d="M78 100 C82 80 80 60 76 44 C80 38 84 30 82 22 C76 30 70 36 62 40 C66 30 70 18 66 6 C60 20 56 34 52 48 L52 100 Z" opacity={opacity} />
+    </svg>
+  );
+}
+
 export function ShockOverlay({ mode = 'none', layer = 'front' }) {
   const [tick, setTick] = useState(0);
   useEffect(() => {
@@ -702,6 +763,11 @@ THREAT ${['LOW', 'ELEV', 'HIGH', 'CRIT'][tick % 4]}
         {/* two counter-spinning hypnotic pinwheels */}
         <div className="absolute left-1/2 top-[45%] w-[120%] aspect-square -translate-x-1/2 -translate-y-1/2 rounded-full shock-spin" style={{ background: 'repeating-conic-gradient(from 0deg, rgba(10,5,18,0.6) 0deg 7deg, rgba(42,22,64,0.5) 7deg 14deg)', opacity: 0.4, maskImage: 'radial-gradient(circle, #000 30%, transparent 66%)', WebkitMaskImage: 'radial-gradient(circle, #000 30%, transparent 66%)', animationDuration: '26s' }} />
         <div className="absolute left-1/2 top-[45%] w-[82%] aspect-square -translate-x-1/2 -translate-y-1/2 rounded-full shock-spin-rev" style={{ background: 'repeating-conic-gradient(from 0deg, transparent 0deg 9deg, rgba(123,44,191,0.4) 9deg 12deg)', opacity: 0.5, maskImage: 'radial-gradient(circle, #000 18%, transparent 60%)', WebkitMaskImage: 'radial-gradient(circle, #000 18%, transparent 60%)' }} />
+        {/* the procession — a corridor of reaching figures receding into the eye, and more rushing past */}
+        {[1, 0.7, 0.49, 0.34, 0.24].map((s, i) => (
+          <ProcessionArch key={i} className="absolute left-1/2 top-[46%] w-[94%]" style={{ aspectRatio: '1', transform: `translate(-50%,-50%) scale(${s})`, opacity: 0.8 - i * 0.12 }} />
+        ))}
+        {[0, 1, 2].map(i => <ProcessionArch key={`p${i}`} className="absolute left-1/2 top-[46%] w-[94%] shock-procession" style={{ aspectRatio: '1', animationDelay: `${i * 2.3}s` }} opacity={0.6} />)}
         {/* the vortex rings pulled into the eye */}
         {[0, 1, 2, 3, 4, 5].map(i => <div key={i} className="absolute left-1/2 top-[45%] w-64 h-64 rounded-full shock-pull" style={{ border: `2px solid ${i % 2 ? 'rgba(200,16,46,0.5)' : 'rgba(123,44,191,0.5)'}`, animationDelay: `${i * 0.66}s` }} />)}
         {/* the watching eye at the centre */}
@@ -716,6 +782,12 @@ THREAT ${['LOW', 'ELEV', 'HIGH', 'CRIT'][tick % 4]}
     );
     return (
       <div className={`${FWRAP} text-[#cdbce8]`} aria-hidden>
+        {/* an intrusive thought, looping endlessly up the edge of the mind */}
+        <div className="absolute inset-y-[-8%] left-[5%] w-[46%] overflow-hidden opacity-[0.14]" style={{ maskImage: 'linear-gradient(transparent, #000 18%, #000 82%, transparent)', WebkitMaskImage: 'linear-gradient(transparent, #000 18%, #000 82%, transparent)' }}>
+          <div className="shock-crawl">
+            {Array.from({ length: 34 }).map((_, i) => <div key={i} className="text-[9px] leading-[1.7] whitespace-nowrap text-[#d8c4f0]" style={{ fontFamily: '"VT323", monospace' }}>i think i unlocked some parts of my brain that i shouldn't have</div>)}
+          </div>
+        </div>
         {/* a giant fragmenting "I" — the self coming apart */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 leading-none shock-rgb-r" style={{ fontSize: '52vw', color: 'rgba(255,255,255,0.05)', fontFamily: '"Grenze Gotisch", serif', textShadow: '5px 0 rgba(200,16,46,0.35), -5px 0 rgba(0,255,230,0.28)' }}>I</div>
         {/* watching eyes opening across the dark */}
@@ -733,16 +805,21 @@ THREAT ${['LOW', 'ELEV', 'HIGH', 'CRIT'][tick % 4]}
     );
   }
 
-  // ── SLEEP PARALYSIS — pure horror: a wraith looms out of the black and LUNGES (jumpscare flash),
-  //    skeletal hands reach, claw marks tear the screen, blood drips, the eyelids slam shut. don't move.
+  // ── SLEEP PARALYSIS — pure horror. a grinning thing looms from the black and LUNGES; a face
+  //    flashes for a single frame (did you see it?); a watcher creeps in from the edge; the screen
+  //    speaks to you in the present tense. claw marks, blood, the eyelids slamming shut. you're awake.
   if (mode === 'paralysis') {
     if (back) return (
       <div className={BWRAP} aria-hidden>
         <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 42%, rgba(18,16,20,0.4), rgba(4,4,5,0.78) 72%)' }} />
         {/* a failing, flickering light */}
         <div className="absolute left-1/2 top-[6%] -translate-x-1/2 w-[60%] h-[50%] animate-flicker" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(180,180,190,0.12), transparent 62%)', mixBlendMode: 'screen' }} />
-        {/* the entity, looming out of the dark then lunging */}
-        <WraithFace className="absolute left-1/2 top-[14%] w-44 shock-loom" />
+        {/* a second figure, faint and unmoving, already in the dark */}
+        <WraithFace className="absolute left-[64%] top-[20%] w-28 opacity-20" />
+        {/* the entity — looming out of the black, then lunging at you */}
+        <GrinningFace className="absolute left-1/2 top-[12%] w-48 shock-loom" />
+        {/* the watcher, creeping in from the edge — closer than it was a moment ago */}
+        <div className="absolute left-0 top-[24%] w-24 h-[46%] shock-creep"><PeekingFace className="w-full h-full" /></div>
         {/* skeletal hands reaching from the edges */}
         <BoneHand className="absolute left-[4%] bottom-[5%] w-16 h-28 -rotate-[24deg]" opacity={0.3} />
         <BoneHand className="absolute right-[5%] bottom-[2%] w-16 h-28 rotate-[206deg] scale-x-[-1]" opacity={0.28} />
@@ -753,7 +830,10 @@ THREAT ${['LOW', 'ELEV', 'HIGH', 'CRIT'][tick % 4]}
     return (
       <div className={`${FWRAP} text-[#b8b0a8]`} aria-hidden>
         {/* the jumpscare — a sudden blinding flash on the lunge */}
-        <div className="absolute inset-0 shock-jump" style={{ background: 'rgba(222,222,228,0.9)' }} />
+        <div className="absolute inset-0 shock-jump" style={{ background: 'rgba(224,224,230,0.92)' }} />
+        {/* SUBLIMINAL — the face you're not sure you saw, gone in a frame */}
+        <GrinningFace className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[68%] shock-subliminal" />
+        <GrinningFace className="absolute left-[58%] top-[40%] -translate-x-1/2 -translate-y-1/2 w-[40%] shock-subliminal-2" />
         {/* labored-breath vignette closing in (eased so the app stays readable between breaths) */}
         <div className="absolute inset-0 shock-breath-heavy" style={{ boxShadow: 'inset 0 0 80px 20px rgba(0,0,0,0.6)' }} />
         {/* claw marks torn down the screen */}
@@ -762,7 +842,12 @@ THREAT ${['LOW', 'ELEV', 'HIGH', 'CRIT'][tick % 4]}
         </g></svg>
         {/* blood weeping from the top */}
         {[[40, 0], [58, 1.6]].map(([l, d], i) => <span key={i} className="absolute top-0 w-[2px] shock-drip" style={{ left: `${l}%`, height: '18%', background: 'linear-gradient(to bottom, #8b0000, #5b0f1a 70%, transparent)', animationDelay: `${d}s` }} />)}
-        {/* the terror, flickering */}
+        {/* it speaks to you — present tense, second person */}
+        {[
+          { t: 'you fell asleep', top: '9%', left: '8%' }, { t: "i've been here all night", top: '22%', left: '46%' },
+          { t: "don't turn around", top: '64%', left: '12%' }, { t: 'it knows your name', top: '76%', left: '52%' },
+          { t: 'you do not deserve such things', top: '88%', left: '9%' },
+        ].map((a, i) => <span key={i} className="absolute text-[10px] lowercase tracking-[0.2em] text-[#b8b0a8]/55 shock-blink" style={{ top: a.top, left: a.left, animationDelay: `${(i % 4) * 0.5}s`, fontFamily: '"VT323", monospace' }}>{a.t}</span>)}
         <div className="absolute left-0 right-0 top-[42%] text-center text-[15px] tracking-[0.3em] text-[#C8102E] shock-blink" style={{ fontFamily: '"IM Fell English", serif', textShadow: '0 0 12px rgba(139,0,0,0.85)' }}>don't move</div>
         <div className="absolute left-0 right-0 bottom-[15%] text-center text-[10px] tracking-[0.34em] text-[#b8b0a8]/60 shock-blink" style={{ animationDelay: '0.6s', fontFamily: '"VT323", monospace' }}>IT IS ALREADY IN THE ROOM</div>
         {/* the eyelids slam shut */}

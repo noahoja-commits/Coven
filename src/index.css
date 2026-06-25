@@ -487,6 +487,21 @@ body.shock-duo-warp .phone-frame { animation: shockHueBreathe 7s ease-in-out inf
 /* a slow, labored breath — the vignette closing in and easing back */
 @keyframes shockBreathHeavy { 0%,100% { opacity: 0.5; } 46% { opacity: 1; } 56% { opacity: 0.94; } }
 .shock-breath-heavy { animation: shockBreathHeavy 4.6s ease-in-out infinite; }
+/* SUBLIMINAL — a face flashes for a single frame, at irregular intervals: the thing you're
+   not sure you saw. the brain registers it without consciously catching it. */
+@keyframes shockSubliminal { 0%, 17%, 17.4%, 46%, 46.3%, 79%, 79.5%, 100% { opacity: 0; } 17.2%, 46.15%, 79.2% { opacity: 0.95; } }
+.shock-subliminal { animation: shockSubliminal 13s steps(1) infinite; }
+@keyframes shockSubliminal2 { 0%, 31%, 31.3%, 66%, 66.4%, 100% { opacity: 0; } 31.15%, 66.2% { opacity: 0.9; } }
+.shock-subliminal-2 { animation: shockSubliminal2 17s steps(1) infinite; }
+/* a watcher at the edge, creeping further in than it was a moment ago */
+@keyframes shockCreep { 0%, 14% { transform: translateX(-46%); } 50%, 64% { transform: translateX(-6%); } 100% { transform: translateX(-46%); } }
+.shock-creep { animation: shockCreep 16s ease-in-out infinite; }
+/* intrusive thought crawling endlessly upward */
+@keyframes shockCrawl { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+.shock-crawl { animation: shockCrawl 22s linear infinite; }
+/* the procession pulled slowly toward the vanishing point — moving through the corridor */
+@keyframes shockProcession { 0% { transform: translate(-50%,-50%) scale(0.85); opacity: 0; } 20% { opacity: 0.85; } 100% { transform: translate(-50%,-50%) scale(2.4); opacity: 0; } }
+.shock-procession { animation: shockProcession 7s linear infinite; }
 /* gentle drift for floating motes */
 @keyframes shockMote { 0% { transform: translateY(0) translateX(0); opacity: 0; } 20% { opacity: 0.8; } 80% { opacity: 0.6; } 100% { transform: translateY(-40vh) translateX(14px); opacity: 0; } }
 .shock-mote { animation-name: shockMote; animation-timing-function: linear; animation-iteration-count: infinite; }
