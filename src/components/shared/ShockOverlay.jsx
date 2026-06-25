@@ -187,20 +187,39 @@ export function GrinningFace({ className = '', style }) {
   );
 }
 
-// A face emerging from the shadow at the edge — dead glowing eyes, a smile that shouldn't be there.
+// A decayed face half-emerging from the shadow at the edge — cold wet eyes in the dark, a thin
+// wrong smile. Same rot/grain processing as the grinning face so it doesn't read as cartoon.
 function PeekingFace({ className = '', style }) {
   return (
     <svg viewBox="0 0 80 130" className={className} style={style} aria-hidden>
       <defs>
-        <radialGradient id="peekG" cx="0.5" cy="0.38" r="0.62">
-          <stop offset="0" stopColor="#3a3a42" /><stop offset="0.7" stopColor="#16161a" /><stop offset="1" stopColor="#0a0a0c" />
+        <radialGradient id="pkSkin" cx="40%" cy="36%" r="72%">
+          <stop offset="0" stopColor="#7c766c" /><stop offset="0.4" stopColor="#3a362f" />
+          <stop offset="0.74" stopColor="#121009" /><stop offset="1" stopColor="#050403" />
         </radialGradient>
+        <filter id="pkRot" x="-30%" y="-30%" width="160%" height="160%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.02 0.026" numOctaves="3" seed="6" result="w" />
+          <feDisplacementMap in="SourceGraphic" in2="w" scale="16" result="d" />
+          <feTurbulence type="fractalNoise" baseFrequency="0.5" numOctaves="2" seed="9" result="g" />
+          <feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.6 0" result="ga" />
+          <feComposite in="ga" in2="d" operator="in" result="gm" />
+          <feBlend in="d" in2="gm" mode="multiply" />
+        </filter>
       </defs>
-      <path d="M40 4 C20 4 14 24 16 46 C17 70 26 110 40 128 L80 128 L80 4 Z" fill="url(#peekG)" />
-      <ellipse cx="32" cy="44" rx="3.6" ry="4.8" fill="#eef0f4" style={{ filter: 'drop-shadow(0 0 4px rgba(220,230,255,0.85))' }} />
-      <ellipse cx="50" cy="44" rx="3.6" ry="4.8" fill="#eef0f4" style={{ filter: 'drop-shadow(0 0 4px rgba(220,230,255,0.85))' }} />
-      <circle cx="32" cy="44.5" r="1.4" fill="#000" /><circle cx="50" cy="44.5" r="1.4" fill="#000" />
-      <path d="M28 62 Q40 76 54 60" stroke="#b8b8c0" strokeWidth="1.6" fill="none" opacity="0.6" />
+      <g filter="url(#pkRot)">
+        <path d="M40 2 C18 3 11 24 14 48 C16 74 24 108 38 128 L80 128 L80 2 Z" fill="url(#pkSkin)" />
+        <path d="M22 38 Q36 31 50 38 L50 44 Q36 38 22 44 Z" fill="#000" opacity="0.5" />
+        {/* sunken dark eyes with a cold wet glow */}
+        <path d="M24 44 Q32 38 40 45 Q33 52 24 48 Z" fill="#020201" />
+        <path d="M44 43 Q52 37 60 44 Q53 51 44 47 Z" fill="#020201" />
+        <circle cx="32" cy="45" r="2.4" fill="#dfe6f0" style={{ filter: 'drop-shadow(0 0 4px rgba(200,220,255,0.8))' }} />
+        <circle cx="52" cy="44" r="2.1" fill="#dfe6f0" style={{ filter: 'drop-shadow(0 0 3px rgba(200,220,255,0.75))' }} />
+        <circle cx="32.5" cy="45" r="0.9" fill="#000" /><circle cx="52.3" cy="44" r="0.8" fill="#000" />
+        <path d="M36 60 Q40 56 44 60 Q41 64 36 60 Z" fill="#020201" />
+        <path d="M24 70 Q42 84 60 66" stroke="#0a0806" strokeWidth="2" fill="none" />
+        <path d="M28 72 Q42 80 56 69" stroke="#5a5048" strokeWidth="0.8" fill="none" opacity="0.5" />
+        <ellipse cx="30" cy="58" rx="4" ry="6" fill="#000" opacity="0.3" />
+      </g>
     </svg>
   );
 }
