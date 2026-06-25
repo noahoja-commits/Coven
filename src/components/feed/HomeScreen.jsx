@@ -14,6 +14,7 @@ import { TEXTS } from '../../data/library';
 import { CODEX } from '../../data/codex';
 import { recordView, fetchViewCounts } from '../../lib/db/views';
 import { Bat, Flame as FlameGlyph, Skull as SkullGlyph, Smoke } from '../shared/ReactionGlyphs';
+import { FeatureBoundary } from '../FeatureBoundary';
 
 export function HomeScreen({
   posts, onReact, onOpenComments, onOpenCommunity, onOpenUser, onDeletePost, onHidePost, onQuotePost, onWhisperPost, onTogglePin, pinnedPostId, feedSort = 'latest', onSetFeedSort,
@@ -371,7 +372,8 @@ export function HomeScreen({
           // "Hot" heat marker — only in trending, only for genuinely high-score posts.
           const isHot = feedSort === 'trending' && postScore(post) >= 8;
           return (
-            <article key={post.id} data-post-id={post.id} className="px-4 py-4 relative select-none border-b border-[#141318]" style={postAgeStyle(post.createdAt)} onDoubleClick={() => doubleTapLike(post)}>
+            <FeatureBoundary key={post.id} variant="post" label="post">
+            <article data-post-id={post.id} className="px-4 py-4 relative select-none border-b border-[#141318]" style={postAgeStyle(post.createdAt)} onDoubleClick={() => doubleTapLike(post)}>
               {burst === post.id && (
                 <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
                   <span className="absolute w-40 h-40 rounded-full animate-heat-flash"
@@ -566,6 +568,7 @@ export function HomeScreen({
                 </div>
               </div>
             </article>
+            </FeatureBoundary>
           );
         })}
         {!feedLoading && sortedPosts.length === 0 && (

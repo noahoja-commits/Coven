@@ -32,6 +32,7 @@ import { VenueMapEditor } from './components/festival/VenueMapEditor';
 import { FONT_HREF, F } from './styles/fonts';
 import { Header } from './components/shared/Header';
 import { BottomNav } from './components/shared/BottomNav';
+import { FeatureBoundary } from './components/FeatureBoundary';
 import { DMsOverlay } from './components/shared/DMsOverlay';
 import { ChatThread } from './components/shared/ChatThread';
 import { ComposeOverlay } from './components/shared/ComposeOverlay';
@@ -2049,7 +2050,9 @@ export default function App() {
           (top-[60px]/bottom-[68px] already include the safe-area insets — see index.css.) */}
       <div className="absolute inset-0 top-[60px] bottom-[68px] overflow-y-auto">
         <div className="animate-screen-in" key={`${tab}-${community || ''}`}>
-          {renderTab()}
+          <FeatureBoundary label={`tab-${tab}`}>
+            {renderTab()}
+          </FeatureBoundary>
         </div>
       </div>
 
@@ -2075,6 +2078,7 @@ export default function App() {
         />
       )}
       {activeConversation && (
+        <FeatureBoundary label="dm">
         <ChatThread
           key={activeConversation}
           conversationId={activeConversation}
@@ -2087,6 +2091,7 @@ export default function App() {
           onOpenPost={(id) => { setActiveConversation(null); setActiveConvMeta(null); setActivePostComments(id); }}
           onBack={() => { setActiveConversation(null); setActiveConvMeta(null); }}
         />
+        </FeatureBoundary>
       )}
       {showCompose && (
         <ComposeOverlay
@@ -2400,6 +2405,7 @@ export default function App() {
       )}
 
       {/* Coven portals — lazy-loaded, so one Suspense covers the whole block */}
+      <FeatureBoundary label="portal">
       <Suspense fallback={<div className="absolute inset-0 z-50 bg-[#0A0A0A] flex items-center justify-center text-[#C9A961] text-2xl animate-pulse-slow" style={F.brand}>Coven</div>}>
       {activePortal === 'menu' && (
         <CovenMenu
@@ -2485,6 +2491,7 @@ export default function App() {
         />
       )}
       </Suspense>
+      </FeatureBoundary>
       {followList && (
         <FollowListOverlay
           initialTab={followList.tab}
@@ -2503,6 +2510,7 @@ export default function App() {
         />
       )}
       {showSigilDraw && (
+        <FeatureBoundary label="sigil">
         <Suspense fallback={<div className="absolute inset-0 z-[60] bg-[#050204] flex items-center justify-center text-[#C9A961] text-2xl animate-pulse-slow" style={F.brand}>Coven</div>}>
           <SigilDrawOverlay
             unlocked={loreUnlocked}
@@ -2510,6 +2518,7 @@ export default function App() {
             onClose={() => setShowSigilDraw(false)}
           />
         </Suspense>
+        </FeatureBoundary>
       )}
       {settings.familiar !== false && !anyOverlayOpen && <FloatingCat active onSummon={summonShock} />}
       {/* the haunt — when a horror mode is on, it roams the WHOLE app (even mid-modal) and strikes
