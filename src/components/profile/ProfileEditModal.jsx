@@ -5,6 +5,7 @@ import { SectionLabel } from '../shared/SectionLabel';
 import { uploadImage } from '../../lib/db/storage';
 import { BORDERS, BANNERS, borderStyle, bannerStyle } from '../../data/decor';
 import { ARCHETYPES } from '../../data/archetypes';
+import { PRESET_AVATARS } from '../../lib/avatars';
 
 // A cohesive occult/gothic sigil set — mourning, moon, cross, and alchemical marks.
 const AVATAR_OPTIONS = ['🦇', '🕯', '🥀', '🌹', '🌙', '🌑', '☾', '☽', '⛧', '⛤', '🜏', '𖤐', '☠', '💀', '⚰', '⚱', '✝', '✟', '☦', '♰', '†', '⸸', '☥', '🔮', '🕸', '🗝', '🦴', '⚜', '✦', '✧'];
@@ -76,6 +77,22 @@ export function ProfileEditModal({ profile, meId, onSave, onClose, onSetShrineTh
               </div>
             </div>
             {error && <div className="text-[11px] text-[#8B0000] mt-1.5" style={F.ui}>{error}</div>}
+
+            {/* Preset portrait sigils — appears only once custom avatar art exists in /public/avatars */}
+            {PRESET_AVATARS.length > 0 && (
+              <div className="mt-3">
+                <SectionLabel rule={false} className="mb-2">or choose a portrait</SectionLabel>
+                <div className="grid grid-cols-6 gap-1.5 p-2 border border-[#1A1A1A] bg-[#0A0204]/60">
+                  {PRESET_AVATARS.map(a => (
+                    <button key={a.id} onClick={() => setAvatarUrl(a.src)} title={a.label}
+                      className={`tap aspect-square rounded-sm overflow-hidden border ${avatarUrl === a.src ? 'border-[#C9A961]/80' : 'border-[#2A2A2A] hover:border-[#C9A961]/40'}`}
+                      style={avatarUrl === a.src ? { boxShadow: '0 0 12px rgba(201,169,97,0.25)' } : undefined}>
+                      <img src={a.src} alt={a.label} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Glyph (used when no photo) */}

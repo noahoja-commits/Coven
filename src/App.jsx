@@ -160,7 +160,7 @@ export default function App() {
   const [quoteTarget, setQuoteTarget] = useState(null);
   const [showVespersArchive, setShowVespersArchive] = useState(false);
 
-  const [activePortal, setActivePortal] = useState(null); // 'menu' | 'library' | 'oddities' | etc.
+  const [activePortal, setActivePortal] = useState(null); // 'menu' | 'oddities' | etc.
   // Tracks whether the current portal was opened from the star→menu (so closing returns
   // to the menu) vs. directly from the home screen / logo (so closing returns to home).
   const [portalFromMenu, setPortalFromMenu] = useState(false);
