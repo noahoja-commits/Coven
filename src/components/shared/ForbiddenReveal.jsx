@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { buzz } from '../../lib/haptics';
 import { GrinningFace } from './ShockOverlay';
-import { primeHorror, stinger, whisper, startDread, stopDread } from '../../lib/horror';
+import { primeHorror, scream, whisper, startDread, stopDread } from '../../lib/horror';
 
 // THE FORBIDDEN REVEAL — the intro that plays when a hidden horror mode is summoned. The dread
 // lives in the build, not the payoff: black-out, a warning trembles in, it corrupts & whispers,
@@ -18,9 +18,12 @@ const CONTENT = {
   },
 };
 
-export function ForbiddenReveal({ target = 'paralysis', onComplete }) {
+export function ForbiddenReveal({ target = 'paralysis', name = 'you', onComplete }) {
   const [phase, setPhase] = useState(0); // 0 cut · 1 warn · 2 corrupt · 3 creep · 4 silence · 5 slam
-  const c = CONTENT[target] || CONTENT.paralysis;
+  const base = CONTENT[target] || CONTENT.paralysis;
+  const who = String(name || 'you').toLowerCase();
+  // it knows who's reading
+  const c = { line: base.line, whispers: [...base.whispers, `i know you, ${who}`, `${who}, you can't wake up`] };
 
   useEffect(() => {
     primeHorror();
@@ -33,7 +36,7 @@ export function ForbiddenReveal({ target = 'paralysis', onComplete }) {
       setTimeout(() => { setPhase(3); buzz('secret'); whisper(); }, 4400),
       setTimeout(() => whisper(), 5100),
       setTimeout(() => { setPhase(4); stopDread(); }, 5600), // the heartbeat STOPS — dead air
-      setTimeout(() => { setPhase(5); buzz('dread'); stinger(1.25); }, 6300), // SLAM + scream
+      setTimeout(() => { setPhase(5); buzz('dread'); scream(); }, 6300), // SLAM + double scream
       setTimeout(() => onComplete && onComplete(target), 7050),
     ];
     return () => { t.forEach(clearTimeout); stopDread(); };
@@ -80,7 +83,7 @@ export function ForbiddenReveal({ target = 'paralysis', onComplete }) {
       {phase === 5 && (
         <>
           <div className="absolute inset-0" style={{ background: 'rgba(232,232,236,0.96)' }} />
-          <GrinningFace className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[155%] reveal-slam" />
+          <GrinningFace className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[178%] reveal-slam" />
         </>
       )}
     </div>

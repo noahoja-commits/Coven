@@ -3,7 +3,7 @@
 // exceed a safe level — no matter how violent the sound, it can't damage hearing. Browsers block
 // audio until a user gesture, so primeHorror() resumes the context from a tap (with a safety net).
 let ctx = null, master = null, limiter = null;
-let dreadTimer = null, whisperTimer = null;
+let dreadTimer = null, whisperTimer = null, bedNodes = [];
 
 function ensure() {
   if (ctx) return true;
@@ -84,11 +84,44 @@ function thump(time, freq, gain) {
   o.connect(g); g.connect(master); o.start(time); o.stop(time + 0.24);
 }
 
-// A slow heartbeat (lub-dub) + occasional whispers, for as long as a horror mode is on.
+// A constant under-bed: a low growl drone + slow breathing (in/out via an LFO on the noise gain).
+function startBed() {
+  stopBed();
+  if (!ctx) return;
+  [56, 84].forEach((f, i) => {
+    const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = i * 7;
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 170; lp.Q.value = 0.5;
+    const g = ctx.createGain(); g.gain.value = 0.06;
+    o.connect(lp); lp.connect(g); g.connect(master); o.start();
+    bedNodes.push(o);
+  });
+  // breathing — looping noise whose level swells and ebbs ~once every 4.5s
+  const len = Math.floor(ctx.sampleRate * 2);
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const d = buf.getChannelData(0); for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true;
+  const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 560; bp.Q.value = 0.8;
+  const bg = ctx.createGain(); bg.gain.value = 0.05;
+  src.connect(bp); bp.connect(bg); bg.connect(master);
+  const lfo = ctx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 0.22;
+  const lfoG = ctx.createGain(); lfoG.gain.value = 0.05;
+  lfo.connect(lfoG); lfoG.connect(bg.gain);
+  src.start(); lfo.start();
+  bedNodes.push(src, lfo);
+}
+
+function stopBed() {
+  bedNodes.forEach(n => { try { n.stop(); } catch { /* noop */ } try { n.disconnect(); } catch { /* noop */ } });
+  bedNodes = [];
+}
+
+// A slow heartbeat (lub-dub) + breathing/growl bed + occasional whispers, for as long as a horror
+// mode is on.
 export function startDread(bpmGap = 1500) {
   if (!ensure()) return;
   resume();
   stopDread();
+  startBed();
   const beat = () => {
     if (!ctx || ctx.state !== 'running') return;
     const t = ctx.currentTime;
@@ -103,4 +136,11 @@ export function startDread(bpmGap = 1500) {
 export function stopDread() {
   if (dreadTimer) { clearInterval(dreadTimer); dreadTimer = null; }
   if (whisperTimer) { clearInterval(whisperTimer); whisperTimer = null; }
+  stopBed();
+}
+
+// A double scream — for the slam. Two stingers in quick succession hit harder than one.
+export function scream() {
+  stinger(1.25);
+  setTimeout(() => stinger(1.1), 170);
 }

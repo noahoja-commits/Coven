@@ -2344,6 +2344,7 @@ export default function App() {
       {revealTarget && (
         <ForbiddenReveal
           target={revealTarget}
+          name={meHandle}
           onComplete={(m) => {
             setSettings((s) => ({ ...s, shockMode: m }));
             setUnlockedShock((u) => (u.includes(m) ? u : [...u, m]));
@@ -2513,7 +2514,7 @@ export default function App() {
       {settings.familiar !== false && !anyOverlayOpen && <FloatingCat active onSummon={summonShock} />}
       {/* the haunt — when a horror mode is on, it roams the WHOLE app (even mid-modal) and strikes
           unpredictably. no safe corner. only held back during the reveal itself. */}
-      {!settings.parchmentMode && <ShockHaunt mode={settings.shockMode} active={!revealTarget} />}
+      {!settings.parchmentMode && <ShockHaunt mode={settings.shockMode} name={meHandle} active={!revealTarget} />}
       {settings.shockMode !== 'none' && settings.reactiveTaps !== false && !anyOverlayOpen && !settings.parchmentMode && (
         <ShockSparks mode={settings.shockMode} />
       )}
