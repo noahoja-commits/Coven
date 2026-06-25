@@ -3,6 +3,7 @@ import { X, ChevronLeft, ChevronRight, Send, Trash2, Eye } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { fetchStoryReactors } from '../../lib/db/stories';
 import { recordView, fetchViewCounts } from '../../lib/db/views';
+import { STORY_GLYPH_FOR } from '../shared/ReactionGlyphs';
 
 const STORY_REACTIONS = ['🦇', '🔥', '💀', '🥀', '🕯'];
 
@@ -138,9 +139,10 @@ export function StoryViewer({ stories = [], startIndex = 0, onReply, onReactStor
           {reactors.length > 0 && (
             <div className="flex items-center gap-2 px-3 py-1.5 bg-black/50 backdrop-blur-sm border border-white/15 rounded-full max-w-full overflow-x-auto no-scrollbar">
               <span className="text-[10px] text-white/60 uppercase tracking-wider shrink-0" style={F.ui}>{reactors.length} reacted</span>
-              {reactors.slice(0, 8).map(r => (
-                <span key={r.userId} className="text-base shrink-0" title={r.user}>{r.kind}</span>
-              ))}
+              {reactors.slice(0, 8).map(r => {
+                const G = STORY_GLYPH_FOR[r.kind];
+                return <span key={r.userId} className="shrink-0 text-[#F5F1E8]" title={r.user}>{G ? <G width={16} height={16} /> : r.kind}</span>;
+              })}
             </div>
           )}
           <div className="flex items-center gap-2">
@@ -157,12 +159,15 @@ export function StoryViewer({ stories = [], startIndex = 0, onReply, onReactStor
       ) : (
         <div className="absolute bottom-4 left-0 right-0 px-4 flex flex-col gap-2">
           <div className="flex items-center justify-center gap-3">
-            {STORY_REACTIONS.map(r => (
-              <button key={r} onClick={() => react(r)}
-                className={`text-2xl transition-transform ${myReactions[story.id] === r ? 'scale-150 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]' : 'opacity-70 hover:opacity-100 hover:scale-110'}`}>
-                {r}
-              </button>
-            ))}
+            {STORY_REACTIONS.map(r => {
+              const G = STORY_GLYPH_FOR[r];
+              return (
+                <button key={r} onClick={() => react(r)}
+                  className={`transition-transform text-[#F5F1E8] ${myReactions[story.id] === r ? 'scale-150 text-[#C9A961] drop-shadow-[0_0_6px_rgba(201,169,97,0.5)]' : 'opacity-70 hover:opacity-100 hover:scale-110'}`}>
+                  {G ? <G width={26} height={26} /> : <span className="text-2xl">{r}</span>}
+                </button>
+              );
+            })}
           </div>
           <div className="flex items-center gap-2">
           <div className="flex-1 px-3 py-2 bg-black/40 backdrop-blur-sm border border-white/15 rounded-full">

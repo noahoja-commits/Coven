@@ -49,5 +49,33 @@ export function Smoke(p) {
   );
 }
 
+// rose — a coiled bloom on a thorned stem (mourning / tenderness)
+export function Rose(p) {
+  return (
+    <svg {...C} {...p}>
+      <path d="M12 4.5c-2 0-3.3 1.4-3.3 3.2 0 1.9 1.5 3.3 3.3 3.3s3.3-1.4 3.3-3.3c0-1.8-1.3-3.2-3.3-3.2z" />
+      <path d="M12 6.4c-1 0-1.6.8-1.6 1.7 0 .9.7 1.6 1.6 1.6" strokeWidth="1.1" opacity="0.75" />
+      <path d="M12 11v8.5" />
+      <path d="M12 14.2c-1.8.1-3-.9-3.2-2.6 1.8-.1 3 .8 3.2 2.6z" />
+      <path d="M12 16.6c1.8.1 3-.9 3.2-2.6-1.8-.1-3 .8-3.2 2.6z" />
+    </svg>
+  );
+}
+
+// candle — a lit taper (vigil / remembrance)
+export function Candle(p) {
+  return (
+    <svg {...C} {...p}>
+      <path d="M12 5c1.3 1.6 2 2.6 2 3.8a2 2 0 1 1-4 0C10 7.6 10.7 6.6 12 5z" />
+      <path d="M10 11h4v8.5h-4z" />
+      <path d="M9 19.5h6" />
+    </svg>
+  );
+}
+
 // keyed by the reaction field names used on posts (post.reactions.bat / fire / skull / smoke)
 export const REACTION_GLYPHS = { bat: Bat, fire: Flame, skull: Skull, smoke: Smoke };
+
+// story reactions are stored by their original emoji "kind" — map each to a sigil so we
+// can render them monochrome without changing the data model.
+export const STORY_GLYPH_FOR = { '🦇': Bat, '🔥': Flame, '💀': Skull, '🥀': Rose, '🕯': Candle };
