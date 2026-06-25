@@ -17,7 +17,7 @@ import { Bat, Flame as FlameGlyph, Skull as SkullGlyph, Smoke } from '../shared/
 import { FeatureBoundary } from '../FeatureBoundary';
 
 export function HomeScreen({
-  posts, onReact, onOpenComments, onOpenCommunity, onOpenUser, onDeletePost, onHidePost, onQuotePost, onWhisperPost, onTogglePin, pinnedPostId, feedSort = 'latest', onSetFeedSort,
+  posts, feedError = false, onRetryFeed, onReact, onOpenComments, onOpenCommunity, onOpenUser, onDeletePost, onHidePost, onQuotePost, onWhisperPost, onTogglePin, pinnedPostId, feedSort = 'latest', onSetFeedSort,
   feedScope = 'everyone', onSetFeedScope, onLoadMore, feedHasMore = false, onReportPost,
   bookmarks = {}, onToggleBookmark, postCandles = {}, onToggleCandle, onOpenEvent, onVotePoll,
   onOpenStory, onCreateStory, stories = [], seenStories = {}, meHandle = 'you', meAvatar = '☾',
@@ -583,7 +583,11 @@ export function HomeScreen({
             </FeatureBoundary>
           );
         })}
-        {!feedLoading && sortedPosts.length === 0 && (
+        {!feedLoading && sortedPosts.length === 0 && feedError ? (
+          <EmptyState glyph={AllSeeingEye} text="couldn't reach the coven."
+            sub="the connection faltered. try again."
+            action="retry" onAction={onRetryFeed} />
+        ) : !feedLoading && sortedPosts.length === 0 && (
           feedScope === 'following' ? (
             <EmptyState glyph={TripleMoon} text="you follow no one yet."
               sub="gather some souls below — or switch to the coven." />

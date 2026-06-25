@@ -33,6 +33,7 @@ import { FONT_HREF, F } from './styles/fonts';
 import { Header } from './components/shared/Header';
 import { BottomNav } from './components/shared/BottomNav';
 import { FeatureBoundary } from './components/FeatureBoundary';
+import { withRetry } from './lib/withRetry';
 import { DMsOverlay } from './components/shared/DMsOverlay';
 import { ChatThread } from './components/shared/ChatThread';
 import { ComposeOverlay } from './components/shared/ComposeOverlay';
@@ -186,6 +187,8 @@ export default function App() {
 
   // Live content state (Supabase-backed)
   const [posts, setPosts] = useState([]);
+  const [feedError, setFeedError] = useState(false);
+  const [feedReloadKey, setFeedReloadKey] = useState(0);
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState({});
   const [followingPeople, setFollowingPeople] = useState([]);
@@ -404,14 +407,14 @@ export default function App() {
       setEvents(events);
       setEventRsvp(rsvp);
     }).catch(() => {});
-    fetchConversations().then(c => { if (active) setConversations(c); }).catch(e => console.error('[load] conversations failed:', e));
+    withRetry(() => fetchConversations()).then(c => { if (active) setConversations(c); }).catch(e => console.error('[load] conversations failed:', e));
     fetchActiveStories(meId).then(s => { if (active) setStories(s); }).catch(() => {});
     fetchListings(meId).then(l => { if (active) setListings(l); }).catch(() => {});
     fetchShops(meId).then(s => { if (active) setShops(s); }).catch(() => {});
     fetchPayoutStatus(meId).then(p => { if (active) setPayoutStatus(p); }).catch(() => {});
     listCrews().then(c => { if (active) setCrews(c); }).catch(() => {});
     fetchMyTicketEventIds().then(ids => { if (active) setMyTicketEventIds(ids); }).catch(() => {});
-    fetchNotifications().then(n => { if (active) setNotifications(n); }).catch(e => console.error('[load] notifications failed:', e));
+    withRetry(() => fetchNotifications()).then(n => { if (active) setNotifications(n); }).catch(e => console.error('[load] notifications failed:', e));
     fetchBlockedIds().then(ids => { if (active) setBlockedIds(new Set(ids)); }).catch(() => {});
     fetchCommunityMemberCounts().then(c => { if (active) setCommunityCounts(c); }).catch(() => {});
     fetchProfiles({ excludeId: meId, limit: 12 }).then(s => { if (active) setSuggestedSouls((s || []).map(p => ({ ...p, avatarUrl: p.avatar_url }))); }).catch(() => {});
@@ -459,14 +462,15 @@ export default function App() {
     let active = true;
     setFeedHasMore(true);
     setFeedLoading(true);
-    fetchFeed(meId, { scope: feedScope }).then(rows => {
+    withRetry(() => fetchFeed(meId, { scope: feedScope })).then(rows => {
       if (!active) return;
       setPosts(rows);
       setFeedHasMore(rows.length >= 20);
-    }).catch(e => console.error('[load] feed failed:', e))
+      setFeedError(false);
+    }).catch(e => { console.error('[load] feed failed:', e); if (active) setFeedError(true); })
       .finally(() => { if (active) setFeedLoading(false); });
     return () => { active = false; };
-  }, [meId, dbProfile, feedScope]);
+  }, [meId, dbProfile, feedScope, feedReloadKey]);
 
   // Real per-scene feed: when a scene is open, fetch its own posts (not just whatever
   // happens to be in the loaded global feed). Falls back to null (→ client filter) on error.
@@ -1778,6 +1782,8 @@ export default function App() {
     if (tab === 'home') return (
       <HomeScreen
         posts={visiblePosts}
+        feedError={feedError}
+        onRetryFeed={() => { setFeedError(false); setFeedReloadKey(k => k + 1); }}
         onReact={reactToPost}
         onOpenComments={(id) => setActivePostComments(id)}
         onOpenCommunity={setCommunity}
