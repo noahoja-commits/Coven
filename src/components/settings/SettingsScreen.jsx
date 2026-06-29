@@ -57,7 +57,7 @@ function Row({ label, desc, children }) {
   );
 }
 
-export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLogout, onRerunOnboarding, mutedKeywords = [], onSetMutedKeywords, payoutStatus, payoutBusy = false, onSetupPayouts, pushState = 'off', onEnablePush, onDisablePush, onEditProfile, onOpenBlocked, onOpenLegal, onDeleteAccount, onOpenShockPicker }) {
+export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLogout, onRerunOnboarding, mutedKeywords = [], onSetMutedKeywords, payoutStatus, payoutBusy = false, onSetupPayouts, pushState = 'off', onEnablePush, onDisablePush, onEditProfile, onOpenBlocked, onOpenLegal, onDeleteAccount, onOpenShockPicker, onOpenAnalytics }) {
   const set = (key, value) => onChange({ ...settings, [key]: value });
   const addKeyword = (e) => {
     e.preventDefault();
@@ -263,6 +263,7 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
         <Section title="account">
           {[
             { label: 'Edit profile', onClick: onEditProfile },
+            ...(onOpenAnalytics ? [{ label: 'Your analytics', onClick: onOpenAnalytics }] : []),
             { label: 'Privacy & blocked', onClick: onOpenBlocked },
             { label: 'Terms, Privacy & Guidelines', onClick: onOpenLegal },
             { label: 'Help & feedback', onClick: () => { window.location.href = 'mailto:noahoja@gmail.com?subject=Coven%20feedback'; } },

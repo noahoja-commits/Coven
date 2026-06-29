@@ -58,6 +58,7 @@ import { ShareToDMModal } from './components/shared/ShareToDMModal';
 import { UserProfileOverlay } from './components/profile/UserProfileOverlay';
 import { StoryViewer } from './components/feed/StoryViewer';
 import { StoryComposer } from './components/feed/StoryComposer';
+import { AnalyticsDashboard } from './components/analytics/AnalyticsDashboard';
 import { SearchOverlay } from './components/shared/SearchOverlay';
 import { CrewBrowse } from './components/profile/CrewBrowse';
 import { AddGraveModal } from './components/profile/AddGraveModal';
@@ -145,6 +146,7 @@ export default function App() {
   const [activeUserHandle, setActiveUserHandle] = useState(null);
   const [showStoryComposer, setShowStoryComposer] = useState(false);
   const [storyAttachedPost, setStoryAttachedPost] = useState(null); // a post being shared into a story
+  const [showAnalytics, setShowAnalytics] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showCrewBrowse, setShowCrewBrowse] = useState(false);
   const [showAddGrave, setShowAddGrave] = useState(false);
@@ -348,7 +350,7 @@ export default function App() {
   // Lock body scroll when a modal overlay is open
   useEffect(() => {
     const anyModal = showEditProfile || showMood || showTonightModal || showSettings || showNotifs
-      || showCompose || showStoryComposer || showSearch || showVespersArchive
+      || showCompose || showStoryComposer || showSearch || showVespersArchive || showAnalytics
       || showAddGrave || showAddAnniv || showNewGroup || showReflections || showDreams || showCrewBrowse
       || showNowPlaying || showBlocked || showLegal || showDeleteConfirm || showMyTickets || quoteTarget || activeStoryIndex !== null;
     document.body.style.overflow = anyModal ? 'hidden' : '';
@@ -1614,6 +1616,7 @@ export default function App() {
     if (ticketSuccess) { setTicketSuccess(false); return true; }
     if (activeStoryIndex !== null) { setActiveStoryIndex(null); return true; }
     if (showStoryComposer) { setShowStoryComposer(false); return true; }
+    if (showAnalytics) { setShowAnalytics(false); return true; }
     if (venueEditorEvent) { setVenueEditorEvent(null); return true; }
     if (ticketManagerEvent) { setTicketManagerEvent(null); return true; }
     if (showCreateEvent) { setShowCreateEvent(false); return true; }
@@ -2358,7 +2361,11 @@ export default function App() {
           onOpenLegal={() => setShowLegal(true)}
           onDeleteAccount={() => setShowDeleteConfirm(true)}
           onOpenShockPicker={() => { setShowSettings(false); setShowShockPicker(true); }}
+          onOpenAnalytics={() => { setShowSettings(false); setShowAnalytics(true); }}
         />
+      )}
+      {showAnalytics && (
+        <AnalyticsDashboard onClose={() => setShowAnalytics(false)} meHandle={meHandle} />
       )}
       {showShockPicker && (
         <ShockModePicker
