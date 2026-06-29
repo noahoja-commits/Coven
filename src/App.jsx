@@ -144,6 +144,7 @@ export default function App() {
   const [activeStoryIndex, setActiveStoryIndex] = useState(null);
   const [activeUserHandle, setActiveUserHandle] = useState(null);
   const [showStoryComposer, setShowStoryComposer] = useState(false);
+  const [storyAttachedPost, setStoryAttachedPost] = useState(null); // a post being shared into a story
   const [showSearch, setShowSearch] = useState(false);
   const [showCrewBrowse, setShowCrewBrowse] = useState(false);
   const [showAddGrave, setShowAddGrave] = useState(false);
@@ -1287,7 +1288,7 @@ export default function App() {
   const postStory = async (story) => {
     if (!meId) return;
     try {
-      const saved = await dbPostStory(story, { id: meId, handle: meHandle, avatar: meAvatar });
+      const saved = await dbPostStory(story, { id: meId, handle: meHandle, avatar: meAvatar, avatarUrl: meAvatarUrl });
       setStories(prev => [...prev, saved]);
     } catch { /* ignore */ }
   };
@@ -2192,6 +2193,7 @@ export default function App() {
           post={posts.find(p => p.id === sharePostTarget)}
           conversations={conversations}
           onPick={whisperPost}
+          onAddToStory={() => { const p = posts.find(p => p.id === sharePostTarget); setSharePostTarget(null); setStoryAttachedPost(p || null); setShowStoryComposer(true); }}
           onClose={() => setSharePostTarget(null)}
         />
       )}
@@ -2209,8 +2211,9 @@ export default function App() {
       {showStoryComposer && (
         <StoryComposer
           meId={meId}
-          onClose={() => setShowStoryComposer(false)}
-          onPost={(story) => { postStory(story); setShowStoryComposer(false); }}
+          attachedPost={storyAttachedPost}
+          onClose={() => { setShowStoryComposer(false); setStoryAttachedPost(null); }}
+          onPost={(story) => { postStory(story); setShowStoryComposer(false); setStoryAttachedPost(null); }}
         />
       )}
       {showCrewBrowse && (
