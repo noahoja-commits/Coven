@@ -2104,6 +2104,7 @@ export default function App() {
           conversation={conversations.find(c => c.id === activeConversation) || activeConvMeta}
           messages={messages[activeConversation] || []}
           initialDraft={dmPrefill}
+          meHandle={meHandle}
           onSend={(body, audioUrl) => sendMessage(activeConversation, body, audioUrl)}
           onRetry={(messageId) => retryMessage(activeConversation, messageId)}
           onReact={(messageId, kind) => reactToMessage(activeConversation, messageId, kind)}

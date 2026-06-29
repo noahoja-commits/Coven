@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Send, Mic, MicOff, Play, Square, X } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { uploadAudio } from '../../lib/db/storage';
+import { useTypingIndicator } from '../../hooks/useTypingIndicator';
 
 function formatDuration(seconds) {
   const m = Math.floor(seconds / 60);
@@ -12,8 +13,9 @@ function formatDuration(seconds) {
 const REACT_KINDS = ['bat', 'fire', 'skull', 'smoke'];
 const REACT_EMOJI = { bat: '🦇', fire: '🔥', skull: '💀', smoke: '💨' };
 
-export function ChatThread({ conversation, messages, onSend, onBack, onRetry, onReact, onOpenPost, initialDraft = '' }) {
+export function ChatThread({ conversation, messages, onSend, onBack, onRetry, onReact, onOpenPost, initialDraft = '', meHandle = '' }) {
   const [draft, setDraft] = useState(initialDraft);
+  const { typingUser, onInput } = useTypingIndicator(conversation?.id, meHandle);
   const [trayMsg, setTrayMsg] = useState(null);
   const scrollRef = useRef(null);
   const [recording, setRecording] = useState(false);
@@ -242,6 +244,10 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
         })}
       </div>
 
+      {typingUser && (
+        <div className="px-4 pb-1 text-[11px] text-[#A8A29E] italic" style={F.serif}>{typingUser} is whispering…</div>
+      )}
+
       {/* Composer */}
       <div className="border-t border-[#1A1A1A] bg-[#0A0A0A] px-3 py-2 pb-3 safe-pb">
         {audioPreview ? (
@@ -284,7 +290,7 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
               <textarea
                 value={draft}
                 maxLength={4000}
-                onChange={(e) => setDraft(e.target.value.slice(0, 4000))}
+                onChange={(e) => { setDraft(e.target.value.slice(0, 4000)); onInput(); }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();

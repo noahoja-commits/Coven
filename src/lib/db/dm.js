@@ -147,3 +147,26 @@ export function subscribeDMs(onInsert) {
     .subscribe();
   return () => { supabase.removeChannel(ch); };
 }
+
+// ── Ephemeral typing presence ──────────────────────────────────────────────
+// Pure Realtime broadcast (no DB table) — each conversation gets its own channel
+// keyed by its unguessable UUID. Transient signalling, so the occasional dropped
+// packet is harmless and nothing is ever persisted.
+const typingChannels = {}; // convId -> channel (shared between subscribe + broadcast)
+
+export function subscribeTyping(convId, onTyping, onTypingStop) {
+  const ch = supabase.channel(`typing:${convId}`, { config: { broadcast: { self: false } } });
+  ch.on('broadcast', { event: 'typing' }, ({ payload }) => onTyping(payload?.user))
+    .on('broadcast', { event: 'typing_stop' }, ({ payload }) => onTypingStop(payload?.user))
+    .subscribe();
+  typingChannels[convId] = ch;
+  return () => { supabase.removeChannel(ch); if (typingChannels[convId] === ch) delete typingChannels[convId]; };
+}
+
+export function broadcastTyping(convId, meHandle) {
+  typingChannels[convId]?.send({ type: 'broadcast', event: 'typing', payload: { user: meHandle } });
+}
+
+export function broadcastTypingStop(convId, meHandle) {
+  typingChannels[convId]?.send({ type: 'broadcast', event: 'typing_stop', payload: { user: meHandle } });
+}
