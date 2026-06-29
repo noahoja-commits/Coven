@@ -61,3 +61,19 @@ export async function uploadImage(bucket, keyPrefix, file) {
   if (error) throw error;
   return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;
 }
+
+/** Upload an audio blob (voice note, audio post) to a public bucket. Returns the public URL. */
+export async function uploadAudio(bucket, keyPrefix, file) {
+  if (!file) throw new Error('no file');
+  if (!file.type?.startsWith('audio/')) throw new Error('please choose an audio file');
+  if (file.size > 5 * 1024 * 1024) throw new Error('audio is too large (max 5MB)');
+  const ext = (file.name?.split('.').pop() || file.type.split('/')[1] || 'webm').toLowerCase();
+  const safeExt = ['webm', 'ogg', 'mp3', 'm4a', 'wav', 'opus'].includes(ext) ? ext : 'webm';
+  const rand = Math.random().toString(36).slice(2, 8);
+  const path = `${keyPrefix || 'anon'}/${Date.now()}-${rand}.${safeExt}`;
+  const { error } = await supabase.storage.from(bucket).upload(path, file, {
+    upsert: true, contentType: file.type || 'audio/webm', cacheControl: '3600',
+  });
+  if (error) throw error;
+  return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+}

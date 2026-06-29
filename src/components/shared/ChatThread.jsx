@@ -1,51 +1,166 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Send, Check, CheckCheck } from 'lucide-react';
+import { Send, Mic, MicOff, Play, Square, X } from 'lucide-react';
 import { F } from '../../styles/fonts';
+import { uploadAudio } from '../../lib/db/storage';
 
-const REACTION_KINDS = [['bat', '🦇'], ['fire', '🔥'], ['skull', '💀'], ['smoke', '💨']];
+function formatDuration(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+const REACT_KINDS = ['bat', 'fire', 'skull', 'smoke'];
+const REACT_EMOJI = { bat: '🦇', fire: '🔥', skull: '💀', smoke: '💨' };
 
 export function ChatThread({ conversation, messages, onSend, onBack, onRetry, onReact, onOpenPost, initialDraft = '' }) {
   const [draft, setDraft] = useState(initialDraft);
-  const [seenAt, setSeenAt] = useState(null); // simulated remote read after delay
-  const [trayFor, setTrayFor] = useState(null); // message id whose reaction tray is open
+  const [trayMsg, setTrayMsg] = useState(null);
   const scrollRef = useRef(null);
+  const [recording, setRecording] = useState(false);
+  const [recDuration, setRecDuration] = useState(0);
+  const [audioBlob, setAudioBlob] = useState(null);
+  const [audioPreview, setAudioPreview] = useState(null);
+  const [sendingAudio, setSendingAudio] = useState(false);
+  const recorderRef = useRef(null);
+  const recTimerRef = useRef(null);
+  const isTouchRef = useRef(false);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-    // When you send a message, simulate the other reading it 4-9s later
-    const last = messages?.[messages.length - 1];
-    if (last?.from === 'me') {
-      const delay = 4000 + Math.random() * 5000;
-      const t = setTimeout(() => setSeenAt(last.id), delay);
-      return () => clearTimeout(t);
-    }
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      // Cleanup on unmount: stop recording, revoke object URLs, stop streams
+      if (recorderRef.current?.state === 'recording') {
+        recorderRef.current.stream?.getTracks().forEach(t => t.stop());
+        recorderRef.current.stop();
+      }
+      clearInterval(recTimerRef.current);
+      if (audioPreview) URL.revokeObjectURL(audioPreview);
+    };
+  }, []);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages?.length]);
 
-  if (!conversation) return null;
+  useEffect(() => {
+    setDraft(initialDraft);
+  }, [initialDraft]);
 
   const send = () => {
-    const body = draft.trim();
-    if (!body) return;
-    onSend && onSend(body);
-    setDraft('');
+    const b = draft.trim();
+    if (b) { onSend(b); setDraft(''); }
   };
 
+  // ── Audio recording ──
+  const canRecord = typeof MediaRecorder !== 'undefined' && navigator.mediaDevices?.getUserMedia;
+
+  const startRecording = () => {
+    // Guard: prevent re-entrancy (rapid taps)
+    if (recording || recorderRef.current) return;
+    // Ignore if this is a synthesized mouse event from a prior touch
+    if (isTouchRef.current) { isTouchRef.current = false; return; }
+
+    try {
+      const constraints = { audio: true };
+      navigator.mediaDevices.getUserMedia(constraints).then(stream => {
+        if (!mountedRef.current) {
+          stream.getTracks().forEach(t => t.stop());
+          return;
+        }
+        // Pick best supported audio mime type; fall back to browser default
+        let mime = 'audio/webm;codecs=opus';
+        if (!MediaRecorder.isTypeSupported(mime)) mime = 'audio/webm';
+        if (!MediaRecorder.isTypeSupported(mime)) mime = '';
+        const recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+        recorder.stream = stream; // attach stream for cleanup
+        recorderRef.current = recorder;
+        const chunks = [];
+        recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+        recorder.onstop = () => {
+          stream.getTracks().forEach(t => t.stop());
+          if (!mountedRef.current) return;
+          if (chunks.length === 0) {
+            // No audio data captured (instant tap-release)
+            discardAudio();
+            return;
+          }
+          const blob = new Blob(chunks, { type: mime || 'audio/webm' });
+          setAudioBlob(blob);
+          setAudioPreview(URL.createObjectURL(blob));
+        };
+        recorder.start();
+        setRecording(true);
+        setRecDuration(0);
+        const startedAt = Date.now();
+        recTimerRef.current = setInterval(() => {
+          if (!mountedRef.current) { clearInterval(recTimerRef.current); return; }
+          const elapsed = (Date.now() - startedAt) / 1000;
+          setRecDuration(elapsed);
+          if (elapsed >= 60) stopRecording(); // cap at 60s
+        }, 200);
+      }).catch(() => { /* mic denied or unavailable */ });
+    } catch { /* getUserMedia unavailable */ }
+  };
+
+  const stopRecording = () => {
+    if (recorderRef.current?.state === 'recording') {
+      recorderRef.current.stop();
+    }
+    setRecording(false);
+    clearInterval(recTimerRef.current);
+  };
+
+  const discardAudio = () => {
+    if (audioPreview) URL.revokeObjectURL(audioPreview);
+    setAudioBlob(null);
+    setAudioPreview(null);
+    setRecDuration(0);
+  };
+
+  const sendAudio = async () => {
+    if (!audioBlob || audioBlob.size === 0 || !audioPreview) return;
+    setSendingAudio(true);
+    try {
+      const fd = new Date();
+      const key = `${conversation?.id || 'dm'}/${fd.getFullYear()}${String(fd.getMonth()+1).padStart(2,'0')}`;
+      const url = await uploadAudio('voice', key, audioBlob);
+      await onSend('🎙️ voice note', url);
+      discardAudio();
+    } catch {
+      // upload or send failed — keep the audio preview so user can retry
+    }
+    if (mountedRef.current) setSendingAudio(false);
+  };
+
+  const isAudioMessage = (m) => !!m.audioUrl;
+
+  // Touch event handlers: set flag to suppress synthesized mouse events
+  const onMicTouchStart = (e) => { e.preventDefault(); isTouchRef.current = true; startRecording(); };
+  const onMicTouchEnd = (e) => { e.preventDefault(); isTouchRef.current = true; stopRecording(); };
+  const onMicMouseDown = () => { if (!isTouchRef.current) startRecording(); };
+  const onMicMouseUp = () => { if (!isTouchRef.current) stopRecording(); };
+  const onMicMouseLeave = () => { if (!isTouchRef.current) stopRecording(); };
+
   return (
-    <div className="absolute inset-0 z-40 bg-[#0A0A0A] flex flex-col animate-slide-in-right">
+    <div className="absolute inset-0 flex flex-col bg-[#0A0A0A] z-40 animate-slide-in-right">
       {/* Header */}
-      <div className="bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A] safe-pt">
-        <div className="px-4 h-[60px] flex items-center gap-3">
-          <button onClick={onBack} className="tap text-[#A8A29E] hover:text-[#C9A961] p-2 -m-1 transition-colors"><ArrowLeft size={20} /></button>
-          <div className="w-9 h-9 rounded-full overflow-hidden bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-base shrink-0">
-            {conversation.avatarUrl ? <img src={conversation.avatarUrl} alt="" className="w-full h-full object-cover" /> : conversation.avatar}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-[#F5F1E8] text-sm truncate" style={F.ui}>{conversation.user}</div>
-            <div className="text-[10px] text-[#6B6B6B]" style={F.mono}>
-              {conversation.group ? 'coven · group' : 'whisper'}
-            </div>
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-[#1A1A1A]">
+        <button onClick={onBack} className="tap text-[#A8A29E] hover:text-[#F5F1E8] transition-colors">
+          <ChevronLeft size={20} />
+        </button>
+        <div className="w-8 h-8 rounded-full bg-[#1A1A1A] flex items-center justify-center overflow-hidden shrink-0" style={F.ui}>
+          {conversation?.avatarUrl ? (
+            <img src={conversation.avatarUrl} className="w-full h-full object-cover" alt="" />
+          ) : (
+            <span className="text-sm">{conversation?.avatar || '✦'}</span>
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="text-sm text-[#F5F1E8] truncate" style={F.ui}>{conversation?.user || '...'}</div>
+          <div className="text-[10px] text-[#6B6B6B]" style={F.ui}>
+            {conversation?.group ? 'coven · group' : 'whisper'}
           </div>
         </div>
       </div>
@@ -54,84 +169,73 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
         {(messages || []).map((m, i) => {
           const mine = m.from === 'me';
-          const prev = (messages || [])[i - 1];
-          const showFrom = conversation.group && !mine && (!prev || prev.from !== m.from);
-          const isLast = i === messages.length - 1;
-          const seen = mine && isLast && seenAt === m.id;
+          const audioMsg = isAudioMessage(m);
           return (
             <div key={m.id} className={`flex flex-col ${mine ? 'items-end' : 'items-start'}`}>
-              {showFrom && (
-                <div className="text-[10px] text-[#6B6B6B] mb-0.5 ml-1" style={F.mono}>{m.from}</div>
+              {conversation?.group && !mine && (
+                <div className="text-[10px] text-[#A8A29E] px-1 pb-0.5" style={F.ui}>{m.from}</div>
               )}
               <div
-                onClick={() => {
-                  if (m.failed) { onRetry && onRetry(m.id); return; }
-                  if (onReact && !m.pending) setTrayFor(t => t === m.id ? null : m.id);
-                }}
-                className={`max-w-[78%] px-3 py-2 text-sm break-words ${(m.failed || (onReact && !m.pending)) ? 'cursor-pointer' : ''} ${
-                  mine
-                    ? `text-[#F5F1E8] rounded-l-2xl rounded-tr-2xl rounded-br-md ${m.failed ? 'bg-[#3a0d0d] border border-[#8B0000]' : m.pending ? 'bg-[#8B0000]/60' : 'bg-[#8B0000]'}`
-                    : 'bg-[#141414] text-[#F5F1E8] border border-[#2A2A2A] rounded-r-2xl rounded-tl-2xl rounded-bl-md'
-                }`}
-                style={F.serif}
+                className={`relative max-w-[78%] group ${mine ? 'items-end' : 'items-start'}`}
+                onClick={() => !m.pending && !m.failed && onReact && setTrayMsg(trayMsg === m.id ? null : m.id)}
               >
-                {m.forwardedPost && (
-                  <div
-                    onClick={(e) => { e.stopPropagation(); if (!m.forwardedPost.removed && onOpenPost) onOpenPost(m.forwardedPost.id); }}
-                    className={`${m.body ? 'mb-1.5' : ''} px-2 py-1.5 rounded-lg bg-black/30 border border-white/10 ${m.forwardedPost.removed ? '' : 'cursor-pointer'}`}
-                  >
-                    {m.forwardedPost.removed ? (
-                      <div className="text-[11px] italic opacity-70">post removed</div>
-                    ) : (
-                      <>
-                        <div className="flex items-center gap-1.5 mb-0.5 opacity-80">
-                          <span className="text-xs leading-none">{m.forwardedPost.avatar || '✦'}</span>
-                          <span className="text-[10px] uppercase tracking-wider truncate">{m.forwardedPost.handle || 'someone'}</span>
-                        </div>
-                        {m.forwardedPost.img && <div className="text-[11px] opacity-70 mb-0.5">🖼 image</div>}
-                        {m.forwardedPost.body && <div className="text-[12px] leading-snug opacity-90">{m.forwardedPost.body.slice(0, 140)}{m.forwardedPost.body.length > 140 ? '…' : ''}</div>}
-                      </>
-                    )}
+                {trayMsg === m.id && onReact && (
+                  <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex gap-1 bg-[#1A1A1A] border border-[#2A2A2A] rounded-full px-2 py-1 z-10 shadow-lg"
+                    onClick={e => e.stopPropagation()}>
+                    {REACT_KINDS.map(k => (
+                      <button key={k} onClick={() => { onReact(m.id, k); setTrayMsg(null); }}
+                        className="tap text-sm hover:scale-125 transition-transform px-1">{REACT_EMOJI[k]}</button>
+                    ))}
                   </div>
                 )}
-                {m.body}
-              </div>
-              {/* reaction tray — tap a whisper to open */}
-              {trayFor === m.id && onReact && (
-                <div className={`flex gap-0.5 mt-1 px-1.5 py-1 rounded-full bg-[#141414] border border-[#2A2A2A] ${mine ? 'self-end' : 'self-start'}`}>
-                  {REACTION_KINDS.map(([k, icon]) => (
-                    <button key={k}
-                      onClick={(e) => { e.stopPropagation(); onReact(m.id, k); setTrayFor(null); }}
-                      className="text-base leading-none px-1.5 py-0.5 hover:scale-125 transition-transform">{icon}</button>
-                  ))}
-                </div>
-              )}
-              {/* reaction chips */}
-              {m.reactions && REACTION_KINDS.some(([k]) => m.reactions[k] > 0) && (
-                <div className={`flex flex-wrap gap-1 mt-1 ${mine ? 'self-end justify-end' : 'self-start'}`}>
-                  {REACTION_KINDS.filter(([k]) => m.reactions[k] > 0).map(([k, icon]) => (
-                    <button key={k}
-                      onClick={(e) => { e.stopPropagation(); onReact && onReact(m.id, k); }}
-                      className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[11px] border transition-colors ${
-                        m.myReactions?.[k]
-                          ? 'border-[#8B0000] bg-[#8B0000]/25 text-[#F5F1E8]'
-                          : 'border-[#2A2A2A] bg-[#141414] text-[#A8A29E] hover:text-[#F5F1E8]'
-                      }`}>
-                      <span className="leading-none">{icon}</span><span style={F.mono}>{m.reactions[k]}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-              <div className="text-[9px] text-[#6B6B6B] mt-0.5 px-1 flex items-center gap-1" style={F.mono}>
-                {m.failed ? (
-                  <span className="text-[#C97a7a]">failed — tap to retry</span>
-                ) : <>
-                  {m.time}
-                  {mine && isLast && (
-                    seen ? <span className="text-[#C9A961] flex items-center gap-0.5"><CheckCheck size={10} /> seen</span>
-                         : <Check size={10} />
+                <div
+                  className={`px-3 py-2 text-sm leading-relaxed ${
+                    mine
+                      ? m.failed ? 'bg-[#8B0000]/20 border border-[#8B0000]/60' : m.pending ? 'bg-[#8B0000]/60' : 'bg-[#8B0000]'
+                      : 'bg-[#141414]'
+                  } text-[#F5F1E8] ${
+                    mine ? 'rounded-l-2xl rounded-tr-2xl rounded-br-md' : 'rounded-r-2xl rounded-tl-2xl rounded-bl-md'
+                  }`}>
+                  {audioMsg ? (
+                    <div className="flex items-center gap-2 min-w-[180px]">
+                      <audio controls src={m.audioUrl} className="h-9 w-full" preload="metadata" />
+                    </div>
+                  ) : m.forwardedPost ? (
+                    <div onClick={e => { e.stopPropagation(); if (m.forwardedPost.id) onOpenPost?.(m.forwardedPost.id); }}
+                      className="cursor-pointer">
+                      {m.forwardedPost.removed ? (
+                        <div className="text-[#6B6B6B] italic text-xs">post removed</div>
+                      ) : (
+                        <div className="border border-[#2A2A2A] rounded-lg p-2 mb-1 bg-[#0A0A0A]/50">
+                          <div className="text-[10px] text-[#A8A29E]" style={F.ui}>@{m.forwardedPost.handle}</div>
+                          {m.forwardedPost.body && <div className="text-xs mt-0.5">{m.forwardedPost.body}</div>}
+                        </div>
+                      )}
+                      {m.body && <div>{m.body}</div>}
+                    </div>
+                  ) : (
+                    <div className="whitespace-pre-wrap break-words">{m.body || ''}</div>
                   )}
-                </>}
+                </div>
+                {REACT_KINDS.some(k => (m.reactions?.[k] || 0) > 0) && (
+                  <div className="flex gap-1 mt-0.5">
+                    {REACT_KINDS.map(k => {
+                      const count = m.reactions?.[k] || 0;
+                      if (!count) return null;
+                      return (
+                        <button key={k} onClick={e => { e.stopPropagation(); onReact?.(m.id, k); }}
+                          className={`text-[10px] px-1.5 py-0.5 rounded-full border transition-colors ${
+                            m.myReactions?.[k] ? 'bg-[#C9A961]/20 border-[#C9A961]/40 text-[#C9A961]' : 'bg-[#1A1A1A] border-[#2A2A2A] text-[#A8A29E]'
+                          }`} style={F.ui}>
+                          {REACT_EMOJI[k]} {count}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                <div className={`text-[9px] text-[#6B6B6B] mt-0.5 px-1 ${mine ? 'text-right' : 'text-left'}`} style={F.ui}>
+                  {m.failed ? 'failed — tap to retry' : m.time}
+                </div>
               </div>
             </div>
           );
@@ -140,37 +244,79 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
 
       {/* Composer */}
       <div className="border-t border-[#1A1A1A] bg-[#0A0A0A] px-3 py-2 pb-3 safe-pb">
-        <div className="flex items-end gap-2">
-          <div className="flex-1 bg-[#141414] border border-[#2A2A2A] focus-within:border-[#C9A961]/50 rounded-2xl px-3 py-2 transition-colors">
-            <textarea
-              value={draft}
-              maxLength={4000}
-              onChange={(e) => setDraft(e.target.value.slice(0, 4000))}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  send();
-                }
-              }}
-              placeholder="whisper..."
-              rows={1}
-              className="w-full bg-transparent text-[#F5F1E8] text-sm outline-none resize-none placeholder:text-[#6B6B6B]"
-              style={{ ...F.ui, maxHeight: '120px' }}
-            />
+        {audioPreview ? (
+          <div className="flex items-center gap-2 bg-[#141414] border border-[#2A2A2A] rounded-2xl px-3 py-2">
+            <audio controls src={audioPreview} className="flex-1 h-9" preload="metadata" />
+            <button onClick={discardAudio} disabled={sendingAudio}
+              className="tap w-8 h-8 rounded-full bg-[#2A2A2A] flex items-center justify-center text-[#A8A29E] hover:text-[#F5F1E8]">
+              <X size={14} />
+            </button>
+            <button onClick={sendAudio} disabled={sendingAudio}
+              className={`tap w-8 h-8 rounded-full flex items-center justify-center ${
+                sendingAudio ? 'bg-[#6B6B6B]' : 'bg-[#8B0000] text-[#F5F1E8]'
+              }`}>
+              <Send size={14} />
+            </button>
           </div>
-          <button
-            onClick={send}
-            disabled={!draft.trim()}
-            className={`tap w-9 h-9 shrink-0 rounded-full flex items-center justify-center transition-colors ${
-              draft.trim()
-                ? 'bg-[#8B0000] text-[#F5F1E8]'
-                : 'bg-[#141414] border border-[#2A2A2A] text-[#6B6B6B]'
-            }`}
-          >
-            <Send size={15} />
-          </button>
-        </div>
+        ) : (
+          <div className="flex items-end gap-2">
+            {canRecord && (
+              <button
+                onMouseDown={onMicMouseDown}
+                onMouseUp={onMicMouseUp}
+                onMouseLeave={onMicMouseLeave}
+                onTouchStart={onMicTouchStart}
+                onTouchEnd={onMicTouchEnd}
+                className={`tap w-9 h-9 shrink-0 rounded-full flex items-center justify-center transition-colors select-none ${
+                  recording
+                    ? 'bg-[#8B0000] text-[#F5F1E8] animate-pulse'
+                    : 'bg-[#141414] border border-[#2A2A2A] text-[#6B6B6B] hover:text-[#F5F1E8]'
+                }`}
+              >
+                {recording ? (
+                  <span className="text-[10px] font-mono">{formatDuration(recDuration)}</span>
+                ) : (
+                  <Mic size={15} />
+                )}
+              </button>
+            )}
+            <div className="flex-1 bg-[#141414] border border-[#2A2A2A] focus-within:border-[#C9A961]/50 rounded-2xl px-3 py-2 transition-colors">
+              <textarea
+                value={draft}
+                maxLength={4000}
+                onChange={(e) => setDraft(e.target.value.slice(0, 4000))}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    send();
+                  }
+                }}
+                placeholder="whisper..."
+                rows={1}
+                className="w-full bg-transparent text-[#F5F1E8] text-sm outline-none resize-none placeholder:text-[#6B6B6B]"
+                style={{ ...F.ui, maxHeight: '120px' }}
+              />
+            </div>
+            <button
+              onClick={send}
+              disabled={!draft.trim()}
+              className={`tap w-9 h-9 shrink-0 rounded-full flex items-center justify-center transition-colors ${
+                draft.trim()
+                  ? 'bg-[#8B0000] text-[#F5F1E8]'
+                  : 'bg-[#141414] border border-[#2A2A2A] text-[#6B6B6B]'
+              }`}
+            >
+              <Send size={15} />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
+const ChevronLeft = ({ size }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="15 18 9 12 15 6" />
+  </svg>
+);
