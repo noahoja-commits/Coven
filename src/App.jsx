@@ -892,8 +892,19 @@ export default function App() {
     return () => timeouts.forEach(clearTimeout);
   }, [meId, posts, meHandle, sigils, crystals, ritual, communityMembership, reflections, graves, bookmarks, divinationLog, following]);
 
-  const addPost = async ({ body, community, anonymous, poll, img, kind, eventId, coauthorId, coauthorHandle }) => {
+  const addPost = async ({ body, community, anonymous, poll, img, kind, eventId, coauthorId, coauthorHandle, scheduled }) => {
     if (!meId) return;
+    // Scheduled for later — create it hidden (no optimistic feed insert) and confirm.
+    if (scheduled) {
+      try {
+        await createPost({ body, community, anonymous, poll, img, kind, eventId, coauthorId, coauthorHandle, scheduled }, { id: meId, handle: meHandle, avatar: meAvatar, avatarUrl: meAvatarUrl });
+        const w = new Date(scheduled);
+        showToast(`scheduled for ${w.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}.`);
+      } catch {
+        showToast("couldn't schedule that — try again.", 'error');
+      }
+      return;
+    }
     const tempId = `temp-${Date.now()}`;
     const optimistic = {
       id: tempId, kind: kind || (poll ? 'poll' : 'text'),

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { X, Image as ImageIcon, Hash, EyeOff, Eye, BarChart2, Plus, Minus, Loader2 } from 'lucide-react';
+import { X, Image as ImageIcon, Hash, EyeOff, Eye, BarChart2, Plus, Minus, Loader2, Clock } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { COMMUNITIES } from '../../data/communities';
 import { uploadImage, uploadVideo } from '../../lib/db/storage';
@@ -20,6 +20,8 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
   const [mediaKind, setMediaKind] = useState(null); // 'image' | 'video'
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [scheduledAt, setScheduledAt] = useState(''); // datetime-local value ('' = post now)
+  const [scheduleOpen, setScheduleOpen] = useState(false);
   const fileRef = useRef(null);
   const taRef = useRef(null);
 
@@ -85,6 +87,9 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
 
   const pollOk = !poll || poll.options.filter(o => o.trim()).length >= 2;
   const canPost = (text.trim().length > 0 || mediaFile) && pollOk && !busy;
+  // A scheduled time only counts if it's at least a minute in the future.
+  const scheduledIso = scheduledAt && new Date(scheduledAt).getTime() > Date.now() + 60000
+    ? new Date(scheduledAt).toISOString() : null;
 
   const onPickMedia = (e) => {
     const file = e.target.files?.[0];
@@ -134,8 +139,9 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
           payload.kind = 'photo';
         }
       }
+      if (scheduledIso) payload.scheduled = scheduledIso;
       onPost && onPost(payload);
-      setText(''); clearMedia(); clearDraft(); setPendingDraft(null); setCoauthor(null);
+      setText(''); clearMedia(); clearDraft(); setPendingDraft(null); setCoauthor(null); setScheduledAt(''); setScheduleOpen(false);
     } catch (err) {
       setError(err?.message || 'could not post — try again');
       setBusy(false);
@@ -153,7 +159,7 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
         <div className="px-4 h-[60px] flex items-center justify-between">
           <button onClick={onClose} className="tap text-[#A8A29E] hover:text-[#C9A961] p-2 -m-1"><X size={20} /></button>
           <div className="text-[#F5F1E8] text-sm tracking-[0.25em]" style={F.display}>NEW POST</div>
-          <button onClick={submit} disabled={!canPost} className="btn btn-primary">{busy ? <><Loader2 size={12} className="animate-spin" /> posting</> : 'post'}</button>
+          <button onClick={submit} disabled={!canPost} className="btn btn-primary">{busy ? <><Loader2 size={12} className="animate-spin" /> posting</> : (scheduledIso ? 'schedule' : 'post')}</button>
         </div>
       </div>
       <div className="flex-1 flex flex-col">
@@ -233,11 +239,21 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
           </div>
         )}
         {error && <div className="px-4 py-2 text-[11px] text-[#8B0000] text-center" style={F.ui}>{error}</div>}
+        {scheduleOpen && (
+          <div className="px-4 py-2 border-t border-[#1A1A1A] flex items-center gap-2">
+            <Clock size={14} className="text-[#C9A961] shrink-0" />
+            <input type="datetime-local" value={scheduledAt} onChange={e => setScheduledAt(e.target.value)}
+              className="bg-[#141414] border border-[#2A2A2A] text-[#F5F1E8] text-sm px-2 py-1 outline-none" style={F.ui} />
+            {scheduledAt && <button onClick={() => setScheduledAt('')} className="text-[10px] text-[#6B6B6B] hover:text-[#C9A961] uppercase tracking-wider" style={F.ui}>clear</button>}
+            <span className="text-[10px] text-[#6B6B6B] ml-auto" style={F.ui}>{scheduledIso ? 'posts at this time' : 'pick a future time'}</span>
+          </div>
+        )}
         <div className="border-t border-[#1A1A1A] px-4 py-3 flex items-center gap-4">
           <input ref={fileRef} type="file" accept="image/*,video/*" onChange={onPickMedia} className="hidden" />
           <button onClick={() => fileRef.current?.click()} disabled={!!poll}
             className={`tap ${mediaPreview ? 'text-[#C9A961]' : 'text-[#A8A29E] hover:text-[#C9A961]'} disabled:opacity-30`} title="add a photo or video"><ImageIcon size={18} /></button>
           <button onClick={togglePoll} disabled={!!mediaFile} className={`tap ${poll ? 'text-[#5E3B73]' : 'text-[#A8A29E] hover:text-[#C9A961]'} disabled:opacity-30`} title="poll"><BarChart2 size={18} /></button>
+          <button onClick={() => setScheduleOpen(o => !o)} className={`tap ${scheduledIso ? 'text-[#C9A961]' : 'text-[#A8A29E] hover:text-[#C9A961]'}`} title="schedule for later"><Clock size={18} /></button>
           <button onClick={() => setAnonymous(!anonymous)}
             className={`flex items-center gap-1.5 text-[10px] uppercase tracking-wider transition-colors ${anonymous ? 'text-[#5E3B73]' : 'text-[#6B6B6B] hover:text-[#A8A29E]'}`}
             style={F.ui} title="post as confession">

@@ -109,7 +109,7 @@ export async function clearPollVote(postId, userId) {
 
 // Create a post and return it already hydrated to the client shape.
 // `me` = { id, handle, avatar }.
-export async function createPost({ body, community, anonymous, poll, kind, img, event, quoted, eventId, coauthorId, coauthorHandle }, me) {
+export async function createPost({ body, community, anonymous, poll, kind, img, event, quoted, eventId, coauthorId, coauthorHandle, scheduled }, me) {
   const insert = {
     author_id: me.id,
     body: body || '',
@@ -123,6 +123,7 @@ export async function createPost({ body, community, anonymous, poll, kind, img, 
   if (quoted) insert.quoted = quoted;
   if (eventId) insert.event_id = eventId; // links the post to an event as a recap
   if (coauthorId && !anonymous) insert.coauthor_id = coauthorId; // co-signed (never on anon — would unmask)
+  if (scheduled) insert.scheduled_at = scheduled; // future publish time; hidden from feed_posts until due
 
   const { data, error } = await supabase.from('posts').insert(insert).select().single();
   if (error) throw error;
