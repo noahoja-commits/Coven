@@ -1,6 +1,6 @@
 // Vercel serverless: send a web-push for a notification.
 // Called by the notifications-insert pg_net trigger (verified by a shared secret).
-import { getSupa, initVapid, sendToUser } from './_push';
+import { getSupa, initVapid, sendToUser } from '../lib/push-server.js';
 
 const REACT_EMOJI = { bat: '🦇', fire: '🔥', skull: '💀', smoke: '💨' };
 

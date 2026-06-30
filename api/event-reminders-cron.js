@@ -1,6 +1,6 @@
 // Vercel serverless: scheduled "starts soon" push to event attendees.
 // Part B of event-reminders. Runs hourly (1h look-ahead window; a 2h schedule would leave gaps).
-import { getSupa, initVapid, checkCronAuth, sendToUser } from './_push';
+import { getSupa, initVapid, checkCronAuth, sendToUser } from '../lib/push-server.js';
 
 export default async function handler(req, res) {
   if (!checkCronAuth(req, res)) return;

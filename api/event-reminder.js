@@ -1,7 +1,7 @@
 // Vercel serverless: daily at 15:00 UTC, push a "tonight · {event}" reminder
 // to every user who RSVP'd to an event happening today.
 // Uses a UTC date-range query (safe for both `date` and `timestamptz` columns).
-import { getSupa, initVapid, checkCronAuth, sendToUser } from './_push';
+import { getSupa, initVapid, checkCronAuth, sendToUser } from '../lib/push-server.js';
 
 export default async function handler(req, res) {
   if (!checkCronAuth(req, res)) return;
