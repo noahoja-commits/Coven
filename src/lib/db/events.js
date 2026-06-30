@@ -42,9 +42,17 @@ function hydrateEvent(row, myRsvpSet, myId) {
   };
 }
 
-export async function fetchEvents(myId) {
+export async function fetchEvents(myId, { limit = 200 } = {}) {
+  // Upcoming (and TBA / null-date) events only, capped. Past events accumulate forever,
+  // and since the list is ordered soonest-first an unfiltered query both grows unbounded
+  // AND leads the browse list with ancient events. Individual past events stay viewable
+  // via EventDetail (reached from a ticket/link) — this only scopes the browse list.
+  const today = new Date().toISOString().slice(0, 10);
   const { data: rows, error } = await supabase
-    .from('event_feed').select('*').order('event_date', { ascending: true });
+    .from('event_feed').select('*')
+    .or(`event_date.gte.${today},event_date.is.null`)
+    .order('event_date', { ascending: true })
+    .limit(limit);
   if (error) throw error;
 
   const set = new Set();

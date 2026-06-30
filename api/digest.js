@@ -1,6 +1,6 @@
 // Vercel serverless: weekly (Thursday 18:00 UTC) digest push.
 // "N rites near you this weekend" — city-matched, preference-gated.
-import { getSupa, initVapid, checkCronAuth, sendToUser } from '../lib/push-server.js';
+import { getSupa, initVapid, checkCronAuth, sendToUsers } from '../lib/push-server.js';
 
 export default async function handler(req, res) {
   if (!checkCronAuth(req, res)) return;
@@ -40,25 +40,25 @@ export default async function handler(req, res) {
     const profileCities = {};
     (profilesRes.data || []).forEach(p => { profileCities[p.id] = (p.city || '').trim().toLowerCase(); });
 
-    // 4. For each user with a matching city, send a digest push
-    const sentUsers = new Set();
-    let totalErrors = 0;
-
+    // 4. Build one digest recipient per subscribed user whose city has events,
+    //    then fan out in a single batched, concurrency-bounded send (sendToUsers
+    //    dedups per user and gates on the 'digest' preference).
+    const seen = new Set();
+    const recipients = [];
     for (const sub of (subsRes.data || [])) {
-      if (sentUsers.has(sub.user_id)) continue; // one push per user across devices
+      if (seen.has(sub.user_id)) continue; // one push per user across devices
+      seen.add(sub.user_id);
       const userCity = profileCities[sub.user_id];
       if (!userCity || !cityEvents[userCity]) continue;
 
       const count = cityEvents[userCity];
       const body = `the coven gathers · ${count} ${count === 1 ? 'rite' : 'rites'} near ${userCity} this weekend`;
-
-      const { errors } = await sendToUser(sub.user_id, { title: 'Coven', body, tag: 'digest', url: '/' }, 'digest');
-      totalErrors += errors.length;
-      sentUsers.add(sub.user_id);
+      recipients.push({ userId: sub.user_id, payload: { title: 'Coven', body, tag: 'digest', url: '/' } });
     }
 
-    if (totalErrors) console.warn('digest: push errors', totalErrors);
-    res.status(200).json({ usersNotified: sentUsers.size, eventsConsidered: events?.length || 0, errors: totalErrors });
+    const { usersSent, errors } = await sendToUsers(recipients, 'digest');
+    if (errors) console.warn('digest: push errors', errors);
+    res.status(200).json({ usersNotified: usersSent, eventsConsidered: events?.length || 0, errors });
   } catch (e) {
     console.error('digest', e?.message || e || 'Unknown error');
     res.status(500).json({ error: e?.message || 'Internal error' });

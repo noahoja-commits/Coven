@@ -58,11 +58,17 @@ export async function clearNotifications(myId) {
   if (error) throw error;
 }
 
-// Realtime: new notifications for the current user (RLS scopes the stream).
-export function subscribeNotifications(onInsert) {
+// Realtime: new notifications for the current user. The server-side `user_id` filter is
+// the key scale lever — without it, notifications being the busiest stream, EVERY user's
+// notification insert is fanned out to (and RLS-checked against) every online client. With
+// it the realtime server skips uninterested subscribers before any RLS work, and each
+// client only wakes for its own rows (so the caller's per-row refetch stays bounded to one
+// user's notification rate). RLS still independently guarantees correctness.
+export function subscribeNotifications(myId, onInsert) {
   const ch = supabase
     .channel('notifications')
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' },
+    .on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${myId}` },
       payload => onInsert(payload.new))
     .subscribe();
   return () => { supabase.removeChannel(ch); };

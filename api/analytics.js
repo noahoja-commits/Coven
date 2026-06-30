@@ -2,6 +2,13 @@
 // Returns aggregated stats: post views, profile views, follower growth,
 // top posts, engagement, and activity timeline.
 import { createClient } from '@supabase/supabase-js';
+import { rateLimit } from '../lib/ratelimit.js';
+
+// Per-instance short-TTL cache: this endpoint runs ~15 DB round-trips, and a user
+// refreshing their dashboard would otherwise re-run all of them each time. 60s is plenty
+// fresh for engagement stats and collapses repeat loads to a single cached response.
+const cache = new Map(); // `${userId}:${days}` -> { at: ms, payload }
+const CACHE_TTL = 60000;
 
 export default async function handler(req, res) {
   // Auth: requires a valid user session token
@@ -23,6 +30,13 @@ export default async function handler(req, res) {
 
   const userId = user.id;
   const days = Math.min(parseInt(req.query?.days || '30', 10), 90);
+
+  if (!rateLimit(`analytics:${userId}`, { limit: 20, windowMs: 60000 })) {
+    res.status(429).json({ error: 'too many requests — try again in a moment' }); return;
+  }
+  const cacheKey = `${userId}:${days}`;
+  const hit = cache.get(cacheKey);
+  if (hit && Date.now() - hit.at < CACHE_TTL) { res.status(200).json(hit.payload); return; }
 
   try {
     const since = new Date(Date.now() - days * 86400000).toISOString();
@@ -65,7 +79,7 @@ export default async function handler(req, res) {
     // Top posts by views
     const topPosts = await getTopPosts(supa, userId);
 
-    res.status(200).json({
+    const payload = {
       overview: {
         totalViews: postViewsRes.data?.reduce((sum, r) => sum + Number(r.n), 0) || 0,
         profileViews: profileViewsRes.count || 0,
@@ -76,7 +90,9 @@ export default async function handler(req, res) {
       },
       viewHistory,
       topPosts,
-    });
+    };
+    cache.set(cacheKey, { at: Date.now(), payload });
+    res.status(200).json(payload);
   } catch (e) {
     console.error('analytics', e?.message || e);
     res.status(500).json({ error: e?.message || 'Internal error' });

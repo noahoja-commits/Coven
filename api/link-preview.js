@@ -10,6 +10,7 @@ import dns from 'node:dns/promises';
 import net from 'node:net';
 import { createClient } from '@supabase/supabase-js';
 import { verifyUser } from './_auth.js';
+import { rateLimit } from '../lib/ratelimit.js';
 
 const MAX_BYTES = 512 * 1024;     // enough to reach <head> OG tags
 const MAX_REDIRECTS = 3;
@@ -148,6 +149,11 @@ export default async function handler(req, res) {
   const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
   const user = await verifyUser(req, supa);
   if (!user) { res.status(401).json({ error: 'unauthorized' }); return; }
+  // This endpoint drives outbound fetches on the user's behalf — cap per-user fetch
+  // amplification (the SSRF hardening already restricts WHERE it can fetch).
+  if (!rateLimit(`linkpreview:${user.id}`, { limit: 30, windowMs: 60000 })) {
+    res.status(429).json({ error: 'too many requests — try again in a moment' }); return;
+  }
 
   const url = req.query?.url;
   if (!url || typeof url !== 'string') { res.status(400).json({ error: 'url query parameter required' }); return; }

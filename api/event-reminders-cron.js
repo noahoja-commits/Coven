@@ -1,6 +1,6 @@
 // Vercel serverless: scheduled "starts soon" push to event attendees.
 // Part B of event-reminders. Runs hourly (1h look-ahead window; a 2h schedule would leave gaps).
-import { getSupa, initVapid, checkCronAuth, sendToUser } from '../lib/push-server.js';
+import { getSupa, initVapid, checkCronAuth, sendToUsers } from '../lib/push-server.js';
 
 export default async function handler(req, res) {
   if (!checkCronAuth(req, res)) return;
@@ -35,18 +35,16 @@ export default async function handler(req, res) {
       userEvents[r.user_id].push(r.event_id);
     });
 
-    let reminded = 0, totalErrors = 0;
-    for (const [uid, uEvents] of Object.entries(userEvents)) {
+    const recipients = Object.entries(userEvents).map(([uid, uEvents]) => {
       const ev = eventById[uEvents[0]];
-      if (!ev) continue;
+      if (!ev) return null;
       const body = `starting soon · ${ev.name || 'an event'}${ev.venue ? ' at ' + ev.venue : ''}`;
-      const { errors } = await sendToUser(uid, { title: 'Coven', body, tag: 'starting-' + ev.id, url: '/' }, 'event_reminder');
-      totalErrors += errors.length;
-      reminded++;
-    }
+      return { userId: uid, payload: { title: 'Coven', body, tag: 'starting-' + ev.id, url: '/' } };
+    }).filter(Boolean);
 
-    if (totalErrors) console.warn('event-reminders-cron: push errors', totalErrors);
-    res.status(200).json({ reminded, errors: totalErrors });
+    const { usersSent, errors } = await sendToUsers(recipients, 'event_reminder');
+    if (errors) console.warn('event-reminders-cron: push errors', errors);
+    res.status(200).json({ reminded: usersSent, errors });
   } catch (e) {
     console.error('event-reminders-cron', e?.message || e || 'Unknown error');
     res.status(500).json({ error: e?.message || 'Internal error' });

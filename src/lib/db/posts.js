@@ -31,11 +31,17 @@ export async function fetchFeed(myId, { scope = 'everyone', before = null, limit
   if (error) throw error;
 
   const myReactionSet = new Set();
-  if (myId) {
+  // Only this page's reactions — scoped to the visible post ids. The old query pulled
+  // EVERY reaction the user had ever made on every feed page; the set is only used to
+  // mark the rows we just fetched, so `.in('post_id', pageIds)` loses nothing and uses
+  // the reactions PK (post_id, user_id, kind).
+  if (myId && (rows || []).length) {
+    const pageIds = rows.map(r => r.id);
     const { data: rx, error: rxErr } = await supabase
       .from('reactions')
       .select('post_id, kind')
-      .eq('user_id', myId);
+      .eq('user_id', myId)
+      .in('post_id', pageIds);
     if (rxErr) throw rxErr;
     (rx || []).forEach(r => myReactionSet.add(`${r.post_id}:${r.kind}`));
   }

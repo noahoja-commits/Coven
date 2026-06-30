@@ -1,7 +1,7 @@
 // Vercel serverless: daily at 15:00 UTC, push a "tonight · {event}" reminder
 // to every user who RSVP'd to an event happening today.
 // Uses a UTC date-range query (safe for both `date` and `timestamptz` columns).
-import { getSupa, initVapid, checkCronAuth, sendToUser } from '../lib/push-server.js';
+import { getSupa, initVapid, checkCronAuth, sendToUsers } from '../lib/push-server.js';
 
 export default async function handler(req, res) {
   if (!checkCronAuth(req, res)) return;
@@ -42,23 +42,18 @@ export default async function handler(req, res) {
       userEvents[r.user_id].push(r.event_id);
     });
 
-    // 3. Send one push per user (first event + "+N more")
-    let usersNotified = 0, totalErrors = 0;
-
-    for (const [uid, uEvents] of Object.entries(userEvents)) {
+    // 3. One push per user (first event + "+N more") via a single batched fan-out.
+    const recipients = Object.entries(userEvents).map(([uid, uEvents]) => {
       const ev = eventById[uEvents[0]];
-      if (!ev) continue;
-
+      if (!ev) return null;
       let body = `tonight · ${ev.name || 'an event'}${ev.venue ? ' at ' + ev.venue : ''}`;
       if (uEvents.length > 1) body += ` +${uEvents.length - 1} more`;
+      return { userId: uid, payload: { title: 'Coven', body, tag: 'event-' + ev.id, url: '/' } };
+    }).filter(Boolean);
 
-      const { errors } = await sendToUser(uid, { title: 'Coven', body, tag: 'event-' + ev.id, url: '/' }, 'event_reminder');
-      totalErrors += errors.length;
-      usersNotified++;
-    }
-
-    if (totalErrors) console.warn('event-reminder: push errors', totalErrors);
-    res.status(200).json({ usersNotified, eventsToday: events.length, errors: totalErrors });
+    const { usersSent, errors } = await sendToUsers(recipients, 'event_reminder');
+    if (errors) console.warn('event-reminder: push errors', errors);
+    res.status(200).json({ usersNotified: usersSent, eventsToday: events.length, errors });
   } catch (e) {
     console.error('event-reminder', e?.message || e || 'Unknown error');
     res.status(500).json({ error: e?.message || 'Internal error' });
