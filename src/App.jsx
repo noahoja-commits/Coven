@@ -29,7 +29,7 @@ import { Toast } from './components/shared/Toast';
 import { fetchMyTicketEventIds } from './lib/db/festival';
 import { FestivalMap } from './components/festival/FestivalMap';
 import { VenueMapEditor } from './components/festival/VenueMapEditor';
-import { FONT_HREF, F } from './styles/fonts';
+import { SHOCK_FONT_HREF, F } from './styles/fonts';
 import { Header } from './components/shared/Header';
 import { BottomNav } from './components/shared/BottomNav';
 import { FeatureBoundary } from './components/FeatureBoundary';
@@ -58,8 +58,6 @@ import { ShareToDMModal } from './components/shared/ShareToDMModal';
 import { UserProfileOverlay } from './components/profile/UserProfileOverlay';
 import { StoryViewer } from './components/feed/StoryViewer';
 import { StoryComposer } from './components/feed/StoryComposer';
-import { AnalyticsDashboard } from './components/analytics/AnalyticsDashboard';
-import { HashtagFeed } from './components/feed/HashtagFeed';
 import { SearchOverlay } from './components/shared/SearchOverlay';
 import { CrewBrowse } from './components/profile/CrewBrowse';
 import { AddGraveModal } from './components/profile/AddGraveModal';
@@ -89,6 +87,8 @@ const ConfessionsOverlay = lazy(() => import('./components/coven/ConfessionsOver
 const SoulsOverlay = lazy(() => import('./components/coven/SoulsOverlay').then(m => ({ default: m.SoulsOverlay })));
 const SigilDrawOverlay = lazy(() => import('./components/coven/SigilDrawOverlay').then(m => ({ default: m.SigilDrawOverlay })));
 const IntentionTimerOverlay = lazy(() => import('./components/coven/IntentionTimerOverlay').then(m => ({ default: m.IntentionTimerOverlay })));
+const AnalyticsDashboard = lazy(() => import('./components/analytics/AnalyticsDashboard').then(m => ({ default: m.AnalyticsDashboard })));
+const HashtagFeed = lazy(() => import('./components/feed/HashtagFeed').then(m => ({ default: m.HashtagFeed })));
 
 import { OnboardingFlow } from './components/onboarding/OnboardingFlow';
 import { WelcomeOverlay } from './components/onboarding/WelcomeOverlay';
@@ -286,15 +286,17 @@ export default function App() {
   const [storyHighlights, setStoryHighlights] = useLocalStorage('storyHighlights', []);
   const [seenStories, setSeenStories] = useLocalStorage('seenStories', {}); // { [storyId]: 1 } — watched stories
 
-  // Load fonts
+  // Core fonts load from index.html <head>. The shock-mode display faces are heavier and rarely
+  // used, so pull them in lazily the first time any shock mode is active (then they stay cached).
   useEffect(() => {
-    if (!document.querySelector(`link[href="${FONT_HREF}"]`)) {
+    if (effectiveShockMode !== 'none' && !document.querySelector('link[data-shock-fonts]')) {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href = FONT_HREF;
+      link.href = SHOCK_FONT_HREF;
+      link.setAttribute('data-shock-fonts', '');
       document.head.appendChild(link);
     }
-  }, []);
+  }, [effectiveShockMode]);
 
   // Apply parchment mode + global media treatment (one effect, no extra hook)
   useEffect(() => {
@@ -2409,18 +2411,22 @@ export default function App() {
         />
       )}
       {showAnalytics && (
-        <AnalyticsDashboard onClose={() => setShowAnalytics(false)} meHandle={meHandle} />
+        <Suspense fallback={null}>
+          <AnalyticsDashboard onClose={() => setShowAnalytics(false)} meHandle={meHandle} />
+        </Suspense>
       )}
       {activeHashtag && (
-        <HashtagFeed
-          tag={activeHashtag}
-          meId={meId}
-          onClose={() => setActiveHashtag(null)}
-          onOpenHashtag={(t) => setActiveHashtag(t)}
-          onOpenPost={(id) => { setActiveHashtag(null); setActivePostComments(id); }}
-          onOpenUser={(h) => { setActiveHashtag(null); openUserProfile(h); }}
-          onReact={reactToPost}
-        />
+        <Suspense fallback={null}>
+          <HashtagFeed
+            tag={activeHashtag}
+            meId={meId}
+            onClose={() => setActiveHashtag(null)}
+            onOpenHashtag={(t) => setActiveHashtag(t)}
+            onOpenPost={(id) => { setActiveHashtag(null); setActivePostComments(id); }}
+            onOpenUser={(h) => { setActiveHashtag(null); openUserProfile(h); }}
+            onReact={reactToPost}
+          />
+        </Suspense>
       )}
       {showShockPicker && (
         <ShockModePicker

@@ -32,9 +32,17 @@ export default defineConfig({
         navigateFallbackDenylist: [/^\/assets\//, /\.[a-f0-9]{8}\.(css|js)$/, /^\/sw-push\.js$/],
         // Load our push/notificationclick handlers into the generated SW.
         importScripts: ['/sw-push.js'],
+        // The maplibre map chunk (~1MB) only loads on the map tab — don't precache it at
+        // install; runtime-cache it on first open instead. Cuts the SW install payload ~1MB.
+        globIgnores: ['**/RealMap-*.js', '**/RealMap-*.css'],
         // Precache only the static shell. NEVER cache Supabase auth/API/realtime —
         // serve them network-only so tokens & RLS-scoped data are always fresh.
         runtimeCaching: [
+          {
+            urlPattern: ({ url }) => /\/assets\/RealMap-[^/]*\.(js|css)$/.test(url.pathname),
+            handler: 'CacheFirst',
+            options: { cacheName: 'coven-map', expiration: { maxEntries: 4 } },
+          },
           {
             urlPattern: ({ url }) => url.hostname.endsWith('.supabase.co'),
             handler: 'NetworkOnly',
@@ -58,6 +66,7 @@ export default defineConfig({
         manualChunks: {
           react: ['react', 'react-dom'],
           supabase: ['@supabase/supabase-js'],
+          icons: ['lucide-react'],
         },
       },
     },
