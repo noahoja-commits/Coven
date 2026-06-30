@@ -555,7 +555,7 @@ export default function App() {
   // bell updates in real time, with the actor's profile joined in.
   useEffect(() => {
     if (!meId || !dbProfile) return;
-    const unsub = subscribeNotifications((row) => {
+    const unsub = subscribeNotifications(meId, (row) => {
       fetchNotifications().then(setNotifications).catch(() => {});
       // OS notification banner when the app is open/backgrounded (not killed) —
       // suppressed during quiet hours (the bell badge above still updates).
