@@ -59,6 +59,7 @@ import { UserProfileOverlay } from './components/profile/UserProfileOverlay';
 import { StoryViewer } from './components/feed/StoryViewer';
 import { StoryComposer } from './components/feed/StoryComposer';
 import { AnalyticsDashboard } from './components/analytics/AnalyticsDashboard';
+import { HashtagFeed } from './components/feed/HashtagFeed';
 import { SearchOverlay } from './components/shared/SearchOverlay';
 import { CrewBrowse } from './components/profile/CrewBrowse';
 import { AddGraveModal } from './components/profile/AddGraveModal';
@@ -147,6 +148,7 @@ export default function App() {
   const [showStoryComposer, setShowStoryComposer] = useState(false);
   const [storyAttachedPost, setStoryAttachedPost] = useState(null); // a post being shared into a story
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [activeHashtag, setActiveHashtag] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
   const [showCrewBrowse, setShowCrewBrowse] = useState(false);
   const [showAddGrave, setShowAddGrave] = useState(false);
@@ -350,7 +352,7 @@ export default function App() {
   // Lock body scroll when a modal overlay is open
   useEffect(() => {
     const anyModal = showEditProfile || showMood || showTonightModal || showSettings || showNotifs
-      || showCompose || showStoryComposer || showSearch || showVespersArchive || showAnalytics
+      || showCompose || showStoryComposer || showSearch || showVespersArchive || showAnalytics || activeHashtag
       || showAddGrave || showAddAnniv || showNewGroup || showReflections || showDreams || showCrewBrowse
       || showNowPlaying || showBlocked || showLegal || showDeleteConfirm || showMyTickets || quoteTarget || activeStoryIndex !== null;
     document.body.style.overflow = anyModal ? 'hidden' : '';
@@ -1628,6 +1630,7 @@ export default function App() {
     if (activeStoryIndex !== null) { setActiveStoryIndex(null); return true; }
     if (showStoryComposer) { setShowStoryComposer(false); return true; }
     if (showAnalytics) { setShowAnalytics(false); return true; }
+    if (activeHashtag) { setActiveHashtag(null); return true; }
     if (venueEditorEvent) { setVenueEditorEvent(null); return true; }
     if (ticketManagerEvent) { setTicketManagerEvent(null); return true; }
     if (showCreateEvent) { setShowCreateEvent(false); return true; }
@@ -1820,6 +1823,7 @@ export default function App() {
         onHidePost={hidePost}
         onQuotePost={(id) => setQuoteTarget(id)}
         onWhisperPost={(id) => setSharePostTarget(id)}
+        onOpenHashtag={(tag) => setActiveHashtag(tag)}
         onTogglePin={togglePin}
         pinnedPostId={pinnedPostId}
         feedSort={feedSort}
@@ -2377,6 +2381,17 @@ export default function App() {
       )}
       {showAnalytics && (
         <AnalyticsDashboard onClose={() => setShowAnalytics(false)} meHandle={meHandle} />
+      )}
+      {activeHashtag && (
+        <HashtagFeed
+          tag={activeHashtag}
+          meId={meId}
+          onClose={() => setActiveHashtag(null)}
+          onOpenHashtag={(t) => setActiveHashtag(t)}
+          onOpenPost={(id) => { setActiveHashtag(null); setActivePostComments(id); }}
+          onOpenUser={(h) => { setActiveHashtag(null); openUserProfile(h); }}
+          onReact={reactToPost}
+        />
       )}
       {showShockPicker && (
         <ShockModePicker

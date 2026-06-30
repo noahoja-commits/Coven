@@ -68,7 +68,7 @@ export function HomeScreen({
   const renderBody = (body) => body
     ? renderRichText(body, {
         onOpenUser,
-        onOpenHashtag: (tag) => { setActiveTag(tag); onOpenHashtag && onOpenHashtag(tag); },
+        onOpenHashtag: (tag) => { if (onOpenHashtag) onOpenHashtag(tag); else setActiveTag(tag); },
       })
     : null;
 
