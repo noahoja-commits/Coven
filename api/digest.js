@@ -1,6 +1,6 @@
 // Vercel serverless: weekly (Thursday 18:00 UTC) digest push.
 // "N rites near you this weekend" — city-matched, preference-gated.
-import { getSupa, initVapid, checkCronAuth, sendToUser } from './_push';
+import { getSupa, initVapid, checkCronAuth, sendToUser } from '../lib/push-server.js';
 
 export default async function handler(req, res) {
   if (!checkCronAuth(req, res)) return;
