@@ -4,6 +4,7 @@
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { verifyUser } from './_auth.js';
+import { rateLimit } from '../lib/ratelimit.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {
@@ -17,6 +18,9 @@ export default async function handler(req, res) {
   try {
     const user = await verifyUser(req, supa);
     if (!user) { res.status(401).json({ error: 'unauthorized' }); return; }
+    if (!rateLimit(`boost:${user.id}`, { limit: 5, windowMs: 60000 })) {
+      res.status(429).json({ error: 'too many requests — try again in a moment' }); return;
+    }
     const { shopId } = req.body || {};
     if (!shopId) { res.status(400).json({ error: 'shopId required' }); return; }
 

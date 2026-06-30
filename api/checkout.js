@@ -3,6 +3,7 @@
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { verifyUser } from './_auth.js';
+import { rateLimit } from '../lib/ratelimit.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {
@@ -15,6 +16,11 @@ export default async function handler(req, res) {
     // Authenticate the buyer; the ticket is attributed to their verified id, not the body.
     const user = await verifyUser(req, supa);
     if (!user) { res.status(401).json({ error: 'unauthorized' }); return; }
+    // Cost guard: each call creates a live Stripe Checkout Session. 10/min/user is far
+    // above any legitimate ticket-buying rate but blocks scripted session spam.
+    if (!rateLimit(`checkout:${user.id}`, { limit: 10, windowMs: 60000 })) {
+      res.status(429).json({ error: 'too many requests — try again in a moment' }); return;
+    }
     const buyerId = user.id;
     const { eventId } = req.body || {};
     if (!eventId) { res.status(400).json({ error: 'eventId required' }); return; }
