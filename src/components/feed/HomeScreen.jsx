@@ -4,6 +4,8 @@ import { F } from '../../styles/fonts';
 import { Reaction } from '../shared/Reaction';
 import { PostImage } from '../shared/Visuals';
 import { renderRichText } from '../shared/RichText';
+import { LinkPreviewCard } from '../shared/LinkPreviewCard';
+import { extractUrl } from '../../lib/linkPreview';
 import { EmptyState } from '../shared/EmptyState';
 import { AllSeeingEye, TripleMoon, BarcodeDivider } from '../shared/Sigils';
 import { buzz } from '../../lib/haptics';
@@ -484,6 +486,7 @@ export function HomeScreen({
                 </div>
               )}
               {post.body && <p className="text-[#F5F1E8] text-[15px] leading-relaxed mb-3" style={F.serif}>{renderBody(post.body)}</p>}
+              {post.body && extractUrl(post.body) && <LinkPreviewCard url={extractUrl(post.body)} />}
               {post.quoted && (
                 <button onClick={() => onOpenComments && onOpenComments(post.quoted.id)}
                   className="block w-full text-left mb-3 border border-[#2A2A2A] bg-[#0F0F0F] p-3 hover:border-[#3F3F3F] transition-colors">
