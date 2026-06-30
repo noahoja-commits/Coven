@@ -30,9 +30,11 @@ function hydrate(r, myId) {
   };
 }
 
-export async function fetchListings(myId) {
+export async function fetchListings(myId, { limit = 100 } = {}) {
+  // Newest-first, capped. The marketplace was loaded in full on every open; the cap is a
+  // runaway guard (full infinite-scroll for the marketplace is a fast-follow if needed).
   const { data, error } = await supabase
-    .from('listings_feed').select('*').order('created_at', { ascending: false });
+    .from('listings_feed').select('*').order('created_at', { ascending: false }).limit(limit);
   if (error) throw error;
   return (data || []).map(r => hydrate(r, myId));
 }

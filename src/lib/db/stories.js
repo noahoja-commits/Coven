@@ -19,9 +19,11 @@ function hydrate(s, myId) {
 }
 
 // All currently-active stories (oldest first), hydrated to the client shape.
-export async function fetchActiveStories(myId) {
+export async function fetchActiveStories(myId, { limit = 300 } = {}) {
+  // The active_stories view already bounds rows to the unexpired window; the cap is a
+  // runaway guard for a high-concurrency spike. Oldest-first preserves story-ring order.
   const { data, error } = await supabase
-    .from('active_stories').select('*').order('created_at', { ascending: true });
+    .from('active_stories').select('*').order('created_at', { ascending: true }).limit(limit);
   if (error) throw error;
   const stories = (data || []).map(s => hydrate(s, myId));
   // Hydrate previews for share-to-story posts from the PUBLIC feed_posts view

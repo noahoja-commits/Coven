@@ -30,16 +30,29 @@ export async function createGroup(title, memberIds) {
   return data;
 }
 
-export async function fetchMessages(convId, myId) {
-  const { data, error } = await supabase
+export async function fetchMessages(convId, myId, { limit = 50, before = null } = {}) {
+  // Load only the most recent `limit` messages (not the whole thread history, which grew
+  // unbounded). Query newest-first with the cap, then reverse to oldest-first for display.
+  // `before` = { createdAt, id } cursor of the oldest loaded message → paginates older.
+  let q = supabase
     .from('messages_dm')
     // Name the FK explicitly: messages_dm has two relationships to profiles (sender_id +
     // the message_reactions m2m), so a bare profiles embed is ambiguous (PGRST201).
     .select('id, body, created_at, sender_id, forwarded_post_id, audio_url, sender:profiles!messages_dm_sender_id_fkey(handle)')
     .eq('conversation_id', convId)
-    .order('created_at', { ascending: true });
+    .order('created_at', { ascending: false })
+    .order('id', { ascending: false })
+    .limit(limit);
+  if (before) {
+    const c = typeof before === 'string' ? { createdAt: before, id: null } : before;
+    q = c.id
+      ? q.or(`created_at.lt.${c.createdAt},and(created_at.eq.${c.createdAt},id.lt.${c.id})`)
+      : q.lt('created_at', c.createdAt);
+  }
+  const { data, error } = await q;
   if (error) throw error;
-  const msgs = (data || []).map(m => ({
+  const ordered = (data || []).slice().reverse(); // back to oldest-first for the thread view
+  const msgs = ordered.map(m => ({
     id: m.id,
     from: m.sender_id === myId ? 'me' : (m.sender?.handle || 'someone'),
     body: m.body,

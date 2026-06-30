@@ -20,8 +20,12 @@ function hydrate(r, myId) {
   };
 }
 
-export async function fetchShops(myId) {
-  const { data, error } = await supabase.from('shops_feed').select('*');
+export async function fetchShops(myId, { limit = 300 } = {}) {
+  // Runaway guard. Boosted shops are pinned client-side AFTER fetch, so the cap is set
+  // well above realistic near-term shop counts to avoid dropping an older boosted (paid)
+  // shop. If shop count ever approaches this, move boost-pinning + pagination server-side.
+  const { data, error } = await supabase
+    .from('shops_feed').select('*').order('created_at', { ascending: false }).limit(limit);
   if (error) throw error;
   // Boosted (unexpired) shops pinned to the top, then newest first.
   const now = Date.now();
