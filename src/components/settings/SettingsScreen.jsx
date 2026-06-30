@@ -217,6 +217,7 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
             { id: 'candle', label: 'Candles lit' },
             { id: 'tonight', label: 'Tonight statuses' },
             { id: 'vespers', label: 'Vespers passages' },
+            { id: 'digest', label: 'Weekly digest' },
           ].map(k => {
             const on = (settings.notificationKinds || {})[k.id] !== false;
             return (

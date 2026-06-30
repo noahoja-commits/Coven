@@ -5,7 +5,7 @@ import { isSupabaseConfigured } from './lib/supabase';
 import { SignInScreen } from './components/auth/SignInScreen';
 import { ResetPasswordScreen } from './components/auth/ResetPasswordScreen';
 import { fetchFeed, createPost, deletePost as dbDeletePost, togglePostReaction, fetchComments, createComment, toggleCommentReaction, castPollVote, clearPollVote, fetchEventRecaps } from './lib/db/posts';
-import { insertProfile, updateProfile, getProfileStats, getProfileByHandle, fetchProfiles } from './lib/db/profiles';
+import { insertProfile, updateProfile, getProfileStats, getProfileByHandle, fetchProfiles, saveNotificationPrefs } from './lib/db/profiles';
 import { fetchFollowing, fetchFollowers, followUser, unfollowUser } from './lib/db/social';
 import { FollowListOverlay } from './components/profile/FollowListOverlay';
 import { joinCommunity, leaveCommunity, fetchCommunityMemberCounts } from './lib/db/communities';
@@ -198,6 +198,25 @@ export default function App() {
   const effectiveShockMode = transientShock || settings.shockMode;
   // hygiene: clear any pending transient-scare timer if the app ever unmounts
   useEffect(() => () => clearTimeout(transientTimer.current), []);
+
+  // Sync the client notification-category toggles to the server so push actually
+  // respects them (api/_push.sendToUser gates on profiles.notification_prefs by KIND).
+  // One-way (client→server); skip the initial mount so we don't clobber stored prefs.
+  const notifKindsKey = JSON.stringify(settings.notificationKinds || {});
+  const notifSyncedRef = useRef(false);
+  useEffect(() => {
+    if (!meId) return;
+    if (!notifSyncedRef.current) { notifSyncedRef.current = true; return; }
+    const CAT_KINDS = { reaction: ['react', 'story_react'], reply: ['comment'], follow: ['follow', 'mention', 'coauthor'], dm: ['dm'], event: ['rsvp', 'event_reminder'], crew: ['crew_join'], digest: ['digest'] };
+    const nk = settings.notificationKinds || {};
+    const prefs = {};
+    for (const [cat, kinds] of Object.entries(CAT_KINDS)) {
+      const on = nk[cat] !== false;
+      for (const k of kinds) prefs[k] = on;
+    }
+    saveNotificationPrefs(meId, prefs).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notifKindsKey, meId]);
 
   // Live content state (Supabase-backed)
   const [posts, setPosts] = useState([]);
