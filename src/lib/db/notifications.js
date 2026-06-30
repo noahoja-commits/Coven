@@ -70,7 +70,9 @@ export function subscribeNotifications(myId, onInsert) {
     .on('postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${myId}` },
       payload => onInsert(payload.new))
-    .subscribe();
+    .subscribe((status) => {
+      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') console.error('[realtime] notifications:', status);
+    });
   return () => { supabase.removeChannel(ch); };
 }
 

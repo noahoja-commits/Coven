@@ -554,7 +554,7 @@ export default function App() {
   // Live notifications: a new row (follow/react/comment/dm) → refetch so the
   // bell updates in real time, with the actor's profile joined in.
   useEffect(() => {
-    if (!meId || !dbProfile) return;
+    if (!meId) return;
     const unsub = subscribeNotifications(meId, (row) => {
       fetchNotifications().then(setNotifications).catch(() => {});
       // OS notification banner when the app is open/backgrounded (not killed) —
@@ -567,12 +567,12 @@ export default function App() {
       } catch { /* noop */ }
     });
     return unsub;
-  }, [meId, dbProfile]);
+  }, [meId]);
 
   // Live DMs: keep the inbox + the open thread fresh as messages arrive.
   useEffect(() => { activeConversationRef.current = activeConversation; }, [activeConversation]);
   useEffect(() => {
-    if (!meId || !dbProfile) return;
+    if (!meId) return;
     const unsub = subscribeDMs((row) => {
       fetchConversations().then(setConversations).catch(() => {});
       const openId = activeConversationRef.current;
@@ -588,12 +588,12 @@ export default function App() {
       }
     });
     return unsub;
-  }, [meId, dbProfile]);
+  }, [meId]);
 
   // Live reaction chips: on any reaction change, refetch the open thread (cheap; DM threads
   // are small). RLS only delivers reactions in conversations the user belongs to.
   useEffect(() => {
-    if (!meId || !dbProfile) return;
+    if (!meId) return;
     const unsub = subscribeDMReactions(() => {
       const openId = activeConversationRef.current;
       if (!openId) return;
@@ -604,7 +604,7 @@ export default function App() {
       })).catch(() => {});
     });
     return unsub;
-  }, [meId, dbProfile]);
+  }, [meId]);
 
   // Returning from Stripe (ticket checkout / Connect onboarding) — webhooks are async, and on a
   // COLD load meId is null on first paint. So parse the URL params ONCE on mount (the params get
@@ -1039,7 +1039,22 @@ export default function App() {
         }),
       };
     }));
-    if (meId) toggleCommentReaction(commentId, kind, meId, wasMine).catch(() => {});
+    if (meId) toggleCommentReaction(commentId, kind, meId, wasMine).catch((err) => {
+      console.error('toggleCommentReaction failed', err);
+      // revert the optimistic change so the count matches the server (mirrors reactToMessage)
+      setPosts(prev => prev.map(p => {
+        if (p.id !== postId) return p;
+        return { ...p, comments: (p.comments || []).map(c => {
+          if (c.id !== commentId) return c;
+          const myReactions = { ...(c.myReactions || {}) };
+          const reactions = { ...(c.reactions || { heart: 0, skull: 0 }) };
+          myReactions[kind] = wasMine;
+          reactions[kind] = Math.max(0, (reactions[kind] || 0) + (wasMine ? 1 : -1));
+          return { ...c, myReactions, reactions };
+        }) };
+      }));
+      showToast("couldn't react — try again.", 'error');
+    });
   };
 
   const sendMessage = (conversationId, body, audioUrl = null) => {
@@ -1053,10 +1068,12 @@ export default function App() {
     ));
     sendDM(conversationId, meId, body, audioUrl)
       .then(saved => setMessages(prev => ({ ...prev, [conversationId]: (prev[conversationId] || []).map(m => m.id === tempId ? saved : m) })))
-      // Keep the message (marked failed) so it isn't silently lost, and tell the user.
-      .catch(() => {
+      // Keep the message (marked failed) so it isn't silently lost, and tell the user the REAL reason
+      // (the DB layer throws the actual Postgres error — surface it instead of swallowing it).
+      .catch((err) => {
+        console.error('sendDM failed', err);
         setMessages(prev => ({ ...prev, [conversationId]: (prev[conversationId] || []).map(m => m.id === tempId ? { ...m, pending: false, failed: true } : m) }));
-        showToast("whisper didn't send — tap it to retry.", 'error');
+        showToast(`couldn't send: ${err?.message || 'unknown error'} — tap to retry`, 'error');
       });
   };
 
@@ -1133,12 +1150,22 @@ export default function App() {
     setCommunityMembership(prev => ({ ...prev, [id]: !wasMember }));
     // Optimistic count bump + server-backed membership row (migration 0031).
     setCommunityCounts(prev => ({ ...prev, [id]: Math.max(0, (prev[id] || 0) + (wasMember ? -1 : 1)) }));
-    (wasMember ? leaveCommunity(id) : joinCommunity(id)).catch(() => {});
-    if (!wasMember) {
-      const c = COMMUNITIES.find(x => x.id === id);
-      addNotification({ kind: 'crew', avatar: c?.glyph || '✦', text: `you joined ${c?.name || id}` });
-      logActivity({ kind: 'join', glyph: c?.glyph || '✦', label: `joined the ${c?.name || 'a'} scene` });
-    }
+    (wasMember ? leaveCommunity(id) : joinCommunity(id))
+      .then(() => {
+        // Only fire the join notification/activity AFTER the server confirms the write.
+        if (!wasMember) {
+          const c = COMMUNITIES.find(x => x.id === id);
+          addNotification({ kind: 'crew', avatar: c?.glyph || '✦', text: `you joined ${c?.name || id}` });
+          logActivity({ kind: 'join', glyph: c?.glyph || '✦', label: `joined the ${c?.name || 'a'} scene` });
+        }
+      })
+      .catch((err) => {
+        console.error('community membership toggle failed', err);
+        // revert the optimistic flag + count so the UI matches the server
+        setCommunityMembership(prev => ({ ...prev, [id]: wasMember }));
+        setCommunityCounts(prev => ({ ...prev, [id]: Math.max(0, (prev[id] || 0) + (wasMember ? 1 : -1)) }));
+        showToast("couldn't update membership — try again.", 'error');
+      });
   };
 
   const toggleEventRsvp = (id) => {
@@ -1242,8 +1269,9 @@ export default function App() {
     if (!meId || !handle || handle === meHandle) return;
     const otherId = await resolveUserId(handle);
     if (!otherId) return;
-    const convId = await getOrCreateDM(otherId).catch(() => null);
-    if (!convId) return;
+    let convId;
+    try { convId = await getOrCreateDM(otherId); }
+    catch (err) { console.error('getOrCreateDM failed', err); showToast(`couldn't open whisper — ${err?.message || 'try again'}`, 'error'); return; }
     await fetchConversations().then(setConversations).catch(() => {});
     setShowDMs(false);
     openConversation(convId, { user: handle, prefill });
@@ -1253,15 +1281,18 @@ export default function App() {
     if (!meId) return;
     const otherId = await resolveUserId(handle);
     if (!otherId) return;
-    const convId = await getOrCreateDM(otherId).catch(() => null);
-    if (convId) sendMessage(convId, body);
+    let convId;
+    try { convId = await getOrCreateDM(otherId); }
+    catch (err) { console.error('getOrCreateDM failed', err); showToast(`couldn't open whisper — ${err?.message || 'try again'}`, 'error'); return; }
+    sendMessage(convId, body);
   };
 
   const createGroupConversation = async ({ name, members }) => {
     if (!meId) return;
     const ids = (await Promise.all((members || []).map(h => resolveUserId(h)))).filter(Boolean);
-    const convId = await createGroup(name, ids).catch(() => null);
-    if (!convId) return;
+    let convId;
+    try { convId = await createGroup(name, ids); }
+    catch (err) { console.error('createGroup failed', err); showToast(`couldn't create circle — ${err?.message || 'try again'}`, 'error'); return; }
     await fetchConversations().then(setConversations).catch(() => {});
     setShowDMs(false);
     openConversation(convId);
@@ -2251,7 +2282,7 @@ export default function App() {
           stories={stories}
           startIndex={activeStoryIndex}
           onReply={(authorHandle, body) => sendMessageToUser(authorHandle, body)}
-          onReactStory={(storyId, kind) => { if (meId) reactToStory(storyId, kind, meId).catch(() => {}); }}
+          onReactStory={(storyId, kind) => { if (meId) reactToStory(storyId, kind, meId).catch((err) => { console.error('reactToStory failed', err); showToast("couldn't react to story — try again.", 'error'); }); }}
           onDelete={removeStory}
           onSeen={(id) => setSeenStories(prev => (prev[id] ? prev : { ...prev, [id]: 1 }))}
           onClose={() => setActiveStoryIndex(null)}

@@ -113,7 +113,9 @@ export function subscribeDMReactions(onChange) {
     .channel('dm-reactions')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'message_reactions' },
       payload => onChange(payload))
-    .subscribe();
+    .subscribe((status) => {
+      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') console.error('[realtime] dm-reactions:', status);
+    });
   return () => { supabase.removeChannel(ch); };
 }
 
@@ -159,7 +161,9 @@ export function subscribeDMs(onInsert) {
     .channel('dm-messages')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages_dm' },
       payload => onInsert(payload.new))
-    .subscribe();
+    .subscribe((status) => {
+      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') console.error('[realtime] dm-messages:', status);
+    });
   return () => { supabase.removeChannel(ch); };
 }
 
