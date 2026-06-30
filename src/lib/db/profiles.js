@@ -68,6 +68,15 @@ export async function updateProfile(id, patch) {
   return res.data;
 }
 
+/** Persist per-kind notification preferences to the DB (read server-side by api/push.js).
+ *  Gracefully handles pre-migration (column doesn't exist) by silently skipping. */
+export async function saveNotificationPrefs(id, prefs) {
+  let res = await supabase.from('profiles').update({ notification_prefs: prefs }).eq('id', id);
+  // Pre-migration: column doesn't exist yet — skip rather than throw
+  if (res.error && /notification_prefs/i.test(res.error.message || '')) return;
+  if (res.error) throw res.error;
+}
+
 export async function getSystemAccountIds() {
   const { data, error } = await supabase
     .from('profiles').select('id').eq('is_system', true);

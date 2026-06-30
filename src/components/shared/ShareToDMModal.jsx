@@ -6,7 +6,7 @@ import { searchProfiles } from '../../lib/db/profiles';
 
 // Pick a soul (existing whisper or by search) to forward a post to.
 // onPick receives { convId } for an existing thread, or { userId, handle, avatar } for a new one.
-export function ShareToDMModal({ post, conversations = [], onPick, onClose }) {
+export function ShareToDMModal({ post, conversations = [], onPick, onClose, onAddToStory }) {
   const [q, setQ] = useState('');
   const [results, setResults] = useState([]);
   useEffect(() => {
@@ -32,6 +32,13 @@ export function ShareToDMModal({ post, conversations = [], onPick, onClose }) {
           <div className="px-4 py-2 border-b border-[#1A1A1A] text-[11px] text-[#6B6B6B] truncate" style={F.serif}>
             {post.img ? '🖼 ' : ''}{post.body ? `“${post.body.slice(0, 64)}”` : 'a post'}
           </div>
+        )}
+        {onAddToStory && (
+          <button onClick={onAddToStory}
+            className="tap w-full px-4 py-2.5 flex items-center gap-2 border-b border-[#1A1A1A] text-left hover:bg-[#0F0F0F] transition-colors">
+            <span className="text-base text-[#C9A961]">✦</span>
+            <span className="text-sm text-[#C9A961]" style={F.ui}>add to your story</span>
+          </button>
         )}
         <div className="px-4 py-2 shrink-0">
           <div className="flex items-center gap-2 bg-[#0A0A0A] border border-[#2A2A2A] px-2.5 py-1.5">

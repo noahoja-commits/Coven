@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, MessageCircle, UserPlus, UserCheck, VolumeX, Volume2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { getProfileByHandle, getProfileStats } from '../../lib/db/profiles';
+import { recordView } from '../../lib/db/views';
 import { fetchUserPosts } from '../../lib/db/posts';
 import { borderStyle, bannerStyle } from '../../data/decor';
 import { moodActive } from '../../data/moods';
@@ -25,6 +26,7 @@ export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], isF
       setProfile(p);
       setLoading(false);
       if (p?.id) {
+        recordView('profile', p.id); // server ignores viewing your own profile
         getProfileStats(p.id).then(s => { if (on) setStats(s); }).catch(() => {});
         fetchUserPosts(p.id).then(gp => { if (on) { setGridPosts(gp); setPostsLoading(false); } }).catch(() => { if (on) setPostsLoading(false); });
       } else { setPostsLoading(false); }

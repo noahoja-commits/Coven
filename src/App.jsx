@@ -5,7 +5,7 @@ import { isSupabaseConfigured } from './lib/supabase';
 import { SignInScreen } from './components/auth/SignInScreen';
 import { ResetPasswordScreen } from './components/auth/ResetPasswordScreen';
 import { fetchFeed, createPost, deletePost as dbDeletePost, togglePostReaction, fetchComments, createComment, toggleCommentReaction, castPollVote, clearPollVote, fetchEventRecaps } from './lib/db/posts';
-import { insertProfile, updateProfile, getProfileStats, getProfileByHandle, fetchProfiles } from './lib/db/profiles';
+import { insertProfile, updateProfile, getProfileStats, getProfileByHandle, fetchProfiles, saveNotificationPrefs } from './lib/db/profiles';
 import { fetchFollowing, fetchFollowers, followUser, unfollowUser } from './lib/db/social';
 import { FollowListOverlay } from './components/profile/FollowListOverlay';
 import { joinCommunity, leaveCommunity, fetchCommunityMemberCounts } from './lib/db/communities';
@@ -58,6 +58,8 @@ import { ShareToDMModal } from './components/shared/ShareToDMModal';
 import { UserProfileOverlay } from './components/profile/UserProfileOverlay';
 import { StoryViewer } from './components/feed/StoryViewer';
 import { StoryComposer } from './components/feed/StoryComposer';
+import { AnalyticsDashboard } from './components/analytics/AnalyticsDashboard';
+import { HashtagFeed } from './components/feed/HashtagFeed';
 import { SearchOverlay } from './components/shared/SearchOverlay';
 import { CrewBrowse } from './components/profile/CrewBrowse';
 import { AddGraveModal } from './components/profile/AddGraveModal';
@@ -144,6 +146,9 @@ export default function App() {
   const [activeStoryIndex, setActiveStoryIndex] = useState(null);
   const [activeUserHandle, setActiveUserHandle] = useState(null);
   const [showStoryComposer, setShowStoryComposer] = useState(false);
+  const [storyAttachedPost, setStoryAttachedPost] = useState(null); // a post being shared into a story
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [activeHashtag, setActiveHashtag] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
   const [showCrewBrowse, setShowCrewBrowse] = useState(false);
   const [showAddGrave, setShowAddGrave] = useState(false);
@@ -193,6 +198,25 @@ export default function App() {
   const effectiveShockMode = transientShock || settings.shockMode;
   // hygiene: clear any pending transient-scare timer if the app ever unmounts
   useEffect(() => () => clearTimeout(transientTimer.current), []);
+
+  // Sync the client notification-category toggles to the server so push actually
+  // respects them (api/_push.sendToUser gates on profiles.notification_prefs by KIND).
+  // One-way (client→server); skip the initial mount so we don't clobber stored prefs.
+  const notifKindsKey = JSON.stringify(settings.notificationKinds || {});
+  const notifSyncedRef = useRef(false);
+  useEffect(() => {
+    if (!meId) return;
+    if (!notifSyncedRef.current) { notifSyncedRef.current = true; return; }
+    const CAT_KINDS = { reaction: ['react', 'story_react'], reply: ['comment'], follow: ['follow', 'mention', 'coauthor'], dm: ['dm'], event: ['rsvp', 'event_reminder'], crew: ['crew_join'], digest: ['digest'] };
+    const nk = settings.notificationKinds || {};
+    const prefs = {};
+    for (const [cat, kinds] of Object.entries(CAT_KINDS)) {
+      const on = nk[cat] !== false;
+      for (const k of kinds) prefs[k] = on;
+    }
+    saveNotificationPrefs(meId, prefs).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notifKindsKey, meId]);
 
   // Live content state (Supabase-backed)
   const [posts, setPosts] = useState([]);
@@ -347,7 +371,7 @@ export default function App() {
   // Lock body scroll when a modal overlay is open
   useEffect(() => {
     const anyModal = showEditProfile || showMood || showTonightModal || showSettings || showNotifs
-      || showCompose || showStoryComposer || showSearch || showVespersArchive
+      || showCompose || showStoryComposer || showSearch || showVespersArchive || showAnalytics || activeHashtag
       || showAddGrave || showAddAnniv || showNewGroup || showReflections || showDreams || showCrewBrowse
       || showNowPlaying || showBlocked || showLegal || showDeleteConfirm || showMyTickets || quoteTarget || activeStoryIndex !== null;
     document.body.style.overflow = anyModal ? 'hidden' : '';
@@ -889,8 +913,19 @@ export default function App() {
     return () => timeouts.forEach(clearTimeout);
   }, [meId, posts, meHandle, sigils, crystals, ritual, communityMembership, reflections, graves, bookmarks, divinationLog, following]);
 
-  const addPost = async ({ body, community, anonymous, poll, img, kind, eventId, coauthorId, coauthorHandle }) => {
+  const addPost = async ({ body, community, anonymous, poll, img, kind, eventId, coauthorId, coauthorHandle, scheduled }) => {
     if (!meId) return;
+    // Scheduled for later — create it hidden (no optimistic feed insert) and confirm.
+    if (scheduled) {
+      try {
+        await createPost({ body, community, anonymous, poll, img, kind, eventId, coauthorId, coauthorHandle, scheduled }, { id: meId, handle: meHandle, avatar: meAvatar, avatarUrl: meAvatarUrl });
+        const w = new Date(scheduled);
+        showToast(`scheduled for ${w.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}.`);
+      } catch {
+        showToast("couldn't schedule that — try again.", 'error');
+      }
+      return;
+    }
     const tempId = `temp-${Date.now()}`;
     const optimistic = {
       id: tempId, kind: kind || (poll ? 'poll' : 'text'),
@@ -957,9 +992,13 @@ export default function App() {
       };
     }));
   };
-  const reactToPost = (postId, kind) => {
+  const reactToPost = (postId, kind, wasMineOverride) => {
+    // wasMineOverride lets callers that hold their own copy of the post (e.g. HashtagFeed,
+    // whose post may not be in the home feed) pass the correct pre-toggle state.
     const current = posts.find(p => p.id === postId);
-    const wasMine = !!(current?.myReactions && current.myReactions[kind]);
+    const wasMine = wasMineOverride !== undefined
+      ? wasMineOverride
+      : !!(current?.myReactions && current.myReactions[kind]);
     flipReaction(postId, kind, wasMine);
     if (meId && !String(postId).startsWith('temp-')) {
       togglePostReaction(postId, kind, meId, wasMine).catch(() => flipReaction(postId, kind, !wasMine));
@@ -1001,15 +1040,16 @@ export default function App() {
     if (meId) toggleCommentReaction(commentId, kind, meId, wasMine).catch(() => {});
   };
 
-  const sendMessage = (conversationId, body) => {
+  const sendMessage = (conversationId, body, audioUrl = null) => {
     if (!meId || !conversationId || String(conversationId).startsWith('temp-')) return;
     const tempId = `tempm-${Date.now()}`;
-    const optimistic = { id: tempId, from: 'me', body, time: 'just now', pending: true };
+    const preview = audioUrl ? '🎙️ voice note' : (body.length > 60 ? body.slice(0, 60) + '…' : body);
+    const optimistic = { id: tempId, from: 'me', body, audioUrl, time: 'just now', pending: true };
     setMessages(prev => ({ ...prev, [conversationId]: [...(prev[conversationId] || []), optimistic] }));
     setConversations(prev => prev.map(c =>
-      c.id === conversationId ? { ...c, last: body.length > 60 ? body.slice(0, 60) + '…' : body, time: 'just now' } : c
+      c.id === conversationId ? { ...c, last: preview, time: 'just now' } : c
     ));
-    sendDM(conversationId, meId, body)
+    sendDM(conversationId, meId, body, audioUrl)
       .then(saved => setMessages(prev => ({ ...prev, [conversationId]: (prev[conversationId] || []).map(m => m.id === tempId ? saved : m) })))
       // Keep the message (marked failed) so it isn't silently lost, and tell the user.
       .catch(() => {
@@ -1043,14 +1083,14 @@ export default function App() {
 
   // Retry a failed message: drop the failed copy and resend.
   const retryMessage = (conversationId, messageId) => {
-    let body = null;
+    let body = null, audioUrl = null;
     setMessages(prev => {
       const list = prev[conversationId] || [];
       const failed = list.find(m => m.id === messageId);
-      if (failed) body = failed.body;
+      if (failed) { body = failed.body; audioUrl = failed.audioUrl || null; }
       return { ...prev, [conversationId]: list.filter(m => m.id !== messageId) };
     });
-    if (body) sendMessage(conversationId, body);
+    if (body || audioUrl) sendMessage(conversationId, body, audioUrl);
   };
 
   const openConversation = (id, meta) => {
@@ -1283,12 +1323,18 @@ export default function App() {
     })();
   };
 
-  const postStory = async (story) => {
+  const postStory = async (story, attached = null) => {
     if (!meId) return;
     try {
-      const saved = await dbPostStory(story, { id: meId, handle: meHandle, avatar: meAvatar });
-      setStories(prev => [...prev, saved]);
-    } catch { /* ignore */ }
+      const saved = await dbPostStory(story, { id: meId, handle: meHandle, avatar: meAvatar, avatarUrl: meAvatarUrl });
+      // The rail doesn't refetch, so attach the shared-post preview now or it won't show until reload.
+      const ap = (attached && attached.id === story.post_id)
+        ? { id: attached.id, user: attached.anonymous ? 'anonymous' : attached.user, avatar: attached.avatar, avatarUrl: attached.avatarUrl || null, body: attached.body || '', img: attached.img || null }
+        : null;
+      setStories(prev => [...prev, ap ? { ...saved, attachedPost: ap } : saved]);
+    } catch {
+      showToast("couldn't post your story — try again.", 'error');
+    }
   };
 
   const removeStory = (id) => {
@@ -1604,14 +1650,16 @@ export default function App() {
     showVespersArchive || showNewGroup || showTonightModal || quoteTarget || showOddityCompose ||
     activeOddity || activePostComments || followList || activeConversation || activeUserHandle ||
     showSearch || showCrewBrowse || activeEvent || showCompose || showNotifs || showDMs || activePortal ||
-    showShockPicker
+    showShockPicker || showAnalytics || activeHashtag
   );
   // Close the single top-most overlay (z-order priority). Returns true if it closed one.
   const closeTopOverlay = () => {
     if (showSigilDraw) { setShowSigilDraw(false); return true; }
     if (ticketSuccess) { setTicketSuccess(false); return true; }
     if (activeStoryIndex !== null) { setActiveStoryIndex(null); return true; }
-    if (showStoryComposer) { setShowStoryComposer(false); return true; }
+    if (showStoryComposer) { setShowStoryComposer(false); setStoryAttachedPost(null); return true; }
+    if (showAnalytics) { setShowAnalytics(false); return true; }
+    if (activeHashtag) { setActiveHashtag(null); return true; }
     if (venueEditorEvent) { setVenueEditorEvent(null); return true; }
     if (ticketManagerEvent) { setTicketManagerEvent(null); return true; }
     if (showCreateEvent) { setShowCreateEvent(false); return true; }
@@ -1804,6 +1852,7 @@ export default function App() {
         onHidePost={hidePost}
         onQuotePost={(id) => setQuoteTarget(id)}
         onWhisperPost={(id) => setSharePostTarget(id)}
+        onOpenHashtag={(tag) => setActiveHashtag(tag)}
         onTogglePin={togglePin}
         pinnedPostId={pinnedPostId}
         feedSort={feedSort}
@@ -1827,7 +1876,7 @@ export default function App() {
         }}
         onVotePoll={voteOnPoll}
         onOpenStory={(i) => setActiveStoryIndex(i)}
-        onCreateStory={() => setShowStoryComposer(true)}
+        onCreateStory={() => { setStoryAttachedPost(null); setShowStoryComposer(true); }}
         stories={stories}
         seenStories={seenStories}
         meHandle={meHandle}
@@ -2103,7 +2152,8 @@ export default function App() {
           conversation={conversations.find(c => c.id === activeConversation) || activeConvMeta}
           messages={messages[activeConversation] || []}
           initialDraft={dmPrefill}
-          onSend={(body) => sendMessage(activeConversation, body)}
+          meHandle={meHandle}
+          onSend={(body, audioUrl) => sendMessage(activeConversation, body, audioUrl)}
           onRetry={(messageId) => retryMessage(activeConversation, messageId)}
           onReact={(messageId, kind) => reactToMessage(activeConversation, messageId, kind)}
           onOpenPost={(id) => { setActiveConversation(null); setActiveConvMeta(null); setActivePostComments(id); }}
@@ -2190,6 +2240,7 @@ export default function App() {
           post={posts.find(p => p.id === sharePostTarget)}
           conversations={conversations}
           onPick={whisperPost}
+          onAddToStory={() => { const p = posts.find(p => p.id === sharePostTarget); setSharePostTarget(null); setStoryAttachedPost(p || null); setShowStoryComposer(true); }}
           onClose={() => setSharePostTarget(null)}
         />
       )}
@@ -2207,8 +2258,9 @@ export default function App() {
       {showStoryComposer && (
         <StoryComposer
           meId={meId}
-          onClose={() => setShowStoryComposer(false)}
-          onPost={(story) => { postStory(story); setShowStoryComposer(false); }}
+          attachedPost={storyAttachedPost}
+          onClose={() => { setShowStoryComposer(false); setStoryAttachedPost(null); }}
+          onPost={(story) => { postStory(story, storyAttachedPost); setShowStoryComposer(false); setStoryAttachedPost(null); }}
         />
       )}
       {showCrewBrowse && (
@@ -2353,6 +2405,21 @@ export default function App() {
           onOpenLegal={() => setShowLegal(true)}
           onDeleteAccount={() => setShowDeleteConfirm(true)}
           onOpenShockPicker={() => { setShowSettings(false); setShowShockPicker(true); }}
+          onOpenAnalytics={() => { setShowSettings(false); setShowAnalytics(true); }}
+        />
+      )}
+      {showAnalytics && (
+        <AnalyticsDashboard onClose={() => setShowAnalytics(false)} meHandle={meHandle} />
+      )}
+      {activeHashtag && (
+        <HashtagFeed
+          tag={activeHashtag}
+          meId={meId}
+          onClose={() => setActiveHashtag(null)}
+          onOpenHashtag={(t) => setActiveHashtag(t)}
+          onOpenPost={(id) => { setActiveHashtag(null); setActivePostComments(id); }}
+          onOpenUser={(h) => { setActiveHashtag(null); openUserProfile(h); }}
+          onReact={reactToPost}
         />
       )}
       {showShockPicker && (

@@ -33,7 +33,7 @@ export async function createGroup(title, memberIds) {
 export async function fetchMessages(convId, myId) {
   const { data, error } = await supabase
     .from('messages_dm')
-    .select('id, body, created_at, sender_id, forwarded_post_id, sender:profiles(handle)')
+    .select('id, body, created_at, sender_id, forwarded_post_id, audio_url, sender:profiles(handle)')
     .eq('conversation_id', convId)
     .order('created_at', { ascending: true });
   if (error) throw error;
@@ -44,6 +44,7 @@ export async function fetchMessages(convId, myId) {
     time: relativeTime(m.created_at),
     forwardedPostId: m.forwarded_post_id || null,
     forwardedPost: null,
+    audioUrl: m.audio_url || null,
     reactions: { bat: 0, fire: 0, skull: 0, smoke: 0 },
     myReactions: {},
   }));
@@ -101,13 +102,15 @@ export function subscribeDMReactions(onChange) {
   return () => { supabase.removeChannel(ch); };
 }
 
-export async function sendDM(convId, senderId, body) {
+export async function sendDM(convId, senderId, body, audioUrl = null) {
+  const payload = { conversation_id: convId, sender_id: senderId, body };
+  if (audioUrl) payload.audio_url = audioUrl;
   const { data, error } = await supabase
     .from('messages_dm')
-    .insert({ conversation_id: convId, sender_id: senderId, body })
-    .select('id, body, created_at').single();
+    .insert(payload)
+    .select('id, body, created_at, audio_url').single();
   if (error) throw error;
-  return { id: data.id, from: 'me', body: data.body, time: relativeTime(data.created_at) };
+  return { id: data.id, from: 'me', body: data.body, time: relativeTime(data.created_at), audioUrl: data.audio_url || null };
 }
 
 // Forward a feed post into a whisper (optionally with a note).
@@ -143,4 +146,27 @@ export function subscribeDMs(onInsert) {
       payload => onInsert(payload.new))
     .subscribe();
   return () => { supabase.removeChannel(ch); };
+}
+
+// ── Ephemeral typing presence ──────────────────────────────────────────────
+// Pure Realtime broadcast (no DB table) — each conversation gets its own channel
+// keyed by its unguessable UUID. Transient signalling, so the occasional dropped
+// packet is harmless and nothing is ever persisted.
+const typingChannels = {}; // convId -> channel (shared between subscribe + broadcast)
+
+export function subscribeTyping(convId, onTyping, onTypingStop) {
+  const ch = supabase.channel(`typing:${convId}`, { config: { broadcast: { self: false } } });
+  ch.on('broadcast', { event: 'typing' }, ({ payload }) => onTyping(payload?.user))
+    .on('broadcast', { event: 'typing_stop' }, ({ payload }) => onTypingStop(payload?.user))
+    .subscribe();
+  typingChannels[convId] = ch;
+  return () => { supabase.removeChannel(ch); if (typingChannels[convId] === ch) delete typingChannels[convId]; };
+}
+
+export function broadcastTyping(convId, meHandle) {
+  typingChannels[convId]?.send({ type: 'broadcast', event: 'typing', payload: { user: meHandle } });
+}
+
+export function broadcastTypingStop(convId, meHandle) {
+  typingChannels[convId]?.send({ type: 'broadcast', event: 'typing_stop', payload: { user: meHandle } });
 }

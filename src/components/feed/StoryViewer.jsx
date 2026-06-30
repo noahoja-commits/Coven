@@ -18,7 +18,7 @@ const BG_STYLES = {
 };
 
 function ago(ts) {
-  const m = Math.floor((Date.now() - ts) / 60000);
+  const m = Math.floor((Date.now() - new Date(ts).getTime()) / 60000);
   if (m < 1) return 'just now';
   if (m < 60) return `${m}m ago`;
   return `${Math.floor(m / 60)}h ago`;
@@ -127,6 +127,25 @@ export function StoryViewer({ stories = [], startIndex = 0, onReply, onReactStor
           <div className="text-[200px] opacity-20" style={{ textShadow: '0 0 60px rgba(0,0,0,0.5)' }}>{story.glyph}</div>
         </div>
       )}
+
+      {/* Attached post (share-to-story) */}
+      {story.attachedPost && (
+        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 px-6 flex justify-center pointer-events-none">
+          <div className="w-full max-w-[280px] bg-[#0A0A0A]/70 backdrop-blur-sm border border-[#C9A961]/30 rounded-xl p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-6 h-6 rounded-full bg-[#1A1A1A] flex items-center justify-center text-[10px] overflow-hidden">
+                {story.attachedPost.avatarUrl ? <img src={story.attachedPost.avatarUrl} className="w-full h-full object-cover" alt="" /> : <span>{story.attachedPost.avatar || '✦'}</span>}
+              </div>
+              <span className="text-[10px] text-white/70" style={F.ui}>{story.attachedPost.user}</span>
+            </div>
+            {story.attachedPost.body && <p className="text-xs text-white/85 leading-relaxed line-clamp-4" style={F.serif}>{story.attachedPost.body}</p>}
+            {story.attachedPost.img && story.attachedPost.img.startsWith('http') && (
+              <div className="mt-1.5 rounded-lg overflow-hidden"><img src={story.attachedPost.img} className="w-full" alt="" /></div>
+            )}
+          </div>
+        </div>
+      )}
+
       {story.caption && (
         <div className="absolute bottom-16 left-0 right-0 px-6 text-center">
           <p className="text-white text-xl leading-tight" style={F.scripture}>"{story.caption}"</p>

@@ -1,118 +1,178 @@
 import { useState, useRef } from 'react';
-import { X, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Image, X } from 'lucide-react';
 import { F } from '../../styles/fonts';
-import { SectionLabel } from '../shared/SectionLabel';
-import { uploadImage } from '../../lib/db/storage';
 import { GLYPHS, DEFAULT_GLYPH } from '../../data/glyphs';
-const BACKGROUNDS = [
-  { id: 'red', label: 'oxblood', bg: 'linear-gradient(135deg, #5B0F1A 0%, #1A0408 70%, #0A0204 100%)' },
-  { id: 'violet', label: 'violet', bg: 'linear-gradient(135deg, #2D0F3F 0%, #14081F 70%, #0A0410 100%)' },
-  { id: 'gold', label: 'gold', bg: 'linear-gradient(135deg, #3B2F0A 0%, #1A1408 70%, #0A0804 100%)' },
-  { id: 'silver', label: 'silver', bg: 'linear-gradient(135deg, #2A2A30 0%, #14141A 70%, #0A0A10 100%)' },
-  { id: 'black', label: 'pitch', bg: 'linear-gradient(135deg, #1F1F1F 0%, #0A0A0A 100%)' },
-];
+import { uploadImage } from '../../lib/db/storage';
 
-export function StoryComposer({ meId, onClose, onPost }) {
+// bg ids must match StoryViewer's BG_STYLES keys (red/violet/gold/silver/black)
+// so the stored value renders correctly there and stays consistent with older stories.
+const BGS = ['red', 'violet', 'gold', 'silver', 'black'];
+
+const BG_STYLES = {
+  red: 'from-[#5B0F1A] to-[#2A050A]',
+  violet: 'from-[#3A1A5A] to-[#1A0A2A]',
+  gold: 'from-[#5A4A1A] to-[#2A220A]',
+  silver: 'from-[#3A3A3A] to-[#1A1A1A]',
+  black: 'from-[#0A0A0A] to-[#000000]',
+};
+
+export function StoryComposer({ meId, onClose, onPost, attachedPost }) {
   const [glyph, setGlyph] = useState(DEFAULT_GLYPH);
   const [caption, setCaption] = useState('');
-  const [bg, setBg] = useState(BACKGROUNDS[0]);
-  const [imgFile, setImgFile] = useState(null);
-  const [imgPreview, setImgPreview] = useState(null);
+  const [bg, setBg] = useState('red');
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
   const fileRef = useRef(null);
 
-  const canPost = (caption.trim() || imgFile) && !busy;
-
-  const onPickImage = (e) => {
-    const file = e.target.files?.[0]; e.target.value = '';
+  const pickImage = (e) => {
+    const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type?.startsWith('image/')) { setError('please choose an image'); return; }
-    setError(''); setImgFile(file); setImgPreview(URL.createObjectURL(file));
+    setImage(file);
+    const r = new FileReader();
+    r.onload = () => setImagePreview(r.result);
+    r.readAsDataURL(file);
   };
 
-  const submit = async () => {
-    if (!canPost) return;
-    setBusy(true); setError('');
+  const post = async () => {
+    if (busy) return;
+    setBusy(true);
     try {
-      const payload = { glyph, caption: caption.trim(), bg: bg.id };
-      if (imgFile) payload.image_url = await uploadImage('story-images', meId, imgFile);
-      onPost && onPost(payload);
-      onClose && onClose();
-    } catch (err) { setError(err?.message || 'could not post'); setBusy(false); }
+      let imageUrl = null;
+      if (image) {
+        imageUrl = await uploadImage('story-images', meId, image);
+      }
+      const payload = { glyph, caption, bg, image_url: imageUrl };
+      if (attachedPost?.id) payload.post_id = attachedPost.id;
+      await onPost(payload);
+    } catch (e) {
+      // upload or parent handler failed — reset busy so user can retry
+      console.warn('story post failed', e?.message || e);
+      setBusy(false);
+      return;
+    }
+    setBusy(false);
   };
 
   return (
-    <div className="fixed inset-0 z-[55] bg-black flex flex-col animate-fade-in">
-      <div className="bg-black/60 backdrop-blur-md border-b border-white/10 z-10 safe-pt">
-        <div className="px-4 h-[60px] flex items-center justify-between">
-          <button onClick={onClose} className="tap text-white/80 hover:text-[#C9A961] p-2 -m-1"><X size={20} /></button>
-          <div className="text-white text-sm tracking-[0.3em]" style={F.display}>YOUR STORY</div>
-          <button onClick={submit} disabled={!canPost} className="btn btn-primary">{busy ? <><Loader2 size={12} className="animate-spin" /> posting</> : 'post'}</button>
-        </div>
+    <div className="fixed inset-0 z-[55] flex flex-col bg-black">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A] bg-[#0A0A0A]">
+        <button onClick={onClose} className="tap text-[#A8A29E] hover:text-[#F5F1E8] transition-colors">
+          <X size={20} />
+        </button>
+        <span className="text-sm text-[#F5F1E8] uppercase tracking-widest" style={F.ui}>new story</span>
+        <button
+          onClick={post}
+          disabled={busy}
+          className={`tap text-xs uppercase tracking-widest px-4 py-1.5 rounded-full transition-colors ${
+            busy ? 'opacity-40' : 'bg-[#8B0000] text-[#F5F1E8]'
+          }`} style={F.ui}
+        >
+          {busy ? '...' : 'share'}
+        </button>
       </div>
 
       {/* Preview */}
-      <div className="relative flex-1 overflow-hidden" style={{ background: imgPreview ? '#000' : bg.bg }}>
-        {imgPreview ? (
-          <img src={imgPreview} alt="" className="absolute inset-0 w-full h-full object-contain" />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-[200px] opacity-20" style={{ textShadow: '0 0 60px rgba(0,0,0,0.5)' }}>{glyph}</div>
+      <div className={`flex-1 flex flex-col items-center justify-center bg-gradient-to-b ${BG_STYLES[bg]} p-6`}>
+        {/* Attached post preview (share-to-story) */}
+        {attachedPost && (
+          <div className="w-full max-w-[280px] mb-4 bg-[#0A0A0A]/60 border border-[#C9A961]/30 rounded-xl p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-6 h-6 rounded-full bg-[#1A1A1A] flex items-center justify-center text-[10px] overflow-hidden">
+                {attachedPost.avatarUrl ? (
+                  <img src={attachedPost.avatarUrl} className="w-full h-full object-cover" alt="" />
+                ) : (
+                  <span>{attachedPost.avatar || '✦'}</span>
+                )}
+              </div>
+              <span className="text-[10px] text-[#A8A29E]" style={F.ui}>
+                {attachedPost.anonymous ? 'anonymous' : attachedPost.user}
+              </span>
+            </div>
+            {attachedPost.body && (
+              <p className="text-xs text-[#F5F1E8]/80 leading-relaxed line-clamp-3" style={F.serif}>
+                {attachedPost.body}
+              </p>
+            )}
+            {attachedPost.img && (
+              <div className="mt-1 rounded-lg overflow-hidden">
+                <PostImage kind={attachedPost.img} />
+              </div>
+            )}
           </div>
         )}
-        <div className="absolute bottom-16 left-0 right-0 px-6 text-center">
-          {caption ? (
-            <p className="text-white text-xl leading-tight" style={F.scripture}>"{caption}"</p>
-          ) : (
-            <p className="text-white/30 text-base italic" style={F.scripture}>your caption appears here</p>
-          )}
-        </div>
+
+        {/* Glyph */}
+        <div className="text-6xl mb-4">{glyph}</div>
+
+        {/* Caption */}
+        {caption && (
+          <p className="text-lg text-center text-[#F5F1E8]/90 max-w-[280px] leading-relaxed" style={F.serif}>
+            "{caption}"
+          </p>
+        )}
+
+        {/* Image preview */}
+        {imagePreview && (
+          <div className="mt-4 w-32 h-32 rounded-xl overflow-hidden border border-white/10">
+            <img src={imagePreview} className="w-full h-full object-cover" alt="" />
+          </div>
+        )}
       </div>
 
       {/* Controls */}
-      <div className="bg-black/80 backdrop-blur-md border-t border-white/10 p-4 space-y-3 safe-pb">
-        {error && <div className="text-[11px] text-[#FF6B6B] text-center" style={F.ui}>{error}</div>}
+      <div className="border-t border-[#1A1A1A] bg-[#0A0A0A] px-4 py-3 space-y-3">
+        {/* Glyph picker */}
+        <div className="flex gap-1 overflow-x-auto no-scrollbar">
+          {GLYPHS.map(g => (
+            <button key={g} onClick={() => setGlyph(g)}
+              className={`tap w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-sm transition-colors ${
+                glyph === g ? 'bg-[#8B0000] text-[#F5F1E8]' : 'bg-[#1A1A1A] text-[#A8A29E]'
+              }`}>{g}</button>
+          ))}
+        </div>
+
+        {/* Caption */}
+        <input
+          value={caption}
+          maxLength={80}
+          onChange={e => setCaption(e.target.value)}
+          placeholder="caption..."
+          className="field w-full text-sm"
+        />
+
+        {/* Background + Image */}
         <div className="flex items-center gap-2">
-          <input
-            value={caption}
-            onChange={e => setCaption(e.target.value.slice(0, 80))}
-            placeholder="say something..."
-            className="field flex-1 text-sm"
-            autoFocus
-          />
-          <input ref={fileRef} type="file" accept="image/*" onChange={onPickImage} className="hidden" />
-          <button onClick={() => imgPreview ? (setImgFile(null), setImgPreview(null)) : fileRef.current?.click()}
-            className={`tap shrink-0 w-10 h-10 flex items-center justify-center border ${imgPreview ? 'border-[#C9A961] text-[#C9A961]' : 'border-white/20 text-white/70 hover:text-[#C9A961] hover:border-[#C9A961]/60'}`}
-            title={imgPreview ? 'remove photo' : 'add a photo'}>
-            {imgPreview ? <X size={16} /> : <ImageIcon size={16} />}
+          {BGS.map(b => (
+            <button key={b} onClick={() => setBg(b)}
+              className={`tap w-8 h-8 rounded-full border-2 transition-colors bg-gradient-to-b ${BG_STYLES[b]} ${
+                bg === b ? 'border-[#C9A961]' : 'border-transparent'
+              }`} />
+          ))}
+          <div className="flex-1" />
+          <button onClick={() => fileRef.current?.click()}
+            className="tap w-8 h-8 rounded-full bg-[#1A1A1A] flex items-center justify-center text-[#A8A29E]">
+            <Image size={14} />
           </button>
-        </div>
-
-        <div>
-          <SectionLabel className="mb-2">glyph</SectionLabel>
-          <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
-            {GLYPHS.map(g => (
-              <button key={g} onClick={() => setGlyph(g)}
-                className={`tap shrink-0 w-9 h-9 flex items-center justify-center text-lg border ${glyph === g ? 'border-[#C9A961]/70 bg-white/5' : 'border-white/10 hover:border-[#5B0F1A]'}`}
-                style={glyph === g ? { boxShadow: '0 0 12px rgba(201,169,97,0.18)' } : undefined}>
-                {g}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <SectionLabel className="mb-2">background</SectionLabel>
-          <div className="flex gap-1.5">
-            {BACKGROUNDS.map(b => (
-              <button key={b.id} onClick={() => setBg(b)}
-                className={`tap flex-1 h-8 border-2 ${bg.id === b.id ? 'border-[#C9A961]/70' : 'border-white/10 hover:border-[#5B0F1A]'}`}
-                style={bg.id === b.id ? { background: b.bg, boxShadow: '0 0 12px rgba(201,169,97,0.18)' } : { background: b.bg }} title={b.label} />
-            ))}
-          </div>
+          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={pickImage} />
+          {imagePreview && (
+            <button onClick={() => { setImage(null); setImagePreview(null); }}
+              className="tap text-[#8B0000] text-xs" style={F.ui}>remove</button>
+          )}
         </div>
       </div>
     </div>
   );
+}
+
+function PostImage({ kind }) {
+  if (!kind) return null;
+  if (kind.startsWith('http') || kind.startsWith('data:')) {
+    const isVideo = /\.(mp4|webm|mov|m4v|ogg)$/i.test(kind);
+    return isVideo
+      ? <video src={kind} className="w-full rounded-lg" controls />
+      : <img src={kind} className="w-full rounded-lg" alt="" />;
+  }
+  return null;
 }
