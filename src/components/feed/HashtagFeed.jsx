@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Hash, ArrowLeft, TrendingUp } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { supabase } from '../../lib/supabase';
+import { relativeTime } from '../../lib/time';
 import { Reaction } from '../shared/Reaction';
 import { PostImage } from '../shared/Visuals';
 import { renderRichText } from '../shared/RichText';
@@ -56,7 +57,7 @@ export function HashtagFeed({ tag, onClose, onOpenPost, onOpenUser, onReact, onO
         user: row.handle,
         avatar: row.avatar,
         avatarUrl: row.avatar_url || undefined,
-        time: row.created_at,
+        time: relativeTime(row.created_at),
         community: row.community,
         body: row.body,
         img: row.img || undefined,
@@ -88,16 +89,17 @@ export function HashtagFeed({ tag, onClose, onOpenPost, onOpenUser, onReact, onO
 
   // Optimistic local react so the count moves immediately; reactToPost persists it.
   const handleReact = (postId, kind) => {
+    const target = posts.find(p => p.id === postId);
+    const mine = !!target?.myReactions?.[kind];
     setPosts(prev => prev.map(p => {
       if (p.id !== postId) return p;
-      const mine = !!p.myReactions?.[kind];
       return {
         ...p,
         myReactions: { ...p.myReactions, [kind]: !mine },
         reactions: { ...p.reactions, [kind]: Math.max(0, (p.reactions?.[kind] || 0) + (mine ? -1 : 1)) },
       };
     }));
-    onReact?.(postId, kind);
+    onReact?.(postId, kind, mine); // pass our own pre-toggle state — this post may not be in the home feed
   };
 
   // Initial load

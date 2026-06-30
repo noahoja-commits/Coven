@@ -992,9 +992,13 @@ export default function App() {
       };
     }));
   };
-  const reactToPost = (postId, kind) => {
+  const reactToPost = (postId, kind, wasMineOverride) => {
+    // wasMineOverride lets callers that hold their own copy of the post (e.g. HashtagFeed,
+    // whose post may not be in the home feed) pass the correct pre-toggle state.
     const current = posts.find(p => p.id === postId);
-    const wasMine = !!(current?.myReactions && current.myReactions[kind]);
+    const wasMine = wasMineOverride !== undefined
+      ? wasMineOverride
+      : !!(current?.myReactions && current.myReactions[kind]);
     flipReaction(postId, kind, wasMine);
     if (meId && !String(postId).startsWith('temp-')) {
       togglePostReaction(postId, kind, meId, wasMine).catch(() => flipReaction(postId, kind, !wasMine));
@@ -1319,12 +1323,18 @@ export default function App() {
     })();
   };
 
-  const postStory = async (story) => {
+  const postStory = async (story, attached = null) => {
     if (!meId) return;
     try {
       const saved = await dbPostStory(story, { id: meId, handle: meHandle, avatar: meAvatar, avatarUrl: meAvatarUrl });
-      setStories(prev => [...prev, saved]);
-    } catch { /* ignore */ }
+      // The rail doesn't refetch, so attach the shared-post preview now or it won't show until reload.
+      const ap = (attached && attached.id === story.post_id)
+        ? { id: attached.id, user: attached.anonymous ? 'anonymous' : attached.user, avatar: attached.avatar, avatarUrl: attached.avatarUrl || null, body: attached.body || '', img: attached.img || null }
+        : null;
+      setStories(prev => [...prev, ap ? { ...saved, attachedPost: ap } : saved]);
+    } catch {
+      showToast("couldn't post your story — try again.", 'error');
+    }
   };
 
   const removeStory = (id) => {
@@ -1640,14 +1650,14 @@ export default function App() {
     showVespersArchive || showNewGroup || showTonightModal || quoteTarget || showOddityCompose ||
     activeOddity || activePostComments || followList || activeConversation || activeUserHandle ||
     showSearch || showCrewBrowse || activeEvent || showCompose || showNotifs || showDMs || activePortal ||
-    showShockPicker
+    showShockPicker || showAnalytics || activeHashtag
   );
   // Close the single top-most overlay (z-order priority). Returns true if it closed one.
   const closeTopOverlay = () => {
     if (showSigilDraw) { setShowSigilDraw(false); return true; }
     if (ticketSuccess) { setTicketSuccess(false); return true; }
     if (activeStoryIndex !== null) { setActiveStoryIndex(null); return true; }
-    if (showStoryComposer) { setShowStoryComposer(false); return true; }
+    if (showStoryComposer) { setShowStoryComposer(false); setStoryAttachedPost(null); return true; }
     if (showAnalytics) { setShowAnalytics(false); return true; }
     if (activeHashtag) { setActiveHashtag(null); return true; }
     if (venueEditorEvent) { setVenueEditorEvent(null); return true; }
@@ -1866,7 +1876,7 @@ export default function App() {
         }}
         onVotePoll={voteOnPoll}
         onOpenStory={(i) => setActiveStoryIndex(i)}
-        onCreateStory={() => setShowStoryComposer(true)}
+        onCreateStory={() => { setStoryAttachedPost(null); setShowStoryComposer(true); }}
         stories={stories}
         seenStories={seenStories}
         meHandle={meHandle}
@@ -2250,7 +2260,7 @@ export default function App() {
           meId={meId}
           attachedPost={storyAttachedPost}
           onClose={() => { setShowStoryComposer(false); setStoryAttachedPost(null); }}
-          onPost={(story) => { postStory(story); setShowStoryComposer(false); setStoryAttachedPost(null); }}
+          onPost={(story) => { postStory(story, storyAttachedPost); setShowStoryComposer(false); setStoryAttachedPost(null); }}
         />
       )}
       {showCrewBrowse && (

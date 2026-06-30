@@ -82,6 +82,7 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
         recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
         recorder.onstop = () => {
           stream.getTracks().forEach(t => t.stop());
+          recorderRef.current = null; // release the ref so the next mic press can record again
           if (!mountedRef.current) return;
           if (chunks.length === 0) {
             // No audio data captured (instant tap-release)
@@ -119,6 +120,7 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
     setAudioBlob(null);
     setAudioPreview(null);
     setRecDuration(0);
+    recorderRef.current = null;
   };
 
   const sendAudio = async () => {
@@ -179,7 +181,10 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
               )}
               <div
                 className={`relative max-w-[78%] group ${mine ? 'items-end' : 'items-start'}`}
-                onClick={() => !m.pending && !m.failed && onReact && setTrayMsg(trayMsg === m.id ? null : m.id)}
+                onClick={() => {
+                  if (m.failed) { onRetry?.(m.id); return; }   // tap a failed whisper to resend it
+                  if (!m.pending && onReact) setTrayMsg(trayMsg === m.id ? null : m.id);
+                }}
               >
                 {trayMsg === m.id && onReact && (
                   <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex gap-1 bg-[#1A1A1A] border border-[#2A2A2A] rounded-full px-2 py-1 z-10 shadow-lg"

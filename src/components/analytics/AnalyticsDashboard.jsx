@@ -9,6 +9,7 @@ export function AnalyticsDashboard({ onClose, meHandle }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(30);
+  const [reload, setReload] = useState(0);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -32,7 +33,7 @@ export function AnalyticsDashboard({ onClose, meHandle }) {
       }
       setLoading(false);
     });
-  }, [days]);
+  }, [days, reload]);
 
   const maxViews = Math.max(...(data?.viewHistory || []).map(d => d.views), 1);
 
@@ -73,7 +74,7 @@ export function AnalyticsDashboard({ onClose, meHandle }) {
         {error && (
           <div className="flex flex-col items-center justify-center h-48 p-6 text-center">
             <div className="text-[#6B6B6B] text-sm mb-2" style={F.ui}>{error}</div>
-            <button onClick={() => setDays(days)} className="btn btn-ghost text-xs">retry</button>
+            <button onClick={() => setReload(r => r + 1)} className="btn btn-ghost text-xs">retry</button>
           </div>
         )}
 

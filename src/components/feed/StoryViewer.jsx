@@ -18,7 +18,7 @@ const BG_STYLES = {
 };
 
 function ago(ts) {
-  const m = Math.floor((Date.now() - ts) / 60000);
+  const m = Math.floor((Date.now() - new Date(ts).getTime()) / 60000);
   if (m < 1) return 'just now';
   if (m < 60) return `${m}m ago`;
   return `${Math.floor(m / 60)}h ago`;

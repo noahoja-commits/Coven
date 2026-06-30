@@ -32,14 +32,51 @@ function isPrivateV4(ip) {
     inRange(ip, '240.0.0.0', 4)        // reserved
   );
 }
+// Expand an IPv6 string to its 16 bytes (handles ::, a trailing dotted-quad, zone id).
+// Returns null if it can't be parsed (caller treats that as blocked).
+function v6ToBytes(ip) {
+  ip = ip.split('%')[0].toLowerCase();
+  let head, tail;
+  if (ip.includes('::')) {
+    const [h, t] = ip.split('::');
+    head = h ? h.split(':') : [];
+    tail = t ? t.split(':') : [];
+  } else { head = ip.split(':'); tail = []; }
+  const expand = (arr) => arr.flatMap(g => {
+    if (g.includes('.')) {                       // trailing dotted-quad counts as 2 hextets
+      const o = g.split('.').map(Number);
+      if (o.length !== 4 || o.some(x => Number.isNaN(x) || x > 255)) return ['zzzz'];
+      return [(((o[0] << 8) | o[1]) >>> 0).toString(16), (((o[2] << 8) | o[3]) >>> 0).toString(16)];
+    }
+    return [g];
+  });
+  head = expand(head); tail = expand(tail);
+  const missing = 8 - (head.length + tail.length);
+  if (missing < 0) return null;
+  const groups = [...head, ...Array(missing).fill('0'), ...tail];
+  if (groups.length !== 8) return null;
+  const bytes = [];
+  for (const g of groups) {
+    if (!/^[0-9a-f]{1,4}$/.test(g)) return null;
+    const n = parseInt(g, 16);
+    bytes.push((n >> 8) & 0xff, n & 0xff);
+  }
+  return bytes;
+}
+// Parse to bytes and check ranges, so hex IPv4-mapped (::ffff:7f00:1), NAT64, and dotted
+// forms are all caught — not just the literal dotted-decimal ::ffff:127.0.0.1.
 function isPrivateV6(ip) {
-  const a = ip.toLowerCase();
-  if (a === '::1' || a === '::') return true;
-  if (a.startsWith('fe8') || a.startsWith('fe9') || a.startsWith('fea') || a.startsWith('feb')) return true; // fe80::/10
-  if (a.startsWith('fc') || a.startsWith('fd')) return true; // ULA fc00::/7
-  const m = a.match(/::ffff:(\d+\.\d+\.\d+\.\d+)$/); // IPv4-mapped
-  if (m) return isPrivateV4(m[1]);
-  return false;
+  const b = v6ToBytes(ip);
+  if (!b) return true;                                                  // unparseable → block
+  if (b.every(x => x === 0)) return true;                               // :: unspecified
+  if (b.slice(0, 15).every(x => x === 0) && b[15] === 1) return true;   // ::1 loopback
+  if (b[0] === 0xfe && (b[1] & 0xc0) === 0x80) return true;             // fe80::/10 link-local
+  if ((b[0] & 0xfe) === 0xfc) return true;                              // fc00::/7 unique-local
+  const mapped = b.slice(0, 10).every(x => x === 0) && b[10] === 0xff && b[11] === 0xff; // ::ffff:0:0/96
+  const nat64  = b[0] === 0 && b[1] === 0x64 && b[2] === 0xff && b[3] === 0x9b && b.slice(4, 12).every(x => x === 0); // 64:ff9b::/96
+  const compat = b.slice(0, 12).every(x => x === 0);                   // ::/96 (deprecated v4-compatible)
+  if (mapped || nat64 || compat) return isPrivateV4(`${b[12]}.${b[13]}.${b[14]}.${b[15]}`);
+  return false;                                                         // global unicast
 }
 function isBlockedIp(ip) {
   const fam = net.isIP(ip);
@@ -56,6 +93,12 @@ async function assertPublicHost(hostname) {
   }
   // Numeric/hex-only "hostnames" are decimal/hex IP tricks (e.g. 2130706433 = 127.0.0.1).
   if (/^\d+$/.test(hostname) || /^0x[0-9a-f]+$/i.test(hostname)) throw new Error('blocked host');
+  // NOTE (accepted residual): this vets the DNS answer, but fetch() re-resolves at connect time,
+  // so a low-TTL rebinding domain could in theory connect to a different IP than we vetted.
+  // Mitigated by: the auth gate, the html-only content-type gate (blocks cloud-metadata JSON/text
+  // exfil), manual per-hop redirect re-validation, and the body size cap. The complete fix is to
+  // pin the connection to a vetted IP (custom node:https lookup) — deferred as low practical risk
+  // on this serverless deployment.
   const records = await dns.lookup(hostname, { all: true });
   if (!records.length) throw new Error('unresolvable host');
   for (const r of records) if (isBlockedIp(r.address)) throw new Error('blocked host');
