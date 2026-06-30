@@ -33,7 +33,9 @@ export async function createGroup(title, memberIds) {
 export async function fetchMessages(convId, myId) {
   const { data, error } = await supabase
     .from('messages_dm')
-    .select('id, body, created_at, sender_id, forwarded_post_id, audio_url, sender:profiles(handle)')
+    // Name the FK explicitly: messages_dm has two relationships to profiles (sender_id +
+    // the message_reactions m2m), so a bare profiles embed is ambiguous (PGRST201).
+    .select('id, body, created_at, sender_id, forwarded_post_id, audio_url, sender:profiles!messages_dm_sender_id_fkey(handle)')
     .eq('conversation_id', convId)
     .order('created_at', { ascending: true });
   if (error) throw error;
