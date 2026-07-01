@@ -1,4 +1,5 @@
 import { supabase } from '../supabase';
+import { resilientChannel } from './realtime';
 
 // DB-backed "out tonight" presence (cross-user, realtime) for the map.
 // The current user's own status is still mirrored in localStorage for instant
@@ -34,7 +35,10 @@ export async function clearTonightPin() {
   const { data: u } = await supabase.auth.getUser();
   const uid = u?.user?.id;
   if (!uid) return;
-  await supabase.from('tonight_pins').delete().eq('user_id', uid);
+  // Throw on failure — a swallowed delete leaves your pin live on the shared map after you
+  // believe you went invisible (privacy). The caller decides how to surface it.
+  const { error } = await supabase.from('tonight_pins').delete().eq('user_id', uid);
+  if (error) throw error;
 }
 
 export async function fetchTonightPins() {
@@ -68,7 +72,10 @@ export async function clearTonightGeo() {
   const { data: u } = await supabase.auth.getUser();
   const uid = u?.user?.id;
   if (!uid) return;
-  await supabase.from('tonight_geo').delete().eq('user_id', uid);
+  // Throw on failure — a swallowed delete leaves your precise (owner-locked) coords broadcasting
+  // after you opted out of sharing (privacy). The caller decides how to surface it.
+  const { error } = await supabase.from('tonight_geo').delete().eq('user_id', uid);
+  if (error) throw error;
 }
 
 // Fuzzed nearby souls + bucketed distance. Returns [] gracefully pre-migration.
@@ -91,10 +98,8 @@ export async function fetchNearby(myLat, myLng) {
 
 // Realtime: any change to tonight pins → tell the caller to refetch.
 export function subscribeTonightPins(onChange) {
-  const ch = supabase
+  return resilientChannel(() => supabase
     .channel('tonight_pins')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'tonight_pins' },
-      () => onChange())
-    .subscribe();
-  return () => { supabase.removeChannel(ch); };
+      () => onChange()));
 }

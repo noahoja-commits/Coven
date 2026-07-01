@@ -45,7 +45,8 @@ export async function fetchVenueMap(eventId) {
 
 // Replace the full pin set for an event (simplest authoring model).
 export async function replaceVenuePins(eventId, pins) {
-  await supabase.from('venue_pins').delete().eq('event_id', eventId);
+  const { error: delErr } = await supabase.from('venue_pins').delete().eq('event_id', eventId);
+  if (delErr) throw delErr; // a failed delete would duplicate pins or leave stale ones behind
   if (!pins.length) return [];
   const rows = pins.map(p => ({ event_id: eventId, kind: p.kind, label: p.label || '', x: p.x, y: p.y }));
   const { data, error } = await supabase.from('venue_pins').insert(rows).select('id, kind, label, x, y');
