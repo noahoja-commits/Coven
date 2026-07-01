@@ -21,12 +21,13 @@ export async function setTonightPin({ text, neighborhood, expiresAt }) {
   const { data: u } = await supabase.auth.getUser();
   const uid = u?.user?.id;
   if (!uid) return;
-  await supabase.from('tonight_pins').upsert({
+  const { error } = await supabase.from('tonight_pins').upsert({
     user_id: uid,
     text: (text || '').slice(0, 80),
     neighborhood: (neighborhood || '').slice(0, 40) || null,
     expires_at: new Date(expiresAt).toISOString(),
   }, { onConflict: 'user_id' });
+  if (error) throw error;
 }
 
 export async function clearTonightPin() {
@@ -53,13 +54,14 @@ export async function setTonightGeo({ lat, lng, fuzzM }) {
   const uid = u?.user?.id;
   if (!uid || typeof lat !== 'number' || typeof lng !== 'number') return;
   // No .select() — we never read raw coords back to the client.
-  await supabase.from('tonight_geo').upsert({
+  const { error } = await supabase.from('tonight_geo').upsert({
     user_id: uid,
     latitude: lat,
     longitude: lng,
     fuzz_m: Math.max(250, Math.round(fuzzM || 1609)),
     updated_at: new Date().toISOString(),
   }, { onConflict: 'user_id' });
+  if (error) throw error;
 }
 
 export async function clearTonightGeo() {

@@ -17,6 +17,27 @@ export function getPosition() {
   });
 }
 
+// Current geolocation permission WITHOUT prompting: 'granted' | 'prompt' | 'denied' | 'unknown'.
+// ('unknown' = the Permissions API isn't available, e.g. older Safari.)
+export async function geoPermission() {
+  try {
+    if (typeof navigator === 'undefined' || !navigator.permissions || !navigator.permissions.query) return 'unknown';
+    const s = await navigator.permissions.query({ name: 'geolocation' });
+    return s.state;
+  } catch {
+    return 'unknown';
+  }
+}
+
+// Get position ONLY if the user has already granted permission — never triggers a prompt.
+// Use for background/auto features (map recenter, nearby refresh) so we don't nag on every
+// app open. The user grants once via an explicit gesture (the "share location" button, or the
+// weather-mood toggle), and thereafter these silent calls just work. Resolves null otherwise.
+export async function getPositionIfGranted() {
+  if ((await geoPermission()) !== 'granted') return null;
+  try { return await getPosition(); } catch { return null; }
+}
+
 // WMO weather_code (+ day/night + temp °F) -> tint { color, opacity, label }. soft-light blend.
 // Granular per-code mapping so the mood reflects the real sky (drizzle ≠ heavy rain ≠ storm),
 // with the temperature appended so it always carries fresh signal. Opacities kept noticeable.
