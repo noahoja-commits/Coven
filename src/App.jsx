@@ -42,7 +42,7 @@ import { GrainOverlay, AmbientGlow, HalftoneOverlay } from './components/shared/
 import { ShockOverlay, SHOCK_MODES } from './components/shared/ShockOverlay';
 import { ShockModePicker } from './components/settings/ShockModePicker';
 import { startAmbient, stopAmbient } from './lib/ambient';
-import { fetchWeatherTint, getPosition } from './lib/weather';
+import { fetchWeatherTint, getPosition, getPositionIfGranted } from './lib/weather';
 import { InstallPrompt } from './components/shared/InstallPrompt';
 
 import { HomeScreen } from './components/feed/HomeScreen';
@@ -719,19 +719,31 @@ export default function App() {
       }
     } catch { /* ignore network errors */ }
     // Real GPS proximity (opt-in): store precise coords (owner-locked) or clear them.
-    try {
-      if (sharing) {
-        const { latitude, longitude } = await getPosition();
-        await setTonightGeo({ lat: latitude, lng: longitude, fuzzM: status.fuzzM });
-        fetchNearby(latitude, longitude).then(setNearby).catch(() => {});
-      } else {
-        await clearTonightGeo();
+    // Read the location and write it in SEPARATE try/catches so a failed DB write reports the
+    // real reason instead of blaming the GPS (which is what hid the original DM/RLS bug class).
+    if (sharing) {
+      let coords;
+      try {
+        coords = await getPosition();
+      } catch {
+        clearTonightGeo().catch(() => {});
         setNearby([]);
+        showToast("couldn't read your location — sharing off.", 'error');
+        coords = null;
       }
-    } catch {
-      clearTonightGeo().catch(() => {}); // never leave stale coords broadcasting
+      if (coords) {
+        try {
+          await setTonightGeo({ lat: coords.latitude, lng: coords.longitude, fuzzM: status.fuzzM });
+          fetchNearby(coords.latitude, coords.longitude).then(setNearby).catch(() => {});
+        } catch (err) {
+          clearTonightGeo().catch(() => {}); // never leave stale coords broadcasting
+          setNearby([]);
+          showToast(`couldn't share your location — ${err?.message || 'try again'}`, 'error');
+        }
+      }
+    } else {
+      clearTonightGeo().catch(() => {});
       setNearby([]);
-      if (sharing) showToast("couldn't read your location — sharing off.", 'error');
     }
     fetchTonightPins().then(setTonightPins).catch(() => {});
   };
@@ -744,14 +756,15 @@ export default function App() {
     setNearby([]);
   }, [settings.ghostMode]);
 
-  // Refresh privacy-fuzzed proximity whenever the map is open (lazy — only asks for location
-  // when you actually open the map). You can always SEE the living map; sharing only decides
-  // whether you appear ON it. Reading others' fuzzed pins is public; your own coords stay local.
+  // Refresh privacy-fuzzed proximity when the map is open — but ONLY if location was already
+  // granted, so opening the map never re-prompts. First-timers grant once via the explicit
+  // "share location" button; after that this silent read just works. You can always SEE the
+  // living map regardless; sharing only decides whether you appear ON it.
   useEffect(() => {
     if (tab !== 'map' || !meId || settings.ghostMode) return undefined;
     let active = true;
-    getPosition()
-      .then(({ latitude, longitude }) => fetchNearby(latitude, longitude))
+    getPositionIfGranted()
+      .then((coords) => (coords ? fetchNearby(coords.latitude, coords.longitude) : []))
       .then(list => { if (active) setNearby(list); })
       .catch(() => { if (active) setNearby([]); });
     return () => { active = false; };
@@ -2035,13 +2048,21 @@ export default function App() {
         }} />
       )}
 
-      {/* Weather mood — subtle tint derived from the live local weather */}
-      {settings.weatherMood && weatherTint && !isInsideOverlay && (
-        <div className="absolute inset-0 pointer-events-none z-10" style={{
-          background: weatherTint.color,
-          opacity: weatherTint.opacity,
-          mixBlendMode: 'soft-light',
-        }} />
+      {/* Weather mood — tint derived from the live local weather. A single soft-light layer was
+          invisible over the near-black base, so (like the profile-mood wash below) we use a
+          screen-blended sky glow — top-weighted, like real skylight — PLUS a faint flat tint, so
+          the weather actually reads while staying restrained. */}
+      {settings.weatherMood && weatherTint && !isInsideOverlay && !settings.parchmentMode && (
+        <>
+          <div className="absolute inset-0 pointer-events-none z-10 transition-opacity duration-[2000ms]" style={{
+            background: `radial-gradient(ellipse at 50% -8%, ${weatherTint.color}52, transparent 56%), radial-gradient(ellipse at 50% 108%, ${weatherTint.color}30, transparent 60%)`,
+            mixBlendMode: 'screen',
+          }} />
+          <div className="absolute inset-0 pointer-events-none z-10" style={{
+            background: weatherTint.color,
+            opacity: Math.min(0.1, (weatherTint.opacity || 0.3) * 0.32),
+          }} />
+        </>
       )}
 
       {/* Profile mood — your self-set mood washes the whole app in its colour (in love → crimson,

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { F } from '../../styles/fonts';
-import { getPosition } from '../../lib/weather';
+import { getPositionIfGranted } from '../../lib/weather';
 
 // Free, no-key, dark-by-default vector tiles. No API key, no billing.
 const DARK_STYLE = 'https://tiles.openfreemap.org/styles/dark';
@@ -90,9 +90,13 @@ export default function RealMap({ nearby = [], tonightStatus, ghost = false, onO
     if (ro && containerRef.current) ro.observe(containerRef.current);
     const reflow = setTimeout(() => { try { map.resize(); } catch { /* noop */ } }, 300);
 
-    // Locate the user in parallel (non-blocking). Recenter + remember on success; ignore failures.
-    getPosition().then(({ latitude, longitude }) => {
-      if (cancelled) return;
+    // Locate the user in parallel (non-blocking), but ONLY if permission was already granted —
+    // opening the map must never trigger a permission prompt. Recenter + remember on success.
+    // Without a prior grant the map simply stays at the last-known/default center (fine); the
+    // "share location" button is the explicit gesture that first requests access.
+    getPositionIfGranted().then((coords) => {
+      if (cancelled || !coords) return;
+      const { latitude, longitude } = coords;
       meRef.current = { lat: latitude, lng: longitude };
       try { localStorage.setItem(LAST_KEY, JSON.stringify([longitude, latitude])); } catch { /* noop */ }
       setLocated(true);
@@ -142,7 +146,23 @@ export default function RealMap({ nearby = [], tonightStatus, ghost = false, onO
       el.addEventListener('click', () => onOpenUser && onOpenUser(p.handle));
       markersRef.current.push(new maplibregl.Marker({ element: el }).setLngLat([p.fuzzLng, p.fuzzLat]).addTo(map));
     });
-  }, [state, nearby, sharing, fuzzM, onOpenUser]);
+  }, [state, nearby, sharing, fuzzM, onOpenUser, located]);
+
+  // When sharing turns on and we don't yet have a fix (permission was granted just now via the
+  // share flow, after the map already mounted), locate silently so the user's own pin + privacy
+  // circle appear this session without needing to reopen the map. Never prompts on its own.
+  useEffect(() => {
+    if (!sharing || meRef.current) return undefined;
+    let cancelled = false;
+    getPositionIfGranted().then((coords) => {
+      if (cancelled || !coords) return;
+      meRef.current = { lat: coords.latitude, lng: coords.longitude };
+      try { localStorage.setItem(LAST_KEY, JSON.stringify([coords.longitude, coords.latitude])); } catch { /* noop */ }
+      setLocated(true); // flips the draw effect above (it depends on `located`)
+      try { mapRef.current && mapRef.current.flyTo({ center: [coords.longitude, coords.latitude], zoom: 12.5, duration: 1400 }); } catch { /* noop */ }
+    }).catch(() => { /* noop */ });
+    return () => { cancelled = true; };
+  }, [sharing]);
 
   return (
     <div className="absolute inset-0 bg-[#070708]">
