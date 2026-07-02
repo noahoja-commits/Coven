@@ -113,20 +113,22 @@ export function ShockOverlay({ mode = 'none', layer = 'front' }) {
     if (back) return (
       <div className={BWRAP} aria-hidden>
         <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 16%, rgba(200,138,46,0.20), transparent 72%)', mixBlendMode: 'screen' }} />
-        <div className="absolute inset-0 shock-heartbeat" style={{ boxShadow: 'inset 0 0 90px 26px rgba(139,0,0,0.42)' }} />
+        <div className="absolute inset-0 shock-heartbeat" style={{ boxShadow: 'inset 0 0 150px 48px rgba(91,15,26,0.7)' }} />
         <div className="absolute inset-0 shock-lightning" style={{ background: 'rgba(232,196,90,0.22)', mixBlendMode: 'screen' }} />
-        <div className="absolute left-1/2 top-[40%] -translate-x-1/2 -translate-y-1/2 text-[20vw] leading-none opacity-[0.07] shock-heartbeat" style={{ color: '#C08A2E', fontFamily: '"IM Fell English", serif' }}>3:33</div>
+        <div className="absolute left-1/2 top-[38%] -translate-x-1/2 -translate-y-1/2 text-[32vw] leading-none opacity-[0.14] shock-heartbeat" style={{ color: '#8b0000', fontFamily: '"UnifrakturCook", cursive' }}>3:33</div>
+        <div className="absolute left-1/2 bottom-[4%] -translate-x-1/2 text-[17vw] leading-none opacity-[0.13] rotate-180" style={{ color: '#5b0f1a', fontFamily: 'serif' }}>✝</div>
       </div>
     );
     return (
       <div className={FWRAP} aria-hidden>
         <div className="absolute inset-0 shock-halftone-drift" style={{ backgroundImage: 'radial-gradient(rgba(201,169,97,0.4) 0.6px, transparent 1.1px)', backgroundSize: '5px 5px', mixBlendMode: 'overlay', opacity: 0.3 }} />
+        <div className="absolute left-0 right-0 top-[13%] text-center text-[#8b0000] text-[13px] tracking-[0.35em] opacity-60 shock-blink" style={{ fontFamily: '"UnifrakturCook", cursive' }}>vigil of the sleepless</div>
         <div className="absolute inset-x-0 h-[2px] shock-scan-v" style={{ background: 'linear-gradient(90deg, transparent, rgba(201,169,97,0.7), transparent)' }} />
         <div className="absolute inset-x-0 h-[1px] shock-scan-v" style={{ background: 'linear-gradient(90deg, transparent, rgba(201,169,97,0.42), transparent)', animationDuration: '2.1s', animationDelay: '-1s' }} />
         <div className="absolute -inset-1/4 shock-sheen" style={{ background: 'linear-gradient(115deg, transparent 44%, rgba(232,196,90,0.16) 50%, transparent 56%)' }} />
         {MOTES.slice(0, 16).map((m, i) => <span key={i} className="absolute rounded-full shock-mote" style={{ left: `${m.l}%`, top: `${m.t}%`, width: m.s, height: m.s, background: '#C9A961', boxShadow: '0 0 4px #8b0000', animationDelay: `${m.d}s`, animationDuration: `${m.dur}s` }} />)}
         <div className="absolute bottom-3 right-3 text-[8px] tracking-[0.25em] opacity-50 text-[#C9A961]" style={{ fontFamily: '"VT323", monospace' }}>AWAKE · {pad(Math.floor(tick / 3600))}:{pad(Math.floor(tick / 60) % 60)}:{pad(tick % 60)}</div>
-        <div className="absolute bottom-3 left-3 text-[11px] tracking-[0.3em] opacity-55 text-[#C9A961] shock-blink" style={{ fontFamily: '"IM Fell English", serif' }}>sleep will not come</div>
+        <div className="absolute bottom-3 left-3 text-[12px] tracking-[0.3em] opacity-70 text-[#C9A961] shock-blink" style={{ fontFamily: '"IM Fell English", serif' }}>sleep will not come · nunquam</div>
       </div>
     );
   }
@@ -137,8 +139,8 @@ export function ShockOverlay({ mode = 'none', layer = 'front' }) {
       <div className={BWRAP} aria-hidden>
         {/* monochrome test bars — a broadcast from somewhere that no longer exists */}
         <div className="absolute inset-0 opacity-[0.07]" style={{ background: 'linear-gradient(90deg, #fff 0 14.28%, #b8b0a8 14.28% 28.5%, #6e6e7e 28.5% 42.8%, #EDEDED 42.8% 57.1%, #4a4a52 57.1% 71.4%, #8b0000 71.4% 85.7%, #1a1a1a 85.7%)' }} />
-        <InvPentagram className="absolute left-1/2 top-[38%] -translate-x-1/2 w-44 h-44 opacity-[0.1]" color="#fff" circle={false} />
-        <div className="absolute left-1/2 top-[64%] -translate-x-1/2 text-[13vw] leading-none whitespace-nowrap opacity-[0.06] shock-blink" style={{ fontFamily: '"UnifrakturCook", cursive' }}>no signal</div>
+        <InvPentagram className="absolute left-1/2 top-[36%] -translate-x-1/2 w-56 h-56 opacity-[0.17] shock-blink" color="#8b0000" circle sw={1.4} />
+        <div className="absolute left-1/2 top-[66%] -translate-x-1/2 text-[16vw] leading-none whitespace-nowrap opacity-[0.11] shock-blink" style={{ fontFamily: '"UnifrakturCook", cursive', color: '#EDEDED' }}>no signal</div>
       </div>
     );
     return (
@@ -150,7 +152,7 @@ export function ShockOverlay({ mode = 'none', layer = 'front' }) {
         <div className="absolute inset-0 shock-rgb-c" style={{ background: 'rgba(184,176,168,0.06)', mixBlendMode: 'screen' }} />
         <div className="absolute inset-x-0 h-[12%] shock-track" style={{ background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.18) 40%, rgba(0,0,0,0.5) 50%, transparent)', mixBlendMode: 'overlay' }} />
         <div className="absolute inset-0 shock-burst" style={{ backgroundImage: GRAIN, backgroundSize: '90px 90px', opacity: 0.9 }} />
-        <div className="absolute top-20 left-0 right-0 text-center text-[#cfcfcf] text-[11px] leading-[1.7] opacity-35 shock-blink" style={{ fontFamily: '"UnifrakturCook", cursive', letterSpacing: '0.2em' }}>the qveen is dead · the qveen is dead<br />𖤐 long live the qveen 𖤐</div>
+        <div className="absolute top-20 left-0 right-0 text-center text-[#EDEDED] text-[15px] leading-[1.7] opacity-55 shock-blink" style={{ fontFamily: '"UnifrakturCook", cursive', letterSpacing: '0.15em' }}>the qveen is dead · the qveen is dead<br />𖤐 long live the qveen 𖤐</div>
         <div className="absolute top-[68px] right-3 text-[8px] tracking-[0.3em] text-[#cfcfcf] opacity-40 shock-blink" style={{ fontFamily: '"VT323", monospace' }}>▮ TRACKING</div>
         <div className="absolute bottom-[72px] inset-x-0 h-[14%] flex items-end justify-between px-1 gap-[1px] opacity-60">
           {WAVE.map((h, i) => <span key={i} className="flex-1 bg-[#b8b0a8] shock-wave" style={{ height: `${h}%`, animationDelay: `${(i % 9) * 0.08}s` }} />)}
@@ -176,7 +178,8 @@ export function ShockOverlay({ mode = 'none', layer = 'front' }) {
           {[40, 70].map(r => <circle key={r} cx="100" cy="100" r={r} fill="none" stroke="#9E2A33" strokeWidth="0.4" strokeDasharray="2 4" />)}
         </svg>
         <div className="absolute left-1/2 top-1/2 w-[170%] h-[170%] -translate-x-1/2 -translate-y-1/2 shock-radar" style={{ background: 'conic-gradient(from 0deg, rgba(158,42,51,0.26), transparent 25%)', borderRadius: '50%' }} />
-        <InvPentagram className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 opacity-[0.09]" color="#9E2A33" circle={false} />
+        <InvPentagram className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 opacity-[0.16] shock-radar" color="#9E2A33" circle sw={1.2} />
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[24vw] leading-none opacity-[0.1]" style={{ color: '#5b0f1a' }}>☠</div>
       </div>
     );
     return (
@@ -189,7 +192,7 @@ ANIMAE · ${['PROPE', 'PROPIOR', 'HIC', 'INTUS'][tick % 4]}
         <div className="absolute top-20 left-3 flex items-center gap-1 text-[9px] opacity-80" style={{ fontFamily: '"VT323", monospace' }}>
           <span className="w-1.5 h-1.5 rounded-full bg-[#9E2A33]" style={{ opacity: tick % 2 ? 1 : 0.2 }} /> VIGIL
         </div>
-        <div className="absolute top-[30%] left-3 text-[11px] tracking-[0.2em] text-[#9E2A33] shock-blink" style={{ fontFamily: '"UnifrakturCook", cursive' }}>† the gate stands open †</div>
+        <div className="absolute top-[30%] left-3 text-[15px] tracking-[0.2em] text-[#9E2A33] shock-blink" style={{ fontFamily: '"UnifrakturCook", cursive' }}>⸸ the gate stands open ⸸</div>
         <div className="absolute bottom-[76px] inset-x-0 overflow-hidden h-4 opacity-70">
           <div className="whitespace-nowrap text-[11px] tracking-[0.2em] shock-godray" style={{ fontFamily: '"UnifrakturCook", cursive' }}>† media vita in morte sumus · the bell tolls for thee · omnes una manet nox · † media vita in morte sumus · the bell tolls for thee ·</div>
         </div>
@@ -269,8 +272,9 @@ ANIMAE · ${['PROPE', 'PROPIOR', 'HIC', 'INTUS'][tick % 4]}
         <div className="absolute inset-x-0 h-[5%] shock-glitch-bar2" style={{ top: '44%', background: 'rgba(201,169,97,0.14)', mixBlendMode: 'screen' }} />
         <div className="absolute inset-x-0 h-[11%] shock-glitch-bar" style={{ top: '68%', background: 'rgba(158,42,51,0.24)', mixBlendMode: 'screen', animationDelay: '0.4s' }} />
         <div className="absolute inset-x-0 h-[3%] shock-glitch-bar2" style={{ top: '82%', background: 'rgba(214,207,192,0.12)', mixBlendMode: 'overlay', animationDelay: '0.2s' }} />
-        <div className="absolute left-3 top-[10%] text-[9px] leading-[1.5] opacity-40 shock-blink" style={{ color: '#C9A961', fontFamily: '"IM Fell English", serif' }}>corrvptio · optimi · pessima<br />verbvm · perditvm · est</div>
-        <div className="absolute left-1/2 top-[42%] -translate-x-1/2 text-3xl tracking-[0.3em] shock-glitch-bar2" style={{ color: '#9E2A33', fontFamily: '"UnifrakturCook", cursive', textShadow: '2px 0 rgba(184,176,168,0.7), -2px 0 #5b0f1a' }}>6̷6̴6̸</div>
+        <div className="absolute left-3 top-[13%] text-[11px] leading-[1.5] opacity-55 shock-blink" style={{ color: '#C9A961', fontFamily: '"IM Fell English", serif' }}>corrvptio · optimi · pessima<br />verbvm · perditvm · est</div>
+        <div className="absolute left-1/2 top-[44%] -translate-x-1/2 text-[9vh] tracking-[0.2em] shock-glitch-bar2" style={{ color: '#9E2A33', fontFamily: '"UnifrakturCook", cursive', textShadow: '3px 0 rgba(184,176,168,0.8), -3px 0 #5b0f1a' }}>6̷6̴6̸</div>
+        <div className="absolute left-1/2 bottom-[6%] -translate-x-1/2 text-[13vw] leading-none opacity-[0.12] rotate-180" style={{ color: '#8b0000', fontFamily: 'serif' }}>✝</div>
         <div className="absolute inset-0 opacity-35" style={{ background: 'repeating-linear-gradient(to bottom, rgba(0,0,0,0.5) 0 1px, transparent 1px 3px)' }} />
       </div>
     );
@@ -283,11 +287,13 @@ ANIMAE · ${['PROPE', 'PROPIOR', 'HIC', 'INTUS'][tick % 4]}
         <div className="absolute inset-0 shock-fire" style={{ background: 'radial-gradient(ellipse at 50% 120%, rgba(139,0,0,0.32), transparent 60%)', mixBlendMode: 'screen' }} />
         <div className="absolute inset-x-0 bottom-0 h-[85%] shock-fire" style={{ background: 'radial-gradient(ellipse at 50% 110%, rgba(200,110,30,0.55), rgba(158,42,51,0.42) 34%, rgba(91,15,26,0.3) 58%, transparent 80%)', mixBlendMode: 'screen' }} />
         {[28, 50, 72].map((l, i) => <div key={i} className="absolute bottom-[20%] w-[30%] h-[60%] shock-smoke" style={{ left: `${l}%`, marginLeft: '-15%', background: 'radial-gradient(ellipse at 50% 100%, rgba(40,20,10,0.5), transparent 70%)', animationDelay: `${i * 1.3}s`, animationDuration: `${6 + i}s` }} />)}
-        <InvPentagram className="absolute left-1/2 bottom-[6%] -translate-x-1/2 w-44 h-44 opacity-55 shock-fire" color="#C08A2E" circle sw={1.7} />
+        <InvPentagram className="absolute left-1/2 bottom-[6%] -translate-x-1/2 w-52 h-52 opacity-65 shock-fire" color="#C08A2E" circle sw={1.9} />
+        <div className="absolute left-1/2 bottom-[20%] -translate-x-1/2 text-[22vw] leading-none opacity-[0.22] rotate-180 shock-fire" style={{ color: '#8b0000', fontFamily: 'serif' }}>✝</div>
       </div>
     );
     return (
       <div className={FWRAP} aria-hidden>
+        <div className="absolute left-1/2 bottom-[30%] -translate-x-1/2 text-[13vw] leading-none opacity-[0.16]" style={{ color: '#2a1410' }}>☠</div>
         {EMBERS.map((e, i) => <span key={i} className="absolute bottom-0 rounded-full shock-ember" style={{ left: `${e.l}%`, width: e.s, height: e.s, animationDelay: `${e.d}s`, animationDuration: `${e.dur}s`, background: 'radial-gradient(circle, #e8c45a, #9E2A33 55%, transparent)', boxShadow: '0 0 6px #8b0000' }} />)}
         {ASH.map((a, i) => <span key={i} className="absolute top-0 shock-leaf" style={{ left: `${a.l}%`, width: a.s, height: a.s, background: '#2a2420', borderRadius: '50%', opacity: 0.5, animationDelay: `${a.d}s`, animationDuration: `${a.dur}s` }} />)}
       </div>
@@ -348,11 +354,13 @@ ANIMAE · ${['PROPE', 'PROPIOR', 'HIC', 'INTUS'][tick % 4]}
         <div className="absolute bottom-0 left-0 w-[30%] h-[16%] shock-blink" style={{ background: 'linear-gradient(135deg, #5B0F1A, #9E2A33)', animationDelay: '0.4s' }} />
         <div className="absolute top-0 left-0 w-[14%] h-[30%]" style={{ background: 'linear-gradient(180deg, rgba(158,42,51,0.8), transparent)' }} />
         <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 100% 0%, rgba(139,0,0,0.24), transparent 42%), radial-gradient(ellipse at 0% 100%, rgba(139,0,0,0.24), transparent 42%)', mixBlendMode: 'screen' }} />
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[36vw] leading-none opacity-[0.13] rotate-180" style={{ color: '#5b0f1a', fontFamily: 'serif' }}>✝</div>
       </div>
     );
     return (
       <div className={`${FWRAP} text-[#9E2A33]`} aria-hidden>
-        <div className="absolute top-[70px] left-2 flex flex-col text-[15px] leading-[1.1] opacity-80 shock-chevron" style={{ fontFamily: '"UnifrakturCook", cursive' }}>{Array.from({ length: 7 }).map((_, i) => <span key={i}>†</span>)}</div>
+        <div className="absolute left-1/2 top-[26%] -translate-x-1/2 text-[16vw] leading-none opacity-[0.14] shock-spin" style={{ fontFamily: '"UnifrakturCook", cursive', animationDuration: '12s' }}>☠</div>
+        <div className="absolute top-[70px] left-2 flex flex-col text-[18px] leading-[1.1] opacity-90 shock-chevron" style={{ fontFamily: '"UnifrakturCook", cursive' }}>{Array.from({ length: 7 }).map((_, i) => <span key={i}>⸸</span>)}</div>
         <div className="absolute top-[68px] right-[33%] text-2xl shock-spin" style={{ fontFamily: '"UnifrakturCook", cursive', animationDuration: '6s' }}>666</div>
         <div className="absolute left-2 bottom-[20%] text-[9px] tracking-[0.25em] opacity-80" style={{ writingMode: 'vertical-rl', fontFamily: '"IM Fell English", serif' }}>MMXXVI · COVEN</div>
         <div className="absolute top-[46%] inset-x-0 overflow-hidden h-6 opacity-90">
@@ -455,13 +463,16 @@ ANIMAE · ${['PROPE', 'PROPIOR', 'HIC', 'INTUS'][tick % 4]}
         </div>
         <div className="absolute w-8 h-8 rounded-full shock-fog" style={{ right: '18%', top: '60%', background: 'radial-gradient(circle at 35% 35%, #6a6478, #1a1822 70%)', boxShadow: '0 0 18px rgba(120,110,150,0.4)' }} />
         <div className="absolute w-5 h-5 rounded-full shock-fog2" style={{ left: '20%', top: '24%', background: 'radial-gradient(circle at 35% 35%, #b8a06a, #3a2f12 70%)', boxShadow: '0 0 14px rgba(201,169,97,0.5)' }} />
+        <InvPentagram className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 opacity-[0.16] shock-spin-rev" color="#8b0000" circle sw={0.9} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(91,15,26,0.45) 100%)' }} />
       </div>
     );
     return (
       <div className={`${FWRAP} text-[#bcb4a2]`} aria-hidden>
         {ALCHEMY_GLYPHS.map((a, i) => <span key={i} className="absolute text-lg shock-twinkle" style={{ top: a.t, left: a.l, opacity: 0.4, animationDelay: `${(i % 6) * 0.5}s` }}>{a.g}</span>)}
         {MOTES.slice(0, 14).map((m, i) => <span key={i} className="absolute rounded-full shock-mote" style={{ left: `${m.l}%`, top: `${m.t}%`, width: m.s, height: m.s, background: 'rgba(201,169,97,0.7)', boxShadow: '0 0 3px rgba(201,169,97,0.6)', animationDelay: `${m.d}s`, animationDuration: `${m.dur}s` }} />)}
-        <div className="absolute left-2 top-[18%] text-[10px] leading-[1.8] tracking-[0.3em] opacity-30" style={{ writingMode: 'vertical-rl', fontFamily: '"IM Fell English", serif' }}>solve · et · coagula</div>
+        <div className="absolute left-2 top-[18%] text-[12px] leading-[1.8] tracking-[0.3em] opacity-45" style={{ writingMode: 'vertical-rl', fontFamily: '"UnifrakturCook", cursive', color: '#9E2A33' }}>solve · et · coagula</div>
+        <div className="absolute right-3 bottom-[18%] text-[13vw] leading-none opacity-[0.12]" style={{ color: '#5b0f1a' }}>🜏</div>
         <div className="absolute inset-0" style={{ backgroundImage: GRAIN, backgroundSize: '140px 140px', mixBlendMode: 'overlay', opacity: 0.25 }} />
       </div>
     );
@@ -471,10 +482,11 @@ ANIMAE · ${['PROPE', 'PROPIOR', 'HIC', 'INTUS'][tick % 4]}
   if (mode === 'keepsake') {
     if (back) return (
       <div className={`${BWRAP} text-[#cdbb97]`} aria-hidden>
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 112%, rgba(232,196,90,0.55), rgba(120,90,40,0.16) 40%, transparent 74%)', mixBlendMode: 'screen' }} />
-        <div className="absolute -inset-1/3 shock-fog" style={{ background: 'radial-gradient(ellipse at 84% 8%, rgba(232,210,150,0.3), transparent 52%)' }} />
-        <div className="absolute -inset-1/4 shock-fog2" style={{ background: 'radial-gradient(ellipse at 10% 30%, rgba(220,120,80,0.16), transparent 50%)', mixBlendMode: 'screen' }} />
-        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 90px 30px rgba(18,12,5,0.62)' }} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 112%, rgba(200,138,46,0.4), rgba(91,15,26,0.22) 40%, transparent 74%)', mixBlendMode: 'screen' }} />
+        <div className="absolute -inset-1/3 shock-fog" style={{ background: 'radial-gradient(ellipse at 84% 8%, rgba(158,42,51,0.24), transparent 52%)' }} />
+        <div className="absolute -inset-1/4 shock-fog2" style={{ background: 'radial-gradient(ellipse at 10% 30%, rgba(139,0,0,0.18), transparent 50%)', mixBlendMode: 'screen' }} />
+        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 140px 46px rgba(8,4,4,0.8)' }} />
+        <div className="absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 text-[40vw] leading-none opacity-[0.09] rotate-180" style={{ color: '#3a2c18', fontFamily: 'serif' }}>✝</div>
         <Rose className="absolute left-[4%] bottom-[6%] w-14 h-24 opacity-25 -rotate-12" color="#a89066" />
         <Rose className="absolute right-[5%] top-[10%] w-10 h-16 opacity-20 rotate-[18deg]" color="#a89066" />
         <div className="absolute bottom-[3%] left-1/2 -translate-x-1/2 flex items-end gap-7 opacity-90">
@@ -503,8 +515,9 @@ ANIMAE · ${['PROPE', 'PROPIOR', 'HIC', 'INTUS'][tick % 4]}
         <div className="absolute top-[6%] right-[10%] flex gap-1.5 opacity-55">
           {['#1a1208', '#3a2c18', '#8a7658', '#3a2c18', '#1a1208'].map((c, i) => <span key={i} className="block w-2.5 h-2.5 rounded-full" style={{ background: c, boxShadow: '0 0 5px rgba(180,150,90,0.35)' }} />)}
         </div>
-        <span className="absolute bottom-[28%] right-[14%] text-base opacity-55 text-[#3a2c18]">†</span>
-        {PETALS.slice(0, 10).map((p, i) => <span key={i} className="absolute top-0 text-[10px] shock-leaf" style={{ left: `${p.l}%`, color: 'rgba(180,140,90,0.55)', animationDelay: `${p.d}s`, animationDuration: `${p.dur}s` }}>{p.g}</span>)}
+        <span className="absolute bottom-[26%] right-[13%] text-2xl opacity-70 text-[#5b0f1a] rotate-180">✝</span>
+        <div className="absolute left-[8%] top-[58%] text-[16vw] leading-none opacity-[0.14]" style={{ color: '#2a1c14' }}>☠</div>
+        {PETALS.slice(0, 10).map((p, i) => <span key={i} className="absolute top-0 text-[10px] shock-leaf" style={{ left: `${p.l}%`, color: 'rgba(139,0,0,0.5)', animationDelay: `${p.d}s`, animationDuration: `${p.dur}s` }}>{p.g}</span>)}
         <div className="absolute inset-0" style={{ backgroundImage: GRAIN, backgroundSize: '110px 110px', mixBlendMode: 'overlay', opacity: 0.24 }} />
       </div>
     );
@@ -550,11 +563,14 @@ ANIMAE · ${['PROPE', 'PROPIOR', 'HIC', 'INTUS'][tick % 4]}
         <div className="absolute inset-0 shock-halftone-drift" style={{ backgroundImage: 'radial-gradient(rgba(228,220,208,0.5) 1.1px, transparent 2.2px)', backgroundSize: '8px 8px', mixBlendMode: 'overlay', opacity: 0.4 }} />
         <div className="absolute right-[6%] top-1/2 -translate-y-1/2 w-[55%] aspect-[3/4] opacity-[0.1]" style={{ backgroundImage: 'radial-gradient(#d6cfc0 36%, transparent 38%)', backgroundSize: '6px 6px', maskImage: 'radial-gradient(ellipse at 50% 40%, #000 30%, transparent 68%)', WebkitMaskImage: 'radial-gradient(ellipse at 50% 40%, #000 30%, transparent 68%)' }} />
         <div className="absolute right-[4%] top-1/2 -translate-y-1/2 w-[55%] aspect-[3/4] opacity-[0.08] shock-jitter" style={{ backgroundImage: 'radial-gradient(#9E2A33 36%, transparent 38%)', backgroundSize: '6px 6px', maskImage: 'radial-gradient(ellipse at 50% 40%, #000 30%, transparent 68%)', WebkitMaskImage: 'radial-gradient(ellipse at 50% 40%, #000 30%, transparent 68%)', mixBlendMode: 'screen' }} />
+        <InvPentagram className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 opacity-[0.13] shock-jitter" color="#8b0000" circle={false} />
+        <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 130px 44px rgba(8,4,4,0.72)' }} />
       </div>
     );
     return (
       <div className={`${FWRAP} text-[#d6cfc0]`} aria-hidden>
-        <div className="absolute left-[6%] top-1/2 -translate-y-1/2 -rotate-3 text-[19vw] leading-[0.78] opacity-[0.16]" style={{ fontFamily: '"IM Fell English", serif' }}>SEE<br />NO<br />EVIL</div>
+        <div className="absolute left-[6%] top-1/2 -translate-y-1/2 -rotate-3 text-[22vw] leading-[0.78] opacity-[0.2]" style={{ fontFamily: '"UnifrakturCook", cursive' }}>SEE<br />NO<br />EVIL</div>
+        <div className="absolute right-[8%] bottom-[12%] text-[15vw] leading-none opacity-[0.14]" style={{ color: '#5b0f1a' }}>☠</div>
         <div className="absolute top-[30%] left-2 right-2 text-[7px] uppercase tracking-[0.1em] opacity-30 leading-[1.4] break-words">{'who knows you · '.repeat(18)}</div>
         <svg className="absolute inset-0 w-full h-full opacity-30" preserveAspectRatio="none" viewBox="0 0 100 100"><g stroke="#d6cfc0" strokeWidth="0.16" fill="none">
           <path d="M0 30 L20 34 L34 26 L52 38 L70 30 L88 42 L100 36" /><path d="M10 0 L16 22 L8 40 L20 60 L12 82 L22 100" /><path d="M60 0 L66 26 L58 48 L72 70 L64 100" /><path d="M0 70 L24 66 L46 76 L70 68 L100 78" /><path d="M40 0 L44 18 L36 36 L46 54 L40 100" /><path d="M80 0 L86 30 L78 56 L88 100" /><path d="M0 50 L30 46 L60 56 L100 48" />
