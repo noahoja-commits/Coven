@@ -1,5 +1,6 @@
 import { supabase } from '../supabase';
 import { relativeTime } from '../time';
+import { resilientChannel } from './realtime';
 
 // Whole inbox, mapped to the client conversation shape DMsOverlay/ChatThread use.
 export async function fetchConversations() {
@@ -108,13 +109,12 @@ export async function toggleDMReaction(messageId, kind, userId, wasMine) {
 }
 
 // Live reaction changes (RLS scopes reads to your own conversations, like messages).
+// Self-healing so a dropped socket doesn't silently stop reaction updates.
 export function subscribeDMReactions(onChange) {
-  const ch = supabase
+  return resilientChannel(() => supabase
     .channel('dm-reactions')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'message_reactions' },
-      payload => onChange(payload))
-    .subscribe();
-  return () => { supabase.removeChannel(ch); };
+      payload => onChange(payload)));
 }
 
 export async function sendDM(convId, senderId, body, audioUrl = null) {
@@ -153,14 +153,13 @@ export async function setBuried(convId, userId, buried) {
 }
 
 // Live message delivery. RLS scopes inserts to the user's own conversations,
-// so the callback only fires for messages they're allowed to see.
+// so the callback only fires for messages they're allowed to see. Self-healing so a dropped
+// socket (sleep/wake, network blip) doesn't silently stop live whispers until a reload.
 export function subscribeDMs(onInsert) {
-  const ch = supabase
+  return resilientChannel(() => supabase
     .channel('dm-messages')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages_dm' },
-      payload => onInsert(payload.new))
-    .subscribe();
-  return () => { supabase.removeChannel(ch); };
+      payload => onInsert(payload.new)));
 }
 
 // ── Ephemeral typing presence ──────────────────────────────────────────────

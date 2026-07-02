@@ -56,8 +56,11 @@ export function StoryViewer({ stories = [], startIndex = 0, onReply, onReactStor
 
   const react = (kind) => {
     if (!story) return;
+    const prev = myReactions[story.id];
     setMyReactions(m => ({ ...m, [story.id]: kind }));
-    onReactStory && onReactStory(story.id, kind);
+    const p = onReactStory && onReactStory(story.id, kind);
+    // Roll the lit glyph back if the reaction didn't actually save.
+    if (p && typeof p.catch === 'function') p.catch(() => setMyReactions(m => ({ ...m, [story.id]: prev })));
   };
 
   useEffect(() => {

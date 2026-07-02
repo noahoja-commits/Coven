@@ -214,7 +214,7 @@ export default function App() {
       const on = nk[cat] !== false;
       for (const k of kinds) prefs[k] = on;
     }
-    saveNotificationPrefs(meId, prefs).catch(() => {});
+    saveNotificationPrefs(meId, prefs).catch((e) => console.error('[prefs] save failed — server push may not honor your choices:', e));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notifKindsKey, meId]);
 
@@ -320,9 +320,10 @@ export default function App() {
     const fc = SHOCK_FONT[effectiveShockMode];
     if (fc && !settings.parchmentMode) document.body.classList.add(fc);
     // Some modes recolour the WHOLE app via a reliable element filter on .phone-frame (backdrop-filter
-    // wouldn't override the red base): insomnia=electric blue, requiem=stark B&W, mist=sepia,
-    // ego-death=a breathing uncanny hue-warp, paralysis=drained b&w horror.
-    const SHOCK_DUO = { insomnia: 'shock-duo-blue', requiem: 'shock-duo-bw', mist: 'shock-duo-sepia', keepsake: 'shock-duo-sepia', xerox: 'shock-duo-bw', duotone: 'shock-duo-blue', egodeath: 'shock-duo-warp', paralysis: 'shock-duo-bw' };
+    // wouldn't override the red base): insomnia=candlelit sepia, requiem=stark B&W, mist=sepia,
+    // duotone=bone monochrome (its oxblood layer sits on top), ego-death=a breathing uncanny hue-warp,
+    // paralysis=drained b&w horror. (insomnia/duotone were electric blue pre-gothic-reskin.)
+    const SHOCK_DUO = { insomnia: 'shock-duo-sepia', requiem: 'shock-duo-bw', mist: 'shock-duo-sepia', keepsake: 'shock-duo-sepia', xerox: 'shock-duo-bw', duotone: 'shock-duo-bw', egodeath: 'shock-duo-warp', paralysis: 'shock-duo-bw' };
     document.body.classList.remove('shock-duo-blue', 'shock-duo-bw', 'shock-duo-sepia', 'shock-duo-warp');
     const dc = SHOCK_DUO[effectiveShockMode];
     if (dc && !settings.parchmentMode) document.body.classList.add(dc);
@@ -425,7 +426,7 @@ export default function App() {
     getProfileStats(dbProfile.id)
       .then(s => setProfile(p => (p ? { ...p, ...s } : p)))
       .catch(() => {});
-  }, [dbProfile]);
+  }, [dbProfile?.id]);
 
   // Load the feed + follow graph once we have an identity.
   useEffect(() => {
@@ -489,7 +490,7 @@ export default function App() {
       cloudSyncedRef.current = true;
     }).catch(() => { cloudSyncedRef.current = true; });
     return () => { active = false; };
-  }, [meId, dbProfile]);
+  }, [meId, dbProfile?.id]);
 
   // Feed: loads (and reloads on scope change) the first page, paginated by cursor.
   useEffect(() => {
@@ -505,7 +506,7 @@ export default function App() {
     }).catch(e => { console.error('[load] feed failed:', e); if (active) setFeedError(true); })
       .finally(() => { if (active) setFeedLoading(false); });
     return () => { active = false; };
-  }, [meId, dbProfile, feedScope, feedReloadKey]);
+  }, [meId, dbProfile?.id, feedScope, feedReloadKey]);
 
   // Real per-scene feed: when a scene is open, fetch its own posts (not just whatever
   // happens to be in the loaded global feed). Falls back to null (→ client filter) on error.
@@ -541,7 +542,7 @@ export default function App() {
       ritual, crystals, pinnedPostId, shrineTheme, divinationLog, storyHighlights, shrine, flameLitAt,
       ageDob,
     };
-    const t = setTimeout(() => { saveProfileState(meId, 'clientSync', blob).catch(() => {}); }, 800);
+    const t = setTimeout(() => { saveProfileState(meId, 'clientSync', blob).catch((e) => console.error('[clientSync] cloud save failed — cross-device sync may lag:', e)); }, 800);
     return () => clearTimeout(t);
   }, [meId, tonightStatus, communityMembership, bookmarks, muted, anniversaries, cardHistory,
       postCandles, nowPlaying, activityLog, mutedKeywords, hiddenPosts,
@@ -567,7 +568,7 @@ export default function App() {
       } catch { /* noop */ }
     });
     return unsub;
-  }, [meId, dbProfile]);
+  }, [meId, dbProfile?.id]);
 
   // Live DMs: keep the inbox + the open thread fresh as messages arrive.
   useEffect(() => { activeConversationRef.current = activeConversation; }, [activeConversation]);
@@ -580,15 +581,18 @@ export default function App() {
         // Re-fetch for correct handles/order, but keep any still-in-flight or
         // failed local messages so a refetch never clobbers what the user typed.
         fetchDMMessages(openId, meId).then(msgs => setMessages(prev => {
+          // Always keep FAILED messages (their "tap to retry" must survive a refetch even if an
+          // earlier delivered message had the same text). Keep PENDING ones unless a delivered copy
+          // with the same body already arrived (dedupe the in-flight optimistic echo).
           const keep = (prev[openId] || []).filter(m =>
-            (m.pending || m.failed) && !msgs.some(s => s.from === 'me' && s.body === m.body));
+            m.failed || (m.pending && !msgs.some(s => s.from === 'me' && s.body === m.body)));
           return { ...prev, [openId]: [...msgs, ...keep] };
         })).catch(() => {});
         dmMarkRead(openId, meId).catch(() => {});
       }
     });
     return unsub;
-  }, [meId, dbProfile]);
+  }, [meId, dbProfile?.id]);
 
   // Live reaction chips: on any reaction change, refetch the open thread (cheap; DM threads
   // are small). RLS only delivers reactions in conversations the user belongs to.
@@ -604,7 +608,7 @@ export default function App() {
       })).catch(() => {});
     });
     return unsub;
-  }, [meId, dbProfile]);
+  }, [meId, dbProfile?.id]);
 
   // Returning from Stripe (ticket checkout / Connect onboarding) — webhooks are async, and on a
   // COLD load meId is null on first paint. So parse the URL params ONCE on mount (the params get
@@ -684,8 +688,9 @@ export default function App() {
   const showToast = (text, kind = 'info') => setToast({ key: `${kind}-${performance.now()}`, text, kind });
 
   const refreshPushState = () => { pushStatus().then(setPushState).catch(() => {}); };
-  useEffect(() => { refreshPushState(); }, [meId]);
-  useEffect(() => { if (showSettings) refreshPushState(); }, [showSettings]);
+  // One effect: refresh on login and whenever Settings opens (opening Settings right after login
+  // used to fire two overlapping reads).
+  useEffect(() => { if (meId) refreshPushState(); }, [meId, showSettings]);
 
   // Turn push on for this device, with clear feedback instead of a silent fail.
   const turnPushOn = async () => {
@@ -742,17 +747,20 @@ export default function App() {
         }
       }
     } else {
-      clearTonightGeo().catch(() => {});
+      // Turning sharing off — a failed clear leaves coords broadcasting, so surface it.
+      clearTonightGeo().catch(() => showToast("couldn't stop sharing your location — check your connection.", 'error'));
       setNearby([]);
     }
     fetchTonightPins().then(setTonightPins).catch(() => {});
   };
 
   // Going ghost must immediately pull any existing pin AND precise coords from the shared map.
+  // Surface a failure — otherwise you'd believe you went invisible while your pin/coords stay live.
   useEffect(() => {
     if (!settings.ghostMode) return;
-    clearTonightPin().then(() => fetchTonightPins().then(setTonightPins)).catch(() => {});
-    clearTonightGeo().catch(() => {});
+    Promise.all([clearTonightPin(), clearTonightGeo()])
+      .then(() => fetchTonightPins().then(setTonightPins).catch(() => {}))
+      .catch(() => showToast("couldn't fully hide you from the map — check your connection, then toggle ghost mode again.", 'error'));
     setNearby([]);
   }, [settings.ghostMode]);
 
@@ -826,7 +834,7 @@ export default function App() {
 
   // === HANDLERS ===
   // Persist a profile-depth blob (graves/trackers/sigils/reflections) for the logged-in user.
-  const persistState = (key, value) => { if (meId) saveProfileState(meId, key, value).catch(() => {}); };
+  const persistState = (key, value) => { if (meId) saveProfileState(meId, key, value).catch((e) => console.error('[persistState] cloud save failed for', key, '— may not sync across devices:', e)); };
 
   // Spell / intention timer — one active "working" at a time, persisted in profile_state.
   const startIntention = (obj) => { setActiveIntention(obj); persistState('intention', obj); };
@@ -1052,7 +1060,26 @@ export default function App() {
         }),
       };
     }));
-    if (meId) toggleCommentReaction(commentId, kind, meId, wasMine).catch(() => {});
+    if (meId) toggleCommentReaction(commentId, kind, meId, wasMine).catch(() => {
+      // Roll the optimistic toggle back (mirror reactToPost) so the chip matches the server.
+      setPosts(prev => prev.map(p => {
+        if (p.id !== postId) return p;
+        return {
+          ...p,
+          comments: (p.comments || []).map(c => {
+            if (c.id !== commentId) return c;
+            const myReactions = c.myReactions || {};
+            const reactions = c.reactions || { heart: 0, skull: 0 };
+            return {
+              ...c,
+              myReactions: { ...myReactions, [kind]: wasMine },
+              reactions: { ...reactions, [kind]: Math.max(0, (reactions[kind] || 0) + (wasMine ? 1 : -1)) },
+            };
+          }),
+        };
+      }));
+      showToast("couldn't react — try again.", 'error');
+    });
   };
 
   const sendMessage = (conversationId, body, audioUrl = null) => {
@@ -1122,10 +1149,15 @@ export default function App() {
       group: !!meta?.group,
     });
     setActiveConversation(id);
+    activeConversationRef.current = id; // update synchronously so the guard below is reliable
     setShowDMs(false);
     setConversations(prev => prev.map(c => c.id === id ? { ...c, unread: 0 } : c));
     if (meId) {
-      fetchDMMessages(id, meId).then(msgs => setMessages(prev => ({ ...prev, [id]: msgs }))).catch(() => {});
+      // Guard against a stale fetch (from a thread you switched away from) clobbering the open one.
+      fetchDMMessages(id, meId).then(msgs => {
+        if (activeConversationRef.current !== id) return;
+        setMessages(prev => ({ ...prev, [id]: msgs }));
+      }).catch(() => {});
       dmMarkRead(id, meId).catch(() => {});
     }
   };
@@ -1146,12 +1178,21 @@ export default function App() {
     setCommunityMembership(prev => ({ ...prev, [id]: !wasMember }));
     // Optimistic count bump + server-backed membership row (migration 0031).
     setCommunityCounts(prev => ({ ...prev, [id]: Math.max(0, (prev[id] || 0) + (wasMember ? -1 : 1)) }));
-    (wasMember ? leaveCommunity(id) : joinCommunity(id)).catch(() => {});
-    if (!wasMember) {
-      const c = COMMUNITIES.find(x => x.id === id);
-      addNotification({ kind: 'crew', avatar: c?.glyph || '✦', text: `you joined ${c?.name || id}` });
-      logActivity({ kind: 'join', glyph: c?.glyph || '✦', label: `joined the ${c?.name || 'a'} scene` });
-    }
+    (wasMember ? leaveCommunity(id) : joinCommunity(id))
+      .then(() => {
+        // Only announce the join AFTER the server confirms it (don't log a join that didn't persist).
+        if (!wasMember) {
+          const c = COMMUNITIES.find(x => x.id === id);
+          addNotification({ kind: 'crew', avatar: c?.glyph || '✦', text: `you joined ${c?.name || id}` });
+          logActivity({ kind: 'join', glyph: c?.glyph || '✦', label: `joined the ${c?.name || 'a'} scene` });
+        }
+      })
+      .catch(() => {
+        // Roll back the optimistic membership flag + count so the UI matches the server.
+        setCommunityMembership(prev => ({ ...prev, [id]: wasMember }));
+        setCommunityCounts(prev => ({ ...prev, [id]: Math.max(0, (prev[id] || 0) + (wasMember ? 1 : -1)) }));
+        showToast(wasMember ? "couldn't leave the scene — try again." : "couldn't join the scene — try again.", 'error');
+      });
   };
 
   const toggleEventRsvp = (id) => {
@@ -1161,16 +1202,25 @@ export default function App() {
       if (wasGoing) delete next[id]; else next[id] = true;
       return next;
     });
-    if (!wasGoing) {
-      addNotification({ kind: 'event', avatar: '◈', text: `you said you're going` });
-      logActivity({ kind: 'rsvp', glyph: '◈', label: 'pledged to a rite', detail: events.find(e => e.id === id)?.name || null });
-    }
+    // Announce the RSVP only once it's real — otherwise a failed write left a "you're going"
+    // notification + activity entry contradicting the reverted button.
+    const announce = () => {
+      if (!wasGoing) {
+        addNotification({ kind: 'event', avatar: '◈', text: `you said you're going` });
+        logActivity({ kind: 'rsvp', glyph: '◈', label: 'pledged to a rite', detail: events.find(e => e.id === id)?.name || null });
+      }
+    };
     if (meId && !String(id).startsWith('temp-')) {
-      dbToggleRsvp(id, meId, wasGoing).catch(() => setEventRsvp(prev => {
-        const next = { ...prev };
-        if (wasGoing) next[id] = true; else delete next[id];
-        return next;
-      }));
+      dbToggleRsvp(id, meId, wasGoing).then(announce).catch(() => {
+        setEventRsvp(prev => {
+          const next = { ...prev };
+          if (wasGoing) next[id] = true; else delete next[id];
+          return next;
+        });
+        showToast("couldn't update your RSVP — try again.", 'error');
+      });
+    } else {
+      announce();
     }
   };
 
@@ -1472,14 +1522,21 @@ export default function App() {
   };
   const unblockUserById = async (profileId) => {
     if (!profileId || !meId) return;
-    await dbUnblockUser(profileId);
+    // Optimistic unblock with rollback (mirror blockUserById) — a bare `await` here would throw an
+    // unhandled rejection on failure and silently never update the UI.
     setBlockedIds(prev => { const n = new Set(prev); n.delete(profileId); return n; });
-    fetchFeed(meId, { scope: feedScope }).then(setPosts).catch(() => {});
+    try {
+      await dbUnblockUser(profileId);
+      fetchFeed(meId, { scope: feedScope }).then(setPosts).catch(() => {});
+    } catch {
+      setBlockedIds(prev => new Set(prev).add(profileId)); // revert
+      showToast("couldn't unblock — try again.", 'error');
+    }
   };
   const reportTarget = async (kind, targetId, reason = '') => {
     if (!meId || !targetId) return;
     try { await reportContent(kind, targetId, reason); addNotification({ kind: 'follow', avatar: '⚑', text: 'reported — thank you' }); }
-    catch { /* ignore */ }
+    catch { showToast("couldn't submit the report — try again.", 'error'); }
   };
 
   // Your own follower / following lists (RLS allows reading your own edges only).
@@ -2272,7 +2329,13 @@ export default function App() {
           stories={stories}
           startIndex={activeStoryIndex}
           onReply={(authorHandle, body) => sendMessageToUser(authorHandle, body)}
-          onReactStory={(storyId, kind) => { if (meId) reactToStory(storyId, kind, meId).catch(() => {}); }}
+          onReactStory={(storyId, kind) => {
+            if (!meId) return undefined;
+            return reactToStory(storyId, kind, meId).catch((e) => {
+              showToast("couldn't react to the story — try again.", 'error');
+              throw e; // let StoryViewer roll its optimistic glyph back
+            });
+          }}
           onDelete={removeStory}
           onSeen={(id) => setSeenStories(prev => (prev[id] ? prev : { ...prev, [id]: 1 }))}
           onClose={() => setActiveStoryIndex(null)}
@@ -2336,6 +2399,7 @@ export default function App() {
         <TicketManager
           event={ticketManagerEvent}
           onClose={() => setTicketManagerEvent(null)}
+          onToast={showToast}
           onEditVenueMap={() => { const ev = ticketManagerEvent; setTicketManagerEvent(null); setVenueEditorEvent(ev); }}
         />
       )}
@@ -2641,9 +2705,11 @@ export default function App() {
         </FeatureBoundary>
       )}
       {settings.familiar !== false && !anyOverlayOpen && <FloatingCat active onSummon={summonShock} />}
-      {/* the haunt — when a horror mode is on, it roams the WHOLE app (even mid-modal) and strikes
-          unpredictably. no safe corner. only held back during the reveal itself. */}
-      {!settings.parchmentMode && <ShockHaunt mode={effectiveShockMode} name={meHandle} active={!revealTarget} />}
+      {/* the haunt — when a horror mode is on, it roams the app and strikes unpredictably. Held back
+          during the reveal itself AND while any overlay/modal is open, so a jumpscare never covers
+          what you're reading (a DM, settings, a post). The persistent egodeath theme is also calmed
+          inside ShockHaunt (no full-screen lunges, longer gaps). */}
+      {!settings.parchmentMode && <ShockHaunt mode={effectiveShockMode} name={meHandle} active={!revealTarget && !anyOverlayOpen} />}
       {/* theme chrome (tap sparks + mode switcher) hides during a transient scare so the
           10s paralysis takeover stays pure horror — only the overlay + haunt show */}
       {!transientShock && settings.shockMode !== 'none' && settings.reactiveTaps !== false && !anyOverlayOpen && !settings.parchmentMode && (

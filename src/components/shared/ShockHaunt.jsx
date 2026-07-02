@@ -30,23 +30,31 @@ export function ShockHaunt({ mode, name = 'you', active = true }) {
     }
     let alive = true;
 
+    // egodeath is a PERSISTENT selectable theme (you browse in it) — so it never full-screen lunges
+    // or flashes over what you're reading, strikes are gentler, and the gaps are much longer. The
+    // full intensity (lunges, corruption flashes, tight cadence) is reserved for the TRANSIENT
+    // paralysis takeover, which only lasts ~10s.
+    const calm = mode === 'egodeath';
+
     const strike = () => {
       if (!alive) return;
       keyRef.current += 1;
       const r = Math.random();
-      const jump = r < 0.3;                 // ~1 in 3 lunges
-      const corruptHit = !jump && r < 0.52; // a UI-corruption flash
+      const jump = !calm && r < 0.3;                 // ~1 in 3 lunges (transient only)
+      const corruptHit = !calm && !jump && r < 0.52; // a UI-corruption flash (transient only)
       let kind;
       if (jump) kind = 'face';
       else if (corruptHit) kind = 'corrupt';
       else kind = (mode === 'egodeath' ? ['eye', 'eye', 'self', 'face'] : ['face', 'eye', 'watch', 'face'])[Math.floor(Math.random() * 4)];
       setApp({ key: keyRef.current, kind, x: 5 + Math.random() * 78, y: 8 + Math.random() * 72, big: jump, text: kind === 'corrupt' ? CORRUPT[Math.floor(Math.random() * CORRUPT.length)] : '' });
-      if (jump) { buzz('dread'); scream(); } else { buzz('react'); if (Math.random() < 0.5) whisper(); }
+      if (jump) { buzz('dread'); scream(); } else { buzz('react'); if (!calm && Math.random() < 0.5) whisper(); }
       const dur = jump ? 800 : kind === 'corrupt' ? 540 : 1200 + Math.random() * 1500;
       hideTimer.current = setTimeout(() => { if (alive) setApp(null); }, dur);
-      timer.current = setTimeout(strike, dur + 1500 + Math.random() * 5000); // 1.5–7s between strikes
+      // calm (egodeath): 9–21s between strikes; transient (paralysis): 1.5–7s.
+      const gap = calm ? (9000 + Math.random() * 12000) : (1500 + Math.random() * 5000);
+      timer.current = setTimeout(strike, dur + gap);
     };
-    timer.current = setTimeout(strike, 1500 + Math.random() * 4000);
+    timer.current = setTimeout(strike, (calm ? 5000 : 1500) + Math.random() * 4000);
 
     // the lingering watcher — fades into a corner and stays for 14–34s, then is gone when you look back
     const lurkCycle = () => {
@@ -90,8 +98,8 @@ export function ShockHaunt({ mode, name = 'you', active = true }) {
       ) : (
         <div key={app.key} className="fixed z-[120] pointer-events-none -translate-x-1/2 -translate-y-1/2" aria-hidden
           style={{ left: `${app.x}%`, top: `${app.y}%`, animation: 'hauntFade 1.7s ease-in-out forwards' }}>
-          {app.kind === 'face' && <HorrorImage src={pick(SCARE_FACES, app.key)} className="w-36" style={{ aspectRatio: '3 / 4', opacity: 0.82 }} />}
-          {app.kind === 'eye' && <HorrorImage src={HORROR_SRC.eyes} className="w-28" style={{ aspectRatio: '4 / 3', opacity: 0.78 }} />}
+          {app.kind === 'face' && <HorrorImage src={pick(SCARE_FACES, app.key)} className="w-36" style={{ aspectRatio: '3 / 4', opacity: mode === 'egodeath' ? 0.5 : 0.82 }} />}
+          {app.kind === 'eye' && <HorrorImage src={HORROR_SRC.eyes} className="w-28" style={{ aspectRatio: '4 / 3', opacity: mode === 'egodeath' ? 0.5 : 0.78 }} />}
           {app.kind === 'watch' && <span className="text-xl tracking-[0.25em] text-[#b8b0a8]" style={{ opacity: 0.62, fontFamily: '"VT323", monospace' }}>i see you, {who}</span>}
           {app.kind === 'self' && <span className="text-[15vw] leading-none text-white/[0.07]" style={{ fontFamily: '"Grenze Gotisch", serif' }}>I</span>}
         </div>

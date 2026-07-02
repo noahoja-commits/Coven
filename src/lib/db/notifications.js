@@ -1,5 +1,6 @@
 import { supabase } from '../supabase';
 import { relativeTime } from '../time';
+import { resilientChannel } from './realtime';
 
 const REACT_EMOJI = { bat: '🦇', fire: '🔥', skull: '💀', smoke: '💨' };
 
@@ -65,13 +66,11 @@ export async function clearNotifications(myId) {
 // client only wakes for its own rows (so the caller's per-row refetch stays bounded to one
 // user's notification rate). RLS still independently guarantees correctness.
 export function subscribeNotifications(myId, onInsert) {
-  const ch = supabase
+  return resilientChannel(() => supabase
     .channel('notifications')
     .on('postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${myId}` },
-      payload => onInsert(payload.new))
-    .subscribe();
-  return () => { supabase.removeChannel(ch); };
+      payload => onInsert(payload.new)));
 }
 
 // A single fresh row (from realtime) hydrated; we refetch handle/avatar lazily,

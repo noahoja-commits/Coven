@@ -3,7 +3,7 @@ import { ArrowLeft, Check, Loader2, Map } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { fetchEventTickets, checkInTicket } from '../../lib/db/tickets';
 
-export function TicketManager({ event, onClose, onEditVenueMap }) {
+export function TicketManager({ event, onClose, onEditVenueMap, onToast }) {
   const [tickets, setTickets] = useState(null);
 
   useEffect(() => {
@@ -13,8 +13,13 @@ export function TicketManager({ event, onClose, onEditVenueMap }) {
   }, [event.id]);
 
   const doCheckIn = async (id) => {
-    const at = await checkInTicket(id).catch(() => null);
-    if (at) setTickets(prev => prev.map(t => (t.id === id ? { ...t, checked_in_at: at } : t)));
+    // Surface a failure — at the door, a silent no-op reads as "the button is broken."
+    try {
+      const at = await checkInTicket(id);
+      if (at) setTickets(prev => prev.map(t => (t.id === id ? { ...t, checked_in_at: at } : t)));
+    } catch {
+      onToast && onToast("couldn't check this ticket in — try again.", 'error');
+    }
   };
 
   const paid = (tickets || []).filter(t => t.status === 'paid');
