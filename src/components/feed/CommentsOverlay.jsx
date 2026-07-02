@@ -7,7 +7,7 @@ import { PostImage } from '../shared/Visuals';
 import { renderRichText } from '../shared/RichText';
 import { COMMENT_REACTIONS } from '../shared/ReactionGlyphs';
 
-export function CommentsOverlay({ post, onClose, onComment, onReact, onReactComment, isBookmarked, onToggleBookmark, onOpenUser }) {
+export function CommentsOverlay({ post, onClose, onComment, onReact, onReactComment, onEditComment, onDeleteComment, isBookmarked, onToggleBookmark, onOpenUser }) {
   const [draft, setDraft] = useState('');
   const [replyTo, setReplyTo] = useState(null); // commentId being replied to
   const scrollRef = useRef(null);
@@ -100,11 +100,11 @@ export function CommentsOverlay({ post, onClose, onComment, onReact, onReactComm
           const replies = repliesByParent[c.id] || [];
           return (
             <div key={c.id} className="px-4 py-3 border-b border-[#1A1A1A]">
-              <CommentRow c={c} onOpenUser={onOpenUser} onReactComment={onReactComment} onReply={() => setReplyTo(c.id)} />
+              <CommentRow c={c} onOpenUser={onOpenUser} onReactComment={onReactComment} onReply={() => setReplyTo(c.id)} onEdit={onEditComment} onDelete={onDeleteComment} />
               {replies.length > 0 && (
                 <div className="mt-2 pl-7 border-l border-[#1A1A1A] space-y-2">
                   {replies.map(r => (
-                    <CommentRow key={r.id} c={r} reply onOpenUser={onOpenUser} onReactComment={onReactComment} onReply={() => setReplyTo(c.id)} />
+                    <CommentRow key={r.id} c={r} reply onOpenUser={onOpenUser} onReactComment={onReactComment} onReply={() => setReplyTo(c.id)} onEdit={onEditComment} onDelete={onDeleteComment} />
                   ))}
                 </div>
               )}
@@ -156,7 +156,9 @@ export function CommentsOverlay({ post, onClose, onComment, onReact, onReactComm
   );
 }
 
-function CommentRow({ c, reply, onOpenUser, onReactComment, onReply }) {
+function CommentRow({ c, reply, onOpenUser, onReactComment, onReply, onEdit, onDelete }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(c.body);
   return (
     <div className="flex gap-2.5">
       <button onClick={() => !c.mine && onOpenUser && onOpenUser(c.user, c.avatar)}
@@ -167,9 +169,20 @@ function CommentRow({ c, reply, onOpenUser, onReactComment, onReply }) {
         <div className="flex items-baseline gap-2">
           <button onClick={() => !c.mine && onOpenUser && onOpenUser(c.user, c.avatar)}
             className="text-[#F5F1E8] text-sm hover:underline" style={F.ui}>{c.user}</button>
-          <span className="text-[9px] text-[#6B6B6B]" style={F.mono}>{c.time}</span>
+          <span className="text-[9px] text-[#6B6B6B]" style={F.mono}>{c.time}{c.edited ? ' · edited' : ''}</span>
         </div>
-        <p className="text-[#F5F1E8] text-sm mt-0.5 leading-relaxed" style={F.serif}>{renderRichText(c.body, { onOpenUser })}</p>
+        {editing ? (
+          <div className="mt-1">
+            <textarea value={draft} onChange={e => setDraft(e.target.value)} rows={2} autoFocus
+              className="w-full bg-[#0F0F0F] border border-[#3F3F3F] focus:border-[#C9A961] text-[#F5F1E8] text-sm p-2 outline-none" style={F.serif} />
+            <div className="flex items-center justify-end gap-2 mt-1">
+              <button onClick={() => { setEditing(false); setDraft(c.body); }} className="tap text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#A8A29E] px-2 py-0.5" style={F.ui}>cancel</button>
+              <button onClick={() => { const t = draft.trim(); if (t && t !== c.body) onEdit && onEdit(c.id, t); setEditing(false); }} className="tap text-[10px] uppercase tracking-wider text-[#C9A961] border border-[#C9A961]/50 hover:bg-[#C9A961]/10 px-2 py-0.5" style={F.ui}>save</button>
+            </div>
+          </div>
+        ) : (
+          <p className="text-[#F5F1E8] text-sm mt-0.5 leading-relaxed" style={F.serif}>{renderRichText(c.body, { onOpenUser })}</p>
+        )}
         <div className="flex items-center gap-1.5 mt-1 -ml-1">
           {COMMENT_REACTIONS.map(({ kind, Glyph }) => {
             const n = c.reactions?.[kind] || 0;
@@ -187,6 +200,14 @@ function CommentRow({ c, reply, onOpenUser, onReactComment, onReply }) {
               className="text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#A8A29E] px-1.5 py-0.5" style={F.ui}>
               reply
             </button>
+          )}
+          {c.mine && !editing && (
+            <>
+              <button onClick={() => { setDraft(c.body); setEditing(true); }}
+                className="text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#C9A961] px-1.5 py-0.5" style={F.ui}>edit</button>
+              <button onClick={() => { if (confirm('Delete this comment?')) onDelete && onDelete(c.id); }}
+                className="text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#8B0000] px-1.5 py-0.5" style={F.ui}>delete</button>
+            </>
           )}
         </div>
       </div>

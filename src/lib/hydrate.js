@@ -11,6 +11,7 @@ export function hydratePost(row, myReactionSet, myId) {
     avatarUrl: row.avatar_url || undefined, // uploaded profile photo (null for anon)
     time: relativeTime(row.created_at),
     createdAt: row.created_at,           // cursor for infinite scroll
+    edited: !!row.edited_at,             // show a quiet "· edited" mark
 
     community: row.community,
     body: row.body,
@@ -51,6 +52,7 @@ export function hydrateComment(row, myId, myReactionSet) {
     avatarUrl: row.avatar_url || undefined,
     body: row.body,
     time: relativeTime(row.created_at),
+    edited: !!row.edited_at,
     mine: !!myId && row.author_id === myId,
     parentId: row.parent_id || null,
     reactions,

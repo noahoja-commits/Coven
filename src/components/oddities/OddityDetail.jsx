@@ -8,7 +8,7 @@ import { recordView, fetchViewCounts } from '../../lib/db/views';
 
 const PRICE_MODE = { firm: 'firm', obo: 'or best offer', trade: 'open to trades' };
 
-export function OddityDetail({ item, onBack, onWhisper, onOpenUser }) {
+export function OddityDetail({ item, onBack, onWhisper, onOpenUser, onMarkSold, onDelete }) {
   const [views, setViews] = useState(0);
   // Record a unique view when a listing is opened (not your own), and load the count.
   useEffect(() => {
@@ -68,12 +68,19 @@ export function OddityDetail({ item, onBack, onWhisper, onOpenUser }) {
           </div>
         </div>
       </div>
-      {!item.mine && (
+      {!item.mine ? (
         <div className="absolute bottom-0 inset-x-0 z-20 bg-[#0A0608]/95 backdrop-blur-md border-t border-[#2A2A2A] p-3 safe-pb">
           <button onClick={() => onWhisper && onWhisper(seller.user)}
             className="w-full py-3 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-colors" style={F.ui}>
             <MessageCircle size={14} /> whisper the seller
           </button>
+        </div>
+      ) : (
+        <div className="absolute bottom-0 inset-x-0 z-20 bg-[#0A0608]/95 backdrop-blur-md border-t border-[#2A2A2A] p-3 safe-pb grid grid-cols-2 gap-2">
+          <button onClick={() => { if (confirm('Mark this as sold? It leaves the market.')) { onMarkSold && onMarkSold(item.id); onBack && onBack(); } }}
+            className="py-3 border border-[#C9A961]/50 text-[#C9A961] hover:bg-[#C9A961]/10 text-[10px] uppercase tracking-[0.2em] transition-colors" style={F.ui}>★ mark sold</button>
+          <button onClick={() => { if (confirm('Delete this listing? This cannot be undone.')) { onDelete && onDelete(item.id); onBack && onBack(); } }}
+            className="py-3 border border-[#5B0F1A] text-[#9E2A33] hover:bg-[#5B0F1A]/20 text-[10px] uppercase tracking-[0.2em] transition-colors" style={F.ui}>⊘ delete</button>
         </div>
       )}
     </div>

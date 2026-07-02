@@ -138,6 +138,20 @@ export async function sendPostToDM(convId, senderId, postId, body = '') {
   return { id: data.id, from: 'me', body: body || '', time: relativeTime(data.created_at) };
 }
 
+// Everyone in a conversation (RLS: only members can read the membership rows).
+// Two-step (ids -> profiles) because conversation_members has no FK into profiles.
+export async function fetchConversationMembers(convId) {
+  const { data, error } = await supabase
+    .from('conversation_members').select('user_id').eq('conversation_id', convId);
+  if (error) throw error;
+  const ids = (data || []).map(r => r.user_id);
+  if (!ids.length) return [];
+  const { data: profs, error: e2 } = await supabase
+    .from('profiles').select('id, handle, avatar, avatar_url').in('id', ids);
+  if (e2) throw e2;
+  return (profs || []).map(p => ({ userId: p.id, handle: p.handle, avatar: p.avatar || '✦', avatarUrl: p.avatar_url || null }));
+}
+
 export async function markRead(convId, userId) {
   const { error } = await supabase.from('conversation_members')
     .update({ last_read_at: new Date().toISOString() })
