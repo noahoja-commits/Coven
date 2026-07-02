@@ -452,7 +452,7 @@ export function HomeScreen({
                           className="w-full px-3 py-2 text-left text-xs text-[#A8A29E] hover:bg-[#1A1A1A] flex items-center gap-2" style={F.ui}>
                           <Send size={12} /> whisper this
                         </button>
-                        {mine && post.body && !post.anonymous && (
+                        {mine && post.body && !post.anonymous && !String(post.id).startsWith('temp-') && (
                           <button onClick={() => { setEditingId(post.id); setEditText(post.body); setOpenMenu(null); }}
                             className="w-full px-3 py-2 text-left text-xs text-[#A8A29E] hover:bg-[#1A1A1A] flex items-center gap-2" style={F.ui}>
                             <Pencil size={12} /> edit
