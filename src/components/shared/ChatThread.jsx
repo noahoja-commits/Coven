@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, Mic, MicOff, Play, Square, X } from 'lucide-react';
+import { Send, Mic, MicOff, Play, Square, X, Users, LogOut } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { uploadAudio } from '../../lib/db/storage';
+import { fetchConversationMembers } from '../../lib/db/dm';
 import { useTypingIndicator } from '../../hooks/useTypingIndicator';
 
 function formatDuration(seconds) {
@@ -13,10 +14,11 @@ function formatDuration(seconds) {
 const REACT_KINDS = ['bat', 'fire', 'skull', 'smoke'];
 const REACT_EMOJI = { bat: '🦇', fire: '🔥', skull: '💀', smoke: '💨' };
 
-export function ChatThread({ conversation, messages, onSend, onBack, onRetry, onReact, onOpenPost, initialDraft = '', meHandle = '' }) {
+export function ChatThread({ conversation, messages, onSend, onBack, onRetry, onReact, onOpenPost, onOpenUser, onLeaveGroup, initialDraft = '', meHandle = '' }) {
   const [draft, setDraft] = useState(initialDraft);
   const { typingUser, onInput } = useTypingIndicator(conversation?.id, meHandle);
   const [trayMsg, setTrayMsg] = useState(null);
+  const [members, setMembers] = useState(null); // null = closed; [] = loading/empty; [..] = open
   const scrollRef = useRef(null);
   const [recording, setRecording] = useState(false);
   const [recDuration, setRecDuration] = useState(0);
@@ -167,7 +169,40 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
             {conversation?.group ? 'coven · group' : 'whisper'}
           </div>
         </div>
+        {conversation?.group && (
+          <div className="flex items-center gap-1 shrink-0">
+            <button onClick={() => { setMembers([]); fetchConversationMembers(conversation.id).then(setMembers).catch(() => setMembers(null)); }}
+              className="tap p-2 text-[#A8A29E] hover:text-[#C9A961]" title="members"><Users size={16} /></button>
+            {onLeaveGroup && (
+              <button onClick={() => { if (confirm('Leave this circle? You can be re-invited (or rejoin, if it\'s a public crew).')) onLeaveGroup(conversation.id); }}
+                className="tap p-2 text-[#A8A29E] hover:text-[#8B0000]" title="leave circle"><LogOut size={16} /></button>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Members sheet */}
+      {members !== null && (
+        <div className="absolute inset-0 z-50 bg-black/70 flex items-end" onClick={() => setMembers(null)}>
+          <div className="w-full max-h-[60%] overflow-y-auto bg-[#0F0F0F] border-t border-[#2A2A2A] p-4" onClick={e => e.stopPropagation()}>
+            <div className="text-[10px] uppercase tracking-[0.25em] text-[#9E2A33] mb-3" style={F.display}>
+              in this circle {members.length > 0 && <span className="text-[#6B6B6B]">· {members.length}</span>}
+            </div>
+            {members.length === 0 ? (
+              <div className="text-[#6B6B6B] text-xs py-4 text-center" style={F.serif}>summoning…</div>
+            ) : members.map(m => (
+              <button key={m.userId}
+                onClick={() => { setMembers(null); onOpenUser && onOpenUser(m.handle); }}
+                className="tap w-full flex items-center gap-3 py-2 text-left hover:bg-[#1A1A1A] px-2 -mx-2">
+                <span className="w-8 h-8 rounded-full bg-[#1A1A1A] flex items-center justify-center overflow-hidden shrink-0">
+                  {m.avatarUrl ? <img src={m.avatarUrl} className="w-full h-full object-cover" alt="" /> : <span className="text-sm">{m.avatar}</span>}
+                </span>
+                <span className="text-sm text-[#F5F1E8]" style={F.ui}>{m.handle}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-2">

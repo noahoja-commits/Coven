@@ -1,5 +1,6 @@
 import { supabase } from '../supabase';
 import { hydratePost, hydrateComment } from '../hydrate';
+import { relativeTime } from '../time';
 
 // Recent feed + the current user's own reactions.
 // scope 'everyone' = global; 'following' = posts by people you follow (+ your own).
@@ -174,6 +175,24 @@ export async function deletePost(postId) {
   if (error) throw error;
 }
 
+// Edit your own post's text (migration 0062). Stamps edited_at so the UI shows a quiet mark.
+export async function updatePost(postId, body) {
+  const { error } = await supabase.from('posts')
+    .update({ body, edited_at: new Date().toISOString() }).eq('id', postId);
+  if (error) throw error;
+}
+
+export async function updateComment(commentId, body) {
+  const { error } = await supabase.from('comments')
+    .update({ body, edited_at: new Date().toISOString() }).eq('id', commentId);
+  if (error) throw error;
+}
+
+export async function deleteComment(commentId) {
+  const { error } = await supabase.from('comments').delete().eq('id', commentId);
+  if (error) throw error;
+}
+
 // Toggle a reaction. `wasMine` = whether the user already had this reaction.
 export async function togglePostReaction(postId, kind, userId, wasMine) {
   if (wasMine) {
@@ -226,4 +245,23 @@ export async function createComment({ postId, body, parentId }, me) {
     time: 'just now', mine: true, parentId: data.parent_id || null,
     reactions: { heart: 0, skull: 0 }, myReactions: {},
   };
+}
+
+// ── Server-side search (migration 0063) — searches the whole corpus, not just the loaded feed.
+// Both return [] gracefully pre-migration so search still works (profiles + client fallback).
+export async function searchPosts(q) {
+  const { data, error } = await supabase.rpc('search_posts', { p_q: q });
+  if (error) return [];
+  return (data || []).map(r => ({
+    id: r.id, body: r.body, user: r.handle, avatar: r.avatar || '✦',
+    avatarUrl: r.avatar_url || undefined, time: relativeTime(r.created_at),
+  }));
+}
+
+export async function searchEvents(q) {
+  const { data, error } = await supabase.rpc('search_events', { p_q: q });
+  if (error) return [];
+  return (data || []).map(r => ({
+    id: r.id, name: r.name, venue: r.venue || '', neighborhood: r.neighborhood || '', date: r.event_date || '',
+  }));
 }

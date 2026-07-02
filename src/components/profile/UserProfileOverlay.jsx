@@ -8,9 +8,10 @@ import { borderStyle, bannerStyle } from '../../data/decor';
 import { moodActive } from '../../data/moods';
 import { archetypeById } from '../../data/archetypes';
 import { PostGrid } from './PostGrid';
+import { PublicShrine } from './PublicShrine';
 import { TarotFrame, arcanaFor, Grain } from '../shared/Sigils';
 
-export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], isFollowing, isMuted, onToggleFollow, onToggleMute, onWhisper, onClose, onOpenComments, onReact, onBlock, onReport }) {
+export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], meId, onToast, isFollowing, isMuted, onToggleFollow, onToggleMute, onWhisper, onClose, onOpenComments, onReact, onBlock, onReport }) {
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState({ followers: 0, following: 0, posts: 0 });
   const [loading, setLoading] = useState(true);
@@ -141,6 +142,10 @@ export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], isF
             className="tap text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#9E2A33]" style={F.ui}>⚑ report</button>
         </div>
       </div>
+
+      {/* Their public shrine — memorials (leave a candle/flower), the log, anniversaries,
+          now playing, kept stories. Renders nothing if they have nothing public. */}
+      {profile?.id && <PublicShrine ownerId={profile.id} meId={meId} onToast={onToast} />}
 
       {/* Posts grid (respect muted keywords) */}
       <PostGrid

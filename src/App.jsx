@@ -4,17 +4,17 @@ import { useAuth } from './auth/AuthProvider';
 import { isSupabaseConfigured } from './lib/supabase';
 import { SignInScreen } from './components/auth/SignInScreen';
 import { ResetPasswordScreen } from './components/auth/ResetPasswordScreen';
-import { fetchFeed, createPost, deletePost as dbDeletePost, togglePostReaction, fetchComments, createComment, toggleCommentReaction, castPollVote, clearPollVote, fetchEventRecaps } from './lib/db/posts';
+import { fetchFeed, createPost, deletePost as dbDeletePost, updatePost as dbUpdatePost, updateComment as dbUpdateComment, deleteComment as dbDeleteComment, togglePostReaction, fetchComments, createComment, toggleCommentReaction, castPollVote, clearPollVote, fetchEventRecaps } from './lib/db/posts';
 import { insertProfile, updateProfile, getProfileStats, getProfileByHandle, fetchProfiles, saveNotificationPrefs } from './lib/db/profiles';
 import { fetchFollowing, fetchFollowers, followUser, unfollowUser } from './lib/db/social';
 import { FollowListOverlay } from './components/profile/FollowListOverlay';
 import { joinCommunity, leaveCommunity, fetchCommunityMemberCounts } from './lib/db/communities';
 import { fetchConversations, getOrCreateDM, createGroup, fetchMessages as fetchDMMessages, sendDM, markRead as dmMarkRead, setBuried as dmSetBuried, subscribeDMs, toggleDMReaction, subscribeDMReactions, sendPostToDM } from './lib/db/dm';
 import { fetchActiveStories, postStory as dbPostStory, deleteStory, reactToStory } from './lib/db/stories';
-import { fetchListings, createListing } from './lib/db/listings';
+import { fetchListings, createListing, deleteListing, markListingSold } from './lib/db/listings';
 import { fetchShops, createShop, deleteShop as dbDeleteShop, startBoostCheckout } from './lib/db/shops';
 import { fetchPayoutStatus, startPayoutSetup, refreshPayoutStatus } from './lib/db/payouts';
-import { listCrews, createCrew as dbCreateCrew, joinCrew as dbJoinCrew } from './lib/db/crews';
+import { listCrews, createCrew as dbCreateCrew, joinCrew as dbJoinCrew, leaveCrew } from './lib/db/crews';
 import { fetchProfileState, saveProfileState } from './lib/db/profileState';
 import { fetchNotifications, markNotificationRead, markAllNotificationsRead, clearNotifications, subscribeNotifications, hydrateRealtime } from './lib/db/notifications';
 import { fetchBlockedIds, blockUser as dbBlockUser, unblockUser as dbUnblockUser, reportContent } from './lib/db/moderation';
@@ -1263,6 +1263,33 @@ export default function App() {
     }
   };
 
+  const editPost = (postId, body) => {
+    const clean = (body || '').trim();
+    if (!clean || String(postId).startsWith('temp-')) return;
+    const snapshot = posts;
+    setPosts(prev => prev.map(p => (p.id === postId ? { ...p, body: clean, edited: true } : p)));
+    dbUpdatePost(postId, clean).catch(() => { setPosts(snapshot); showToast("couldn't save your edit — try again.", 'error'); });
+  };
+
+  // Comments live inside posts[].comments — edit/delete update that nested array optimistically.
+  const editComment = (postId, commentId, body) => {
+    const clean = (body || '').trim();
+    if (!clean) return;
+    const snapshot = posts;
+    setPosts(prev => prev.map(p => (p.id === postId
+      ? { ...p, comments: (p.comments || []).map(c => (c.id === commentId ? { ...c, body: clean, edited: true } : c)) }
+      : p)));
+    dbUpdateComment(commentId, clean).catch(() => { setPosts(snapshot); showToast("couldn't save your edit — try again.", 'error'); });
+  };
+
+  const deleteComment = (postId, commentId) => {
+    const snapshot = posts;
+    setPosts(prev => prev.map(p => (p.id === postId
+      ? { ...p, comments: (p.comments || []).filter(c => c.id !== commentId), baseCommentCount: Math.max(0, (p.baseCommentCount || 1) - 1) }
+      : p)));
+    dbDeleteComment(commentId).catch(() => { setPosts(snapshot); showToast("couldn't delete that — try again.", 'error'); });
+  };
+
   const repostPost = async (originalId, commentary = '') => {
     const original = posts.find(p => p.id === originalId);
     if (!original || !meId) return;
@@ -1921,6 +1948,7 @@ export default function App() {
         onOpenCommunity={setCommunity}
         onOpenUser={openUserProfile}
         onDeletePost={deletePost}
+        onEditPost={editPost}
         onHidePost={hidePost}
         onQuotePost={(id) => setQuoteTarget(id)}
         onWhisperPost={(id) => setSharePostTarget(id)}
@@ -2237,6 +2265,17 @@ export default function App() {
           onRetry={(messageId) => retryMessage(activeConversation, messageId)}
           onReact={(messageId, kind) => reactToMessage(activeConversation, messageId, kind)}
           onOpenPost={(id) => { setActiveConversation(null); setActiveConvMeta(null); setActivePostComments(id); }}
+          onOpenUser={(handle) => { setActiveConversation(null); setActiveConvMeta(null); openUserProfile(handle); }}
+          onLeaveGroup={(convId) => {
+            leaveCrew(convId)
+              .then(() => {
+                setActiveConversation(null); setActiveConvMeta(null);
+                setConversations(prev => prev.filter(c => c.id !== convId));
+                listCrews().then(setCrews).catch(() => {});
+                showToast('you slipped out of the circle.');
+              })
+              .catch(() => showToast("couldn't leave the circle — try again.", 'error'));
+          }}
           onBack={() => { setActiveConversation(null); setActiveConvMeta(null); }}
         />
         </FeatureBoundary>
@@ -2256,6 +2295,8 @@ export default function App() {
           onComment={(body, parentId) => addComment(activePostComments, body, parentId)}
           onReact={(kind) => reactToPost(activePostComments, kind)}
           onReactComment={(commentId, kind) => reactToComment(activePostComments, commentId, kind)}
+          onEditComment={(commentId, body) => editComment(activePostComments, commentId, body)}
+          onDeleteComment={(commentId) => deleteComment(activePostComments, commentId)}
           isBookmarked={!!bookmarks[activePostComments]}
           onToggleBookmark={() => toggleBookmark(activePostComments)}
           onOpenUser={openUserProfile}
@@ -2266,6 +2307,8 @@ export default function App() {
           handle={activeUserHandle}
           posts={posts}
           mutedKeywords={mutedKeywords}
+          meId={meId}
+          onToast={showToast}
           isFollowing={!!following[activeUserHandle]}
           isMuted={!!muted[activeUserHandle]}
           onToggleFollow={() => toggleFollow(activeUserHandle)}
@@ -2663,6 +2706,14 @@ export default function App() {
             setActiveOddity(null); setActivePortal(null); openDMWithUser(h, prefill);
           }}
           onOpenUser={(h) => { setActiveOddity(null); setActivePortal(null); if (h && h !== meHandle) setActiveUserHandle(h); }}
+          onMarkSold={(id) => {
+            setListings(prev => prev.filter(l => l.id !== id));
+            markListingSold(id).then(() => showToast('marked sold.')).catch(() => { showToast("couldn't mark it sold — try again.", 'error'); fetchListings(meId).then(setListings).catch(() => {}); });
+          }}
+          onDelete={(id) => {
+            setListings(prev => prev.filter(l => l.id !== id));
+            deleteListing(id).then(() => showToast('listing removed.')).catch(() => { showToast("couldn't delete it — try again.", 'error'); fetchListings(meId).then(setListings).catch(() => {}); });
+          }}
           onBack={() => setActiveOddity(null)}
         />
       )}
