@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { MessageCircle, MoreHorizontal, Eye, Bookmark, Trash2, Flame, EyeOff, Repeat, Pin, Loader2, Send } from 'lucide-react';
+import { MessageCircle, MoreHorizontal, Eye, Bookmark, Trash2, Flame, EyeOff, Repeat, Pin, Loader2, Send, Pencil } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { Reaction } from '../shared/Reaction';
 import { PostImage } from '../shared/Visuals';
@@ -19,7 +19,7 @@ import { Bat, Flame as FlameGlyph, Skull as SkullGlyph, Smoke } from '../shared/
 import { FeatureBoundary } from '../FeatureBoundary';
 
 export function HomeScreen({
-  posts, feedError = false, onRetryFeed, onReact, onOpenComments, onOpenCommunity, onOpenUser, onDeletePost, onHidePost, onQuotePost, onWhisperPost, onTogglePin, pinnedPostId, feedSort = 'latest', onSetFeedSort,
+  posts, feedError = false, onRetryFeed, onReact, onOpenComments, onOpenCommunity, onOpenUser, onDeletePost, onEditPost, onHidePost, onQuotePost, onWhisperPost, onTogglePin, pinnedPostId, feedSort = 'latest', onSetFeedSort,
   feedScope = 'everyone', onSetFeedScope, onLoadMore, feedHasMore = false, onReportPost,
   bookmarks = {}, onToggleBookmark, postCandles = {}, onToggleCandle, onOpenEvent, onVotePoll,
   onOpenStory, onCreateStory, stories = [], seenStories = {}, meHandle = 'you', meAvatar = '☾',
@@ -65,6 +65,8 @@ export function HomeScreen({
     return groups;
   }, [stories, seenStories]);
   const [openMenu, setOpenMenu] = useState(null);
+  const [editingId, setEditingId] = useState(null); // post id being edited inline
+  const [editText, setEditText] = useState('');
   const [activeTag, setActiveTag] = useState(null);
 
   const renderBody = (body) => body
@@ -450,6 +452,12 @@ export function HomeScreen({
                           className="w-full px-3 py-2 text-left text-xs text-[#A8A29E] hover:bg-[#1A1A1A] flex items-center gap-2" style={F.ui}>
                           <Send size={12} /> whisper this
                         </button>
+                        {mine && post.body && !post.anonymous && (
+                          <button onClick={() => { setEditingId(post.id); setEditText(post.body); setOpenMenu(null); }}
+                            className="w-full px-3 py-2 text-left text-xs text-[#A8A29E] hover:bg-[#1A1A1A] flex items-center gap-2" style={F.ui}>
+                            <Pencil size={12} /> edit
+                          </button>
+                        )}
                         {mine && (
                           <button onClick={() => { onTogglePin && onTogglePin(post.id); setOpenMenu(null); }}
                             className="w-full px-3 py-2 text-left text-xs text-[#A8A29E] hover:bg-[#1A1A1A] flex items-center gap-2" style={F.ui}>
@@ -485,8 +493,24 @@ export function HomeScreen({
                   <Repeat size={11} /> reposted from {post.quoted?.user}
                 </div>
               )}
-              {post.body && <p className="text-[#F5F1E8] text-[15px] leading-relaxed mb-3" style={F.serif}>{renderBody(post.body)}</p>}
-              {post.body && extractUrl(post.body) && <LinkPreviewCard url={extractUrl(post.body)} />}
+              {editingId === post.id ? (
+                <div className="mb-3">
+                  <textarea value={editText} onChange={e => setEditText(e.target.value)} rows={3} autoFocus
+                    className="w-full bg-[#0F0F0F] border border-[#3F3F3F] focus:border-[#C9A961] text-[#F5F1E8] text-[15px] leading-relaxed p-2 outline-none" style={F.serif} />
+                  <div className="flex items-center justify-end gap-2 mt-1.5">
+                    <button onClick={() => { setEditingId(null); setEditText(''); }}
+                      className="tap text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#A8A29E] px-2 py-1" style={F.ui}>cancel</button>
+                    <button onClick={() => { const t = editText.trim(); if (t) onEditPost && onEditPost(post.id, t); setEditingId(null); setEditText(''); }}
+                      className="tap text-[10px] uppercase tracking-wider text-[#C9A961] border border-[#C9A961]/50 hover:bg-[#C9A961]/10 px-2 py-1" style={F.ui}>save</button>
+                  </div>
+                </div>
+              ) : post.body && (
+                <p className="text-[#F5F1E8] text-[15px] leading-relaxed mb-3" style={F.serif}>
+                  {renderBody(post.body)}
+                  {post.edited && <span className="text-[10px] text-[#6B6B6B] ml-1" style={F.ui}>· edited</span>}
+                </p>
+              )}
+              {post.body && editingId !== post.id && extractUrl(post.body) && <LinkPreviewCard url={extractUrl(post.body)} />}
               {post.quoted && (
                 <button onClick={() => onOpenComments && onOpenComments(post.quoted.id)}
                   className="block w-full text-left mb-3 border border-[#2A2A2A] bg-[#0F0F0F] p-3 hover:border-[#3F3F3F] transition-colors">

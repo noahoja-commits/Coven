@@ -4,24 +4,30 @@ import { F } from '../../styles/fonts';
 import { COMMUNITIES } from '../../data/communities';
 import { CODEX } from '../../data/codex';
 import { searchProfiles } from '../../lib/db/profiles';
+import { searchPosts, searchEvents } from '../../lib/db/posts';
 
 export function SearchOverlay({ posts = [], events = [], onClose, onOpenPost, onOpenUser, onOpenCommunity, onOpenEvent, onOpenCodex }) {
   const [q, setQ] = useState('');
   const [userResults, setUserResults] = useState([]);
   const [userError, setUserError] = useState(false);
+  const [serverPosts, setServerPosts] = useState([]);
+  const [serverEvents, setServerEvents] = useState([]);
   const inputRef = useRef(null);
 
   useEffect(() => { inputRef.current?.focus(); }, []);
 
-  // Real people search is async — debounce it lightly.
+  // Souls + posts + events are searched server-side (whole corpus, not just the loaded feed).
+  // Debounced together. Scenes + codex stay client-side (small fixed data sets).
   useEffect(() => {
     const query = q.trim();
-    if (!query) { setUserResults([]); setUserError(false); return; }
+    if (!query) { setUserResults([]); setUserError(false); setServerPosts([]); setServerEvents([]); return; }
     let on = true;
     const t = setTimeout(() => {
       searchProfiles(query)
         .then(rows => { if (on) { setUserResults(rows); setUserError(false); } })
         .catch(() => { if (on) { setUserResults([]); setUserError(true); } });
+      searchPosts(query).then(rows => { if (on) setServerPosts(rows); }).catch(() => { if (on) setServerPosts([]); });
+      searchEvents(query).then(rows => { if (on) setServerEvents(rows); }).catch(() => { if (on) setServerEvents([]); });
     }, 180);
     return () => { on = false; clearTimeout(t); };
   }, [q]);
@@ -32,13 +38,18 @@ export function SearchOverlay({ posts = [], events = [], onClose, onOpenPost, on
 
     const matches = (s) => (s || '').toLowerCase().includes(query);
 
+    // Prefer server results; fall back to the loaded feed/events if the RPC is unavailable
+    // (e.g. before migration 0063 is applied) so search never regresses.
+    const clientPosts = posts.filter(p => matches(p.body) || matches(p.user) || matches(p.community));
+    const clientEvents = (events || []).filter(e => matches(e.name) || matches(e.venue) || matches(e.neighborhood) || (e.tags || []).some(t => matches(t)));
+
     return {
-      posts: posts.filter(p => matches(p.body) || matches(p.user) || matches(p.community)).slice(0, 8),
+      posts: (serverPosts.length ? serverPosts : clientPosts).slice(0, 12),
       scenes: COMMUNITIES.filter(c => matches(c.name) || matches(c.desc)).slice(0, 6),
-      events: (events || []).filter(e => matches(e.name) || matches(e.venue) || matches(e.neighborhood) || (e.tags || []).some(t => matches(t))).slice(0, 6),
+      events: (serverEvents.length ? serverEvents : clientEvents).slice(0, 8),
       codex: (CODEX || []).filter(c => matches(c.term) || matches(c.def)).slice(0, 6),
     };
-  }, [q, posts, events]);
+  }, [q, posts, events, serverPosts, serverEvents]);
 
   const totalCount = (results ? Object.values(results).reduce((s, arr) => s + arr.length, 0) : 0) + userResults.length;
 

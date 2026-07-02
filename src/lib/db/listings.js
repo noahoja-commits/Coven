@@ -62,3 +62,10 @@ export async function deleteListing(id) {
   const { error } = await supabase.from('listings').delete().eq('id', id);
   if (error) throw error;
 }
+
+// Mark your listing sold — reuses the existing status column; the listings_feed view filters
+// status='active', so a sold item simply leaves the marketplace (kept in the table for history).
+export async function markListingSold(id) {
+  const { error } = await supabase.from('listings').update({ status: 'sold' }).eq('id', id);
+  if (error) throw error;
+}
