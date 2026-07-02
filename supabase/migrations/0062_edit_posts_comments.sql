@@ -26,7 +26,6 @@ create policy comments_update on public.comments
 -- Re-emit feed_posts (0055 shape) + edited_at.
 create or replace view public.feed_posts as
   select p.id, p.kind, p.body, p.community, p.anonymous, p.img, p.event, p.poll, p.quoted, p.created_at,
-         p.edited_at,
          case when p.anonymous then null::uuid else p.author_id end as author_id_public,
          case when p.anonymous then 'anonymous'::text else pr.handle end as handle,
          case when p.anonymous then '✟'::text else pr.avatar end as avatar,
@@ -38,7 +37,8 @@ create or replace view public.feed_posts as
          case when p.anonymous then null::text else pr.avatar_url end as avatar_url,
          p.event_id as event_id,
          case when p.anonymous then null::uuid else p.coauthor_id end as coauthor_id,
-         case when p.anonymous then null::text else cpr.handle end as coauthor_handle
+         case when p.anonymous then null::text else cpr.handle end as coauthor_handle,
+         p.edited_at
   from public.posts p
     join public.profiles pr on pr.id = p.author_id
     left join public.profiles cpr on cpr.id = p.coauthor_id
@@ -46,7 +46,9 @@ create or replace view public.feed_posts as
     and (select count(distinct reports.reporter_id) from public.reports
          where reports.target_kind = 'post' and reports.target_id = p.id) < 3;
 
--- Re-emit post_comments (0051 shape) + edited_at.
+-- Re-emit post_comments (0051 shape) + edited_at. Drop first — adding a column to a function's
+-- RETURNS TABLE changes its return type, which create-or-replace can't do.
+drop function if exists public.post_comments(uuid);
 create or replace function public.post_comments(p_post_id uuid)
 returns table (id uuid, post_id uuid, author_id uuid, parent_id uuid, body text,
                created_at timestamptz, edited_at timestamptz, handle text, avatar text, avatar_url text, reactions jsonb)

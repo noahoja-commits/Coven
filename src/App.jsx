@@ -1265,7 +1265,10 @@ export default function App() {
 
   const editPost = (postId, body) => {
     const clean = (body || '').trim();
-    if (!clean || String(postId).startsWith('temp-')) return;
+    if (!clean) return;
+    // Guard the fresh-post race: a post created moments ago still has an optimistic temp id
+    // (no server row to PATCH). Surface it instead of silently dropping the edit.
+    if (String(postId).startsWith('temp-')) { showToast('still posting — give it a moment, then edit.', 'error'); return; }
     const snapshot = posts;
     setPosts(prev => prev.map(p => (p.id === postId ? { ...p, body: clean, edited: true } : p)));
     dbUpdatePost(postId, clean).catch(() => { setPosts(snapshot); showToast("couldn't save your edit — try again.", 'error'); });
@@ -1275,6 +1278,7 @@ export default function App() {
   const editComment = (postId, commentId, body) => {
     const clean = (body || '').trim();
     if (!clean) return;
+    if (String(commentId).startsWith('tempc-')) { showToast('still sending — give it a moment.', 'error'); return; }
     const snapshot = posts;
     setPosts(prev => prev.map(p => (p.id === postId
       ? { ...p, comments: (p.comments || []).map(c => (c.id === commentId ? { ...c, body: clean, edited: true } : c)) }
@@ -1283,6 +1287,7 @@ export default function App() {
   };
 
   const deleteComment = (postId, commentId) => {
+    if (String(commentId).startsWith('tempc-')) { showToast('still sending — give it a moment.', 'error'); return; }
     const snapshot = posts;
     setPosts(prev => prev.map(p => (p.id === postId
       ? { ...p, comments: (p.comments || []).filter(c => c.id !== commentId), baseCommentCount: Math.max(0, (p.baseCommentCount || 1) - 1) }
