@@ -180,9 +180,9 @@ function MajorArt({ id, w, h }) {
     7: ( // The Chariot — chariot, two sphinxes
       <g>
         <rect x={cx-22} y={cy-10} width={44} height={28} rx={1} {...st}/>
-        <line x1={cx-22} y1={cy-10} x2={cx-14} y2={cy-32} stroke={G} strokeWidth="1"}/>
-        <line x1={cx+22} y1={cy-10} x2={cx+14} y2={cy-32} stroke={G} strokeWidth="1"}/>
-        <line x1={cx-14} y1={cy-32} x2={cx+14} y2={cy-32} stroke={G} strokeWidth="1.2"}/>
+        <line x1={cx-22} y1={cy-10} x2={cx-14} y2={cy-32} stroke={G} strokeWidth="1"/>
+        <line x1={cx+22} y1={cy-10} x2={cx+14} y2={cy-32} stroke={G} strokeWidth="1"/>
+        <line x1={cx-14} y1={cy-32} x2={cx+14} y2={cy-32} stroke={G} strokeWidth="1.2"/>
         <circle cx={cx} cy={cy-20} r={6} {...s}/>
         <path d={`M${cx-6},${cy-24} L${cx-4},${cy-32} L${cx},${cy-28} L${cx+4},${cy-32} L${cx+6},${cy-24}`} {...st}/>
         <circle cx={cx} cy={cy+6} r={8} {...st}/>
@@ -190,7 +190,7 @@ function MajorArt({ id, w, h }) {
         <line x1={cx-16} y1={cy+26} x2={cx-14} y2={cy+18} stroke={G} strokeWidth="0.8"/>
         <circle cx={cx+18} cy={cy+30} r={6} {...st}/>
         <line x1={cx+16} y1={cy+26} x2={cx+14} y2={cy+18} stroke={G} strokeWidth="0.8"/>
-        <line x1={cx-22} y1={cy+18} x2={cx+22} y2={cy+18} stroke={G} strokeWidth="1"}/>
+        <line x1={cx-22} y1={cy+18} x2={cx+22} y2={cy+18} stroke={G} strokeWidth="1"/>
       </g>
     ),
     8: ( // Strength — woman and lion
@@ -250,26 +250,26 @@ function MajorArt({ id, w, h }) {
       <g>
         <circle cx={cx} cy={cy-28} r={6} {...s}/>
         <path d={`M${cx-7},${cy-31} L${cx-5},${cy-40} L${cx},${cy-37} L${cx+5},${cy-40} L${cx+7},${cy-31}`} {...st}/>
-        <line x1={cx} y1={cy-22} x2={cx} y2={cy+14} stroke={G} strokeWidth="1"}/>
-        <line x1={cx-12} y1={cy-10} x2={cx+12} y2={cy-10} stroke={G} strokeWidth="0.9"}/>
-        <line x1={cx-12} y1={cy-10} x2={cx-14} y2={cy+2} stroke={G} strokeWidth="0.8"}/>
-        <line x1={cx+12} y1={cy-10} x2={cx+12} y2={cy+2} stroke={G} strokeWidth="0.8"}/>
+        <line x1={cx} y1={cy-22} x2={cx} y2={cy+14} stroke={G} strokeWidth="1"/>
+        <line x1={cx-12} y1={cy-10} x2={cx+12} y2={cy-10} stroke={G} strokeWidth="0.9"/>
+        <line x1={cx-12} y1={cy-10} x2={cx-14} y2={cy+2} stroke={G} strokeWidth="0.8"/>
+        <line x1={cx+12} y1={cy-10} x2={cx+12} y2={cy+2} stroke={G} strokeWidth="0.8"/>
         <ellipse cx={cx-13} cy={cy+4} rx={5} ry={3} {...st}/>
         <ellipse cx={cx+12} cy={cy+4} rx={5} ry={3} {...st}/>
-        <line x1={cx+16} y1={cy-14} x2={cx+26} y2={cy+10} stroke={G} strokeWidth="1.3"}/>
+        <line x1={cx+16} y1={cy-14} x2={cx+26} y2={cy+10} stroke={G} strokeWidth="1.3"/>
         <polygon points={`${cx+24},${cy+10} ${cx+28},${cy+14} ${cx+20},${cy+14}`} fill={G} stroke={G} strokeWidth="0.5"/>
         <path d={`M${cx-14},${cy+14} L${cx+14},${cy+14} L${cx+10},${cy+44} L${cx-10},${cy+44} Z`} {...st}/>
       </g>
     ),
     12: ( // The Hanged Man — figure upside down on cross
       <g>
-        <line x1={cx} y1={cy-44} x2={cx} y2={cy+24} stroke={G} strokeWidth="1.3"}/>
-        <line x1={cx-20} y1={cy-32} x2={cx+20} y2={cy-32} stroke={G} strokeWidth="1.2"}/>
+        <line x1={cx} y1={cy-44} x2={cx} y2={cy+24} stroke={G} strokeWidth="1.3"/>
+        <line x1={cx-20} y1={cy-32} x2={cx+20} y2={cy-32} stroke={G} strokeWidth="1.2"/>
         <circle cx={cx} cy={cy+30} r={6} {...s}/>
-        <line x1={cx} y1={cy+24} x2={cx} y2={cy+14} stroke={G} strokeWidth="1"}/>
-        <line x1={cx-10} y1={cy+18} x2={cx+10} y2={cy+18} stroke={G} strokeWidth="0.9"}/>
-        <line x1={cx} y1={cy+14} x2={cx-10} y2={cy+2} stroke={G} strokeWidth="0.9"}/>
-        <line x1={cx} y1={cy+14} x2={cx+10} y2={cy+2} stroke={G} strokeWidth="0.9"}/>
+        <line x1={cx} y1={cy+24} x2={cx} y2={cy+14} stroke={G} strokeWidth="1"/>
+        <line x1={cx-10} y1={cy+18} x2={cx+10} y2={cy+18} stroke={G} strokeWidth="0.9"/>
+        <line x1={cx} y1={cy+14} x2={cx-10} y2={cy+2} stroke={G} strokeWidth="0.9"/>
+        <line x1={cx} y1={cy+14} x2={cx+10} y2={cy+2} stroke={G} strokeWidth="0.9"/>
         <path d={`M${cx-6},${cy+2} Q${cx-14},${cy-6} ${cx-10},${cy-14}`} {...st}/>
         <path d={`M${cx-6},${cy+2} L${cx-10},${cy-44}`} stroke="none"/>
         {[cy-44,cy-36,cy-26].map((y,k)=>(
@@ -280,15 +280,15 @@ function MajorArt({ id, w, h }) {
     13: ( // Death — skeleton, scythe, fallen figure
       <g>
         <circle cx={cx-4} cy={cy-32} r={7} {...st}/>
-        <line x1={cx-4} y1={cy-25} x2={cx-4} y2={cy-2} stroke={G} strokeWidth="1"}/>
+        <line x1={cx-4} y1={cy-25} x2={cx-4} y2={cy-2} stroke={G} strokeWidth="1"/>
         {[-3,-8,-13,-18,-23].map((y,k)=>(
           <line key={k} x1={cx-8} y1={cy+y} x2={cx} y2={cy+y} stroke={G} strokeWidth="0.7"/>
         ))}
-        <line x1={cx-4} y1={cy-2} x2={cx-14} y2={cy+18} stroke={G} strokeWidth="0.9"}/>
-        <line x1={cx-4} y1={cy-2} x2={cx+4} y2={cy+18} stroke={G} strokeWidth="0.9"}/>
-        <line x1={cx-14} y1={cy-14} x2={cx+4} y2={cy-12} stroke={G} strokeWidth="0.8"}/>
+        <line x1={cx-4} y1={cy-2} x2={cx-14} y2={cy+18} stroke={G} strokeWidth="0.9"/>
+        <line x1={cx-4} y1={cy-2} x2={cx+4} y2={cy+18} stroke={G} strokeWidth="0.9"/>
+        <line x1={cx-14} y1={cy-14} x2={cx+4} y2={cy-12} stroke={G} strokeWidth="0.8"/>
         <path d={`M${cx+6},${cy-16} Q${cx+20},${cy-8} ${cx+16},${cy+8}`} {...st}/>
-        <line x1={cx+16} y1={cy+8} x2={cx-10} y2={cy+28} stroke={G} strokeWidth="1.3"}/>
+        <line x1={cx+16} y1={cy+8} x2={cx-10} y2={cy+28} stroke={G} strokeWidth="1.3"/>
         <polygon points={`${cx-10},${cy+28} ${cx-18},${cy+22} ${cx-6},${cy+24}`} fill={G} stroke={G} strokeWidth="0.5"/>
         <ellipse cx={cx-4} cy={cy+38} rx={14} ry={4} {...st}/>
       </g>
@@ -300,8 +300,8 @@ function MajorArt({ id, w, h }) {
         <path d={`M${cx+12},${cy-20} Q${cx+24},${cy-8} ${cx+14},${cy+4}`} {...st}/>
         <path d={`M${cx-6},${cy-22} Q${cx-14},${cy-10} ${cx-8},${cy+4}`} {...st}/>
         <path d={`M${cx+6},${cy-22} Q${cx+14},${cy-10} ${cx+8},${cy+4}`} {...st}/>
-        <line x1={cx} y1={cy-21} x2={cx} y2={cy+4} stroke={G} strokeWidth="1"}/>
-        <line x1={cx-10} y1={cy-6} x2={cx+10} y2={cy-6} stroke={G} strokeWidth="0.9"}/>
+        <line x1={cx} y1={cy-21} x2={cx} y2={cy+4} stroke={G} strokeWidth="1"/>
+        <line x1={cx-10} y1={cy-6} x2={cx+10} y2={cy-6} stroke={G} strokeWidth="0.9"/>
         <rect x={cx-18} y={cy+6} width={12} height={16} rx={1} {...st}/>
         <rect x={cx+6} y={cy+6} width={12} height={16} rx={1} {...st}/>
         <path d={`M${cx-12},${cy+6} Q${cx},${cy} ${cx+12},${cy+6}`} fill="none" stroke={G} strokeWidth="0.7" strokeDasharray="2,2"/>
@@ -311,36 +311,36 @@ function MajorArt({ id, w, h }) {
     15: ( // The Devil — horned figure, two bound figures
       <g>
         <circle cx={cx} cy={cy-22} r={7} {...s}/>
-        <path d={`M${cx-7},${cy-26} L${cx-14},${cy-38} M${cx+7},${cy-26} L${cx+14},${cy-38}`} stroke={G} strokeWidth="1"}/>
-        <line x1={cx-10} y1={cy-40} x2={cx+10} y2={cy-34} stroke={G} strokeWidth="0.9"}/>
-        <line x1={cx} y1={cy-15} x2={cx} y2={cy+2} stroke={G} strokeWidth="1.1"}/>
+        <path d={`M${cx-7},${cy-26} L${cx-14},${cy-38} M${cx+7},${cy-26} L${cx+14},${cy-38}`} stroke={G} strokeWidth="1"/>
+        <line x1={cx-10} y1={cy-40} x2={cx+10} y2={cy-34} stroke={G} strokeWidth="0.9"/>
+        <line x1={cx} y1={cy-15} x2={cx} y2={cy+2} stroke={G} strokeWidth="1.1"/>
         <path d={`M${cx-10},${cy-12} Q${cx-18},${cy-2} ${cx-10},${cy+6}`} {...st}/>
         <path d={`M${cx+10},${cy-12} Q${cx+18},${cy-2} ${cx+10},${cy+6}`} {...st}/>
-        <line x1={cx-10} y1={cy+6} x2={cx+10} y2={cy+6} stroke={G} strokeWidth="0.8"}/>
+        <line x1={cx-10} y1={cy+6} x2={cx+10} y2={cy+6} stroke={G} strokeWidth="0.8"/>
         <rect x={cx-4} y={cy+2} width={8} height={18} rx={1} {...st}/>
         <circle cx={cx-16} cy={cy+22} r={4} {...st}/>
         <circle cx={cx+16} cy={cy+22} r={4} {...st}/>
-        <line x1={cx-12} y1={cy+22} x2={cx-4} y2={cy+14} stroke={G} strokeWidth="0.7"}/>
-        <line x1={cx+12} y1={cy+22} x2={cx+4} y2={cy+14} stroke={G} strokeWidth="0.7"}/>
-        <line x1={cx-16} y1={cy+26} x2={cx-14} y2={cy+40} stroke={G} strokeWidth="0.8"}/>
-        <line x1={cx+16} y1={cy+26} x2={cx+14} y2={cy+40} stroke={G} strokeWidth="0.8"}/>
-        <path d={`M${cx-16},${cy+40} L${cx+16},${cy+40}`} stroke={G} strokeWidth="0.8"}/>
+        <line x1={cx-12} y1={cy+22} x2={cx-4} y2={cy+14} stroke={G} strokeWidth="0.7"/>
+        <line x1={cx+12} y1={cy+22} x2={cx+4} y2={cy+14} stroke={G} strokeWidth="0.7"/>
+        <line x1={cx-16} y1={cy+26} x2={cx-14} y2={cy+40} stroke={G} strokeWidth="0.8"/>
+        <line x1={cx+16} y1={cy+26} x2={cx+14} y2={cy+40} stroke={G} strokeWidth="0.8"/>
+        <path d={`M${cx-16},${cy+40} L${cx+16},${cy+40}`} stroke={G} strokeWidth="0.8"/>
       </g>
     ),
     16: ( // The Tower — struck by lightning, figures falling
       <g>
         <rect x={cx-14} y={cy-30} width={28} height={52} rx={1} {...st}/>
         <polygon points={`${cx-16},${cy-30} ${cx+16},${cy-30} ${cx},${cy-44}`} {...st}/>
-        <path d={`M${cx+20},${cy-40} L${cx+10},${cy-20} L${cx+16},${cy-18} L${cx+4},${cy+2}`} stroke={G} strokeWidth="1.4"}/>
-        <line x1={cx-4} y1={cy-16} x2={cx+4} y2={cy-16} stroke={G} strokeWidth="2"}/>
+        <path d={`M${cx+20},${cy-40} L${cx+10},${cy-20} L${cx+16},${cy-18} L${cx+4},${cy+2}`} stroke={G} strokeWidth="1.4"/>
+        <line x1={cx-4} y1={cy-16} x2={cx+4} y2={cy-16} stroke={G} strokeWidth="2"/>
         <circle cx={cx-22} cy={cy+10} r={4} {...st}/>
-        <line x1={cx-22} y1={cy+6} x2={cx-18} y2={cy-10} stroke={G} strokeWidth="0.9"}/>
-        <line x1={cx-22} y1={cy+14} x2={cx-26} y2={cy+28} stroke={G} strokeWidth="0.8"}/>
+        <line x1={cx-22} y1={cy+6} x2={cx-18} y2={cy-10} stroke={G} strokeWidth="0.9"/>
+        <line x1={cx-22} y1={cy+14} x2={cx-26} y2={cy+28} stroke={G} strokeWidth="0.8"/>
         <circle cx={cx+22} cy={cy+20} r={4} {...st}/>
-        <line x1={cx+22} y1={cy+16} x2={cx+18} y2={cy} stroke={G} strokeWidth="0.9"}/>
-        <line x1={cx+22} y1={cy+24} x2={cx+28} y2={cy+38} stroke={G} strokeWidth="0.8"}/>
-        <line x1={cx-4} y1={cy-4} x2={cx+4} y2={cy+4} stroke={G} strokeWidth="0.7"}/>
-        <line x1={cx-4} y1={cy+14} x2={cx+4} y2={cy+14} stroke={G} strokeWidth="0.7"}/>
+        <line x1={cx+22} y1={cy+16} x2={cx+18} y2={cy} stroke={G} strokeWidth="0.9"/>
+        <line x1={cx+22} y1={cy+24} x2={cx+28} y2={cy+38} stroke={G} strokeWidth="0.8"/>
+        <line x1={cx-4} y1={cy-4} x2={cx+4} y2={cy+4} stroke={G} strokeWidth="0.7"/>
+        <line x1={cx-4} y1={cy+14} x2={cx+4} y2={cy+14} stroke={G} strokeWidth="0.7"/>
       </g>
     ),
     17: ( // The Star — kneeling figure, stars, water
@@ -350,10 +350,10 @@ function MajorArt({ id, w, h }) {
         ))}
         <circle cx={cx} cy={cy-40} r={7} {...s}/>
         <circle cx={cx-16} cy={cy+16} r={5} {...s}/>
-        <line x1={cx-16} y1={cy+21} x2={cx-16} y2={cy+38} stroke={G} strokeWidth="1"}/>
-        <line x1={cx-22} y1={cy+28} x2={cx-10} y2={cy+28} stroke={G} strokeWidth="0.8"}/>
-        <line x1={cx-16} y1={cy+38} x2={cx-24} y2={cy+46} stroke={G} strokeWidth="0.8"}/>
-        <line x1={cx-16} y1={cy+38} x2={cx-8} y2={cy+46} stroke={G} strokeWidth="0.8"}/>
+        <line x1={cx-16} y1={cy+21} x2={cx-16} y2={cy+38} stroke={G} strokeWidth="1"/>
+        <line x1={cx-22} y1={cy+28} x2={cx-10} y2={cy+28} stroke={G} strokeWidth="0.8"/>
+        <line x1={cx-16} y1={cy+38} x2={cx-24} y2={cy+46} stroke={G} strokeWidth="0.8"/>
+        <line x1={cx-16} y1={cy+38} x2={cx-8} y2={cy+46} stroke={G} strokeWidth="0.8"/>
         <rect x={cx-4} y={cy+20} width={8} height={10} rx={1} {...st}/>
         <path d={`M${cx},${cy+30} Q${cx+6},${cy+36} ${cx},${cy+44}`} {...st}/>
         <path d={`M${cx+4},${cy+34} Q${cx+14},${cy+38} ${cx+8},${cy+46}`} {...st}/>
@@ -374,9 +374,9 @@ function MajorArt({ id, w, h }) {
         <rect x={cx+18} y={cy-4} width={10} height={28} {...st}/>
         <polygon points={`${cx+18},${cy-4} ${cx+28},${cy-4} ${cx+23},${cy-14}`} {...st}/>
         <ellipse cx={cx-14} cy={cy+22} rx={6} ry={8} {...st}/>
-        <line x1={cx-14} y1={cy+14} x2={cx-16} y2={cy+6} stroke={G} strokeWidth="0.9"}/>
+        <line x1={cx-14} y1={cy+14} x2={cx-16} y2={cy+6} stroke={G} strokeWidth="0.9"/>
         <ellipse cx={cx+14} cy={cy+22} rx={6} ry={8} {...st}/>
-        <line x1={cx+14} y1={cy+14} x2={cx+16} y2={cy+6} stroke={G} strokeWidth="0.9"}/>
+        <line x1={cx+14} y1={cy+14} x2={cx+16} y2={cy+6} stroke={G} strokeWidth="0.9"/>
         <path d={`M${cx-4},${cy+38} Q${cx},${cy+30} ${cx+4},${cy+38}`} {...st}/>
         <circle cx={cx} cy={cy+42} r={3} {...st}/>
         <path d={`M${cx-28},${cy+44} L${cx+28},${cy+44}`} {...st}/>
@@ -392,13 +392,13 @@ function MajorArt({ id, w, h }) {
             stroke={G} strokeWidth={a%60===0?1.2:0.7}/>
         ))}
         <circle cx={cx-4} cy={cy+10} r={5} {...s}/>
-        <line x1={cx-4} y1={cy+15} x2={cx-4} y2={cy+30} stroke={G} strokeWidth="0.9"}/>
-        <line x1={cx-12} y1={cy+20} x2={cx+4} y2={cy+20} stroke={G} strokeWidth="0.8"}/>
+        <line x1={cx-4} y1={cy+15} x2={cx-4} y2={cy+30} stroke={G} strokeWidth="0.9"/>
+        <line x1={cx-12} y1={cy+20} x2={cx+4} y2={cy+20} stroke={G} strokeWidth="0.8"/>
         <ellipse cx={cx+6} cy={cy+34} rx={14} ry={8} {...st}/>
-        <line x1={cx-4} y1={cy+30} x2={cx+2} y2={cy+28} stroke={G} strokeWidth="0.9"}/>
-        <line x1={cx-4} y1={cy+30} x2={cx-10} y2={cy+34} stroke={G} strokeWidth="0.8"}/>
-        <line x1={cx+18} y1={cy+32} x2={cx+24} y2={cy+44} stroke={G} strokeWidth="0.8"}/>
-        <line x1={cx-8} y1={cy+38} x2={cx-12} y2={cy+46} stroke={G} strokeWidth="0.8"}/>
+        <line x1={cx-4} y1={cy+30} x2={cx+2} y2={cy+28} stroke={G} strokeWidth="0.9"/>
+        <line x1={cx-4} y1={cy+30} x2={cx-10} y2={cy+34} stroke={G} strokeWidth="0.8"/>
+        <line x1={cx+18} y1={cy+32} x2={cx+24} y2={cy+44} stroke={G} strokeWidth="0.8"/>
+        <line x1={cx-8} y1={cy+38} x2={cx-12} y2={cy+46} stroke={G} strokeWidth="0.8"/>
       </g>
     ),
     20: ( // Judgement — angel with trumpet, rising figures
@@ -406,13 +406,13 @@ function MajorArt({ id, w, h }) {
         <circle cx={cx} cy={cy-36} r={7} {...st}/>
         <path d={`M${cx-8},${cy-32} Q${cx-20},${cy-20} ${cx-10},${cy-8}`} {...st}/>
         <path d={`M${cx+8},${cy-32} Q${cx+20},${cy-20} ${cx+10},${cy-8}`} {...st}/>
-        <path d={`M${cx+8},${cy-32} L${cx+26},${cy-24}`} stroke={G} strokeWidth="1.3"}/>
+        <path d={`M${cx+8},${cy-32} L${cx+26},${cy-24}`} stroke={G} strokeWidth="1.3"/>
         <ellipse cx={cx+28} cy={cy-22} rx={4} ry={8} style={{transform:`rotate(-30deg)`,transformOrigin:`${cx+28}px ${cy-22}px`}} {...st}/>
         <circle cx={cx-16} cy={cy+14} r={5} {...st}/>
-        <line x1={cx-16} y1={cy+8} x2={cx-16} y2={cy-4} stroke={G} strokeWidth="0.9"}/>
+        <line x1={cx-16} y1={cy+8} x2={cx-16} y2={cy-4} stroke={G} strokeWidth="0.9"/>
         <rect x={cx-24} y={cy+18} width={16} height={24} rx={1} {...st}/>
         <circle cx={cx+4} cy={cy+14} r={5} {...st}/>
-        <line x1={cx+4} y1={cy+8} x2={cx+4} y2={cy-4} stroke={G} strokeWidth="0.9"}/>
+        <line x1={cx+4} y1={cy+8} x2={cx+4} y2={cy-4} stroke={G} strokeWidth="0.9"/>
         <rect x={cx-4} y={cy+18} width={16} height={24} rx={1} {...st}/>
         <path d={`M${cx-28},${cy+44} Q${cx},${cy+38} ${cx+28},${cy+44}`} {...st}/>
       </g>
@@ -421,8 +421,8 @@ function MajorArt({ id, w, h }) {
       <g>
         <ellipse cx={cx} cy={cy} rx={22} ry={34} {...st}/>
         <circle cx={cx} cy={cy} r={8} {...s}/>
-        <line x1={cx} y1={cy-8} x2={cx} y2={cy-34} stroke={G} strokeWidth="0.7"}/>
-        <line x1={cx} y1={cy+8} x2={cx} y2={cy+34} stroke={G} strokeWidth="0.7"}/>
+        <line x1={cx} y1={cy-8} x2={cx} y2={cy-34} stroke={G} strokeWidth="0.7"/>
+        <line x1={cx} y1={cy+8} x2={cx} y2={cy+34} stroke={G} strokeWidth="0.7"/>
         {[0,40,80,120,160,200,240,280,320].map(a=>(
           <ellipse key={a} cx={cx+Math.cos(a*Math.PI/180)*22} cy={cy+Math.sin(a*Math.PI/180)*34}
             rx={3} ry={5} style={{transform:`rotate(${a+90}deg)`,transformOrigin:`${cx+Math.cos(a*Math.PI/180)*22}px ${cy+Math.sin(a*Math.PI/180)*34}px`}}
@@ -522,9 +522,9 @@ function PipArt({ count, suit, w, h }) {
 const RANK_TO_COUNT = { ace:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9, ten:10 };
 const COURT_RANKS = ['page','knight','queen','king'];
 
-function CardFace({ card, reversed, large = false }) {
-  const w = large ? 252 : 192;
-  const h = large ? 418 : 318;
+function CardFace({ card, reversed, large = false, w: wProp, h: hProp }) {
+  const w = wProp ?? (large ? 252 : 192);
+  const h = hProp ?? (large ? 418 : 318);
 
   const isMajor = card.type === 'major';
   const isCourt = COURT_RANKS.includes(card.rank);
@@ -799,11 +799,7 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
                 {spread.map((s, i) => (
                   <div key={i} className="flex flex-col items-center">
                     <div className="text-[9px] uppercase tracking-[0.3em] text-[#9E2A33]/60 mb-1" style={F.scriptureSC}>· {['past','present','future'][i]} ·</div>
-                    <div style={{ overflow: 'hidden', width: 90, height: 150 }}>
-                      <div style={{ transform: 'scale(0.469)', transformOrigin: 'top left', width: 192, height: 318, pointerEvents: 'none' }}>
-                        <CardFace card={s.card} reversed={s.reversed}/>
-                      </div>
-                    </div>
+                    <CardFace card={s.card} reversed={s.reversed} w={90} h={150}/>
                   </div>
                 ))}
               </div>
@@ -827,11 +823,8 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
         <div className="relative px-4 pt-6 pb-12 grid grid-cols-3 gap-3">
           {TAROT_DECK.map(card => (
             <button key={card.id} onClick={() => setBrowseCard(card)}
-              className="hover:opacity-80 transition-opacity"
-              style={{ display: 'block', overflow: 'hidden', height: 160 }}>
-              <div style={{ transform: 'scale(0.5)', transformOrigin: 'top left', width: 192, height: 318, pointerEvents: 'none' }}>
-                <CardFace card={card} reversed={false}/>
-              </div>
+              className="hover:opacity-80 transition-opacity">
+              <CardFace card={card} reversed={false} w={96} h={159}/>
             </button>
           ))}
         </div>
