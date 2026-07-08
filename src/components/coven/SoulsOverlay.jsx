@@ -21,7 +21,7 @@ export function SoulsOverlay({ meId, following = {}, onClose, onOpenUser }) {
   const filtered = allUsers.filter(u => {
     if (filter === 'following' && !following[u.handle]) return false;
     if (!q) return true;
-    return u.handle.toLowerCase().includes(q) || (u.bio || '').toLowerCase().includes(q) || u.tags.some(t => t.toLowerCase().includes(q));
+    return u.handle.toLowerCase().startsWith(q);
   });
 
   return (

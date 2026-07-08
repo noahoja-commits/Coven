@@ -78,7 +78,7 @@ export async function searchProfiles(query, { limit = 8 } = {}) {
     .from('profiles')
     .select('id, handle, avatar, avatar_url, bio, city, tags')
     .eq('is_system', false)
-    .or(`handle.ilike.%${q}%,bio.ilike.%${q}%`)
+    .ilike('handle', `${q}%`)
     .limit(limit);
   if (error) throw error;
   return data || [];
