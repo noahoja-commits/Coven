@@ -5,10 +5,19 @@ import { getProfileById } from '../lib/db/profiles';
 const AuthCtx = createContext(null);
 export function useAuth() { return useContext(AuthCtx); }
 
+const DEV_BYPASS = import.meta.env.VITE_DEV_BYPASS_AUTH === 'true';
+const DEV_USER_ID = '00000000-0000-0000-0000-000000000dev';
+const DEV_SESSION = { user: { id: DEV_USER_ID, email: 'dev@local' } };
+const DEV_PROFILE = {
+  id: DEV_USER_ID, handle: 'devuser', avatar: null, avatar_url: null,
+  bio: '', city: '', created_at: new Date().toISOString(),
+  is_system: false, pronouns: '', scenes: [], tags: [], birthday: null,
+};
+
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(null);
-  const [dbProfile, setDbProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState(DEV_BYPASS ? DEV_SESSION : null);
+  const [dbProfile, setDbProfile] = useState(DEV_BYPASS ? DEV_PROFILE : null);
+  const [loading, setLoading] = useState(!DEV_BYPASS);
   // True after the user lands via a password-recovery email link — the app then
   // shows the "set a new password" screen instead of the normal logged-in surface.
   const [recovery, setRecovery] = useState(false);
@@ -20,7 +29,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    if (!isSupabaseConfigured) { setLoading(false); return; }
+    if (DEV_BYPASS || !isSupabaseConfigured) { setLoading(false); return; }
     let active = true;
 
     (async () => {

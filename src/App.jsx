@@ -2512,6 +2512,10 @@ export default function App() {
         <SearchOverlay
           onClose={() => setShowSearch(false)}
           onOpenUser={(handle) => { setActiveUserHandle(handle); setShowSearch(false); }}
+          onOpenPost={(id) => { setActivePostComments(id); setShowSearch(false); }}
+          onOpenCommunity={(id) => { setTab('communities'); setCommunity(id); setShowSearch(false); }}
+          onOpenEvent={(id) => { setActiveEvent(id); setTab('events'); setShowSearch(false); }}
+          onOpenCodex={() => { setPortalFromMenu(false); setActivePortal('codex'); setShowSearch(false); }}
         />
       )}
       {showSettings && (
