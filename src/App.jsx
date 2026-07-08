@@ -2510,14 +2510,8 @@ export default function App() {
       )}
       {showSearch && (
         <SearchOverlay
-          posts={posts}
-          events={events}
           onClose={() => setShowSearch(false)}
-          onOpenPost={(id) => { setActivePostComments(id); setShowSearch(false); }}
           onOpenUser={(handle) => { setActiveUserHandle(handle); setShowSearch(false); }}
-          onOpenCommunity={(id) => { setTab('communities'); setCommunity(id); setShowSearch(false); }}
-          onOpenEvent={() => { setTab('events'); setShowSearch(false); }}
-          onOpenCodex={() => { setPortalFromMenu(false); setActivePortal('codex'); setShowSearch(false); }}
         />
       )}
       {showSettings && (

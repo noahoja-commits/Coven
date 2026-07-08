@@ -1,70 +1,44 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
-import { X, Search, Hash, Calendar } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { X, Search } from 'lucide-react';
 import { F } from '../../styles/fonts';
-import { COMMUNITIES } from '../../data/communities';
-import { CODEX } from '../../data/codex';
 import { searchProfiles } from '../../lib/db/profiles';
-import { searchPosts, searchEvents } from '../../lib/db/posts';
 
-export function SearchOverlay({ posts = [], events = [], onClose, onOpenPost, onOpenUser, onOpenCommunity, onOpenEvent, onOpenCodex }) {
+export function SearchOverlay({ onClose, onOpenUser }) {
   const [q, setQ] = useState('');
+  const [debouncedQ, setDebouncedQ] = useState('');
   const [userResults, setUserResults] = useState([]);
   const [userError, setUserError] = useState(false);
-  const [serverPosts, setServerPosts] = useState([]);
-  const [serverEvents, setServerEvents] = useState([]);
   const inputRef = useRef(null);
 
   useEffect(() => { inputRef.current?.focus(); }, []);
 
-  // Souls + posts + events are searched server-side (whole corpus, not just the loaded feed).
-  // Debounced together. Scenes + codex stay client-side (small fixed data sets).
   useEffect(() => {
-    const query = q.trim();
-    if (!query) { setUserResults([]); setUserError(false); setServerPosts([]); setServerEvents([]); return; }
-    let on = true;
-    const t = setTimeout(() => {
-      searchProfiles(query)
-        .then(rows => { if (on) { setUserResults(rows); setUserError(false); } })
-        .catch(() => { if (on) { setUserResults([]); setUserError(true); } });
-      searchPosts(query).then(rows => { if (on) setServerPosts(rows); }).catch(() => { if (on) setServerPosts([]); });
-      searchEvents(query).then(rows => { if (on) setServerEvents(rows); }).catch(() => { if (on) setServerEvents([]); });
-    }, 180);
-    return () => { on = false; clearTimeout(t); };
+    const t = setTimeout(() => setDebouncedQ(q), 300);
+    return () => clearTimeout(t);
   }, [q]);
 
-  const results = useMemo(() => {
-    const query = q.trim().toLowerCase();
-    if (!query) return null;
-
-    const matches = (s) => (s || '').toLowerCase().includes(query);
-
-    // Prefer server results; fall back to the loaded feed/events if the RPC is unavailable
-    // (e.g. before migration 0063 is applied) so search never regresses.
-    const clientPosts = posts.filter(p => matches(p.body) || matches(p.user) || matches(p.community));
-    const clientEvents = (events || []).filter(e => matches(e.name) || matches(e.venue) || matches(e.neighborhood) || (e.tags || []).some(t => matches(t)));
-
-    return {
-      posts: (serverPosts.length ? serverPosts : clientPosts).slice(0, 12),
-      scenes: COMMUNITIES.filter(c => matches(c.name) || matches(c.desc)).slice(0, 6),
-      events: (serverEvents.length ? serverEvents : clientEvents).slice(0, 8),
-      codex: (CODEX || []).filter(c => matches(c.term) || matches(c.def)).slice(0, 6),
-    };
-  }, [q, posts, events, serverPosts, serverEvents]);
-
-  const totalCount = (results ? Object.values(results).reduce((s, arr) => s + arr.length, 0) : 0) + userResults.length;
+  useEffect(() => {
+    const query = debouncedQ.trim();
+    if (!query) { setUserResults([]); setUserError(false); return; }
+    let on = true;
+    searchProfiles(query)
+      .then(rows => { if (on) { setUserResults(rows); setUserError(false); } })
+      .catch(() => { if (on) { setUserResults([]); setUserError(true); } });
+    return () => { on = false; };
+  }, [debouncedQ]);
 
   return (
     <div className="absolute inset-0 z-40 bg-[#0A0A0A] animate-slide-in-right flex flex-col">
       <div className="bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A] safe-pt">
         <div className="px-4 h-[60px] flex items-center gap-3">
-          <button onClick={onClose} className="tap text-[#A8A29E] hover:text-[#C9A961] p-2 -m-1"><X size={20} /></button>
+          <button onClick={onClose} className="tap text-[#A8A29E] hover:text-[#F5F1E8] p-2 -m-1"><X size={20} /></button>
           <div className="flex-1 flex items-center gap-2 bg-[#141414] border border-[#2A2A2A] px-3 py-2">
             <Search size={14} className="text-[#6B6B6B]" />
             <input
               ref={inputRef}
               value={q}
               onChange={e => setQ(e.target.value)}
-              placeholder="search everything"
+              placeholder="search souls"
               className="bg-transparent text-[#F5F1E8] text-sm outline-none flex-1 placeholder:text-[#6B6B6B]"
               style={F.ui}
             />
@@ -74,114 +48,39 @@ export function SearchOverlay({ posts = [], events = [], onClose, onOpenPost, on
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {!results && (
+        {!debouncedQ.trim() && (
           <div className="px-6 pt-12 text-center">
             <div className="text-[#3F3F3F] text-5xl mb-3" style={F.display}>·</div>
-            <p className="text-[#A8A29E] text-sm italic" style={F.serif}>
-              find a soul, a scene, a rite, a passage.
-            </p>
+            <p className="text-[#A8A29E] text-sm italic" style={F.serif}>find a soul.</p>
           </div>
         )}
 
-        {results && totalCount === 0 && (
+        {debouncedQ.trim() && userResults.length === 0 && !userError && (
           <div className="px-6 pt-12 text-center">
-            <p className="text-[#6B6B6B] text-sm italic" style={F.serif}>· nothing in the dark matches "{q}" ·</p>
+            <p className="text-[#6B6B6B] text-sm italic" style={F.serif}>· no souls match "{debouncedQ}" ·</p>
           </div>
         )}
 
-        {userError && q.trim() && (
+        {userError && debouncedQ.trim() && (
           <div className="px-4 py-2.5 text-[11px] text-[#C97a7a] italic" style={F.serif}>
             · couldn't reach the soul directory — check your connection ·
           </div>
         )}
 
         {userResults.length > 0 && (
-          <Section title="souls">
+          <div className="divide-y divide-[#1A1A1A]">
             {userResults.map(u => (
               <button key={u.id} onClick={() => { onOpenUser && onOpenUser(u.handle); onClose(); }}
                 className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-[#0F0F0F] text-left">
-                <div className="w-9 h-9 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-base shrink-0">{u.avatar}</div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[#F5F1E8] text-sm" style={F.ui}>{u.handle}</div>
-                  <div className="text-[10px] text-[#A8A29E] truncate" style={F.serif}>{u.bio}</div>
+                <div className="w-9 h-9 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-base shrink-0">
+                  {u.avatar_url ? <img src={u.avatar_url} alt="" className="w-full h-full object-cover rounded-full" /> : u.avatar}
                 </div>
+                <div className="text-[#F5F1E8] text-sm" style={F.ui}>{u.handle}</div>
               </button>
             ))}
-          </Section>
+          </div>
         )}
-
-        {results && results.posts.length > 0 && (
-          <Section title="posts">
-            {results.posts.map(p => (
-              <button key={p.id} onClick={() => { onOpenPost && onOpenPost(p.id); onClose(); }}
-                className="w-full px-4 py-2.5 flex items-start gap-3 hover:bg-[#0F0F0F] text-left">
-                <div className="w-9 h-9 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-base shrink-0">{p.avatar}</div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-[#F5F1E8] text-sm" style={F.ui}>{p.user}</span>
-                    <span className="text-[10px] text-[#6B6B6B]" style={F.mono}>{p.time}</span>
-                  </div>
-                  {p.body && <div className="text-xs text-[#A8A29E] truncate" style={F.serif}>{p.body}</div>}
-                </div>
-              </button>
-            ))}
-          </Section>
-        )}
-
-        {results && results.scenes.length > 0 && (
-          <Section title="scenes">
-            {results.scenes.map(c => (
-              <button key={c.id} onClick={() => { onOpenCommunity && onOpenCommunity(c.id); onClose(); }}
-                className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-[#0F0F0F] text-left">
-                <div className="w-9 h-9 bg-[#141414] border border-[#2A2A2A] flex items-center justify-center text-[#F5F1E8] text-base shrink-0" style={F.display}>{c.glyph}</div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[#F5F1E8] text-sm" style={F.display}>{c.name.toUpperCase()}</div>
-                  <div className="text-[10px] text-[#A8A29E] truncate" style={F.serif}>{c.desc}</div>
-                </div>
-              </button>
-            ))}
-          </Section>
-        )}
-
-        {results && results.events.length > 0 && (
-          <Section title="rites">
-            {results.events.map(e => (
-              <button key={e.id} onClick={() => { onOpenEvent && onOpenEvent(e.id); onClose(); }}
-                className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-[#0F0F0F] text-left">
-                <Calendar size={14} className="text-[#C9A961] shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="text-[#F5F1E8] text-sm" style={F.display}>{e.name}</div>
-                  <div className="text-[10px] text-[#A8A29E]" style={F.mono}>{e.venue} · {e.date}</div>
-                </div>
-              </button>
-            ))}
-          </Section>
-        )}
-
-        {results && results.codex.length > 0 && (
-          <Section title="codex">
-            {results.codex.map(c => (
-              <button key={c.term} onClick={() => { onOpenCodex && onOpenCodex(); onClose(); }}
-                className="w-full px-4 py-2.5 hover:bg-[#0F0F0F] text-left">
-                <div className="text-[#F5F1E8] text-sm" style={F.scripture}>{c.term}</div>
-                <div className="text-[11px] text-[#A8A29E] line-clamp-1" style={F.serif}>{c.def}</div>
-              </button>
-            ))}
-          </Section>
-        )}
-
       </div>
-    </div>
-  );
-}
-
-function Section({ title, children }) {
-  return (
-    <div>
-      <div className="px-4 py-2 bg-[#0F0F0F] text-[10px] uppercase tracking-[0.3em] text-[#9E2A33] sticky top-0" style={F.scriptureSC}>
-        · {title} ·
-      </div>
-      <div className="divide-y divide-[#1A1A1A]">{children}</div>
     </div>
   );
 }
