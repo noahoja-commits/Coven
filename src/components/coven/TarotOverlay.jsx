@@ -838,18 +838,10 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
         <div className="relative px-4 pt-6 pb-12 grid grid-cols-3 gap-3">
           {TAROT_DECK.map(card => (
             <button key={card.id} onClick={() => setBrowseCard(card)}
-              className="hover:opacity-90 transition-opacity"
-              style={{ aspectRatio: '2/3' }}>
-              <div style={{ width: '100%', height: '100%', background: 'linear-gradient(170deg,#1C0D08 0%,#110806 100%)', position: 'relative', boxShadow: '0 4px 16px rgba(0,0,0,0.5)' }}>
-                <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
-                  <rect x="4" y="4" width="calc(100% - 8)" height="calc(100% - 8)" rx="2" fill="none" stroke="rgba(201,169,97,0.6)" strokeWidth="0.8"/>
-                </svg>
-                <div style={{ position: 'absolute', bottom: 4, left: 0, right: 0, textAlign: 'center', fontFamily: 'Cinzel, serif', fontSize: 6, color: 'rgba(201,169,97,0.8)', letterSpacing: '0.08em', padding: '0 4px' }}>
-                  {card.name?.toUpperCase()}
-                </div>
-                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-60%)', fontFamily: 'serif', fontSize: 18, color: 'rgba(201,169,97,0.7)' }}>
-                  {SUIT_GLYPH[card.suit] || (card.type === 'major' ? ROMAN[card.id] : '✦')}
-                </div>
+              className="hover:opacity-80 transition-opacity"
+              style={{ display: 'block', overflow: 'hidden', height: 160 }}>
+              <div style={{ transform: 'scale(0.5)', transformOrigin: 'top left', width: 192, height: 318, pointerEvents: 'none' }}>
+                <CardFace card={card} reversed={false}/>
               </div>
             </button>
           ))}
