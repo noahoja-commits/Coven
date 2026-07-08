@@ -799,20 +799,9 @@ export function TarotOverlay({ onClose, history = {}, onRecord, onLogDivination,
                 {spread.map((s, i) => (
                   <div key={i} className="flex flex-col items-center">
                     <div className="text-[9px] uppercase tracking-[0.3em] text-[#9E2A33]/60 mb-1" style={F.scriptureSC}>· {['past','present','future'][i]} ·</div>
-                    <div style={{ transform: s.reversed ? 'rotate(180deg)' : 'none' }}>
-                      <div style={{ width: 90, height: 135, background: 'linear-gradient(170deg,#1C0D08 0%,#110806 100%)', position: 'relative', boxShadow: '0 4px 16px rgba(0,0,0,0.6)' }}>
-                        <svg style={{ position: 'absolute', inset: 0, width: 90, height: 135 }}>
-                          <rect x={5} y={5} width={80} height={125} rx={2} fill="none" stroke={G} strokeWidth="1"/>
-                          <rect x={9} y={9} width={72} height={117} rx={1} fill="none" stroke={G2} strokeWidth="0.6"/>
-                        </svg>
-                        <svg style={{ position: 'absolute', inset: 0 }}>
-                          {s.card.type === 'major' && <MajorArt id={s.card.id} w={90} h={135}/>}
-                          {s.card.type !== 'major' && COURT_RANKS.includes(s.card.rank) && <CourtArt rank={s.card.rank} suit={s.card.suit} w={90} h={135}/>}
-                          {s.card.type !== 'major' && !COURT_RANKS.includes(s.card.rank) && RANK_TO_COUNT[s.card.rank] && <PipArt count={RANK_TO_COUNT[s.card.rank]} suit={s.card.suit} w={90} h={135}/>}
-                        </svg>
-                        <div style={{ position: 'absolute', bottom: 4, left: 0, right: 0, textAlign: 'center', fontFamily: 'Cinzel, serif', fontSize: 6, color: 'rgba(201,169,97,0.8)', letterSpacing: '0.1em' }}>
-                          {s.card.name?.toUpperCase()}
-                        </div>
+                    <div style={{ overflow: 'hidden', width: 90, height: 150 }}>
+                      <div style={{ transform: 'scale(0.469)', transformOrigin: 'top left', width: 192, height: 318, pointerEvents: 'none' }}>
+                        <CardFace card={s.card} reversed={s.reversed}/>
                       </div>
                     </div>
                   </div>
