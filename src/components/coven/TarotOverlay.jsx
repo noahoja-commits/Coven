@@ -548,13 +548,13 @@ function CardFace({ card, reversed, large = false }) {
       {/* Crosshatch texture */}
       <svg className="absolute inset-0 pointer-events-none opacity-[0.06]" width={w} height={h}>
         <defs>
-          <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse">
+          <pattern id={`hatch-${card.id}`} width="6" height="6" patternUnits="userSpaceOnUse">
             <line x1="0" y1="6" x2="6" y2="0" stroke="#C9A961" strokeWidth="0.4"/>
             <line x1="-1" y1="1" x2="1" y2="-1" stroke="#C9A961" strokeWidth="0.4"/>
             <line x1="5" y1="7" x2="7" y2="5" stroke="#C9A961" strokeWidth="0.4"/>
           </pattern>
         </defs>
-        <rect width={w} height={h} fill="url(#hatch)"/>
+        <rect width={w} height={h} fill={`url(#hatch-${card.id})`}/>
       </svg>
 
       {/* Ornate border */}
