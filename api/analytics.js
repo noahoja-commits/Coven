@@ -3,6 +3,7 @@
 // top posts, engagement, and activity timeline.
 import { createClient } from '@supabase/supabase-js';
 import { rateLimit } from '../lib/ratelimit.js';
+import { verifyUser } from './_auth.js';
 
 // Per-instance short-TTL cache: this endpoint runs ~15 DB round-trips, and a user
 // refreshing their dashboard would otherwise re-run all of them each time. 60s is plenty
@@ -11,22 +12,12 @@ const cache = new Map(); // `${userId}:${days}` -> { at: ms, payload }
 const CACHE_TTL = 60000;
 
 export default async function handler(req, res) {
-  // Auth: requires a valid user session token
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    res.status(401).json({ error: 'unauthorized' }); return;
-  }
-
   const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false },
-    global: { headers: { Authorization: authHeader } },
   });
 
-  // Verify session and get user
-  const { data: { user }, error: authError } = await supa.auth.getUser();
-  if (authError || !user) {
-    res.status(401).json({ error: 'unauthorized' }); return;
-  }
+  const user = await verifyUser(req, supa);
+  if (!user) { res.status(401).json({ error: 'unauthorized' }); return; }
 
   const userId = user.id;
   const days = Math.min(parseInt(req.query?.days || '30', 10), 90);

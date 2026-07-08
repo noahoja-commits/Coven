@@ -5,7 +5,7 @@ import { getProfileById } from '../lib/db/profiles';
 const AuthCtx = createContext(null);
 export function useAuth() { return useContext(AuthCtx); }
 
-const DEV_BYPASS = import.meta.env.VITE_DEV_BYPASS_AUTH === 'true';
+const DEV_BYPASS = import.meta.env.VITE_DEV_BYPASS_AUTH === 'true' && import.meta.env.DEV;
 const DEV_USER_ID = '00000000-0000-0000-0000-000000000dev';
 const DEV_SESSION = { user: { id: DEV_USER_ID, email: 'dev@local' } };
 const DEV_PROFILE = {
