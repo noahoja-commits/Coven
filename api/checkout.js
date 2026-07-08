@@ -62,6 +62,11 @@ export default async function handler(req, res) {
         },
       }],
       metadata: { event_id: ev.id, buyer_id: buyerId || '' },
+      // Cap how long an open Checkout tab stays payable (Stripe default is 24h, min is 30m).
+      // The capacity count above is only a first pass — a stale tab left open could still pay
+      // long after sellout; a short window shrinks that oversell exposure. The webhook is the
+      // authoritative capacity gate and refunds anything that lands beyond capacity.
+      expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
       success_url: `${origin}/?ticket=success&event=${ev.id}`,
       cancel_url: `${origin}/?ticket=cancel`,
     };

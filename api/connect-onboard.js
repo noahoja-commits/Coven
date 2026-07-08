@@ -29,11 +29,22 @@ export default async function handler(req, res) {
         capabilities: { card_payments: { requested: true }, transfers: { requested: true } },
         metadata: { user_id: userId },
       });
-      acctId = acct.id;
-      await supa.from('payout_accounts').upsert(
-        { user_id: userId, stripe_account_id: acctId, payouts_enabled: false, updated_at: new Date().toISOString() },
-        { onConflict: 'user_id' },
-      );
+      // Insert (not upsert) so the user_id PRIMARY KEY decides a single winner under a race:
+      // two concurrent first-time onboards would otherwise both create a Stripe account and the
+      // later upsert would overwrite the first, orphaning a live Connect account. On a unique
+      // violation we lost the race — delete our orphan account and adopt the winner's id so both
+      // requests and the account.updated webhook converge on one account.
+      const { error: insErr } = await supa.from('payout_accounts')
+        .insert({ user_id: userId, stripe_account_id: acct.id, payouts_enabled: false, updated_at: new Date().toISOString() });
+      if (insErr) {
+        try { await stripe.accounts.del(acct.id); } catch { /* best effort — orphan cleanup */ }
+        const { data: canon } = await supa
+          .from('payout_accounts').select('stripe_account_id').eq('user_id', userId).maybeSingle();
+        acctId = canon?.stripe_account_id;
+        if (!acctId) throw new Error('payout account race could not resolve');
+      } else {
+        acctId = acct.id;
+      }
     }
 
     const origin = req.headers.origin || `https://${req.headers.host}`;

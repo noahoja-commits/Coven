@@ -21,9 +21,17 @@ if (typeof window !== 'undefined') {
 // new code applies immediately — no manual cache clear / reinstall. The PWA is
 // configured with registerType:'autoUpdate' (skipWaiting + clientsClaim), so a
 // new SW claims the page and fires 'controllerchange'. Guard against reload loops.
+//
+// IMPORTANT: on a first-ever visit the page starts UNCONTROLLED, and the freshly
+// installed SW's clientsClaim also fires 'controllerchange' (null → SW). That is an
+// install, not a deploy — reloading there would wipe in-progress input (e.g. the signup
+// form) and any deep-link intent App.jsx already consumed. So skip that first,
+// install-time takeover and only reload on genuine later updates.
 if ('serviceWorker' in navigator) {
   let reloaded = false;
+  let controlled = !!navigator.serviceWorker.controller; // false on a first, uncontrolled visit
   navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!controlled) { controlled = true; return; } // initial install claim — not a deploy
     if (reloaded) return;
     reloaded = true;
     window.location.reload();
