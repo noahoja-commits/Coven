@@ -86,9 +86,42 @@ export async function createEvent(data, host) {
     capacity: data.capacity ?? null,
     age_restriction: (data.ageRestriction === '18' || data.ageRestriction === '21') ? data.ageRestriction : null,
   };
-  const { data: row, error } = await supabase.from('events').insert(insert).select().single();
+  // Map pin (migration 0064). Only sent when the host actually pinned a location.
+  if (typeof data.lat === 'number' && typeof data.lng === 'number') { insert.lat = data.lat; insert.lng = data.lng; }
+  let { data: row, error } = await supabase.from('events').insert(insert).select().single();
+  // Resilience if deployed before 0064 lands: if the lat/lng columns don't exist yet (42703),
+  // retry without them so event creation never breaks on deploy ordering.
+  if (error && error.code === '42703' && ('lat' in insert || 'lng' in insert)) {
+    delete insert.lat; delete insert.lng;
+    ({ data: row, error } = await supabase.from('events').insert(insert).select().single());
+  }
   if (error) throw error;
   return hydrateEvent({ ...row, host_handle: host.handle, host_avatar: host.avatar, going: 0 }, new Set(), host.id);
+}
+
+// Events with map coordinates that pass the anti-spam gate (migration 0064's event_map view:
+// upcoming/ongoing, host account >24h old, under the report threshold, capped per host).
+// Returns lightweight map-marker shapes. Degrades to [] pre-migration (view absent) so the
+// map still renders the soul pins.
+export async function fetchEventMap() {
+  const { data, error } = await supabase
+    .from('event_map')
+    .select('id, name, venue, neighborhood, lat, lng, event_date, event_time, ticketed, age_restriction, host_handle')
+    .limit(200);
+  if (error) return [];
+  return (data || []).map(r => ({
+    id: r.id,
+    name: r.name,
+    venue: r.venue || '',
+    neighborhood: r.neighborhood || '',
+    lat: r.lat,
+    lng: r.lng,
+    date: fmtDate(r.event_date),
+    time: r.event_time || '',
+    ticketed: !!r.ticketed,
+    ageRestriction: (r.age_restriction === '18' || r.age_restriction === '21') ? r.age_restriction : 'all',
+    host: r.host_handle,
+  }));
 }
 
 export async function deleteEvent(eventId) {

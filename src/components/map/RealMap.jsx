@@ -46,11 +46,21 @@ function markerEl({ glyph, avatarUrl, mine }) {
   return el;
 }
 
+// Events read as a distinct marker (gold rounded-square ◈) so they never blur with the
+// circular soul pins. Tap opens the rite.
+function eventMarkerEl({ name }) {
+  const el = document.createElement('div');
+  el.style.cssText = 'width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:15px;background:#0A0A0A;border:2px solid #C9A961;color:#C9A961;box-shadow:0 0 12px rgba(201,169,97,0.55);cursor:pointer;';
+  el.textContent = '◈';
+  if (name) el.title = name;
+  return el;
+}
+
 // The living map. It ALWAYS renders the tiles immediately at a sensible default center and
 // never blocks on geolocation — your location is requested in parallel and the map flies to it
 // when (if) it arrives. You can always SEE the map; sharing only decides whether you appear ON it
 // (your own pin + privacy circle). A load failsafe guarantees it never sits on "summoning…".
-export default function RealMap({ nearby = [], tonightStatus, ghost = false, onOpenUser, onOpenTonightStatus }) {
+export default function RealMap({ nearby = [], events = [], tonightStatus, ghost = false, onOpenUser, onOpenTonightStatus, onOpenEvent }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef([]);
@@ -146,7 +156,14 @@ export default function RealMap({ nearby = [], tonightStatus, ghost = false, onO
       el.addEventListener('click', () => onOpenUser && onOpenUser(p.handle));
       markersRef.current.push(new maplibregl.Marker({ element: el }).setLngLat([p.fuzzLng, p.fuzzLat]).addTo(map));
     });
-  }, [state, nearby, sharing, fuzzM, onOpenUser, located]);
+    // Event pins (gated by the event_map view's anti-spam rules) → tap opens the rite.
+    events.forEach(ev => {
+      if (!Number.isFinite(ev.lat) || !Number.isFinite(ev.lng)) return;
+      const el = eventMarkerEl({ name: ev.name });
+      el.addEventListener('click', () => onOpenEvent && onOpenEvent(ev.id));
+      markersRef.current.push(new maplibregl.Marker({ element: el }).setLngLat([ev.lng, ev.lat]).addTo(map));
+    });
+  }, [state, nearby, events, sharing, fuzzM, onOpenUser, onOpenEvent, located]);
 
   // When sharing turns on and we don't yet have a fix (permission was granted just now via the
   // share flow, after the map already mounted), locate silently so the user's own pin + privacy

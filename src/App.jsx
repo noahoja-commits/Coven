@@ -96,7 +96,7 @@ import { AgeGate } from './components/shared/AgeGate';
 import { SettingsScreen, DEFAULT_SETTINGS } from './components/settings/SettingsScreen';
 
 import { COMMUNITIES } from './data/communities';
-import { fetchEvents, createEvent, toggleEventRsvp as dbToggleRsvp, fetchEventAttendees, deleteEvent as dbDeleteEvent, joinWaitlist, leaveWaitlist, fetchWaitlist } from './lib/db/events';
+import { fetchEvents, fetchEventMap, createEvent, toggleEventRsvp as dbToggleRsvp, fetchEventAttendees, deleteEvent as dbDeleteEvent, joinWaitlist, leaveWaitlist, fetchWaitlist } from './lib/db/events';
 import { CommentsOverlay } from './components/feed/CommentsOverlay';
 import { QuoteModal } from './components/feed/QuoteModal';
 import { VespersArchiveModal } from './components/feed/VespersArchiveModal';
@@ -250,6 +250,7 @@ export default function App() {
   const [eventRecaps, setEventRecaps] = useState([]); // recap posts for the open event
   const [eventRsvp, setEventRsvp] = useState({});
   const [events, setEvents] = useState([]);
+  const [eventsOnMap, setEventsOnMap] = useState([]); // events with coords that pass the map anti-spam gate
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [activeEventAttendees, setActiveEventAttendees] = useState([]);
   const [eventWaitlist, setEventWaitlist] = useState({ count: 0, mine: false });
@@ -452,6 +453,7 @@ export default function App() {
       followIdByHandle.current = idByHandle;
       setFollowingPeople(people || []);
     }).catch(() => {});
+    fetchEventMap().then(m => { if (active) setEventsOnMap(m); }).catch(() => {});
     fetchEvents(meId).then(({ events, rsvp }) => {
       if (!active) return;
       setEvents(events);
@@ -1273,6 +1275,8 @@ export default function App() {
       const saved = await createEvent(data, { id: meId, handle: meHandle, avatar: meAvatar });
       setEvents(prev => [saved, ...prev]);
       logActivity({ kind: 'event', glyph: '◈', label: 'summoned a rite', detail: data.name });
+      // Refresh the map pins so a just-created event with a location appears immediately.
+      if (data.lat != null && data.lng != null) fetchEventMap().then(setEventsOnMap).catch(() => {});
     } catch (e) {
       showToast("couldn't create the rite — try again.", 'error');
       throw e; // let the modal keep itself open so the user doesn't lose their input
@@ -2073,8 +2077,10 @@ export default function App() {
           ghost={settings.ghostMode}
           pins={tonightPins.filter(p => p.userId !== meId && !blockedIds.has(p.userId))}
           nearby={nearby.filter(n => !blockedIds.has(n.userId))}
+          events={eventsOnMap}
           onOpenUser={(h) => setActiveUserHandle(h)}
           onOpenTonightStatus={() => setShowTonightModal(true)}
+          onOpenEvent={(id) => setActiveEvent(id)}
           festivalEvent={festivalEvent && exitedFestivalId === festivalEvent.id ? festivalEvent : null}
           onEnterFestival={() => setExitedFestivalId(null)}
         />
