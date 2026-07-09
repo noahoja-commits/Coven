@@ -17,7 +17,7 @@ function hashStr(s) {
 const areaKey = (pin) => (pin.neighborhood || pin.city || '').trim().toLowerCase();
 const areaLabel = (pin) => (pin.neighborhood || pin.city || 'somewhere unspoken');
 
-export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = [], onOpenUser, onOpenTonightStatus, festivalEvent = null, onEnterFestival }) {
+export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = [], events = [], onOpenUser, onOpenTonightStatus, onOpenEvent, festivalEvent = null, onEnterFestival }) {
   const [view, setView] = useState('real'); // 'real' (the living map) | 'list' (by area)
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState('active'); // 'active' | 'az'
@@ -86,7 +86,7 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = []
       {view === 'real' ? (
         <ErrorBoundary>
           <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-[#6B6B6B] text-xs bg-[#070708]" style={F.ui}>summoning the map…</div>}>
-            <RealMap nearby={nearby} tonightStatus={tonightStatus} ghost={ghost} onOpenUser={onOpenUser} onOpenTonightStatus={onOpenTonightStatus} />
+            <RealMap nearby={nearby} events={events} tonightStatus={tonightStatus} ghost={ghost} onOpenUser={onOpenUser} onOpenTonightStatus={onOpenTonightStatus} onOpenEvent={onOpenEvent} />
           </Suspense>
         </ErrorBoundary>
       ) : (
