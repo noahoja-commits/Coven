@@ -162,6 +162,34 @@ export async function createPost({ body, community, anonymous, poll, kind, img, 
   };
 }
 
+// A single post by id, hydrated to the same shape as the feed — for opening comments or a
+// deep link on a post that isn't in the loaded feed page (a notification tap, a search
+// result, a hashtag-feed item, or a ?post= share link). Returns null if it's gone/hidden.
+export async function fetchPostById(postId, myId) {
+  const { data, error } = await supabase.from('feed_posts').select('*').eq('id', postId).maybeSingle();
+  if (error || !data) return null;
+  const myReactionSet = new Set();
+  if (myId) {
+    const { data: rx } = await supabase
+      .from('reactions').select('post_id, kind').eq('user_id', myId).eq('post_id', postId);
+    (rx || []).forEach(r => myReactionSet.add(`${r.post_id}:${r.kind}`));
+  }
+  const post = hydratePost(data, myReactionSet, myId);
+  if (post.poll) {
+    const [{ data: tallies }, { data: myVotes }] = await Promise.all([
+      supabase.from('poll_tallies').select('option_id, votes').eq('post_id', postId),
+      myId ? supabase.from('poll_votes').select('option_id').eq('user_id', myId).eq('post_id', postId) : Promise.resolve({ data: [] }),
+    ]);
+    const tally = {}; (tallies || []).forEach(t => { tally[t.option_id] = t.votes; });
+    post.poll = {
+      ...post.poll,
+      myVote: (myVotes && myVotes[0]?.option_id) || null,
+      options: post.poll.options.map(o => ({ ...o, votes: tally[o.id] || 0 })),
+    };
+  }
+  return post;
+}
+
 // Recap posts linked to an event (newest first). Returns [] gracefully pre-migration.
 export async function fetchEventRecaps(eventId, myId) {
   const { data, error } = await supabase

@@ -20,7 +20,11 @@ export default async function handler(req, res) {
   if (!user) { res.status(401).json({ error: 'unauthorized' }); return; }
 
   const userId = user.id;
-  const days = Math.min(parseInt(req.query?.days || '30', 10), 90);
+  // Clamp to [1, 90]. A non-numeric ?days (e.g. "abc") yields NaN, and NaN flows into
+  // `new Date(Date.now() - NaN * 86400000)` → RangeError → the catch below used to echo the
+  // raw error to the client. A negative/tiny value also multiplied the per-user cache key space.
+  const parsedDays = parseInt(req.query?.days, 10);
+  const days = Number.isFinite(parsedDays) ? Math.min(Math.max(parsedDays, 1), 90) : 30;
 
   if (!rateLimit(`analytics:${userId}`, { limit: 20, windowMs: 60000 })) {
     res.status(429).json({ error: 'too many requests — try again in a moment' }); return;
@@ -83,10 +87,16 @@ export default async function handler(req, res) {
       topPosts,
     };
     cache.set(cacheKey, { at: Date.now(), payload });
+    // Opportunistic eviction so a warm instance seeing many users/day-values doesn't grow forever.
+    if (cache.size > 500) {
+      const now = Date.now();
+      for (const [k, v] of cache) { if (now - v.at >= CACHE_TTL) cache.delete(k); }
+    }
     res.status(200).json(payload);
   } catch (e) {
+    // Log the detail server-side; never echo raw internal/DB error strings to the client.
     console.error('analytics', e?.message || e);
-    res.status(500).json({ error: e?.message || 'Internal error' });
+    res.status(500).json({ error: 'analytics unavailable' });
   }
 }
 

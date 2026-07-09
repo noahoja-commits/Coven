@@ -112,11 +112,14 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame, onUnravel }) {
                 private ones aren't promoted to the header chip. */}
             {(() => {
               const headline = graves.find(g => !g.private);
+              // Display-only chip: it surfaces your headline memorial's name. It is NOT a button —
+              // its old onClick opened the blank "add a grave" form, which is not what tapping a
+              // named memorial should do, and there's no single-grave view to route to.
               return headline ? (
-                <button onClick={onAddGrave} className="tap text-[10px] text-[#6B6B6B] hover:text-[#C9A961] uppercase tracking-wider flex items-center gap-1" style={F.ui}>
+                <span className="text-[10px] text-[#6B6B6B] uppercase tracking-wider flex items-center gap-1" style={F.ui} title="your headline memorial">
                   <span className="text-base">⚱</span>
                   <span>{headline.name}</span>
-                </button>
+                </span>
               ) : null;
             })()}
             <button onClick={() => shareCoven({ title: `@${profile.name} on Coven`, text: profile.bio || 'a soul in the coven', path: `?u=${profile.name}` })}
@@ -641,7 +644,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame, onUnravel }) {
                     <span className="text-[10px] text-[#6B6B6B]" style={F.mono}>{post.time}</span>
                   </div>
                   {post.body && <p className="text-[#A8A29E] text-sm mt-1 line-clamp-2" style={F.serif}>{post.body}</p>}
-                  {post.kind === 'event' && <p className="text-[#9E2A33] text-sm mt-1" style={F.display}>{post.event.name}</p>}
+                  {post.kind === 'event' && post.event && <p className="text-[#9E2A33] text-sm mt-1" style={F.display}>{post.event.name}</p>}
                 </div>
               </button>
             ))}

@@ -4,7 +4,7 @@ import { useAuth } from './auth/AuthProvider';
 import { isSupabaseConfigured } from './lib/supabase';
 import { SignInScreen } from './components/auth/SignInScreen';
 import { ResetPasswordScreen } from './components/auth/ResetPasswordScreen';
-import { fetchFeed, createPost, deletePost as dbDeletePost, updatePost as dbUpdatePost, updateComment as dbUpdateComment, deleteComment as dbDeleteComment, togglePostReaction, fetchComments, createComment, toggleCommentReaction, castPollVote, clearPollVote, fetchEventRecaps } from './lib/db/posts';
+import { fetchFeed, fetchPostById, createPost, deletePost as dbDeletePost, updatePost as dbUpdatePost, updateComment as dbUpdateComment, deleteComment as dbDeleteComment, togglePostReaction, fetchComments, createComment, toggleCommentReaction, castPollVote, clearPollVote, fetchEventRecaps } from './lib/db/posts';
 import { insertProfile, updateProfile, getProfileStats, getProfileByHandle, fetchProfiles, saveNotificationPrefs } from './lib/db/profiles';
 import { fetchFollowing, fetchFollowers, followUser, unfollowUser } from './lib/db/social';
 import { FollowListOverlay } from './components/profile/FollowListOverlay';
@@ -110,6 +110,20 @@ import { ShockHaunt } from './components/shared/ShockHaunt';
 import { primeHorror, startDread, stopDread } from './lib/horror';
 import { ShockQuickSwitch } from './components/shared/ShockQuickSwitch';
 import { ShockSparks } from './components/shared/ShockSparks';
+
+// Map a RAW notification kind → its settings category. settings.notificationKinds is keyed by
+// CATEGORY (reaction/reply/follow/dm/event/crew/digest — see SettingsScreen), but notifications
+// carry the raw kind (react/comment/rsvp/…). Without this mapping the in-app bell filter compares
+// a raw kind against category keys and silently no-ops for everything but follow/dm.
+const NOTIF_KIND_CATEGORY = {
+  react: 'reaction', story_react: 'reaction',
+  comment: 'reply',
+  follow: 'follow', mention: 'follow', coauthor: 'follow',
+  dm: 'dm',
+  rsvp: 'event', event_reminder: 'event',
+  crew_join: 'crew',
+  digest: 'digest',
+};
 
 export default function App() {
   // === AUTH ===
@@ -516,8 +530,15 @@ export default function App() {
     setCommunityPosts(null);
     fetchFeed(meId, { scope: 'everyone', community, limit: 40 })
       .then(rows => { if (active) setCommunityPosts(rows); })
-      .catch(e => { console.error('[load] scene feed failed:', e); });
+      // On error, resolve the null loading sentinel (which otherwise keeps CommunityDetail on
+      // "gathering the scene" forever) to the client-filtered global feed — the fallback this
+      // effect's own header comment promises. `posts` here is the feed captured at open time.
+      .catch(e => {
+        console.error('[load] scene feed failed:', e);
+        if (active) setCommunityPosts(posts.filter(p => community === 'general' || (p.community || 'general') === community));
+      });
     return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [community, meId]);
 
   const loadMoreFeed = () => {
@@ -822,15 +843,37 @@ export default function App() {
   };
 
   // Lazy-load a thread's comments when it opens (base count -> 0 to avoid double-count).
+  // If comments were opened for a post that isn't in the loaded feed page (a notification tap,
+  // a hashtag/search result, another user's profile grid, or a ?post= deep link), fetch the
+  // post itself first and inject it — otherwise CommentsOverlay gets post=undefined and renders
+  // blank (mirrors openRecapPost's inject-then-open). `posts` is intentionally not a dep: the
+  // membership check reads the current feed at open time; adding it would refetch on every change.
   useEffect(() => {
     if (!activePostComments || String(activePostComments).startsWith('temp-')) return;
     const pid = activePostComments;
     let active = true;
-    fetchComments(pid, meId).then(list => {
-      if (active) setPosts(prev => prev.map(p => (p.id === pid ? { ...p, comments: list, baseCommentCount: 0 } : p)));
+    const ensurePost = posts.some(p => p.id === pid)
+      ? Promise.resolve()
+      : fetchPostById(pid, meId).then(p => { if (p && active) setPosts(prev => prev.some(x => x.id === pid) ? prev : [p, ...prev]); }).catch(() => {});
+    ensurePost.then(() => fetchComments(pid, meId)).then(list => {
+      if (active && list) setPosts(prev => prev.map(p => (p.id === pid ? { ...p, comments: list, baseCommentCount: 0 } : p)));
     }).catch(() => {});
     return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activePostComments, meId]);
+
+  // Keep the pinned post resolvable on the shrine even after the feed paginates past it (or on a
+  // fresh load): if it isn't in the loaded feed, fetch + inject it so ProfileScreen's
+  // `posts.find(id && mine)` lookup doesn't come up empty and silently drop the pin.
+  useEffect(() => {
+    if (!pinnedPostId || !meId || posts.some(p => p.id === pinnedPostId)) return;
+    let active = true;
+    fetchPostById(pinnedPostId, meId).then(p => {
+      if (p && p.mine && active) setPosts(prev => prev.some(x => x.id === pinnedPostId) ? prev : [...prev, p]);
+    }).catch(() => {});
+    return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pinnedPostId, meId]);
 
   // === HANDLERS ===
   // Persist a profile-depth blob (graves/trackers/sigils/reflections) for the logged-in user.
@@ -1652,7 +1695,7 @@ export default function App() {
       openConversation(n.conversationId, { user: n.user, avatar: n.avatar });
     } else if (n.kind === 'follow' && n.user && n.user !== 'someone') {
       setActiveUserHandle(n.user);
-    } else if ((n.kind === 'react' || n.kind === 'comment' || n.kind === 'mention') && n.postId) {
+    } else if ((n.kind === 'react' || n.kind === 'comment' || n.kind === 'mention' || n.kind === 'coauthor') && n.postId) {
       setActivePostComments(n.postId);
     } else if (n.kind === 'event' || n.kind === 'rsvp') {
       setTab('events');
@@ -1754,10 +1797,12 @@ export default function App() {
     showVespersArchive || showNewGroup || showTonightModal || quoteTarget || showOddityCompose ||
     activeOddity || activePostComments || followList || activeConversation || activeUserHandle ||
     showSearch || showCrewBrowse || activeEvent || showCompose || showNotifs || showDMs || activePortal ||
-    showShockPicker || showAnalytics || activeHashtag
+    showShockPicker || showAnalytics || activeHashtag ||
+    (!seenWelcome && meId && dbProfile && profile) // first-run welcome — so Back/Escape dismisses it, not the PWA
   );
   // Close the single top-most overlay (z-order priority). Returns true if it closed one.
   const closeTopOverlay = () => {
+    if (!seenWelcome && meId && dbProfile && profile) { setSeenWelcome(true); return true; }
     if (showSigilDraw) { setShowSigilDraw(false); return true; }
     if (ticketSuccess) { setTicketSuccess(false); return true; }
     if (activeStoryIndex !== null) { setActiveStoryIndex(null); return true; }
@@ -1770,12 +1815,14 @@ export default function App() {
     if (showEditProfile) { setShowEditProfile(false); return true; }
     if (showMood) { setShowMood(false); return true; }
     if (sharePostTarget) { setSharePostTarget(null); return true; }
-    if (showSettings) { setShowSettings(false); return true; }
     if (legalEscalation) { setLegalEscalation(null); return true; }
     if (reportSheet) { setReportSheet(null); return true; }
     if (showDeleteConfirm) { setShowDeleteConfirm(false); return true; }
     if (showLegal) { setShowLegal(false); return true; }
     if (showBlocked) { setShowBlocked(false); return true; }
+    // Settings peels AFTER Blocked/Legal/Delete/Report — those open ON TOP of Settings without
+    // closing it, so Back/Escape must dismiss the visible child before the Settings behind it.
+    if (showSettings) { setShowSettings(false); return true; }
     if (showMyTickets) { setShowMyTickets(false); return true; }
     if (showReflections) { setShowReflections(false); return true; }
     if (showDreams) { setShowDreams(false); return true; }
@@ -2331,7 +2378,8 @@ export default function App() {
           notifications={notifications.filter(n => {
             const kinds = settings.notificationKinds;
             if (!kinds) return true;
-            return kinds[n.kind] !== false;
+            const cat = NOTIF_KIND_CATEGORY[n.kind];
+            return cat ? kinds[cat] !== false : true; // unknown kinds always show
           })}
           onClose={() => setShowNotifs(false)}
           onMarkAllRead={markAllNotifsRead}
@@ -2542,12 +2590,12 @@ export default function App() {
         />
       )}
       {showAnalytics && (
-        <Suspense fallback={null}>
+        <Suspense fallback={<div className="absolute inset-0 z-50 bg-[#0A0A0A] flex items-center justify-center text-[#C9A961] text-2xl animate-pulse-slow" style={F.brand}>Coven</div>}>
           <AnalyticsDashboard onClose={() => setShowAnalytics(false)} meHandle={meHandle} />
         </Suspense>
       )}
       {activeHashtag && (
-        <Suspense fallback={null}>
+        <Suspense fallback={<div className="absolute inset-0 z-50 bg-[#0A0A0A] flex items-center justify-center text-[#C9A961] text-2xl animate-pulse-slow" style={F.brand}>Coven</div>}>
           <HashtagFeed
             tag={activeHashtag}
             meId={meId}

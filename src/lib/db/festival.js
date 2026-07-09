@@ -44,13 +44,27 @@ export async function fetchVenueMap(eventId) {
 }
 
 // Replace the full pin set for an event (simplest authoring model).
+// delete + insert isn't a single transaction, so we snapshot the current pins first and
+// restore them if the insert fails after the delete already committed — otherwise a
+// transient error mid-save would silently wipe the whole map (attendees see an empty venue).
 export async function replaceVenuePins(eventId, pins) {
+  const { data: existing } = await supabase.from('venue_pins')
+    .select('kind, label, x, y').eq('event_id', eventId);
+
   const { error: delErr } = await supabase.from('venue_pins').delete().eq('event_id', eventId);
   if (delErr) throw delErr; // a failed delete would duplicate pins or leave stale ones behind
   if (!pins.length) return [];
   const rows = pins.map(p => ({ event_id: eventId, kind: p.kind, label: p.label || '', x: p.x, y: p.y }));
   const { data, error } = await supabase.from('venue_pins').insert(rows).select('id, kind, label, x, y');
-  if (error) throw error;
+  if (error) {
+    // The delete already committed — put the prior pins back so a failed save isn't data loss.
+    if (existing?.length) {
+      await supabase.from('venue_pins')
+        .insert(existing.map(p => ({ event_id: eventId, kind: p.kind, label: p.label || '', x: p.x, y: p.y })))
+        .then(() => {}, () => {});
+    }
+    throw error;
+  }
   return data || [];
 }
 

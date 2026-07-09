@@ -553,7 +553,7 @@ export function HomeScreen({
 
               {(post.kind === 'photo' || post.kind === 'video') && <div className="mb-3"><PostImage kind={post.img} /></div>}
 
-              {post.kind === 'event' && (
+              {post.kind === 'event' && post.event && (
                 <button onClick={() => onOpenEvent && onOpenEvent({ id: post.event.id, name: post.event.name })}
                   className="block w-full text-left mb-3 border border-[#2A2A2A] bg-[#0F0F0F] overflow-hidden hover:border-[#3F3F3F] transition-colors">
                   <div className="h-1.5" style={{ background: 'linear-gradient(90deg, #8B0000, #5E3B73)' }} />
@@ -562,7 +562,7 @@ export function HomeScreen({
                     <div className="text-[#F5F1E8] text-xl mb-1" style={F.display}>{post.event.name}</div>
                     <div className="text-[#A8A29E] text-sm" style={F.serif}>{post.event.venue} · <span style={F.mono}>{post.event.date}</span></div>
                     <div className="flex items-center gap-1.5 mt-3 flex-wrap">
-                      {post.event.tags.map(t => (
+                      {(post.event.tags || []).map(t => (
                         <span key={t} className="text-[10px] px-2 py-0.5 border border-[#2A2A2A] text-[#A8A29E] uppercase tracking-wider" style={F.ui}>{t}</span>
                       ))}
                     </div>

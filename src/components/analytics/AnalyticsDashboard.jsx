@@ -13,12 +13,16 @@ export function AnalyticsDashboard({ onClose, meHandle }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // Cancellation flag (matches every other fetch effect here): a stale in-flight range
+    // switch must not overwrite a newer one, and a resolve after close must not setState.
+    let on = true;
     setLoading(true);
     setError(null);
     // The api/analytics.js endpoint reads the session from the Authorization header.
     // In the browser, we need to get the current session token.
     import('../../lib/supabase').then(async ({ supabase }) => {
       const { data: { session } } = await supabase.auth.getSession();
+      if (!on) return;
       if (!session?.access_token) { setError('not signed in'); setLoading(false); return; }
 
       try {
@@ -27,12 +31,13 @@ export function AnalyticsDashboard({ onClose, meHandle }) {
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
-        setData(json);
+        if (on) setData(json);
       } catch (e) {
-        setError(e?.message || 'Failed to load analytics');
+        if (on) setError(e?.message || 'Failed to load analytics');
       }
-      setLoading(false);
+      if (on) setLoading(false);
     });
+    return () => { on = false; };
   }, [days, reload]);
 
   const maxViews = Math.max(...(data?.viewHistory || []).map(d => d.views), 1);

@@ -18,7 +18,14 @@ async function applyBoost(sub, extra = {}) {
   const ownerId = sub.metadata?.owner_id;
   if (!shopId || !ownerId) return;
   const active = sub.status === 'active' || sub.status === 'trialing';
-  const periodEnd = sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null;
+  // The current billing-period end moved from the Subscription object to its line items
+  // in Stripe API version 2025-03-31.basil (the installed SDK pins 2026-05-27.dahlia), so
+  // `sub.current_period_end` is undefined on retrieve/SDK-shaped events. Read it from the
+  // item, falling back to the top-level field for webhook payloads pinned to an older
+  // dashboard API version. Without this, periodEnd was always null and an active boost
+  // wrote boosted_until = null — the paid shop was never actually pinned.
+  const periodEndTs = sub.items?.data?.[0]?.current_period_end ?? sub.current_period_end;
+  const periodEnd = periodEndTs ? new Date(periodEndTs * 1000).toISOString() : null;
   await supa.from('store_subscriptions').upsert({
     owner_id: ownerId,
     shop_id: shopId,
@@ -37,6 +44,35 @@ async function endBoost(sub) {
     .update({ status: 'canceled', updated_at: new Date().toISOString() })
     .eq('stripe_subscription_id', sub.id);
   if (shopId) await supa.from('shops').update({ boosted_until: null }).eq('id', shopId);
+}
+
+// Authoritative oversell guard. The pre-checkout capacity count (api/checkout.js) is TOCTOU:
+// two concurrent buyers — or one stale open Checkout tab — can both pass it and both pay. So
+// the webhook is the final gate. After a ticket is minted we recount PAID tickets in creation
+// order; if THIS ticket landed beyond capacity, we refund it (reversing the transfer + fee when
+// it was a Connect destination charge). The charge.refunded handler then flips it to 'refunded'
+// so it never counts at the door. Best-effort — a refund failure must never block recording the
+// sale, and ordering by (created_at, id) means only the genuinely-overflow tickets get refunded.
+async function enforceCapacity(ticket, paymentIntentId) {
+  try {
+    if (!ticket?.event_id) return;
+    const { data: ev } = await supa.from('events').select('capacity').eq('id', ticket.event_id).maybeSingle();
+    if (!ev || ev.capacity == null) return;
+    const { data: paid } = await supa.from('tickets')
+      .select('id, created_at').eq('event_id', ticket.event_id).eq('status', 'paid')
+      .order('created_at', { ascending: true }).order('id', { ascending: true });
+    const rank = (paid || []).findIndex(t => t.id === ticket.id);
+    if (rank < 0 || rank < ev.capacity) return; // within capacity (or already gone)
+    if (!paymentIntentId) return;
+    const pi = await stripe.paymentIntents.retrieve(paymentIntentId);
+    const isConnect = !!pi.transfer_data?.destination;
+    await stripe.refunds.create(isConnect
+      ? { payment_intent: paymentIntentId, reverse_transfer: true, refund_application_fee: true }
+      : { payment_intent: paymentIntentId });
+    console.error('stripe-webhook: refunded oversold ticket', { ticket: ticket.id, event: ticket.event_id, rank, capacity: ev.capacity });
+  } catch (e) {
+    console.error('stripe-webhook: capacity enforcement failed', e.message);
+  }
 }
 
 function readRawBody(req) {
@@ -80,7 +116,8 @@ export default async function handler(req, res) {
   if (event.type === 'checkout.session.completed') {
     const s = event.data.object;
     if (s.metadata?.event_id) {
-      const { error } = await supa.from('tickets').upsert({
+      const piId = typeof s.payment_intent === 'string' ? s.payment_intent : null;
+      const { data: ticket, error } = await supa.from('tickets').upsert({
         event_id: s.metadata.event_id,
         buyer_id: s.metadata.buyer_id || null,
         buyer_email: s.customer_details?.email || null,
@@ -88,9 +125,10 @@ export default async function handler(req, res) {
         currency: s.currency || 'usd',
         status: 'paid',
         stripe_session_id: s.id,
-        stripe_payment_intent: typeof s.payment_intent === 'string' ? s.payment_intent : null,
-      }, { onConflict: 'stripe_session_id' });
+        stripe_payment_intent: piId,
+      }, { onConflict: 'stripe_session_id' }).select('id, event_id, created_at').maybeSingle();
       if (error) { res.status(500).json({ error: error.message }); return; }
+      await enforceCapacity(ticket, piId); // refund + flag anything that oversold past capacity
     } else if (s.metadata?.kind === 'boost' && s.subscription) {
       // A store-boost subscription was purchased — fetch the sub for its period end, then pin the shop.
       try {

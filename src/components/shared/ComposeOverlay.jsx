@@ -108,6 +108,13 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
     if (mediaPreview) URL.revokeObjectURL(mediaPreview);
     setMediaFile(null); setMediaPreview(null); setMediaKind(null);
   };
+  // Revoke the preview blob when it's replaced (re-picking media) or the overlay unmounts
+  // (closing via ✕ without clearing) — onPickMedia doesn't revoke the prior URL, so without
+  // this each swap/close would leak a blob for the life of the page.
+  useEffect(() => {
+    if (!mediaPreview) return undefined;
+    return () => URL.revokeObjectURL(mediaPreview);
+  }, [mediaPreview]);
 
   // Co-author search.
   useEffect(() => {
