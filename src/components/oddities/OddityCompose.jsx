@@ -69,8 +69,8 @@ export function OddityCompose({ meId, onClose, onCreate, kind = 'sale' }) {
             </div>
             <div>
               <label className="text-[10px] uppercase tracking-[0.2em] text-[#C9A961] mb-1 block" style={F.scriptureSC}>· title ·</label>
-              <input value={data.title} onChange={e => setData({ ...data, title: e.target.value })}
-                placeholder={copy.title} className="field p-3" />
+              <input value={data.title} onChange={e => setData({ ...data, title: e.target.value.slice(0, 80) })}
+                maxLength={80} placeholder={copy.title} className="field p-3" />
             </div>
             <div>
               <label className="text-[10px] uppercase tracking-[0.2em] text-[#C9A961] mb-1 block" style={F.scriptureSC}>· category ·</label>
@@ -85,7 +85,8 @@ export function OddityCompose({ meId, onClose, onCreate, kind = 'sale' }) {
           <div className="space-y-4">
             <div>
               <label className="text-[10px] uppercase tracking-[0.2em] text-[#C9A961] mb-1 block" style={F.scriptureSC}>{copy.price}</label>
-              <input type="number" value={data.price} onChange={e => setData({ ...data, price: e.target.value })}
+              <input type="number" min="0" max="1000000" value={data.price}
+                onChange={e => { const v = e.target.value; if (v === '' || parseFloat(v) >= 0) setData({ ...data, price: v.slice(0, 12) }); }}
                 placeholder="0" className="field p-3 text-2xl" style={F.mono} />
             </div>
             {/* terms + condition only make sense for a sale */}
@@ -117,14 +118,14 @@ export function OddityCompose({ meId, onClose, onCreate, kind = 'sale' }) {
           <div className="space-y-4">
             <div>
               <label className="text-[10px] uppercase tracking-[0.2em] text-[#C9A961] mb-1 block" style={F.scriptureSC}>· description ·</label>
-              <textarea value={data.description} onChange={e => setData({ ...data, description: e.target.value })}
-                placeholder="size, condition details, what's included..."
+              <textarea value={data.description} onChange={e => setData({ ...data, description: e.target.value.slice(0, 600) })}
+                maxLength={600} placeholder="size, condition details, what's included..."
                 className="field h-32 p-3 resize-none" />
             </div>
             <div>
               <label className="text-[10px] uppercase tracking-[0.2em] text-[#C9A961] mb-1 block" style={F.scriptureSC}>· the story · optional ·</label>
-              <textarea value={data.storyBehind} onChange={e => setData({ ...data, storyBehind: e.target.value })}
-                placeholder="anything to share about this piece?"
+              <textarea value={data.storyBehind} onChange={e => setData({ ...data, storyBehind: e.target.value.slice(0, 400) })}
+                maxLength={400} placeholder="anything to share about this piece?"
                 className="field h-24 p-3 resize-none italic text-[#A8A29E]" />
               <p className="text-[10px] text-[#6B6B6B] mt-1" style={F.serif}>where it came from, what it meant. helps it find the right home.</p>
             </div>

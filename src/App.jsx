@@ -111,6 +111,20 @@ import { primeHorror, startDread, stopDread } from './lib/horror';
 import { ShockQuickSwitch } from './components/shared/ShockQuickSwitch';
 import { ShockSparks } from './components/shared/ShockSparks';
 
+// Map a RAW notification kind → its settings category. settings.notificationKinds is keyed by
+// CATEGORY (reaction/reply/follow/dm/event/crew/digest — see SettingsScreen), but notifications
+// carry the raw kind (react/comment/rsvp/…). Without this mapping the in-app bell filter compares
+// a raw kind against category keys and silently no-ops for everything but follow/dm.
+const NOTIF_KIND_CATEGORY = {
+  react: 'reaction', story_react: 'reaction',
+  comment: 'reply',
+  follow: 'follow', mention: 'follow', coauthor: 'follow',
+  dm: 'dm',
+  rsvp: 'event', event_reminder: 'event',
+  crew_join: 'crew',
+  digest: 'digest',
+};
+
 export default function App() {
   // === AUTH ===
   const { loading: authLoading, session, userId, dbProfile, recovery, signOut, refreshProfile } = useAuth();
@@ -1652,7 +1666,7 @@ export default function App() {
       openConversation(n.conversationId, { user: n.user, avatar: n.avatar });
     } else if (n.kind === 'follow' && n.user && n.user !== 'someone') {
       setActiveUserHandle(n.user);
-    } else if ((n.kind === 'react' || n.kind === 'comment' || n.kind === 'mention') && n.postId) {
+    } else if ((n.kind === 'react' || n.kind === 'comment' || n.kind === 'mention' || n.kind === 'coauthor') && n.postId) {
       setActivePostComments(n.postId);
     } else if (n.kind === 'event' || n.kind === 'rsvp') {
       setTab('events');
@@ -1754,10 +1768,12 @@ export default function App() {
     showVespersArchive || showNewGroup || showTonightModal || quoteTarget || showOddityCompose ||
     activeOddity || activePostComments || followList || activeConversation || activeUserHandle ||
     showSearch || showCrewBrowse || activeEvent || showCompose || showNotifs || showDMs || activePortal ||
-    showShockPicker || showAnalytics || activeHashtag
+    showShockPicker || showAnalytics || activeHashtag ||
+    (!seenWelcome && meId && dbProfile && profile) // first-run welcome — so Back/Escape dismisses it, not the PWA
   );
   // Close the single top-most overlay (z-order priority). Returns true if it closed one.
   const closeTopOverlay = () => {
+    if (!seenWelcome && meId && dbProfile && profile) { setSeenWelcome(true); return true; }
     if (showSigilDraw) { setShowSigilDraw(false); return true; }
     if (ticketSuccess) { setTicketSuccess(false); return true; }
     if (activeStoryIndex !== null) { setActiveStoryIndex(null); return true; }
@@ -1770,12 +1786,14 @@ export default function App() {
     if (showEditProfile) { setShowEditProfile(false); return true; }
     if (showMood) { setShowMood(false); return true; }
     if (sharePostTarget) { setSharePostTarget(null); return true; }
-    if (showSettings) { setShowSettings(false); return true; }
     if (legalEscalation) { setLegalEscalation(null); return true; }
     if (reportSheet) { setReportSheet(null); return true; }
     if (showDeleteConfirm) { setShowDeleteConfirm(false); return true; }
     if (showLegal) { setShowLegal(false); return true; }
     if (showBlocked) { setShowBlocked(false); return true; }
+    // Settings peels AFTER Blocked/Legal/Delete/Report — those open ON TOP of Settings without
+    // closing it, so Back/Escape must dismiss the visible child before the Settings behind it.
+    if (showSettings) { setShowSettings(false); return true; }
     if (showMyTickets) { setShowMyTickets(false); return true; }
     if (showReflections) { setShowReflections(false); return true; }
     if (showDreams) { setShowDreams(false); return true; }
@@ -2331,7 +2349,8 @@ export default function App() {
           notifications={notifications.filter(n => {
             const kinds = settings.notificationKinds;
             if (!kinds) return true;
-            return kinds[n.kind] !== false;
+            const cat = NOTIF_KIND_CATEGORY[n.kind];
+            return cat ? kinds[cat] !== false : true; // unknown kinds always show
           })}
           onClose={() => setShowNotifs(false)}
           onMarkAllRead={markAllNotifsRead}
@@ -2544,12 +2563,12 @@ export default function App() {
         />
       )}
       {showAnalytics && (
-        <Suspense fallback={null}>
+        <Suspense fallback={<div className="absolute inset-0 z-50 bg-[#0A0A0A] flex items-center justify-center text-[#C9A961] text-2xl animate-pulse-slow" style={F.brand}>Coven</div>}>
           <AnalyticsDashboard onClose={() => setShowAnalytics(false)} meHandle={meHandle} />
         </Suspense>
       )}
       {activeHashtag && (
-        <Suspense fallback={null}>
+        <Suspense fallback={<div className="absolute inset-0 z-50 bg-[#0A0A0A] flex items-center justify-center text-[#C9A961] text-2xl animate-pulse-slow" style={F.brand}>Coven</div>}>
           <HashtagFeed
             tag={activeHashtag}
             meId={meId}

@@ -47,8 +47,8 @@ export function CreateEventModal({ onCreate, onClose }) {
         tags: tags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean).slice(0, 6),
         description: description.trim(),
         ticketed,
-        priceCents: ticketed ? Math.round(priceNum * 100) : 0,
-        capacity: capacity ? parseInt(capacity, 10) : null,
+        priceCents: ticketed ? Math.max(0, Math.round(priceNum * 100)) : 0,
+        capacity: capacity ? Math.max(1, parseInt(capacity, 10) || 0) || null : null,
         ageRestriction: ageRestriction === 'all' ? null : ageRestriction,
       });
       if (venue.trim()) addVenue(venue.trim());

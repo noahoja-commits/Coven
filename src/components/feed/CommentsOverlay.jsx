@@ -173,7 +173,7 @@ function CommentRow({ c, reply, onOpenUser, onReactComment, onReply, onEdit, onD
         </div>
         {editing ? (
           <div className="mt-1">
-            <textarea value={draft} onChange={e => setDraft(e.target.value)} rows={2} autoFocus
+            <textarea value={draft} onChange={e => setDraft(e.target.value.slice(0, 2000))} maxLength={2000} rows={2} autoFocus
               className="w-full bg-[#0F0F0F] border border-[#3F3F3F] focus:border-[#C9A961] text-[#F5F1E8] text-sm p-2 outline-none" style={F.serif} />
             <div className="flex items-center justify-end gap-2 mt-1">
               <button onClick={() => { setEditing(false); setDraft(c.body); }} className="tap text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#A8A29E] px-2 py-0.5" style={F.ui}>cancel</button>

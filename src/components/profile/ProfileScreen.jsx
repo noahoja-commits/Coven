@@ -641,7 +641,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame, onUnravel }) {
                     <span className="text-[10px] text-[#6B6B6B]" style={F.mono}>{post.time}</span>
                   </div>
                   {post.body && <p className="text-[#A8A29E] text-sm mt-1 line-clamp-2" style={F.serif}>{post.body}</p>}
-                  {post.kind === 'event' && <p className="text-[#9E2A33] text-sm mt-1" style={F.display}>{post.event.name}</p>}
+                  {post.kind === 'event' && post.event && <p className="text-[#9E2A33] text-sm mt-1" style={F.display}>{post.event.name}</p>}
                 </div>
               </button>
             ))}

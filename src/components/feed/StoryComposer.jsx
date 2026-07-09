@@ -23,6 +23,7 @@ export function StoryComposer({ meId, onClose, onPost, attachedPost }) {
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
   const fileRef = useRef(null);
 
   const pickImage = (e) => {
@@ -36,7 +37,7 @@ export function StoryComposer({ meId, onClose, onPost, attachedPost }) {
 
   const post = async () => {
     if (busy) return;
-    setBusy(true);
+    setBusy(true); setError('');
     try {
       let imageUrl = null;
       if (image) {
@@ -46,8 +47,9 @@ export function StoryComposer({ meId, onClose, onPost, attachedPost }) {
       if (attachedPost?.id) payload.post_id = attachedPost.id;
       await onPost(payload);
     } catch (e) {
-      // upload or parent handler failed — reset busy so user can retry
+      // upload or parent handler failed — surface it so the user isn't left guessing.
       console.warn('story post failed', e?.message || e);
+      setError(e?.message || "couldn't post your story — try again.");
       setBusy(false);
       return;
     }
@@ -72,6 +74,10 @@ export function StoryComposer({ meId, onClose, onPost, attachedPost }) {
           {busy ? '...' : 'share'}
         </button>
       </div>
+
+      {error && (
+        <div className="px-4 py-2 text-[11px] text-[#8B0000] text-center bg-[#8B0000]/10 border-b border-[#8B0000]/30" style={F.ui}>{error}</div>
+      )}
 
       {/* Preview */}
       <div className={`flex-1 flex flex-col items-center justify-center bg-gradient-to-b ${BG_STYLES[bg]} p-6`}>
