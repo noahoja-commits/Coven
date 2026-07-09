@@ -226,9 +226,10 @@ export function HashtagFeed({ tag, onClose, onOpenPost, onOpenUser, onReact, onO
               </div>
             )}
 
-            {/* Media */}
+            {/* Media — also the open affordance for bodyless posts (otherwise a photo/video-only
+                post in a hashtag feed has nothing tappable to open its comments). */}
             {(post.kind === 'photo' || post.kind === 'video') && (
-              <div className="mb-3"><PostImage kind={post.img} /></div>
+              <div className="mb-3 cursor-pointer" onClick={() => onOpenPost?.(post.id)}><PostImage kind={post.img} /></div>
             )}
 
             {/* Reactions */}

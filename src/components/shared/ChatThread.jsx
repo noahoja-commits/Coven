@@ -48,6 +48,21 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages?.length]);
 
+  // Escape should peel the members sheet / reaction tray FIRST, not close the whole conversation.
+  // Capture phase + stopPropagation runs before App's window-level Escape handler so it doesn't
+  // also pop the conversation off the overlay stack.
+  useEffect(() => {
+    if (members === null && !trayMsg) return undefined;
+    const onKey = (e) => {
+      if (e.key !== 'Escape') return;
+      e.stopPropagation();
+      if (members !== null) setMembers(null);
+      else if (trayMsg) setTrayMsg(null);
+    };
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
+  }, [members, trayMsg]);
+
   useEffect(() => {
     setDraft(initialDraft);
   }, [initialDraft]);
@@ -190,16 +205,22 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
             </div>
             {members.length === 0 ? (
               <div className="text-[#6B6B6B] text-xs py-4 text-center" style={F.serif}>summoning…</div>
-            ) : members.map(m => (
-              <button key={m.userId}
-                onClick={() => { setMembers(null); onOpenUser && onOpenUser(m.handle); }}
-                className="tap w-full flex items-center gap-3 py-2 text-left hover:bg-[#1A1A1A] px-2 -mx-2">
-                <span className="w-8 h-8 rounded-full bg-[#1A1A1A] flex items-center justify-center overflow-hidden shrink-0">
-                  {m.avatarUrl ? <img src={m.avatarUrl} className="w-full h-full object-cover" alt="" /> : <span className="text-sm">{m.avatar}</span>}
-                </span>
-                <span className="text-sm text-[#F5F1E8]" style={F.ui}>{m.handle}</span>
-              </button>
-            ))}
+            ) : members.map(m => {
+              const isSelf = m.handle === meHandle;
+              // Your own row isn't a link — onOpenUser(self) is a no-op in App, but the wired
+              // handler ALSO closes the conversation first, so tapping yourself would eject you
+              // to the feed with nothing opened. Render self as a plain, non-tappable row.
+              return (
+                <button key={m.userId} disabled={isSelf}
+                  onClick={isSelf ? undefined : () => { setMembers(null); onOpenUser && onOpenUser(m.handle); }}
+                  className={`tap w-full flex items-center gap-3 py-2 text-left px-2 -mx-2 ${isSelf ? 'cursor-default' : 'hover:bg-[#1A1A1A]'}`}>
+                  <span className="w-8 h-8 rounded-full bg-[#1A1A1A] flex items-center justify-center overflow-hidden shrink-0">
+                    {m.avatarUrl ? <img src={m.avatarUrl} className="w-full h-full object-cover" alt="" /> : <span className="text-sm">{m.avatar}</span>}
+                  </span>
+                  <span className="text-sm text-[#F5F1E8]" style={F.ui}>{m.handle}{isSelf && <span className="text-[#6B6B6B]"> · you</span>}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -239,7 +260,9 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
                     mine ? 'rounded-l-2xl rounded-tr-2xl rounded-br-md' : 'rounded-r-2xl rounded-tl-2xl rounded-bl-md'
                   }`}>
                   {audioMsg ? (
-                    <div className="flex items-center gap-2 min-w-[180px]">
+                    // Stop the tap from bubbling to the bubble's reaction-tray toggle, so hitting
+                    // play/scrub on the voice note doesn't also pop the emoji tray (mirror forwardedPost).
+                    <div className="flex items-center gap-2 min-w-[180px]" onClick={e => e.stopPropagation()}>
                       <audio controls src={m.audioUrl} className="h-9 w-full" preload="metadata" />
                     </div>
                   ) : m.forwardedPost ? (

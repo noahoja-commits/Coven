@@ -16,7 +16,22 @@ export function CommentsOverlay({ post, onClose, onComment, onReact, onReactComm
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [post?.comments?.length]);
 
-  if (!post) return null;
+  // The post may not be loaded yet — when comments are opened for a post that wasn't in the
+  // feed page, App fetches + injects it (fetchPostById). Show a loading frame WITH a working
+  // close button meanwhile, so the overlay is never a blank dead-end (only Back/Escape reacted).
+  if (!post) {
+    return (
+      <div className="absolute inset-0 z-40 bg-[#0A0A0A] flex flex-col animate-slide-in-right">
+        <div className="bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#1A1A1A] safe-pt">
+          <div className="px-4 h-[60px] flex items-center gap-3">
+            <button onClick={onClose} className="tap text-[#A8A29E] hover:text-[#C9A961] p-2 -m-1"><ArrowLeft size={20} /></button>
+            <div className="text-[#F5F1E8] text-sm" style={F.display}>COMMENTS</div>
+          </div>
+        </div>
+        <div className="flex-1 flex items-center justify-center text-[#6B6B6B] text-xs italic animate-pulse-slow" style={F.serif}>· summoning the thread ·</div>
+      </div>
+    );
+  }
 
   const send = () => {
     const body = draft.trim();

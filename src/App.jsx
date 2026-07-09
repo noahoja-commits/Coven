@@ -4,7 +4,7 @@ import { useAuth } from './auth/AuthProvider';
 import { isSupabaseConfigured } from './lib/supabase';
 import { SignInScreen } from './components/auth/SignInScreen';
 import { ResetPasswordScreen } from './components/auth/ResetPasswordScreen';
-import { fetchFeed, createPost, deletePost as dbDeletePost, updatePost as dbUpdatePost, updateComment as dbUpdateComment, deleteComment as dbDeleteComment, togglePostReaction, fetchComments, createComment, toggleCommentReaction, castPollVote, clearPollVote, fetchEventRecaps } from './lib/db/posts';
+import { fetchFeed, fetchPostById, createPost, deletePost as dbDeletePost, updatePost as dbUpdatePost, updateComment as dbUpdateComment, deleteComment as dbDeleteComment, togglePostReaction, fetchComments, createComment, toggleCommentReaction, castPollVote, clearPollVote, fetchEventRecaps } from './lib/db/posts';
 import { insertProfile, updateProfile, getProfileStats, getProfileByHandle, fetchProfiles, saveNotificationPrefs } from './lib/db/profiles';
 import { fetchFollowing, fetchFollowers, followUser, unfollowUser } from './lib/db/social';
 import { FollowListOverlay } from './components/profile/FollowListOverlay';
@@ -530,8 +530,15 @@ export default function App() {
     setCommunityPosts(null);
     fetchFeed(meId, { scope: 'everyone', community, limit: 40 })
       .then(rows => { if (active) setCommunityPosts(rows); })
-      .catch(e => { console.error('[load] scene feed failed:', e); });
+      // On error, resolve the null loading sentinel (which otherwise keeps CommunityDetail on
+      // "gathering the scene" forever) to the client-filtered global feed — the fallback this
+      // effect's own header comment promises. `posts` here is the feed captured at open time.
+      .catch(e => {
+        console.error('[load] scene feed failed:', e);
+        if (active) setCommunityPosts(posts.filter(p => community === 'general' || (p.community || 'general') === community));
+      });
     return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [community, meId]);
 
   const loadMoreFeed = () => {
@@ -836,15 +843,37 @@ export default function App() {
   };
 
   // Lazy-load a thread's comments when it opens (base count -> 0 to avoid double-count).
+  // If comments were opened for a post that isn't in the loaded feed page (a notification tap,
+  // a hashtag/search result, another user's profile grid, or a ?post= deep link), fetch the
+  // post itself first and inject it — otherwise CommentsOverlay gets post=undefined and renders
+  // blank (mirrors openRecapPost's inject-then-open). `posts` is intentionally not a dep: the
+  // membership check reads the current feed at open time; adding it would refetch on every change.
   useEffect(() => {
     if (!activePostComments || String(activePostComments).startsWith('temp-')) return;
     const pid = activePostComments;
     let active = true;
-    fetchComments(pid, meId).then(list => {
-      if (active) setPosts(prev => prev.map(p => (p.id === pid ? { ...p, comments: list, baseCommentCount: 0 } : p)));
+    const ensurePost = posts.some(p => p.id === pid)
+      ? Promise.resolve()
+      : fetchPostById(pid, meId).then(p => { if (p && active) setPosts(prev => prev.some(x => x.id === pid) ? prev : [p, ...prev]); }).catch(() => {});
+    ensurePost.then(() => fetchComments(pid, meId)).then(list => {
+      if (active && list) setPosts(prev => prev.map(p => (p.id === pid ? { ...p, comments: list, baseCommentCount: 0 } : p)));
     }).catch(() => {});
     return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activePostComments, meId]);
+
+  // Keep the pinned post resolvable on the shrine even after the feed paginates past it (or on a
+  // fresh load): if it isn't in the loaded feed, fetch + inject it so ProfileScreen's
+  // `posts.find(id && mine)` lookup doesn't come up empty and silently drop the pin.
+  useEffect(() => {
+    if (!pinnedPostId || !meId || posts.some(p => p.id === pinnedPostId)) return;
+    let active = true;
+    fetchPostById(pinnedPostId, meId).then(p => {
+      if (p && p.mine && active) setPosts(prev => prev.some(x => x.id === pinnedPostId) ? prev : [...prev, p]);
+    }).catch(() => {});
+    return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pinnedPostId, meId]);
 
   // === HANDLERS ===
   // Persist a profile-depth blob (graves/trackers/sigils/reflections) for the logged-in user.

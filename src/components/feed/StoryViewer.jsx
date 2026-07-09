@@ -29,6 +29,7 @@ export function StoryViewer({ stories = [], startIndex = 0, onReply, onReactStor
   const [reply, setReply] = useState('');
   const [progress, setProgress] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [replyFocused, setReplyFocused] = useState(false); // typing a reply freezes auto-advance
   const [myReactions, setMyReactions] = useState({}); // {storyId: kind}
   const [reactors, setReactors] = useState([]);        // who reacted to my story
   const [seenCount, setSeenCount] = useState(0);       // unique views of my story
@@ -36,7 +37,9 @@ export function StoryViewer({ stories = [], startIndex = 0, onReply, onReactStor
 
   const story = stories[index];
 
-  useEffect(() => { setProgress(0); startRef.current = Date.now(); }, [index]);
+  // Reset progress AND clear any half-typed reply when the story changes, so a draft can never
+  // carry over and get sent to the next author (whether by auto-advance or a manual tap).
+  useEffect(() => { setProgress(0); startRef.current = Date.now(); setReply(''); }, [index]);
 
   // Mark each story watched as it's shown (drives the "seen" ring on the rail) and record a
   // real unique view server-side. Skip your own — viewing your own story shouldn't count.
@@ -64,7 +67,10 @@ export function StoryViewer({ stories = [], startIndex = 0, onReply, onReactStor
   };
 
   useEffect(() => {
-    if (paused || !story) return;
+    // Freeze auto-advance while a reply is being typed — otherwise the story rotates to the next
+    // author mid-compose and sendReply() targets the wrong person. replyFocused is separate from
+    // `paused` (press-and-hold) because on mobile the input tap fires the root hold(false) too.
+    if (paused || replyFocused || !story) return;
     const t = setInterval(() => {
       const p = Math.min(1, (Date.now() - startRef.current) / STORY_DURATION);
       setProgress(p);
@@ -74,7 +80,7 @@ export function StoryViewer({ stories = [], startIndex = 0, onReply, onReactStor
       }
     }, 50);
     return () => clearInterval(t);
-  }, [index, paused, story, stories.length, onClose]);
+  }, [index, paused, replyFocused, story, stories.length, onClose]);
 
   if (!story) return null;
 
@@ -194,6 +200,7 @@ export function StoryViewer({ stories = [], startIndex = 0, onReply, onReactStor
           <div className="flex items-center gap-2">
           <div className="flex-1 px-3 py-2 bg-black/40 backdrop-blur-sm border border-white/15 rounded-full">
             <input value={reply} onChange={(e) => setReply(e.target.value)}
+              onFocus={() => setReplyFocused(true)} onBlur={() => setReplyFocused(false)}
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); sendReply(); } }}
               placeholder={`reply to ${story.user}...`}
               className="w-full bg-transparent text-white text-sm outline-none placeholder:text-white/50" style={F.ui} />
