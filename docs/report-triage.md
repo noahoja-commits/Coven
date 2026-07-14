@@ -1,5 +1,9 @@
 # Operator runbook — reviewing reports
 
+> **Since migration 0066 every new report web-pushes an alert to the admin**
+> (`app_config.admin_user_id`) via the notifications pipeline — you no longer have to
+> remember to check. This runbook is the *review procedure* once an alert arrives.
+
 Coven auto-hides a post once **3 distinct users** report it (the `feed_posts` view).
 That handles the worst case automatically, but content with 1–2 reports, repeat
 offenders, and anything **illegal/copyright** need a human look. This is how you do it.
