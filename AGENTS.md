@@ -3,15 +3,26 @@
 **Read `CLAUDE.md` first** — it is the full project guide (stack, architecture, security model,
 collaboration rules). This file mirrors the session learnings for agents that look for AGENTS.md.
 
+## Non-negotiables (they protect production)
+
+- `main` deploys to production on push. **Never commit or push to `main` directly** — branch + PR only.
+- The Supabase database is a **single shared PRODUCTION instance** — migrations are sequentially
+  numbered, announced before applying, one person at a time.
+- Stripe is in **LIVE mode**. Never complete a test purchase.
+- Never commit secrets; `.env` is gitignored and stays that way.
+
 ## Hard-won gotchas (mirror of CLAUDE.md — keep in sync)
 
 - A green `npm run build` does NOT mean the app works — always run `npm run dev` and confirm the app mounts with a clean console.
-- The Supabase DB is a single shared PRODUCTION instance; migrations are sequentially numbered and must be announced/coordinated.
 - New `profiles` columns are invisible to clients until granted: 0026 made `profiles` SELECT a column whitelist — a new column needs BOTH `grant select (new_col)` in the migration AND a `PROFILE_COLS_*` entry in `src/lib/db/profiles.js` with a pre-migration fallback tier (see tos_/mood/decor pattern).
 - Never rasterize SVG through `compress()` in `storage.js` — its catch-all falls back to the ORIGINAL file when canvas fails (`foreignObject` taints it), silently uploading scriptable markup. `uploadImage` rejects SVG on purpose.
 - Video GPS lives in mp4 `moov`→`udta` (`©xyz`/`loci`) and `moov`→`meta`; `stripVideoLocation` renames those boxes to `free` in place (no re-encode) and fails open. New mp4-family uploads only.
 - TermsGate: `tos_version === undefined` → 0065 columns not deployed (fail open, hide gate); `null`/stale → block until accepted. Bump `TERMS_VERSION` + label together in `src/lib/legal.js`.
-- Claude auto-mode cannot perform prod writes (live posts, `apply.mjs` migrations, Stripe actions) — a human runs those; agents prep exact commands and verify afterwards.
+- New alert type = one DB trigger, not a new endpoint: `notifications.kind` is unconstrained and `trg_notify_push` web-pushes every insert — add a trigger inserting a notifications row + a `kind` case in `api/push.js` and `src/lib/db/notifications.js` (see 0066).
+- Storage does NOT cascade on user deletion — `api/delete-account.js` purges the user-keyed buckets in `USER_BUCKETS`; a new user-keyed bucket must be added there. The `voice` bucket is conversation-keyed and can't be purged per-user.
+- `supabase/apply.mjs` doubles as a read-only SQL audit runner (returns JSON) but truncates output to ~300 chars — write compact aggregates, not row dumps.
+- Claude auto-mode cannot perform prod writes (live posts, `apply.mjs` migrations, Stripe actions) unless the human explicitly green-lights them in the moment; agents prep exact commands and verify afterwards.
+- Two Claude sessions on one machine: the second works in a `git worktree` so the shared checkout's branch never flips underneath the first.
 
 ## Session Log
 
