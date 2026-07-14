@@ -205,7 +205,7 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
           )}
           {mediaKind === 'video' && (
             <p className="mt-1.5 text-[10px] text-[#9E2A33]/70 italic" style={F.serif}>
-              heads up — camera videos can carry your location; Coven can't strip that from video yet.
+              heads up — camera videos can carry hidden location data; Coven strips what it can before posting.
             </p>
           )}
           {poll && (
