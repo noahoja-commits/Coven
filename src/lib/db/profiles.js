@@ -2,14 +2,20 @@ import { supabase } from '../supabase';
 
 // Every profile column EXCEPT birthday (which is column-locked to the owner at the
 // DB level — read via the my_birthday rpc). Use this instead of select('*').
-const PROFILE_COLS_FULL = 'id, handle, avatar, avatar_url, bio, city, created_at, is_system, pronouns, scenes, tags, decor, mood, archetype';
+const PROFILE_COLS_FULL = 'id, handle, avatar, avatar_url, bio, city, created_at, is_system, pronouns, scenes, tags, decor, mood, archetype, tos_version, tos_accepted_at';
 // Cascade fallbacks so reads don't break before a column's migration is applied:
-// full → drop the new optional cols (mood/archetype, keeps decor) → drop `decor` (pre-0028).
+// full → drop tos_* (pre-0065) → drop mood/archetype (keeps decor) → drop `decor` (pre-0028).
+// Pre-migration, tos_version is absent (undefined) on the result — the TermsGate
+// treats undefined as "column not deployed yet" and stays hidden (fail-open).
+const PROFILE_COLS_NO_TOS = 'id, handle, avatar, avatar_url, bio, city, created_at, is_system, pronouns, scenes, tags, decor, mood, archetype';
 const PROFILE_COLS = 'id, handle, avatar, avatar_url, bio, city, created_at, is_system, pronouns, scenes, tags, decor';
 const PROFILE_COLS_BASE = 'id, handle, avatar, avatar_url, bio, city, created_at, is_system, pronouns, scenes, tags';
 
 async function selectProfile(col, val) {
   let res = await supabase.from('profiles').select(PROFILE_COLS_FULL).eq(col, val).maybeSingle();
+  if (res.error && /tos_/i.test(res.error.message || '')) {
+    res = await supabase.from('profiles').select(PROFILE_COLS_NO_TOS).eq(col, val).maybeSingle();
+  }
   if (res.error && /mood|archetype/i.test(res.error.message || '')) {
     res = await supabase.from('profiles').select(PROFILE_COLS).eq(col, val).maybeSingle();
   }
@@ -48,14 +54,25 @@ export async function getProfileByHandle(handle) {
 
 // Insert the current user's profile row. Throws on conflict (handle taken → 23505).
 export async function insertProfile(row) {
-  const { data, error } = await supabase.from('profiles').insert(row).select('id, handle').single();
-  if (error) throw error;
-  return data;
+  let res = await supabase.from('profiles').insert(row).select('id, handle').single();
+  // Pre-0065: tos_* columns don't exist yet — retry without them so onboarding
+  // never blocks on a lagging migration (acceptance is re-collected by TermsGate).
+  if (res.error && /tos_/i.test(res.error.message || '') && (row.tos_version !== undefined || row.tos_accepted_at !== undefined)) {
+    const { tos_version, tos_accepted_at, ...rest } = row;
+    res = await supabase.from('profiles').insert(rest).select('id, handle').single();
+  }
+  if (res.error) throw res.error;
+  return res.data;
 }
 
 export async function updateProfile(id, patch) {
   let res = await supabase.from('profiles').update(patch).eq('id', id).select('id, handle').single();
   // Pre-migration: drop the missing column and retry so the rest of the profile still saves.
+  if (res.error && /tos_/i.test(res.error.message || '') && (patch.tos_version !== undefined || patch.tos_accepted_at !== undefined)) {
+    const { tos_version, tos_accepted_at, ...rest } = patch;
+    if (!Object.keys(rest).length) return { id }; // tos-only patch pre-0065 → no-op, fail open
+    res = await supabase.from('profiles').update(rest).eq('id', id).select('id, handle').single();
+  }
   if (res.error && /mood|archetype/i.test(res.error.message || '') && (patch.mood !== undefined || patch.archetype !== undefined)) {
     const { mood, archetype, ...rest } = patch;
     res = await supabase.from('profiles').update(rest).eq('id', id).select('id, handle').single();

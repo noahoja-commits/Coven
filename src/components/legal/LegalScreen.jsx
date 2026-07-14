@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { F } from '../../styles/fonts';
+import { TERMS_EFFECTIVE_LABEL } from '../../lib/legal';
 
 // Static legal docs (ToS / Privacy / Community Guidelines / Tickets & Refunds).
 // Self-contained — no auth or data deps — so it mounts both pre-auth (sign-in) and
 // post-auth (settings). NOT attorney-reviewed; a lawyer should review before scale.
-const EFFECTIVE = 'June 23, 2026';
+// The effective date lives in lib/legal.js next to TERMS_VERSION — bump them together.
+const EFFECTIVE = TERMS_EFFECTIVE_LABEL;
 const CONTACT = 'noahoja@gmail.com';
 
 const TABS = [
