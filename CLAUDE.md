@@ -86,6 +86,11 @@ git push origin feature/short-name             # upload your branch
 - **Realtime:** new tables aren't auto-streamed. To get `postgres_changes`, add the table to the publication: `alter publication supabase_realtime add table public.<t>;` (see migration 0024).
 - **Stripe is currently in LIVE mode.** Checkout/tickets work (platform-collect). Connect payout onboarding needs the restricted key's Connect permissions enabled in the Stripe dashboard. The webhook (`STRIPE_WEBHOOK_SECRET`) must match the **live** endpoint or paid tickets won't be recorded.
 - After a deploy, the PWA service worker auto-reloads clients (`controllerchange` handler in `main.jsx`) — but a phone may still need one cache clear/reinstall to pick up a brand-new SW.
+- **A NEW `profiles` column is invisible to clients until you extend the column whitelist.** 0026 replaced profiles' table-level SELECT with `grant select (col, ...)`, so every migration adding a profiles column must include `grant select (new_col) on public.profiles to authenticated` or reads fail with 42501 (INSERT/UPDATE grants are still table-level — only SELECT is whitelisted). See 0065.
+- **New alert type = one DB trigger, not a new endpoint.** `notifications.kind` is unconstrained text and `trg_notify_push` (0022/0058) web-pushes EVERY notifications insert. To alert someone about anything: trigger inserts a notifications row, add a `kind` body case to `api/push.js` and `src/lib/db/notifications.js`. See 0066 (report → admin).
+- **Storage does NOT cascade on user deletion** (DB rows do). `api/delete-account.js` purges the 5 user-id-keyed buckets (`USER_BUCKETS`) before `deleteUser` — **a new user-keyed bucket must be added to that list.** The `voice` bucket is conversation-keyed and can't be purged per-user (documented limitation).
+- `supabase/apply.mjs` doubles as a read-only SQL runner for audits (returns JSON) but truncates output to ~300 chars — write compact aggregate queries (`string_agg`, `count`, `exists`), not row dumps.
+- Two Claude sessions on one machine: the second one should work in a `git worktree` (`git worktree add ../coven-backend -b <branch> origin/main`) so the shared checkout's branch never changes under the first.
 
 ## How we work together (collaboration rules)
 
