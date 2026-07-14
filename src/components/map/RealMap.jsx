@@ -90,6 +90,11 @@ export default function RealMap({ nearby = [], events = [], tonightStatus, ghost
     mapRef.current = map;
     try { map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-left'); } catch { /* noop */ }
     map.on('error', () => {}); // swallow transient tile errors
+    // The external style references sprite images we don't ship (e.g. 'wood-pattern') —
+    // feed maplibre a transparent 1px stand-in so it stops warning on every render.
+    map.on('styleimagemissing', (e) => {
+      try { if (!map.hasImage(e.id)) map.addImage(e.id, { width: 1, height: 1, data: new Uint8Array(4) }); } catch { /* noop */ }
+    });
     map.on('load', () => { if (!cancelled) { map.resize(); setState('ready'); } });
     // Failsafe: never sit on "summoning…" — if the style/tiles stall, reveal the map anyway after 8s.
     const failsafe = setTimeout(() => { if (!cancelled) setState(s => (s === 'loading' ? 'ready' : s)); }, 8000);

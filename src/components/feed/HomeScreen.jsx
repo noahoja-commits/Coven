@@ -12,8 +12,9 @@ import { buzz } from '../../lib/haptics';
 import { getDailyCard } from '../../data/tarot';
 import { darkDay, todaysVespers, todaysCodex } from '../../data/helpers';
 import { DailyAltar } from './DailyAltar';
-import { TEXTS } from '../../data/library';
-import { CODEX } from '../../data/codex';
+// TEXTS (~49 kB) + CODEX (~17 kB) are daily-card source data, not needed for first
+// paint — loaded async below so the feed renders immediately and the vespers/codex
+// cards pop in a beat later.
 import { recordView, fetchViewCounts } from '../../lib/db/views';
 import { Bat, Flame as FlameGlyph, Skull as SkullGlyph, Smoke } from '../shared/ReactionGlyphs';
 import { FeatureBoundary } from '../FeatureBoundary';
@@ -133,8 +134,16 @@ export function HomeScreen({
 
   const daily = getDailyCard();
   const today = darkDay();
-  const vespers = todaysVespers(TEXTS);
-  const codexToday = todaysCodex(CODEX);
+  const [dailyData, setDailyData] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    Promise.all([import('../../data/library'), import('../../data/codex')])
+      .then(([lib, cdx]) => { if (alive) setDailyData({ texts: lib.TEXTS, codex: cdx.CODEX }); })
+      .catch(() => {}); // offline chunk miss — cards just stay hidden
+    return () => { alive = false; };
+  }, []);
+  const vespers = dailyData ? todaysVespers(dailyData.texts) : null;
+  const codexToday = dailyData ? todaysCodex(dailyData.codex) : null;
 
   // Trending hashtags from posts
   const tagCounts = {};

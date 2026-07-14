@@ -1,6 +1,6 @@
 import { X } from 'lucide-react';
 import { F } from '../../styles/fonts';
-import { SHOCK_MODES } from '../shared/ShockOverlay';
+import { SHOCK_MODES } from '../shared/shockModes';
 
 // Tiny representative swatch per mode (just the picker thumbnail — the real effect is full-screen).
 const SWATCH = {

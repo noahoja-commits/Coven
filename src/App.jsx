@@ -3,7 +3,6 @@ import { useLocalStorage } from './hooks/useLocalStorage';
 import { useAuth } from './auth/AuthProvider';
 import { isSupabaseConfigured } from './lib/supabase';
 import { SignInScreen } from './components/auth/SignInScreen';
-import { ResetPasswordScreen } from './components/auth/ResetPasswordScreen';
 import { fetchFeed, fetchPostById, createPost, deletePost as dbDeletePost, updatePost as dbUpdatePost, updateComment as dbUpdateComment, deleteComment as dbDeleteComment, togglePostReaction, fetchComments, createComment, toggleCommentReaction, castPollVote, clearPollVote, fetchEventRecaps } from './lib/db/posts';
 import { insertProfile, updateProfile, getProfileStats, getProfileByHandle, fetchProfiles, saveNotificationPrefs } from './lib/db/profiles';
 import { fetchFollowing, fetchFollowers, followUser, unfollowUser } from './lib/db/social';
@@ -19,7 +18,6 @@ import { fetchProfileState, saveProfileState } from './lib/db/profileState';
 import { fetchNotifications, markNotificationRead, markAllNotificationsRead, clearNotifications, subscribeNotifications, hydrateRealtime } from './lib/db/notifications';
 import { fetchBlockedIds, blockUser as dbBlockUser, unblockUser as dbUnblockUser, reportContent } from './lib/db/moderation';
 import { BlockedOverlay } from './components/settings/BlockedOverlay';
-import { LegalScreen } from './components/legal/LegalScreen';
 import { TermsGate } from './components/legal/TermsGate';
 import { TERMS_VERSION } from './lib/legal';
 import { DeleteAccountModal } from './components/settings/DeleteAccountModal';
@@ -41,7 +39,10 @@ import { ChatThread } from './components/shared/ChatThread';
 import { ComposeOverlay } from './components/shared/ComposeOverlay';
 import { NotificationsPanel } from './components/shared/NotificationsPanel';
 import { GrainOverlay, AmbientGlow, HalftoneOverlay } from './components/shared/Visuals';
-import { ShockOverlay, SHOCK_MODES } from './components/shared/ShockOverlay';
+import { SHOCK_MODES } from './components/shared/shockModes';
+// ShockOverlay is ~78 kB of source (the whole horror system) and only renders when a
+// shock mode is active — lazy-load it so it never weighs down first paint.
+const ShockOverlay = lazy(() => import('./components/shared/ShockOverlay').then(m => ({ default: m.ShockOverlay })));
 import { ShockModePicker } from './components/settings/ShockModePicker';
 import { startAmbient, stopAmbient } from './lib/ambient';
 import { fetchWeatherTint, getPosition, getPositionIfGranted } from './lib/weather';
@@ -51,7 +52,9 @@ import { HomeScreen } from './components/feed/HomeScreen';
 import { CommunitiesScreen, CommunityDetail } from './components/communities/CommunitiesScreen';
 import { MapScreen } from './components/map/MapScreen';
 import { EventsScreen } from './components/events/EventsScreen';
-import { ProfileScreen } from './components/profile/ProfileScreen';
+const ProfileScreen = lazy(() => import('./components/profile/ProfileScreen').then(m => ({ default: m.ProfileScreen })));
+const LegalScreen = lazy(() => import('./components/legal/LegalScreen').then(m => ({ default: m.LegalScreen })));
+const ResetPasswordScreen = lazy(() => import('./components/auth/ResetPasswordScreen').then(m => ({ default: m.ResetPasswordScreen })));
 import { TonightStatusModal } from './components/profile/TonightStatusModal';
 import { ProfileEditModal } from './components/profile/ProfileEditModal';
 import { MoodModal } from './components/profile/MoodModal';
@@ -92,16 +95,21 @@ const IntentionTimerOverlay = lazy(() => import('./components/coven/IntentionTim
 const AnalyticsDashboard = lazy(() => import('./components/analytics/AnalyticsDashboard').then(m => ({ default: m.AnalyticsDashboard })));
 const HashtagFeed = lazy(() => import('./components/feed/HashtagFeed').then(m => ({ default: m.HashtagFeed })));
 
-import { OnboardingFlow } from './components/onboarding/OnboardingFlow';
-import { WelcomeOverlay } from './components/onboarding/WelcomeOverlay';
 import { AgeGate } from './components/shared/AgeGate';
-import { SettingsScreen, DEFAULT_SETTINGS } from './components/settings/SettingsScreen';
+import { DEFAULT_SETTINGS } from './components/settings/defaults';
+// Rare-path screens: onboarding runs once per account, settings/legal open occasionally,
+// profile is one tab of five. All lazy — none belong in the first-paint bundle.
+const OnboardingFlow = lazy(() => import('./components/onboarding/OnboardingFlow').then(m => ({ default: m.OnboardingFlow })));
+const WelcomeOverlay = lazy(() => import('./components/onboarding/WelcomeOverlay').then(m => ({ default: m.WelcomeOverlay })));
+const SettingsScreen = lazy(() => import('./components/settings/SettingsScreen').then(m => ({ default: m.SettingsScreen })));
 
 import { COMMUNITIES } from './data/communities';
 import { fetchEvents, fetchEventMap, createEvent, toggleEventRsvp as dbToggleRsvp, fetchEventAttendees, deleteEvent as dbDeleteEvent, joinWaitlist, leaveWaitlist, fetchWaitlist } from './lib/db/events';
 import { CommentsOverlay } from './components/feed/CommentsOverlay';
 import { QuoteModal } from './components/feed/QuoteModal';
-import { VespersArchiveModal } from './components/feed/VespersArchiveModal';
+// VespersArchiveModal statically imports the ~49 kB TEXTS library — lazy so that data
+// only loads when the archive is opened.
+const VespersArchiveModal = lazy(() => import('./components/feed/VespersArchiveModal').then(m => ({ default: m.VespersArchiveModal })));
 import { TRACKER_CATEGORIES } from './data/profile';
 import { livingTheme, meetsAge, isVigil } from './data/helpers';
 import { earnedAchievements } from './data/achievements';
@@ -1944,7 +1952,11 @@ export default function App() {
     );
   }
   if (recovery) {
-    return <ResetPasswordScreen />;
+    return (
+      <Suspense fallback={<div className="min-h-[100dvh] bg-black flex items-center justify-center text-[#C9A961] text-2xl animate-pulse-slow" style={F.brand}>Coven</div>}>
+        <ResetPasswordScreen />
+      </Suspense>
+    );
   }
   if (!session) {
     return <SignInScreen />;
@@ -1952,7 +1964,9 @@ export default function App() {
   if (!dbProfile) {
     return (
       <div className="phone-frame max-w-md mx-auto bg-black text-[#F5F1E8] relative overflow-hidden min-h-[100dvh]">
-        <OnboardingFlow onComplete={handleOnboard} onSignOut={signOut} />
+        <Suspense fallback={<div className="min-h-[100dvh] flex items-center justify-center text-[#C9A961] text-2xl animate-pulse-slow" style={F.brand}>Coven</div>}>
+          <OnboardingFlow onComplete={handleOnboard} onSignOut={signOut} />
+        </Suspense>
       </div>
     );
   }
@@ -2125,6 +2139,7 @@ export default function App() {
       </Suspense>
     );
     if (tab === 'profile') return (
+      <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-[#C9A961] text-xl animate-pulse-slow" style={F.brand}>Coven</div>}>
       <ProfileScreen
         profile={{ ...profile, status: tonightStatus?.text || null }}
         onUnravel={() => summonShock('egodeath')}
@@ -2179,6 +2194,7 @@ export default function App() {
         mementoMoriOn={settings.mementoMori}
         settings={settings}
       />
+      </Suspense>
     );
     return null;
   };
@@ -2191,7 +2207,9 @@ export default function App() {
     <div className={`phone-frame max-w-md mx-auto relative overflow-hidden h-[100dvh] text-[#F5F1E8] ${effectiveShockMode === 'scream' || effectiveShockMode === 'paralysis' ? 'shock-shake' : effectiveShockMode === 'glitch' ? 'shock-jitter' : ''}`}
       style={{ background: settings.parchmentMode ? '#EDE0C2' : '#0A0A0A' }}>
       {/* Shock mode — BACK layer: bold occult motifs render BEHIND the app content so it stays readable */}
-      {!settings.parchmentMode && !isInsideOverlay && <ShockOverlay mode={effectiveShockMode} layer="back" />}
+      {!settings.parchmentMode && !isInsideOverlay && effectiveShockMode !== 'none' && (
+        <Suspense fallback={null}><ShockOverlay mode={effectiveShockMode} layer="back" /></Suspense>
+      )}
       {/* Living ambient glow — breathing ember/candle light for depth (behind mood washes) */}
       {settings.ambientGlow !== false && !isInsideOverlay && !settings.parchmentMode && <AmbientGlow />}
       {/* Restrained oxblood breath — a hint at top + bottom over a deep near-black base, so the
@@ -2269,7 +2287,9 @@ export default function App() {
       )}
 
       {/* Shock mode — FRONT layer: only translucent texture/chrome, on top (z-30, pointer-events-none) */}
-      {!settings.parchmentMode && !isInsideOverlay && <ShockOverlay mode={effectiveShockMode} layer="front" />}
+      {!settings.parchmentMode && !isInsideOverlay && effectiveShockMode !== 'none' && (
+        <Suspense fallback={null}><ShockOverlay mode={effectiveShockMode} layer="front" /></Suspense>
+      )}
       {/* Grain — floored so the film texture stays visibly present (still slider-controlled above the floor) */}
       {settings.grainIntensity > 0 && (
         settings.grainStyle === 'print'
@@ -2531,6 +2551,7 @@ export default function App() {
           me={{ id: meId }}
           onClose={() => setVenueEditorEvent(null)}
           onSaved={() => { fetchEvents(meId).then(({ events: ev }) => setEvents(ev)).catch(() => {}); }}
+          onError={(msg) => showToast(msg, 'error')}
         />
       )}
       {ticketSuccess && (
@@ -2544,9 +2565,11 @@ export default function App() {
         </div>
       )}
       {showVespersArchive && (
-        <VespersArchiveModal
-          onClose={() => setShowVespersArchive(false)}
-        />
+        <Suspense fallback={null}>
+          <VespersArchiveModal
+            onClose={() => setShowVespersArchive(false)}
+          />
+        </Suspense>
       )}
       {quoteTarget && (
         <QuoteModal
@@ -2593,6 +2616,7 @@ export default function App() {
         />
       )}
       {showSettings && (
+        <Suspense fallback={<div className="absolute inset-0 z-50 bg-[#0A0A0A] flex items-center justify-center text-[#C9A961] text-2xl animate-pulse-slow" style={F.brand}>Coven</div>}>
         <SettingsScreen
           settings={settings}
           onChange={setSettings}
@@ -2614,6 +2638,7 @@ export default function App() {
           onOpenShockPicker={() => { setShowSettings(false); setShowShockPicker(true); }}
           onOpenAnalytics={() => { setShowSettings(false); setShowAnalytics(true); }}
         />
+        </Suspense>
       )}
       {showAnalytics && (
         <Suspense fallback={<div className="absolute inset-0 z-50 bg-[#0A0A0A] flex items-center justify-center text-[#C9A961] text-2xl animate-pulse-slow" style={F.brand}>Coven</div>}>
@@ -2662,7 +2687,9 @@ export default function App() {
         />
       )}
       {showLegal && (
-        <LegalScreen onBack={() => setShowLegal(false)} />
+        <Suspense fallback={<div className="absolute inset-0 z-50 bg-[#0A0A0A] flex items-center justify-center text-[#C9A961] text-2xl animate-pulse-slow" style={F.brand}>Coven</div>}>
+          <LegalScreen onBack={() => setShowLegal(false)} />
+        </Suspense>
       )}
       {showDeleteConfirm && (
         <DeleteAccountModal
@@ -2813,13 +2840,15 @@ export default function App() {
         />
       )}
       {!seenWelcome && meId && dbProfile && profile && (
-        <WelcomeOverlay
-          handle={meHandle}
-          onClose={() => setSeenWelcome(true)}
-          onDropStatus={() => { setSeenWelcome(true); setShowTonightModal(true); }}
-          onFindSouls={() => { setSeenWelcome(true); openPortalDirect('souls'); }}
-          onSpeak={() => { setSeenWelcome(true); setShowCompose(true); }}
-        />
+        <Suspense fallback={null}>
+          <WelcomeOverlay
+            handle={meHandle}
+            onClose={() => setSeenWelcome(true)}
+            onDropStatus={() => { setSeenWelcome(true); setShowTonightModal(true); }}
+            onFindSouls={() => { setSeenWelcome(true); openPortalDirect('souls'); }}
+            onSpeak={() => { setSeenWelcome(true); setShowCompose(true); }}
+          />
+        </Suspense>
       )}
       {showSigilDraw && (
         <FeatureBoundary label="sigil">
