@@ -143,6 +143,19 @@ export default function App() {
 
   // === STATE ===
   const [tab, setTab] = useState('home');
+  // Once the map tab has been visited, keep MapScreen MOUNTED (hidden with display:none on
+  // other tabs) so the maplibre instance survives tab switches — rebuilding it on every visit
+  // (style fetch + tile fetch + worker spin-up) is what made the map feel finicky.
+  const [mapVisited, setMapVisited] = useState(false);
+  useEffect(() => { if (tab === 'map') setMapVisited(true); }, [tab]);
+  // Warm the ~1 MB map chunk while the browser is idle so even the FIRST open skips the
+  // download wait (tiles still come from the network; the SW runtime-caches them after).
+  useEffect(() => {
+    const warm = () => { import('./components/map/RealMap').catch(() => { /* offline — first open will retry */ }); };
+    const idle = typeof requestIdleCallback !== 'undefined';
+    const id = idle ? requestIdleCallback(warm, { timeout: 10000 }) : setTimeout(warm, 4000);
+    return () => { if (idle) cancelIdleCallback(id); else clearTimeout(id); };
+  }, []);
   const [community, setCommunity] = useState(null);
   const [showDMs, setShowDMs] = useState(false);
   const [activeConversation, setActiveConversation] = useState(null);
@@ -2105,20 +2118,9 @@ export default function App() {
       if (festivalEvent && exitedFestivalId !== festivalEvent.id) {
         return <FestivalMap event={festivalEvent} onExit={() => setExitedFestivalId(festivalEvent.id)} />;
       }
-      return (
-        <MapScreen
-          tonightStatus={tonightStatus}
-          ghost={settings.ghostMode}
-          pins={tonightPins.filter(p => p.userId !== meId && !blockedIds.has(p.userId))}
-          nearby={nearby.filter(n => !blockedIds.has(n.userId))}
-          events={eventsOnMap}
-          onOpenUser={(h) => setActiveUserHandle(h)}
-          onOpenTonightStatus={() => setShowTonightModal(true)}
-          onOpenEvent={(id) => setActiveEvent(id)}
-          festivalEvent={festivalEvent && exitedFestivalId === festivalEvent.id ? festivalEvent : null}
-          onEnterFestival={() => setExitedFestivalId(null)}
-        />
-      );
+      // The real map renders in the PERSISTENT layer below (see mapVisited) so the
+      // maplibre instance survives tab switches instead of rebuilding every visit.
+      return null;
     }
     if (tab === 'events') return (
       <EventsScreen events={events} rsvp={eventRsvp} onToggleRsvp={toggleEventRsvp} onOpenEvent={(id) => setActiveEvent(id)} onCreateEvent={() => setShowCreateEvent(true)} />
@@ -2322,6 +2324,26 @@ export default function App() {
       {/* Main content scrolls INSIDE the frame, between the fixed header and bottom nav.
           (top-[60px]/bottom-[68px] already include the safe-area insets — see index.css.) */}
       <div className="absolute inset-0 top-[60px] bottom-[68px] overflow-y-auto">
+        {/* Persistent map layer — mounted on first visit, then only display-toggled so the
+            maplibre instance (style, tiles, camera) survives tab switches. */}
+        {mapVisited && (
+          <div className="absolute inset-0" style={{ display: tab === 'map' && !(festivalEvent && exitedFestivalId !== festivalEvent.id) ? undefined : 'none' }}>
+            <FeatureBoundary label="tab-map">
+              <MapScreen
+                tonightStatus={tonightStatus}
+                ghost={settings.ghostMode}
+                pins={tonightPins.filter(p => p.userId !== meId && !blockedIds.has(p.userId))}
+                nearby={nearby.filter(n => !blockedIds.has(n.userId))}
+                events={eventsOnMap}
+                onOpenUser={(h) => setActiveUserHandle(h)}
+                onOpenTonightStatus={() => setShowTonightModal(true)}
+                onOpenEvent={(id) => setActiveEvent(id)}
+                festivalEvent={festivalEvent && exitedFestivalId === festivalEvent.id ? festivalEvent : null}
+                onEnterFestival={() => setExitedFestivalId(null)}
+              />
+            </FeatureBoundary>
+          </div>
+        )}
         <div className="animate-screen-in" key={`${tab}-${community || ''}`}>
           <FeatureBoundary label={`tab-${tab}`}>
             {renderTab()}
