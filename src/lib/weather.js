@@ -29,12 +29,27 @@ export async function geoPermission() {
   }
 }
 
-// Get position ONLY if the user has already granted permission — never triggers a prompt.
-// Use for background/auto features (map recenter, nearby refresh) so we don't nag on every
-// app open. The user grants once via an explicit gesture (the "share location" button, or the
-// weather-mood toggle), and thereafter these silent calls just work. Resolves null otherwise.
+// Remember that THIS user once explicitly granted location (via the share flow). iOS
+// Safari — especially installed PWAs — often reports 'prompt' again on the next session
+// even though the user granted before, which made every silent refresh bail and the map
+// pins vanish. With this marker we still attempt the read (worst case iOS shows its own
+// re-prompt, which matches the user's stated intent to share).
+const GEO_GRANTED_KEY = 'geoEverGranted';
+export function markGeoGranted() {
+  try { localStorage.setItem(GEO_GRANTED_KEY, '1'); } catch { /* noop */ }
+}
+function geoEverGranted() {
+  try { return localStorage.getItem(GEO_GRANTED_KEY) === '1'; } catch { return false; }
+}
+
+// Get position ONLY if the user has already granted permission — never triggers a prompt
+// for someone who hasn't opted in. Used by background/auto features (map recenter, nearby
+// refresh). The user grants once via an explicit gesture (the "share location" button, or
+// the weather-mood toggle), and thereafter these silent calls just work. Resolves null otherwise.
 export async function getPositionIfGranted() {
-  if ((await geoPermission()) !== 'granted') return null;
+  const state = await geoPermission();
+  const allowed = state === 'granted' || (state !== 'denied' && geoEverGranted());
+  if (!allowed) return null;
   try { return await getPosition(); } catch { return null; }
 }
 

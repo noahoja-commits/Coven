@@ -43,6 +43,21 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: { cacheName: 'coven-map', expiration: { maxEntries: 4 } },
           },
+          // OpenFreeMap vector tiles — the bulk of what makes the map feel slow on repeat
+          // opens. CacheFirst: a tile for a given zoom/x/y never changes meaningfully at
+          // our timescale; capped so the cache can't grow unbounded.
+          {
+            urlPattern: ({ url }) => url.hostname === 'tiles.openfreemap.org' && url.pathname.endsWith('.pbf'),
+            handler: 'CacheFirst',
+            options: { cacheName: 'coven-map-tiles', expiration: { maxEntries: 400, maxAgeSeconds: 7 * 24 * 3600, purgeOnQuotaError: true } },
+          },
+          // Style JSON, glyph fonts, sprites — small, rarely change: serve cached instantly,
+          // refresh in the background.
+          {
+            urlPattern: ({ url }) => url.hostname === 'tiles.openfreemap.org',
+            handler: 'StaleWhileRevalidate',
+            options: { cacheName: 'coven-map-style', expiration: { maxEntries: 60, maxAgeSeconds: 30 * 24 * 3600, purgeOnQuotaError: true } },
+          },
           {
             urlPattern: ({ url }) => url.hostname.endsWith('.supabase.co'),
             handler: 'NetworkOnly',
