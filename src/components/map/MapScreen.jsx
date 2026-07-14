@@ -83,13 +83,16 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = []
         </div>
       )}
 
-      {view === 'real' ? (
+      {/* RealMap stays MOUNTED when peeking at the by-area list (display:none) — unmounting
+          would tear down the whole maplibre instance and rebuild it on every toggle. */}
+      <div className="absolute inset-0" style={{ display: view === 'real' ? undefined : 'none' }}>
         <ErrorBoundary>
           <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-[#6B6B6B] text-xs bg-[#070708]" style={F.ui}>summoning the map…</div>}>
             <RealMap nearby={nearby} events={events} tonightStatus={tonightStatus} ghost={ghost} onOpenUser={onOpenUser} onOpenTonightStatus={onOpenTonightStatus} onOpenEvent={onOpenEvent} />
           </Suspense>
         </ErrorBoundary>
-      ) : (
+      </div>
+      {view === 'list' && (
         /* By-area list */
         <div className="absolute inset-0 top-[88px] bottom-0 overflow-y-auto bg-[#070708] safe-pb">
           {filtered.length === 0 ? (
