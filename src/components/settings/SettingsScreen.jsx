@@ -301,28 +301,5 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
   );
 }
 
-export const DEFAULT_SETTINGS = {
-  parchmentMode: false,
-  grainIntensity: 0.12,
-  grainStyle: 'fine',
-  mediaTreatment: 'none',
-  vignette: true,
-  colorMood: 'none',
-  shockMode: 'none',
-  quickSwitch: true,
-  shakeShuffle: true,
-  reactiveTaps: true,
-  weatherMood: false,
-  soundOn: false,
-  tarotEnabled: true,
-  vespersEnabled: true,
-  vigilEnabled: true,
-  mementoMori: true,
-  mementoExpected: false,
-  ghostMode: false,
-  haptics: true,
-  ambientGlow: true,
-  livingTheme: true,
-  familiar: true,
-  quietHours: { enabled: false, start: '22:00', end: '08:00' },
-};
+// DEFAULT_SETTINGS moved to ./defaults.js so App.jsx can read it without
+// pulling this (lazy-loaded) screen into the main bundle.

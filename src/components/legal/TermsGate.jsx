@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
-import { LegalScreen } from './LegalScreen';
+const LegalScreen = lazy(() => import('./LegalScreen').then(m => ({ default: m.LegalScreen })));
 import { TERMS_EFFECTIVE_LABEL } from '../../lib/legal';
 
 // Re-acceptance gate — shown when the signed-in profile's recorded tos_version
@@ -55,7 +55,7 @@ export function TermsGate({ onAgree }) {
           your agreement is recorded with today's date, once.
         </p>
       </div>
-      {legal && <LegalScreen initialDoc={legal} onBack={() => setLegal(null)} />}
+      {legal && <Suspense fallback={null}><LegalScreen initialDoc={legal} onBack={() => setLegal(null)} /></Suspense>}
     </div>
   );
 }

@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { Mail, Lock, Loader2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { GrainOverlay } from '../shared/Visuals';
 import { useAuth } from '../../auth/AuthProvider';
-import { LegalScreen } from '../legal/LegalScreen';
+const LegalScreen = lazy(() => import('../legal/LegalScreen').then(m => ({ default: m.LegalScreen })));
 
 export function SignInScreen() {
   const { signInWithPassword, signUpWithPassword, resetPasswordForEmail } = useAuth();
@@ -150,7 +150,7 @@ export function SignInScreen() {
           </form>
         )}
       </div>
-      {legal && <LegalScreen initialDoc={legal} onBack={() => setLegal(null)} />}
+      {legal && <Suspense fallback={null}><LegalScreen initialDoc={legal} onBack={() => setLegal(null)} /></Suspense>}
     </div>
   );
 }

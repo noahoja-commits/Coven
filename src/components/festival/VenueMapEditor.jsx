@@ -10,7 +10,8 @@ function toLocalInput(iso) {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
-export function VenueMapEditor({ event, me, onClose, onSaved }) {
+export function VenueMapEditor({ event, me, onClose, onSaved, onError }) {
+  const fail = (msg) => (onError ? onError(msg) : alert(msg));
   const [imageUrl, setImageUrl] = useState(null);
   const [pins, setPins] = useState([]); // {tmpId, kind, label, x, y}
   const [kind, setKind] = useState('stage');
@@ -36,7 +37,7 @@ export function VenueMapEditor({ event, me, onClose, onSaved }) {
       const url = await uploadVenueImage(event.id, file);
       await saveVenueMap(event.id, url, me.id);
       setImageUrl(url);
-    } catch (err) { alert('upload failed: ' + (err.message || err)); }
+    } catch (err) { fail('upload failed: ' + (err.message || err)); }
     finally { setUploading(false); }
   };
 
@@ -56,7 +57,7 @@ export function VenueMapEditor({ event, me, onClose, onSaved }) {
       setSaved(true);
       onSaved && onSaved();
       setTimeout(() => setSaved(false), 1500);
-    } catch (err) { alert('save failed: ' + (err.message || err)); }
+    } catch (err) { fail('save failed: ' + (err.message || err)); }
     finally { setSaving(false); }
   };
 
