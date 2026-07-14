@@ -86,6 +86,11 @@ git push origin feature/short-name             # upload your branch
 - **Realtime:** new tables aren't auto-streamed. To get `postgres_changes`, add the table to the publication: `alter publication supabase_realtime add table public.<t>;` (see migration 0024).
 - **Stripe is currently in LIVE mode.** Checkout/tickets work (platform-collect). Connect payout onboarding needs the restricted key's Connect permissions enabled in the Stripe dashboard. The webhook (`STRIPE_WEBHOOK_SECRET`) must match the **live** endpoint or paid tickets won't be recorded.
 - After a deploy, the PWA service worker auto-reloads clients (`controllerchange` handler in `main.jsx`) — but a phone may still need one cache clear/reinstall to pick up a brand-new SW.
+- **New `profiles` columns are invisible to clients until granted.** Migration 0026 made `profiles` SELECT a column whitelist (`revoke select` + `grant select (cols…)`), so adding a column needs BOTH the `grant select (new_col)` in the migration AND an entry in `PROFILE_COLS_*` in `profiles.js` (with a pre-migration fallback tier — see the tos_/mood/decor pattern).
+- **Never rasterize SVG through `compress()`.** Its catch-all falls back to the ORIGINAL file when canvas fails (a `foreignObject` taints the canvas), silently uploading unsanitized scriptable markup to a public bucket. That's why `uploadImage` rejects SVG outright — don't "fix" that by re-adding passthrough.
+- **Video GPS lives in mp4 `moov`→`udta` (`©xyz`/`loci`) and `moov`→`meta`.** `stripVideoLocation` in `storage.js` renames those boxes to `free` in place (no re-encode, offsets intact) and fails open on malformed input. Applies to NEW mp4/mov/m4v uploads only — historical videos and webm/ogg keep whatever they had.
+- **TermsGate semantics:** `dbProfile.tos_version === undefined` means the 0065 columns aren't deployed/readable (gate hides, fail-open); `null`/stale means the user genuinely hasn't accepted the current `TERMS_VERSION` (gate blocks). Bump `TERMS_VERSION` + label together in `src/lib/legal.js` when the legal docs change.
+- **Claude auto-mode can't do prod writes** (live posts, `apply.mjs` migrations, Stripe actions) — the permission classifier blocks them. A human runs those; agents prep the exact commands and verify after.
 
 ## How we work together (collaboration rules)
 
@@ -108,3 +113,10 @@ The frontend is safe to parallelize; the **shared backend is where you can clobb
    - touch Stripe dashboard config or run anything that writes/deletes prod data.
 5. **Secrets are shared securely (password manager), never committed and never pasted in chat.** `.env` is gitignored; keep it that way.
 6. **Write decisions down in the repo** (this file, code comments, PR descriptions) — not in a local Claude memory, which doesn't transfer between machines/people.
+
+## Session Log
+
+- 2026-07-14: [Decisions] Legal-hardening pass (two paired Claude sessions, frontend/backend split): PR #14 records ToS acceptance (`tos_version`/`tos_accepted_at` at onboarding + `TermsGate` re-acceptance for existing users/version bumps, no backfill — real timestamps only); PR #15 strips video GPS client-side + rejects SVG uploads; PR #16 migrations 0065 (tos columns + column grant) & 0066 (report → admin push via existing `notify_push` trigger, zero new endpoints) + delete-account now purges the user's Storage objects. Merge order #16 → #14 → #15; both frontend PRs fail open pre-migration.
+- 2026-07-14: [Verification] Full audit + live walkthrough: RLS enabled 37/37 tables (`app_config` zero-policy by design); Stripe webhook signature-verified, no card data touches Coven; every `api/` fn auth-enforced (verifyUser ×8); live console clean (single cosmetic maplibre `wood-pattern` warn); prod-uploaded images confirmed EXIF-free; location sharing verified opt-in. Legal docs are solid but **not attorney-reviewed** — get a lawyer before scale.
+- 2026-07-14: [Gotchas → see Hard-won gotchas] profiles column-grant pattern, SVG-rasterize trap, mp4 GPS atoms, TermsGate undefined-vs-null, auto-mode prod-write blocks.
+- 2026-07-14: [Known gaps, deliberate] `voice` bucket is conversation-keyed so delete-account can't purge it per-user; GIFs and pre-existing videos keep their metadata (only new mp4-family uploads are stripped); client errors go to ephemeral Vercel logs only (`api/log-error.js`, no durable store); reports below the 3-reporter auto-hide now push the admin but review itself is still the `docs/report-triage.md` runbook.
