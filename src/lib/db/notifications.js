@@ -15,6 +15,9 @@ function text(n) {
     case 'crew_join': return n.body ? `joined ${n.body}` : 'joined your crew';
     case 'mention':   return 'mentioned you';
     case 'coauthor':  return n.body ? `co-signed a post with you: "${n.body}"` : 'co-signed a post with you';
+    // Admin-only: fired by the reports-table trigger (migration 0066) so flagged
+    // content gets human eyes without anyone polling SQL. body = "kind · reason".
+    case 'report':    return n.body ? `filed a report — ${n.body}` : 'filed a report';
     default:        return 'did something';
   }
 }

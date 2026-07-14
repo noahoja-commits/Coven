@@ -20,6 +20,8 @@ import { fetchNotifications, markNotificationRead, markAllNotificationsRead, cle
 import { fetchBlockedIds, blockUser as dbBlockUser, unblockUser as dbUnblockUser, reportContent } from './lib/db/moderation';
 import { BlockedOverlay } from './components/settings/BlockedOverlay';
 import { LegalScreen } from './components/legal/LegalScreen';
+import { TermsGate } from './components/legal/TermsGate';
+import { TERMS_VERSION } from './lib/legal';
 import { DeleteAccountModal } from './components/settings/DeleteAccountModal';
 import { deleteAccount } from './lib/db/account';
 import { ReportSheet } from './components/shared/ReportSheet';
@@ -1720,6 +1722,10 @@ export default function App() {
         tags: [...new Set(['goth', ...(data.vibes || []).slice(0, 3)])],
         scenes: data.scenes || [],
         bio: (data.vibes || []).length ? data.vibes.join(' · ') + ' · ' + data.city : (data.city || ''),
+        // Onboarding completion is the acceptance event for the clickwrap shown at
+        // sign-up — record which terms version was agreed to and when.
+        tos_version: TERMS_VERSION,
+        tos_accepted_at: new Date().toISOString(),
       });
     } catch (e) {
       if (e?.code === '23505') throw new Error('handle taken');
@@ -1947,6 +1953,20 @@ export default function App() {
     return (
       <div className="phone-frame max-w-md mx-auto bg-black text-[#F5F1E8] relative overflow-hidden min-h-[100dvh]">
         <OnboardingFlow onComplete={handleOnboard} onSignOut={signOut} />
+      </div>
+    );
+  }
+  // Terms re-acceptance gate. `undefined` means the tos_version column isn't
+  // deployed yet (selectProfile fell back to the no-tos column list) — fail open.
+  // `null`/stale means the column exists and this profile hasn't accepted the
+  // current version — block until they agree.
+  if (dbProfile.tos_version !== undefined && dbProfile.tos_version !== TERMS_VERSION) {
+    return (
+      <div className="phone-frame max-w-md mx-auto bg-black text-[#F5F1E8] relative overflow-hidden min-h-[100dvh]">
+        <TermsGate onAgree={async () => {
+          await updateProfile(userId, { tos_version: TERMS_VERSION, tos_accepted_at: new Date().toISOString() });
+          await refreshProfile();
+        }} />
       </div>
     );
   }
