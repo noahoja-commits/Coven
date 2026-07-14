@@ -16,6 +16,7 @@ function bodyFor(n, actor) {
     case 'crew_join':   return n.body ? `${actor} joined ${n.body}` : `${actor} joined your crew`;
     case 'mention':     return `${actor} mentioned you`;
     case 'coauthor':    return n.body ? `${actor} co-signed a post with you: "${trunc(n.body)}"` : `${actor} co-signed a post with you`;
+    case 'report':      return n.body ? `new report · ${trunc(n.body)}` : 'new report — review it';
     default:            return `${actor} did something`;
   }
 }
