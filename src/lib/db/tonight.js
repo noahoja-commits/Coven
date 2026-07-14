@@ -78,10 +78,12 @@ export async function clearTonightGeo() {
   if (error) throw error;
 }
 
-// Fuzzed nearby souls + bucketed distance. Returns [] gracefully pre-migration.
+// Fuzzed nearby souls + bucketed distance. Returns NULL on error (so callers can keep
+// their last-known list instead of wiping pins on a transient failure) — a genuinely
+// empty map is [], which stays distinguishable.
 export async function fetchNearby(myLat, myLng) {
   const { data, error } = await supabase.rpc('tonight_nearby', { my_lat: myLat, my_lng: myLng });
-  if (error) return [];
+  if (error) return null;
   return (data || []).map(r => ({
     userId: r.user_id,
     handle: r.handle,

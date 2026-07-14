@@ -45,7 +45,7 @@ import { SHOCK_MODES } from './components/shared/shockModes';
 const ShockOverlay = lazy(() => import('./components/shared/ShockOverlay').then(m => ({ default: m.ShockOverlay })));
 import { ShockModePicker } from './components/settings/ShockModePicker';
 import { startAmbient, stopAmbient } from './lib/ambient';
-import { fetchWeatherTint, getPosition, getPositionIfGranted } from './lib/weather';
+import { fetchWeatherTint, getPosition, getPositionIfGranted, markGeoGranted } from './lib/weather';
 import { InstallPrompt } from './components/shared/InstallPrompt';
 
 import { HomeScreen } from './components/feed/HomeScreen';
@@ -143,18 +143,16 @@ export default function App() {
 
   // === STATE ===
   const [tab, setTab] = useState('home');
-  // Once the map tab has been visited, keep MapScreen MOUNTED (hidden with display:none on
-  // other tabs) so the maplibre instance survives tab switches — rebuilding it on every visit
-  // (style fetch + tile fetch + worker spin-up) is what made the map feel finicky.
+  // The map layer stays MOUNTED once created (hidden with visibility:hidden on other tabs,
+  // which keeps its real size) so the maplibre instance survives tab switches — rebuilding
+  // it on every visit (style fetch + tile fetch + worker spin-up) is what made it finicky.
+  // It also WARM-MOUNTS ~4s after launch: the map initializes, positions, and renders its
+  // tiles invisibly in the background, so the first tap on the map tab is instant.
   const [mapVisited, setMapVisited] = useState(false);
   useEffect(() => { if (tab === 'map') setMapVisited(true); }, [tab]);
-  // Warm the ~1 MB map chunk while the browser is idle so even the FIRST open skips the
-  // download wait (tiles still come from the network; the SW runtime-caches them after).
   useEffect(() => {
-    const warm = () => { import('./components/map/RealMap').catch(() => { /* offline — first open will retry */ }); };
-    const idle = typeof requestIdleCallback !== 'undefined';
-    const id = idle ? requestIdleCallback(warm, { timeout: 10000 }) : setTimeout(warm, 4000);
-    return () => { if (idle) cancelIdleCallback(id); else clearTimeout(id); };
+    const t = setTimeout(() => setMapVisited(true), 4000);
+    return () => clearTimeout(t);
   }, []);
   const [community, setCommunity] = useState(null);
   const [showDMs, setShowDMs] = useState(false);
@@ -783,9 +781,10 @@ export default function App() {
         coords = null;
       }
       if (coords) {
+        markGeoGranted(); // survives iOS PWA permission amnesia — silent refreshes keep working
         try {
           await setTonightGeo({ lat: coords.latitude, lng: coords.longitude, fuzzM: status.fuzzM });
-          fetchNearby(coords.latitude, coords.longitude).then(setNearby).catch(() => {});
+          fetchNearby(coords.latitude, coords.longitude).then(list => { if (list) setNearby(list); }).catch(() => {});
         } catch (err) {
           clearTonightGeo().catch(() => {}); // never leave stale coords broadcasting
           setNearby([]);
@@ -810,18 +809,25 @@ export default function App() {
     setNearby([]);
   }, [settings.ghostMode]);
 
-  // Refresh privacy-fuzzed proximity when the map is open — but ONLY if location was already
+  // Refresh privacy-fuzzed proximity while the map is open — but ONLY if location was already
   // granted, so opening the map never re-prompts. First-timers grant once via the explicit
   // "share location" button; after that this silent read just works. You can always SEE the
   // living map regardless; sharing only decides whether you appear ON it.
+  // IMPORTANT: a failed refresh (flaky GPS indoors, transient RPC error, iOS PWA permission
+  // amnesia) keeps the LAST-KNOWN pins instead of wiping the map — the old wipe-on-failure
+  // was why "locations don't stick around". Refresh repeats every 60s while the tab is open.
   useEffect(() => {
     if (tab !== 'map' || !meId || settings.ghostMode) return undefined;
     let active = true;
-    getPositionIfGranted()
-      .then((coords) => (coords ? fetchNearby(coords.latitude, coords.longitude) : []))
-      .then(list => { if (active) setNearby(list); })
-      .catch(() => { if (active) setNearby([]); });
-    return () => { active = false; };
+    const refresh = () => {
+      getPositionIfGranted()
+        .then((coords) => (coords ? fetchNearby(coords.latitude, coords.longitude) : null))
+        .then(list => { if (active && list) setNearby(list); })
+        .catch(() => { /* keep last-known pins */ });
+    };
+    refresh();
+    const t = setInterval(refresh, 60000);
+    return () => { active = false; clearInterval(t); };
   }, [tab, meId, settings.ghostMode]);
 
   // Load an event's attendees + waitlist + recap posts when its detail opens.
@@ -2324,10 +2330,12 @@ export default function App() {
       {/* Main content scrolls INSIDE the frame, between the fixed header and bottom nav.
           (top-[60px]/bottom-[68px] already include the safe-area insets — see index.css.) */}
       <div className="absolute inset-0 top-[60px] bottom-[68px] overflow-y-auto">
-        {/* Persistent map layer — mounted on first visit, then only display-toggled so the
-            maplibre instance (style, tiles, camera) survives tab switches. */}
+        {/* Persistent map layer — warm-mounted shortly after launch, then only
+            visibility-toggled so the maplibre instance (style, tiles, camera) survives tab
+            switches. visibility (not display) keeps its real size, so tiles pre-render
+            invisibly and the map tab opens fully drawn. */}
         {mapVisited && (
-          <div className="absolute inset-0" style={{ display: tab === 'map' && !(festivalEvent && exitedFestivalId !== festivalEvent.id) ? undefined : 'none' }}>
+          <div className="absolute inset-0" style={(tab === 'map' && !(festivalEvent && exitedFestivalId !== festivalEvent.id)) ? undefined : { visibility: 'hidden', pointerEvents: 'none' }}>
             <FeatureBoundary label="tab-map">
               <MapScreen
                 tonightStatus={tonightStatus}
