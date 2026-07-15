@@ -2346,6 +2346,7 @@ export default function App() {
                 onOpenUser={(h) => setActiveUserHandle(h)}
                 onOpenTonightStatus={() => setShowTonightModal(true)}
                 onOpenEvent={(id) => setActiveEvent(id)}
+                onCreateEvent={() => setShowCreateEvent(true)}
                 festivalEvent={festivalEvent && exitedFestivalId === festivalEvent.id ? festivalEvent : null}
                 onEnterFestival={() => setExitedFestivalId(null)}
               />

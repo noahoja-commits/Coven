@@ -17,7 +17,7 @@ function hashStr(s) {
 const areaKey = (pin) => (pin.neighborhood || pin.city || '').trim().toLowerCase();
 const areaLabel = (pin) => (pin.neighborhood || pin.city || 'somewhere unspoken');
 
-export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = [], events = [], onOpenUser, onOpenTonightStatus, onOpenEvent, festivalEvent = null, onEnterFestival }) {
+export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = [], events = [], onOpenUser, onOpenTonightStatus, onOpenEvent, onCreateEvent, festivalEvent = null, onEnterFestival }) {
   const [view, setView] = useState('real'); // 'real' (the living map) | 'list' (by area)
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState('active'); // 'active' | 'az'
@@ -128,12 +128,22 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = []
         </div>
       )}
 
-      <button onClick={onOpenTonightStatus}
-        className="absolute bottom-4 right-4 w-12 h-12 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] flex items-center justify-center shadow-xl z-30"
-        style={{ boxShadow: '0 0 20px rgba(139,0,0,0.5)' }}
-        title="drop your tonight pin">
-        <Plus size={20} />
-      </button>
+      <div className="absolute bottom-4 right-4 z-30 flex flex-col items-center gap-2">
+        {onCreateEvent && (
+          <button onClick={onCreateEvent}
+            className="w-12 h-12 bg-[#0A0A0A] hover:bg-[#1A1400] border-2 border-[#C9A961] text-[#C9A961] flex items-center justify-center shadow-xl text-lg"
+            style={{ boxShadow: '0 0 16px rgba(201,169,97,0.4)' }}
+            title="host a rite">
+            ◈
+          </button>
+        )}
+        <button onClick={onOpenTonightStatus}
+          className="w-12 h-12 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] flex items-center justify-center shadow-xl"
+          style={{ boxShadow: '0 0 20px rgba(139,0,0,0.5)' }}
+          title="drop your tonight pin">
+          <Plus size={20} />
+        </button>
+      </div>
     </div>
   );
 }
