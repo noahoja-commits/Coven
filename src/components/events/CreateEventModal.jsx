@@ -31,9 +31,11 @@ export function CreateEventModal({ onCreate, onClose, initialCoords = null }) {
   const [attested, setAttested] = useState(false); // Stripe-safe: not paid metaphysical services
   const [saving, setSaving] = useState(false);
   const [coords, setCoords] = useState(initialCoords); // {lat,lng} — the map pin
-  const [fromMap, setFromMap] = useState(!!initialCoords); // true = picked on the map, false = device location
   const [locating, setLocating] = useState(false);
   const [savedVenues] = useState(() => getVenues());
+  // Derived, not state: the pin came from the map iff coords is still the exact object the map
+  // handed us (initialCoords never changes; a device re-pin always creates a new object).
+  const fromMap = !!coords && coords === initialCoords;
 
   const priceNum = parseFloat(price || '0');
   const valid = name.trim().length > 1 && (!ticketed || (priceNum > 0 && attested));
@@ -45,10 +47,9 @@ export function CreateEventModal({ onCreate, onClose, initialCoords = null }) {
     try {
       const pos = await getPosition();
       setCoords({ lat: pos.latitude, lng: pos.longitude });
-      setFromMap(false);
     } catch {
-      setCoords(null);
-      setFromMap(false);
+      // Keep whatever pin we had — wiping it here would silently discard a map-picked
+      // point (unrecoverable inside the modal) just because geolocation failed/was denied.
     } finally {
       setLocating(false);
     }

@@ -1849,7 +1849,7 @@ export default function App() {
     if (activeHashtag) { setActiveHashtag(null); return true; }
     if (venueEditorEvent) { setVenueEditorEvent(null); return true; }
     if (ticketManagerEvent) { setTicketManagerEvent(null); return true; }
-    if (showCreateEvent) { setShowCreateEvent(false); return true; }
+    if (showCreateEvent) { setShowCreateEvent(false); setEventDraftCoords(null); return true; }
     if (showEditProfile) { setShowEditProfile(false); return true; }
     if (showMood) { setShowMood(false); return true; }
     if (sharePostTarget) { setSharePostTarget(null); return true; }

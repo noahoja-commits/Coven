@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Plus, Map as MapIcon, List } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { Avatar } from '../shared/Avatar';
@@ -22,6 +22,16 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = []
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState('active'); // 'active' | 'az'
   const [placing, setPlacing] = useState(false); // tap-the-map "host a rite here" mode
+
+  // Escape cancels placement. Lives HERE (not in the lazy RealMap) so cancel always works even
+  // if the map chunk failed to load. defaultPrevented skips presses App's overlay handler already
+  // consumed (closing a modal shouldn't also silently kill placement mode).
+  useEffect(() => {
+    if (!placing) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape' && !e.defaultPrevented) setPlacing(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [placing]);
 
   // Filter the souls by the search box (used by the by-area list).
   const q = query.trim().toLowerCase();
@@ -50,6 +60,14 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = []
     // collapse to 0: MapScreen sits inside an `animate-screen-in` wrapper that has no in-flow
     // height (its children are absolutely positioned), which would otherwise leave MapLibre 0px tall.
     <div className="absolute inset-x-0 top-0" style={{ height: 'calc(100dvh - 128px)' }}>
+      {/* Placement banner — owned by MapScreen (not the lazy RealMap) so the cancel ✕ is
+          always reachable even while the map chunk is loading or failed. */}
+      {placing && (
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-3 py-1.5 bg-black/80 backdrop-blur-sm border border-[#C9A961]/70" style={F.ui}>
+          <span className="text-[#C9A961] text-[10px] uppercase tracking-[0.18em]">tap the map to place your rite</span>
+          <button onClick={() => setPlacing(false)} className="text-[#A8A29E] hover:text-[#F5F1E8] text-xs leading-none px-1" title="cancel">✕</button>
+        </div>
+      )}
       {festivalEvent && !placing && (
         <button onClick={onEnterFestival}
           className="absolute top-2 left-1/2 -translate-x-1/2 z-30 px-4 py-2 bg-[#8B0000]/90 border border-[#C9A961] text-[#F5F1E8] text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 shadow-xl animate-pulse-slow" style={F.ui}>
@@ -91,8 +109,7 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = []
           <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-[#6B6B6B] text-xs bg-[#070708]" style={F.ui}>summoning the map…</div>}>
             <RealMap nearby={nearby} events={events} tonightStatus={tonightStatus} ghost={ghost} onOpenUser={onOpenUser} onOpenTonightStatus={onOpenTonightStatus} onOpenEvent={onOpenEvent}
               placing={placing}
-              onPickPoint={(c) => { setPlacing(false); onCreateEventAt && onCreateEventAt(c); }}
-              onCancelPlacing={() => setPlacing(false)} />
+              onPickPoint={(c) => { setPlacing(false); onCreateEventAt && onCreateEventAt(c); }} />
           </Suspense>
         </ErrorBoundary>
       </div>
