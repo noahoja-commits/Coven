@@ -273,6 +273,7 @@ export default function App() {
   const [events, setEvents] = useState([]);
   const [eventsOnMap, setEventsOnMap] = useState([]); // events with coords that pass the map anti-spam gate
   const [showCreateEvent, setShowCreateEvent] = useState(false);
+  const [eventDraftCoords, setEventDraftCoords] = useState(null); // {lat,lng} picked on the map → pre-pins CreateEventModal
   const [activeEventAttendees, setActiveEventAttendees] = useState([]);
   const [eventWaitlist, setEventWaitlist] = useState({ count: 0, mine: false });
   const [ticketManagerEvent, setTicketManagerEvent] = useState(null);
@@ -1848,7 +1849,7 @@ export default function App() {
     if (activeHashtag) { setActiveHashtag(null); return true; }
     if (venueEditorEvent) { setVenueEditorEvent(null); return true; }
     if (ticketManagerEvent) { setTicketManagerEvent(null); return true; }
-    if (showCreateEvent) { setShowCreateEvent(false); return true; }
+    if (showCreateEvent) { setShowCreateEvent(false); setEventDraftCoords(null); return true; }
     if (showEditProfile) { setShowEditProfile(false); return true; }
     if (showMood) { setShowMood(false); return true; }
     if (sharePostTarget) { setSharePostTarget(null); return true; }
@@ -2346,7 +2347,7 @@ export default function App() {
                 onOpenUser={(h) => setActiveUserHandle(h)}
                 onOpenTonightStatus={() => setShowTonightModal(true)}
                 onOpenEvent={(id) => setActiveEvent(id)}
-                onCreateEvent={() => setShowCreateEvent(true)}
+                onCreateEventAt={(c) => { setEventDraftCoords(c); setShowCreateEvent(true); }}
                 festivalEvent={festivalEvent && exitedFestivalId === festivalEvent.id ? festivalEvent : null}
                 onEnterFestival={() => setExitedFestivalId(null)}
               />
@@ -2566,7 +2567,8 @@ export default function App() {
         );
       })()}
       {showCreateEvent && (
-        <CreateEventModal onCreate={addEvent} onClose={() => setShowCreateEvent(false)} />
+        <CreateEventModal onCreate={addEvent} initialCoords={eventDraftCoords}
+          onClose={() => { setShowCreateEvent(false); setEventDraftCoords(null); }} />
       )}
       {ticketManagerEvent && (
         <TicketManager

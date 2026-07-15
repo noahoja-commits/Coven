@@ -60,13 +60,24 @@ function eventMarkerEl({ name }) {
 // never blocks on geolocation — your location is requested in parallel and the map flies to it
 // when (if) it arrives. You can always SEE the map; sharing only decides whether you appear ON it
 // (your own pin + privacy circle). A load failsafe guarantees it never sits on "summoning…".
-export default function RealMap({ nearby = [], events = [], tonightStatus, ghost = false, onOpenUser, onOpenTonightStatus, onOpenEvent }) {
+export default function RealMap({ nearby = [], events = [], tonightStatus, ghost = false, onOpenUser, onOpenTonightStatus, onOpenEvent, placing = false, onPickPoint }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef([]);
   const meRef = useRef(null); // { lat, lng } once we have a fix
   const [state, setState] = useState('loading'); // loading | ready | error
   const [located, setLocated] = useState(false);
+  // Read by the marker click handlers: a tap on an existing pin during placement mode picks
+  // THAT pin's location (markers sit over the canvas and would otherwise be dead zones),
+  // instead of opening the soul/event on top of the create-modal.
+  const placingRef = useRef(false);
+  useEffect(() => { placingRef.current = placing; }, [placing]);
+  const pickFromMarker = (e, lat, lng) => {
+    if (!placingRef.current) return false;
+    e.stopPropagation(); // don't let the tap ALSO reach the canvas and double-pick
+    onPickPoint && onPickPoint({ lat, lng });
+    return true;
+  };
   const sharing = !!tonightStatus?.share && !ghost;
   const fuzzM = tonightStatus?.fuzzM || 1609;
 
@@ -152,23 +163,41 @@ export default function RealMap({ nearby = [], events = [], tonightStatus, ghost
     markersRef.current.forEach(m => m.remove());
     markersRef.current = [];
     if (wantMine) {
-      markersRef.current.push(new maplibregl.Marker({ element: markerEl({ glyph: '☽', mine: true }) }).setLngLat([me.lng, me.lat]).addTo(map));
+      const mineEl = markerEl({ glyph: '☽', mine: true });
+      mineEl.addEventListener('click', (e) => { pickFromMarker(e, me.lat, me.lng); });
+      markersRef.current.push(new maplibregl.Marker({ element: mineEl }).setLngLat([me.lng, me.lat]).addTo(map));
     }
     nearby.forEach(p => {
       if (p.fuzzLat == null || p.fuzzLng == null) return;
       const el = markerEl({ glyph: p.avatar, avatarUrl: p.avatarUrl });
       el.title = `${p.handle}${p.distanceMi != null ? ` · ~${p.distanceMi} mi` : ''}`;
-      el.addEventListener('click', () => onOpenUser && onOpenUser(p.handle));
+      el.addEventListener('click', (e) => { if (!pickFromMarker(e, p.fuzzLat, p.fuzzLng)) onOpenUser && onOpenUser(p.handle); });
       markersRef.current.push(new maplibregl.Marker({ element: el }).setLngLat([p.fuzzLng, p.fuzzLat]).addTo(map));
     });
     // Event pins (gated by the event_map view's anti-spam rules) → tap opens the rite.
     events.forEach(ev => {
       if (!Number.isFinite(ev.lat) || !Number.isFinite(ev.lng)) return;
       const el = eventMarkerEl({ name: ev.name });
-      el.addEventListener('click', () => onOpenEvent && onOpenEvent(ev.id));
+      el.addEventListener('click', (e) => { if (!pickFromMarker(e, ev.lat, ev.lng)) onOpenEvent && onOpenEvent(ev.id); });
       markersRef.current.push(new maplibregl.Marker({ element: el }).setLngLat([ev.lng, ev.lat]).addTo(map));
     });
   }, [state, nearby, events, sharing, fuzzM, onOpenUser, onOpenEvent, located]);
+
+  // Placement mode: one tap on the map picks the point for a new rite. Crosshair cursor while
+  // active; the click handler is registered only for the duration so normal map taps are untouched.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!placing || state !== 'ready' || !map) return undefined;
+    const canvas = map.getCanvas();
+    const prevCursor = canvas.style.cursor;
+    canvas.style.cursor = 'crosshair';
+    const pick = (e) => { onPickPoint && onPickPoint({ lat: e.lngLat.lat, lng: e.lngLat.lng }); };
+    map.on('click', pick);
+    return () => {
+      map.off('click', pick);
+      try { canvas.style.cursor = prevCursor; } catch { /* noop */ }
+    };
+  }, [placing, state, onPickPoint]);
 
   // When sharing turns on and we don't yet have a fix (permission was granted just now via the
   // share flow, after the map already mounted), locate silently so the user's own pin + privacy
@@ -202,7 +231,7 @@ export default function RealMap({ nearby = [], events = [], tonightStatus, ghost
         </div>
       )}
       {/* Non-blocking nudge — never a dead-end. Tap to drop your pin / share. */}
-      {state === 'ready' && !sharing && !ghost && (
+      {state === 'ready' && !sharing && !ghost && !placing && (
         <button onClick={onOpenTonightStatus}
           className="absolute top-3 left-1/2 -translate-x-1/2 z-10 px-3 py-1.5 bg-black/75 backdrop-blur-sm border border-[#8B0000]/50 text-[#C9A961] text-[10px] uppercase tracking-[0.18em] hover:border-[#C9A961] transition-colors" style={F.ui}>
           {located ? 'go live · drop your pin →' : 'share location to appear →'}

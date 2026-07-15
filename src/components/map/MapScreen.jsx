@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Plus, Map as MapIcon, List } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { Avatar } from '../shared/Avatar';
@@ -17,10 +17,21 @@ function hashStr(s) {
 const areaKey = (pin) => (pin.neighborhood || pin.city || '').trim().toLowerCase();
 const areaLabel = (pin) => (pin.neighborhood || pin.city || 'somewhere unspoken');
 
-export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = [], events = [], onOpenUser, onOpenTonightStatus, onOpenEvent, onCreateEvent, festivalEvent = null, onEnterFestival }) {
+export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = [], events = [], onOpenUser, onOpenTonightStatus, onOpenEvent, onCreateEventAt, festivalEvent = null, onEnterFestival }) {
   const [view, setView] = useState('real'); // 'real' (the living map) | 'list' (by area)
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState('active'); // 'active' | 'az'
+  const [placing, setPlacing] = useState(false); // tap-the-map "host a rite here" mode
+
+  // Escape cancels placement. Lives HERE (not in the lazy RealMap) so cancel always works even
+  // if the map chunk failed to load. defaultPrevented skips presses App's overlay handler already
+  // consumed (closing a modal shouldn't also silently kill placement mode).
+  useEffect(() => {
+    if (!placing) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape' && !e.defaultPrevented) setPlacing(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [placing]);
 
   // Filter the souls by the search box (used by the by-area list).
   const q = query.trim().toLowerCase();
@@ -49,7 +60,15 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = []
     // collapse to 0: MapScreen sits inside an `animate-screen-in` wrapper that has no in-flow
     // height (its children are absolutely positioned), which would otherwise leave MapLibre 0px tall.
     <div className="absolute inset-x-0 top-0" style={{ height: 'calc(100dvh - 128px)' }}>
-      {festivalEvent && (
+      {/* Placement banner — owned by MapScreen (not the lazy RealMap) so the cancel ✕ is
+          always reachable even while the map chunk is loading or failed. */}
+      {placing && (
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-3 py-1.5 bg-black/80 backdrop-blur-sm border border-[#C9A961]/70" style={F.ui}>
+          <span className="text-[#C9A961] text-[10px] uppercase tracking-[0.18em]">tap the map to place your rite</span>
+          <button onClick={() => setPlacing(false)} className="text-[#A8A29E] hover:text-[#F5F1E8] text-xs leading-none px-1" title="cancel">✕</button>
+        </div>
+      )}
+      {festivalEvent && !placing && (
         <button onClick={onEnterFestival}
           className="absolute top-2 left-1/2 -translate-x-1/2 z-30 px-4 py-2 bg-[#8B0000]/90 border border-[#C9A961] text-[#F5F1E8] text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 shadow-xl animate-pulse-slow" style={F.ui}>
           <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#C9A961]" /> {festivalEvent.name} · enter venue map
@@ -60,7 +79,7 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = []
       <div className="absolute top-2 left-2 z-30 flex items-center gap-1.5">
         <div className="flex border border-[#2A2A2A] bg-black/70 backdrop-blur-sm">
           {[['real', MapIcon, 'map'], ['list', List, 'by area']].map(([v, Icon, lbl]) => (
-            <button key={v} onClick={() => setView(v)}
+            <button key={v} onClick={() => { setView(v); if (v === 'list') setPlacing(false); }}
               className={`flex items-center gap-1 px-2.5 py-1.5 text-[9px] uppercase tracking-[0.18em] transition-colors ${view === v ? 'bg-[#8B0000] text-[#F5F1E8]' : 'text-[#A8A29E] hover:text-[#F5F1E8]'}`}
               style={F.ui}>
               <Icon size={11} /> {lbl}
@@ -88,7 +107,9 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = []
       <div className="absolute inset-0" style={{ display: view === 'real' ? undefined : 'none' }}>
         <ErrorBoundary>
           <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-[#6B6B6B] text-xs bg-[#070708]" style={F.ui}>summoning the map…</div>}>
-            <RealMap nearby={nearby} events={events} tonightStatus={tonightStatus} ghost={ghost} onOpenUser={onOpenUser} onOpenTonightStatus={onOpenTonightStatus} onOpenEvent={onOpenEvent} />
+            <RealMap nearby={nearby} events={events} tonightStatus={tonightStatus} ghost={ghost} onOpenUser={onOpenUser} onOpenTonightStatus={onOpenTonightStatus} onOpenEvent={onOpenEvent}
+              placing={placing}
+              onPickPoint={(c) => { setPlacing(false); onCreateEventAt && onCreateEventAt(c); }} />
           </Suspense>
         </ErrorBoundary>
       </div>
@@ -128,22 +149,28 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = []
         </div>
       )}
 
-      <div className="absolute bottom-4 right-4 z-30 flex flex-col items-center gap-2">
-        {onCreateEvent && (
-          <button onClick={onCreateEvent}
-            className="w-12 h-12 bg-[#0A0A0A] hover:bg-[#1A1400] border-2 border-[#C9A961] text-[#C9A961] flex items-center justify-center shadow-xl text-lg"
-            style={{ boxShadow: '0 0 16px rgba(201,169,97,0.4)' }}
-            title="host a rite">
-            ◈
+      {/* FAB stack: gold ◈ = host a rite at a tapped point (subsumes main's plain host-a-rite
+          button — same ◈, but it arms tap-to-place so the rite lands where you tap); red + =
+          drop your tonight pin (the opt-in, privacy-fuzzed location share). Hidden while
+          placing — the banner cancels. */}
+      {!placing && (
+        <div className="absolute bottom-4 right-4 z-30 flex flex-col items-end gap-2.5">
+          {onCreateEventAt && (
+            <button onClick={() => { setView('real'); setPlacing(true); }}
+              className="w-12 h-12 bg-[#0A0A0A] hover:bg-[#1A1400] border-2 border-[#C9A961] text-[#C9A961] flex items-center justify-center shadow-xl text-lg"
+              style={{ boxShadow: '0 0 14px rgba(201,169,97,0.4)', ...F.ui }}
+              title="host a rite on the map">
+              ◈
+            </button>
+          )}
+          <button onClick={onOpenTonightStatus}
+            className="w-12 h-12 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] flex items-center justify-center shadow-xl"
+            style={{ boxShadow: '0 0 20px rgba(139,0,0,0.5)' }}
+            title="drop your tonight pin — share where you are">
+            <Plus size={20} />
           </button>
-        )}
-        <button onClick={onOpenTonightStatus}
-          className="w-12 h-12 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] flex items-center justify-center shadow-xl"
-          style={{ boxShadow: '0 0 20px rgba(139,0,0,0.5)' }}
-          title="drop your tonight pin">
-          <Plus size={20} />
-        </button>
-      </div>
+        </div>
+      )}
     </div>
   );
 }
