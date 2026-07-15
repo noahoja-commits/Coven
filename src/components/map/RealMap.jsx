@@ -67,6 +67,10 @@ export default function RealMap({ nearby = [], events = [], tonightStatus, ghost
   const meRef = useRef(null); // { lat, lng } once we have a fix
   const [state, setState] = useState('loading'); // loading | ready | error
   const [located, setLocated] = useState(false);
+  // Read by the marker click handlers so a tap on an existing pin during placement mode
+  // doesn't ALSO open that soul/event on top of the create-modal.
+  const placingRef = useRef(false);
+  useEffect(() => { placingRef.current = placing; }, [placing]);
   const sharing = !!tonightStatus?.share && !ghost;
   const fuzzM = tonightStatus?.fuzzM || 1609;
 
@@ -158,14 +162,14 @@ export default function RealMap({ nearby = [], events = [], tonightStatus, ghost
       if (p.fuzzLat == null || p.fuzzLng == null) return;
       const el = markerEl({ glyph: p.avatar, avatarUrl: p.avatarUrl });
       el.title = `${p.handle}${p.distanceMi != null ? ` · ~${p.distanceMi} mi` : ''}`;
-      el.addEventListener('click', () => onOpenUser && onOpenUser(p.handle));
+      el.addEventListener('click', () => { if (!placingRef.current) onOpenUser && onOpenUser(p.handle); });
       markersRef.current.push(new maplibregl.Marker({ element: el }).setLngLat([p.fuzzLng, p.fuzzLat]).addTo(map));
     });
     // Event pins (gated by the event_map view's anti-spam rules) → tap opens the rite.
     events.forEach(ev => {
       if (!Number.isFinite(ev.lat) || !Number.isFinite(ev.lng)) return;
       const el = eventMarkerEl({ name: ev.name });
-      el.addEventListener('click', () => onOpenEvent && onOpenEvent(ev.id));
+      el.addEventListener('click', () => { if (!placingRef.current) onOpenEvent && onOpenEvent(ev.id); });
       markersRef.current.push(new maplibregl.Marker({ element: el }).setLngLat([ev.lng, ev.lat]).addTo(map));
     });
   }, [state, nearby, events, sharing, fuzzM, onOpenUser, onOpenEvent, located]);
@@ -180,11 +184,14 @@ export default function RealMap({ nearby = [], events = [], tonightStatus, ghost
     canvas.style.cursor = 'crosshair';
     const pick = (e) => { onPickPoint && onPickPoint({ lat: e.lngLat.lat, lng: e.lngLat.lng }); };
     map.on('click', pick);
+    const onKey = (e) => { if (e.key === 'Escape') onCancelPlacing && onCancelPlacing(); };
+    window.addEventListener('keydown', onKey);
     return () => {
       map.off('click', pick);
+      window.removeEventListener('keydown', onKey);
       try { canvas.style.cursor = prevCursor; } catch { /* noop */ }
     };
-  }, [placing, state, onPickPoint]);
+  }, [placing, state, onPickPoint, onCancelPlacing]);
 
   // When sharing turns on and we don't yet have a fix (permission was granted just now via the
   // share flow, after the map already mounted), locate silently so the user's own pin + privacy
