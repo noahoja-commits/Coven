@@ -34,7 +34,11 @@ export default async function handler(req, res) {
     if (!adminRow) { res.status(403).json({ error: 'not an admin' }); return; }
 
     const { action, userId } = req.body || {};
-    if (!userId || typeof userId !== 'string') { res.status(400).json({ error: 'userId required' }); return; }
+    // Strict UUID — this value is interpolated into the GoTrue admin REST path and handed to
+    // the service-role admin API, so a loose string check would let path/query characters steer
+    // the request (the "act on an unvalidated body field with the service role" trap _auth.js warns of).
+    const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (typeof userId !== 'string' || !UUID.test(userId)) { res.status(400).json({ error: 'valid userId required' }); return; }
 
     if (action === 'signout') {
       await adminLogout(userId);
