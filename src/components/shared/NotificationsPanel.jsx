@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Bell, Heart, MessageCircle, UserPlus, Calendar, ShoppingBag, Trash2, AtSign } from 'lucide-react';
+import { X, Bell, Heart, MessageCircle, UserPlus, Calendar, ShoppingBag, Trash2, AtSign, Ticket, Check } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { timeAgo } from '../../data/helpers';
 
@@ -20,14 +20,33 @@ const KIND_ICON = {
   candle: { icon: Bell, color: '#C9A961' },
   tonight: { icon: Bell, color: '#8B0000' },
   vespers: { icon: Bell, color: '#C9A961' },
+  ticket_sale: { icon: Ticket, color: '#C9A961' },
+  event_change: { icon: Calendar, color: '#A89968' },
+  event_cancelled: { icon: Calendar, color: '#8B0000' },
+  report: { icon: Bell, color: '#9E2A33' },
 };
 
-// Collapse consecutive same-post reactions into one row ("X and N others reacted…").
-// Only reactions group (the spammy kind); everything else stays a singleton.
+// Filter tabs — raw kinds bucketed into how people think about them.
+const FILTERS = [
+  { id: 'all', label: 'all', kinds: null },
+  { id: 'souls', label: 'souls', kinds: ['follow', 'react', 'reaction', 'story_react', 'comment', 'reply', 'mention', 'coauthor'] },
+  { id: 'rites', label: 'rites', kinds: ['rsvp', 'event', 'event_reminder', 'ticket_sale', 'event_change', 'event_cancelled'] },
+  { id: 'whispers', label: 'whispers', kinds: ['dm', 'crew_join', 'crew'] },
+];
+
+// Collapse consecutive same-target rows into one ("X and N others reacted…").
+// The spammy kinds group: reactions + comments per post, follows as a run.
+function groupKey(n) {
+  if ((n.kind === 'react' || n.kind === 'reaction') && n.postId) return `react:${n.postId}`;
+  if (n.kind === 'comment' && n.postId) return `comment:${n.postId}`;
+  if (n.kind === 'follow') return 'follow';
+  return null;
+}
+
 function groupNotifs(list) {
   const out = [];
   for (const n of list) {
-    const key = (n.kind === 'react' || n.kind === 'reaction') && n.postId ? `react:${n.postId}` : null;
+    const key = groupKey(n);
     const prev = out[out.length - 1];
     if (key && prev && prev._key === key) {
       prev.count += 1;
@@ -43,6 +62,9 @@ function groupNotifs(list) {
 
 export function NotificationsPanel({ notifications, onClose, onMarkAllRead, onMarkRead, onTap, onClearAll }) {
   const [pressTimer, setPressTimer] = useState(null);
+  const [filter, setFilter] = useState('all');
+  const active = FILTERS.find(f => f.id === filter) || FILTERS[0];
+  const shown = active.kinds ? notifications.filter(n => active.kinds.includes(n.kind)) : notifications;
 
   const handlePressStart = () => {
     const t = setTimeout(() => {
@@ -82,7 +104,19 @@ export function NotificationsPanel({ notifications, onClose, onMarkAllRead, onMa
         </div>
       )}
       {notifications.length > 0 && (
-        <div className="px-4 py-2 border-b border-[#1A1A1A] flex items-center justify-end">
+        <div className="px-4 py-2 border-b border-[#1A1A1A] flex items-center gap-1.5">
+          {FILTERS.map(f => (
+            <button key={f.id} onClick={() => setFilter(f.id)}
+              className={`tap px-2 py-1 text-[9px] uppercase tracking-[0.15em] border transition-colors ${filter === f.id ? 'border-[#C9A961]/60 text-[#C9A961]' : 'border-[#2A2A2A] text-[#6B6B6B] hover:text-[#A8A29E]'}`}
+              style={F.ui}>{f.label}</button>
+          ))}
+          <span className="flex-1" />
+          {unread > 0 && (
+            <button onClick={onMarkAllRead}
+              className="tap flex items-center gap-1 text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#C9A961]" style={F.ui}>
+              <Check size={10} /> read all
+            </button>
+          )}
           <button onClick={onClearAll}
             className="tap flex items-center gap-1 text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#8B0000]" style={F.ui}>
             <Trash2 size={10} /> clear all
@@ -90,14 +124,14 @@ export function NotificationsPanel({ notifications, onClose, onMarkAllRead, onMa
         </div>
       )}
       <div className="flex-1 overflow-y-auto">
-        {notifications.length === 0 ? (
+        {shown.length === 0 ? (
           <div className="text-center pt-24 px-6">
             <div className="text-[#3F3F3F] text-5xl mb-3" style={F.display}>·</div>
-            <p className="text-[#A8A29E] text-sm" style={F.serif}>quiet for now.</p>
+            <p className="text-[#A8A29E] text-sm" style={F.serif}>{filter === 'all' ? 'quiet for now.' : `no ${active.label} to speak of.`}</p>
           </div>
         ) : (
           <div className="divide-y divide-[#1A1A1A]">
-            {groupNotifs(notifications).map(n => {
+            {groupNotifs(shown).map(n => {
               const k = KIND_ICON[n.kind] || KIND_ICON.reaction;
               const Icon = k.icon;
               const extra = n.count - 1;

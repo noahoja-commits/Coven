@@ -57,7 +57,7 @@ function Row({ label, desc, children }) {
   );
 }
 
-export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLogout, onRerunOnboarding, mutedKeywords = [], onSetMutedKeywords, payoutStatus, payoutBusy = false, onSetupPayouts, pushState = 'off', onEnablePush, onDisablePush, onEditProfile, onOpenBlocked, onOpenLegal, onDeleteAccount, onOpenShockPicker, onOpenAnalytics }) {
+export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLogout, onRerunOnboarding, mutedKeywords = [], onSetMutedKeywords, payoutStatus, payoutBusy = false, onSetupPayouts, pushState = 'off', onEnablePush, onDisablePush, onEditProfile, onOpenBlocked, onOpenLegal, onDeleteAccount, onOpenShockPicker, onOpenAnalytics, onOpenAdmin }) {
   const set = (key, value) => onChange({ ...settings, [key]: value });
   const addKeyword = (e) => {
     e.preventDefault();
@@ -261,6 +261,7 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
         <Section title="account">
           {[
             { label: 'Edit profile', onClick: onEditProfile },
+            ...(onOpenAdmin ? [{ label: 'Inner sanctum (admin)', onClick: onOpenAdmin }] : []),
             ...(onOpenAnalytics ? [{ label: 'Your analytics', onClick: onOpenAnalytics }] : []),
             { label: 'Privacy & blocked', onClick: onOpenBlocked },
             { label: 'Terms, Privacy & Guidelines', onClick: onOpenLegal },
