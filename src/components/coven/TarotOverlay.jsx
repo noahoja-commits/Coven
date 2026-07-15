@@ -14,21 +14,6 @@ const GRN  = '#2D6435';          // greenery
 
 const ROMAN = ['â˜‰','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX','XXI'];
 const RANK_LABEL = { ace:'ACE', two:'2', three:'3', four:'4', five:'5', six:'6', seven:'7', eight:'8', nine:'9', ten:'10', page:'PAGE', knight:'KNIGHT', queen:'QUEEN', king:'KING' };
-const SUIT_GLYPH = { wands:'ðŒŠ', cups:'â¬¡', swords:'âœ¦', pentacles:'âœ¿' };
-const SUIT_COLOR = { wands: YEL, cups: BLUE, swords: RED, pentacles: YEL };
-
-const PIP_LAYOUTS = {
-  1:  [[50,50]],
-  2:  [[50,25],[50,75]],
-  3:  [[50,18],[50,50],[50,82]],
-  4:  [[28,25],[72,25],[28,75],[72,75]],
-  5:  [[28,18],[72,18],[50,50],[28,82],[72,82]],
-  6:  [[28,18],[72,18],[28,50],[72,50],[28,82],[72,82]],
-  7:  [[28,15],[72,15],[50,32],[28,50],[72,50],[28,75],[72,75]],
-  8:  [[28,12],[72,12],[28,32],[72,32],[28,55],[72,55],[28,78],[72,78]],
-  9:  [[28,12],[72,12],[28,32],[72,32],[50,50],[28,68],[72,68],[28,88],[72,88]],
-  10: [[28,10],[72,10],[28,28],[72,28],[28,46],[72,46],[28,64],[72,64],[28,82],[72,82]],
-};
 
 // â”€â”€ Border â€” simple Marseille double-rect â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function CardBorder({ w, h }) {
@@ -114,85 +99,18 @@ function MajorArt({ id, w, h }) {
 }
 
 function CourtArt({ rank, suit, w, h }) {
-  const cx = w / 2, cy = h / 2;
-  const glyph = SUIT_GLYPH[suit] || 'âœ¦';
-  const sc = SUIT_COLOR[suit] || YEL;
-  const isKing = rank === 'king', isQueen = rank === 'queen', isKnight = rank === 'knight';
-  const robeCol = (isKing || isKnight) ? BLUE : RED;
-  const mantleCol = (isKing || isKnight) ? RED : BLUE;
-
-  return (
-    <g>
-      {(isKing || isQueen) && <>
-        <line x1={cx-24} y1={cy-42} x2={cx-24} y2={cy+46} stroke={INK} strokeWidth="1.5"/>
-        <line x1={cx+24} y1={cy-42} x2={cx+24} y2={cy+46} stroke={INK} strokeWidth="1.5"/>
-        <rect x={cx-28} y={cy-46} width={10} height={8} fill={INK}/>
-        <rect x={cx+18} y={cy-46} width={10} height={8} fill={INK}/>
-      </>}
-      {/* Head */}
-      <circle cx={isKnight ? cx-6 : cx} cy={cy-28} r={8} fill={FLESH} stroke={INK} strokeWidth="1.3"/>
-      {/* Crown */}
-      {(isKing || isQueen) && (
-        <path d={`M${cx-10},${cy-32} L${cx-7},${cy-46} L${cx},${cy-40} L${cx+7},${cy-46} L${cx+10},${cy-32}`} fill={YEL} stroke={INK} strokeWidth="1.1"/>
-      )}
-      {/* Hat for page */}
-      {rank === 'page' && (
-        <path d={`M${cx-10},${cy-32} Q${cx},${cy-46} ${cx+10},${cy-32}`} fill={sc} stroke={INK} strokeWidth="1"/>
-      )}
-      {/* Horse for knight */}
-      {isKnight && <>
-        <ellipse cx={cx+10} cy={cy+12} rx={20} ry={11} fill={RED} stroke={INK} strokeWidth="1.2"/>
-        <line x1={cx+28} y1={cy+7} x2={cx+32} y2={cy-10} stroke={INK} strokeWidth="1.1"/>
-        <circle cx={cx+32} cy={cy-12} r={6} fill={FLESH} stroke={INK} strokeWidth="1.1"/>
-        <line x1={cx-10} y1={cy+16} x2={cx-12} y2={cy+32} stroke={INK} strokeWidth="1.1"/>
-        <line x1={cx+2} y1={cy+21} x2={cx+2} y2={cy+34} stroke={INK} strokeWidth="1.1"/>
-        <line x1={cx+16} y1={cy+21} x2={cx+18} y2={cy+34} stroke={INK} strokeWidth="1.1"/>
-        <line x1={cx+28} y1={cy+17} x2={cx+30} y2={cy+32} stroke={INK} strokeWidth="1.1"/>
-      </>}
-      {/* Body */}
-      {!isKnight && <>
-        <line x1={cx} y1={cy-20} x2={cx} y2={cy+8} stroke={INK} strokeWidth="1.1"/>
-        <line x1={cx-13} y1={cy-11} x2={cx+13} y2={cy-11} stroke={INK} strokeWidth="1"/>
-        <path d={`M${cx-13},${cy+8} L${cx-15},${cy+46} L${cx+15},${cy+46} L${cx+13},${cy+8} Z`} fill={robeCol} stroke={INK} strokeWidth="1.1"/>
-        <path d={`M${cx-13},${cy+8} Q${cx-22},${cy-4} ${cx-13},${cy-11}`} fill={mantleCol} stroke={INK} strokeWidth="1"/>
-        <path d={`M${cx+13},${cy+8} Q${cx+22},${cy-4} ${cx+13},${cy-11}`} fill={mantleCol} stroke={INK} strokeWidth="1"/>
-        <line x1={cx} y1={cy+8} x2={cx-11} y2={cy+24} stroke={INK} strokeWidth="0.9"/>
-        <line x1={cx} y1={cy+8} x2={cx+11} y2={cy+24} stroke={INK} strokeWidth="0.9"/>
-      </>}
-      {/* Suit symbol */}
-      <text x={cx+14} y={cy+38} textAnchor="middle" fill={sc} fontSize="12" fontFamily="serif" stroke={INK} strokeWidth="0.3">{glyph}</text>
-    </g>
-  );
+  const suitPfx = { wands: 'w', cups: 'c', swords: 's', pentacles: 'p' }[suit] || 'w';
+  const rankNum = { page: 11, knight: 12, queen: 13, king: 14 }[rank] || 11;
+  const pad = String(rankNum).padStart(2, '0');
+  const url = `https://raw.githubusercontent.com/metabismuth/tarot-json/master/cards/${suitPfx}${pad}.jpg`;
+  return <image href={url} x={0} y={0} width={w} height={h} preserveAspectRatio="xMidYMid meet"/>;
 }
 
-// â”€â”€ Pip arrangements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function PipArt({ count, suit, w, h }) {
-  const glyph = SUIT_GLYPH[suit] || 'âœ¦';
-  const col = SUIT_COLOR[suit] || YEL;
-  const layout = PIP_LAYOUTS[Math.min(count, 10)] || PIP_LAYOUTS[1];
-  const areaW = w - 28, areaH = h - 56;
-  const startX = 14, startY = 28;
-  return (
-    <g>
-      {layout.map(([px, py], k) => {
-        const x = startX + (px / 100) * areaW;
-        const y = startY + (py / 100) * areaH;
-        const flipped = py > 55;
-        return (
-          <text key={k} x={x} y={y + 5}
-            textAnchor="middle"
-            fill={col}
-            stroke={INK}
-            strokeWidth="0.4"
-            fontSize={count === 1 ? '22' : count <= 3 ? '14' : '11'}
-            fontFamily="serif"
-            style={{ transform: flipped ? `rotate(180deg)` : 'none', transformOrigin: `${x}px ${y}px` }}>
-            {glyph}
-          </text>
-        );
-      })}
-    </g>
-  );
+  const suitPfx = { wands: 'w', cups: 'c', swords: 's', pentacles: 'p' }[suit] || 'w';
+  const pad = String(count).padStart(2, '0');
+  const url = `https://raw.githubusercontent.com/metabismuth/tarot-json/master/cards/${suitPfx}${pad}.jpg`;
+  return <image href={url} x={0} y={0} width={w} height={h} preserveAspectRatio="xMidYMid meet"/>;
 }
 
 // â”€â”€ CardFace â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
