@@ -56,6 +56,7 @@ const ProfileScreen = lazy(() => import('./components/profile/ProfileScreen').th
 const LegalScreen = lazy(() => import('./components/legal/LegalScreen').then(m => ({ default: m.LegalScreen })));
 const ResetPasswordScreen = lazy(() => import('./components/auth/ResetPasswordScreen').then(m => ({ default: m.ResetPasswordScreen })));
 import { TonightStatusModal } from './components/profile/TonightStatusModal';
+import { AdminPanel } from './components/settings/AdminPanel';
 import { ProfileEditModal } from './components/profile/ProfileEditModal';
 import { MoodModal } from './components/profile/MoodModal';
 import { moodActive } from './data/moods';
@@ -105,6 +106,7 @@ const SettingsScreen = lazy(() => import('./components/settings/SettingsScreen')
 
 import { COMMUNITIES } from './data/communities';
 import { fetchEvents, fetchEventMap, createEvent, toggleEventRsvp as dbToggleRsvp, fetchEventAttendees, deleteEvent as dbDeleteEvent, joinWaitlist, leaveWaitlist, fetchWaitlist } from './lib/db/events';
+import { fetchIsAdmin, heartbeat } from './lib/db/admin';
 import { CommentsOverlay } from './components/feed/CommentsOverlay';
 import { QuoteModal } from './components/feed/QuoteModal';
 // VespersArchiveModal statically imports the ~49 kB TEXTS library — lazy so that data
@@ -131,6 +133,7 @@ const NOTIF_KIND_CATEGORY = {
   follow: 'follow', mention: 'follow', coauthor: 'follow',
   dm: 'dm',
   rsvp: 'event', event_reminder: 'event',
+  ticket_sale: 'event', event_change: 'event', event_cancelled: 'event', // 0067 kinds
   crew_join: 'crew',
   digest: 'digest',
 };
@@ -165,6 +168,8 @@ export default function App() {
   const [showCompose, setShowCompose] = useState(false);
   const [showNotifs, setShowNotifs] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false); // UX gate only — every admin surface re-checks server-side
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [toast, setToast] = useState(null);
   const [pushState, setPushState] = useState('off');
   const [weatherTint, setWeatherTint] = useState(null); // {color,opacity} when Weather mood is on
@@ -242,7 +247,7 @@ export default function App() {
   useEffect(() => {
     if (!meId) return;
     if (!notifSyncedRef.current) { notifSyncedRef.current = true; return; }
-    const CAT_KINDS = { reaction: ['react', 'story_react'], reply: ['comment'], follow: ['follow', 'mention', 'coauthor'], dm: ['dm'], event: ['rsvp', 'event_reminder'], crew: ['crew_join'], digest: ['digest'] };
+    const CAT_KINDS = { reaction: ['react', 'story_react'], reply: ['comment'], follow: ['follow', 'mention', 'coauthor'], dm: ['dm'], event: ['rsvp', 'event_reminder', 'ticket_sale', 'event_change', 'event_cancelled'], crew: ['crew_join'], digest: ['digest'] };
     const nk = settings.notificationKinds || {};
     const prefs = {};
     for (const [cat, kinds] of Object.entries(CAT_KINDS)) {
@@ -252,6 +257,19 @@ export default function App() {
     saveNotificationPrefs(meId, prefs).catch((e) => console.error('[prefs] save failed — server push may not honor your choices:', e));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notifKindsKey, meId]);
+
+  // Admin gate (UX only — the server re-checks everything) + presence heartbeat.
+  // Heartbeat every 2 min while the app is open, plus immediately on login and whenever
+  // the tab becomes visible again — that's what powers the admin "souls online" roster.
+  useEffect(() => {
+    if (!meId) { setIsAdmin(false); return undefined; }
+    fetchIsAdmin(meId).then(setIsAdmin).catch(() => setIsAdmin(false));
+    heartbeat(meId);
+    const beat = setInterval(() => heartbeat(meId), 2 * 60 * 1000);
+    const onVisible = () => { if (document.visibilityState === 'visible') heartbeat(meId); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => { clearInterval(beat); document.removeEventListener('visibilitychange', onVisible); };
+  }, [meId]);
 
   // Live content state (Supabase-backed)
   const [posts, setPosts] = useState([]);
@@ -1731,8 +1749,10 @@ export default function App() {
       setActiveUserHandle(n.user);
     } else if ((n.kind === 'react' || n.kind === 'comment' || n.kind === 'mention' || n.kind === 'coauthor') && n.postId) {
       setActivePostComments(n.postId);
-    } else if (n.kind === 'event' || n.kind === 'rsvp') {
+    } else if (n.kind === 'event' || n.kind === 'rsvp' || n.kind === 'ticket_sale' || n.kind === 'event_change' || n.kind === 'event_cancelled') {
       setTab('events');
+    } else if (n.kind === 'report' && isAdmin) {
+      setShowAdminPanel(true); // admins jump straight to the queue
     } else if (n.kind === 'story_react' && n.user && n.user !== 'someone') {
       setActiveUserHandle(n.user); // the story may have expired — go to the reactor
     }
@@ -1830,7 +1850,7 @@ export default function App() {
   const anyOverlayOpen = !!(
     showSigilDraw ||
     ticketSuccess || activeStoryIndex !== null || showStoryComposer || venueEditorEvent ||
-    ticketManagerEvent || showCreateEvent || showEditProfile || showMood || sharePostTarget || showSettings || showBlocked || showLegal || showDeleteConfirm || reportSheet || legalEscalation ||
+    ticketManagerEvent || showCreateEvent || showAdminPanel || showEditProfile || showMood || sharePostTarget || showSettings || showBlocked || showLegal || showDeleteConfirm || reportSheet || legalEscalation ||
     showMyTickets || showReflections || showDreams || showNowPlaying || showAddGrave || showAddAnniv ||
     showVespersArchive || showNewGroup || showTonightModal || quoteTarget || showOddityCompose ||
     activeOddity || activePostComments || followList || activeConversation || activeUserHandle ||
@@ -1849,6 +1869,7 @@ export default function App() {
     if (activeHashtag) { setActiveHashtag(null); return true; }
     if (venueEditorEvent) { setVenueEditorEvent(null); return true; }
     if (ticketManagerEvent) { setTicketManagerEvent(null); return true; }
+    if (showAdminPanel) { setShowAdminPanel(false); return true; }
     if (showCreateEvent) { setShowCreateEvent(false); setEventDraftCoords(null); return true; }
     if (showEditProfile) { setShowEditProfile(false); return true; }
     if (showMood) { setShowMood(false); return true; }
@@ -2570,6 +2591,10 @@ export default function App() {
         <CreateEventModal onCreate={addEvent} initialCoords={eventDraftCoords}
           onClose={() => { setShowCreateEvent(false); setEventDraftCoords(null); }} />
       )}
+      {showAdminPanel && (
+        <AdminPanel meId={meId} onClose={() => setShowAdminPanel(false)} onToast={showToast}
+          onOpenUser={(h) => { setShowAdminPanel(false); setActiveUserHandle(h); }} />
+      )}
       {ticketManagerEvent && (
         <TicketManager
           event={ticketManagerEvent}
@@ -2670,6 +2695,7 @@ export default function App() {
           onDeleteAccount={() => setShowDeleteConfirm(true)}
           onOpenShockPicker={() => { setShowSettings(false); setShowShockPicker(true); }}
           onOpenAnalytics={() => { setShowSettings(false); setShowAnalytics(true); }}
+          onOpenAdmin={isAdmin ? () => { setShowSettings(false); setShowAdminPanel(true); } : undefined}
         />
         </Suspense>
       )}

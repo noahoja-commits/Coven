@@ -17,6 +17,9 @@ function bodyFor(n, actor) {
     case 'mention':     return `${actor} mentioned you`;
     case 'coauthor':    return n.body ? `${actor} co-signed a post with you: "${trunc(n.body)}"` : `${actor} co-signed a post with you`;
     case 'report':      return n.body ? `new report · ${trunc(n.body)}` : 'new report — review it';
+    case 'ticket_sale':     return n.body ? `${actor} bought a ticket to ${trunc(n.body)}` : `${actor} bought a ticket to your rite`;
+    case 'event_change':    return n.body ? `${trunc(n.body)} changed — check the details` : 'a rite you’re going to changed';
+    case 'event_cancelled': return n.body ? `${trunc(n.body)} was cancelled` : 'a rite you were going to was cancelled';
     default:            return `${actor} did something`;
   }
 }
