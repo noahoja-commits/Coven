@@ -149,13 +149,15 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = []
         </div>
       )}
 
-      {/* FAB stack: gold ◈ = host a rite at a tapped point; red + = drop your tonight pin
-          (the opt-in, privacy-fuzzed location share). Hidden while placing — the banner cancels. */}
+      {/* FAB stack: gold ◈ = host a rite at a tapped point (subsumes main's plain host-a-rite
+          button — same ◈, but it arms tap-to-place so the rite lands where you tap); red + =
+          drop your tonight pin (the opt-in, privacy-fuzzed location share). Hidden while
+          placing — the banner cancels. */}
       {!placing && (
         <div className="absolute bottom-4 right-4 z-30 flex flex-col items-end gap-2.5">
           {onCreateEventAt && (
             <button onClick={() => { setView('real'); setPlacing(true); }}
-              className="w-12 h-12 bg-[#0A0A0A] border-2 border-[#C9A961] text-[#C9A961] flex items-center justify-center shadow-xl text-lg"
+              className="w-12 h-12 bg-[#0A0A0A] hover:bg-[#1A1400] border-2 border-[#C9A961] text-[#C9A961] flex items-center justify-center shadow-xl text-lg"
               style={{ boxShadow: '0 0 14px rgba(201,169,97,0.4)', ...F.ui }}
               title="host a rite on the map">
               ◈
