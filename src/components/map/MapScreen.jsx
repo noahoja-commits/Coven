@@ -17,10 +17,11 @@ function hashStr(s) {
 const areaKey = (pin) => (pin.neighborhood || pin.city || '').trim().toLowerCase();
 const areaLabel = (pin) => (pin.neighborhood || pin.city || 'somewhere unspoken');
 
-export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = [], events = [], onOpenUser, onOpenTonightStatus, onOpenEvent, festivalEvent = null, onEnterFestival }) {
+export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = [], events = [], onOpenUser, onOpenTonightStatus, onOpenEvent, onCreateEventAt, festivalEvent = null, onEnterFestival }) {
   const [view, setView] = useState('real'); // 'real' (the living map) | 'list' (by area)
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState('active'); // 'active' | 'az'
+  const [placing, setPlacing] = useState(false); // tap-the-map "host a rite here" mode
 
   // Filter the souls by the search box (used by the by-area list).
   const q = query.trim().toLowerCase();
@@ -88,7 +89,10 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = []
       <div className="absolute inset-0" style={{ display: view === 'real' ? undefined : 'none' }}>
         <ErrorBoundary>
           <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-[#6B6B6B] text-xs bg-[#070708]" style={F.ui}>summoning the map…</div>}>
-            <RealMap nearby={nearby} events={events} tonightStatus={tonightStatus} ghost={ghost} onOpenUser={onOpenUser} onOpenTonightStatus={onOpenTonightStatus} onOpenEvent={onOpenEvent} />
+            <RealMap nearby={nearby} events={events} tonightStatus={tonightStatus} ghost={ghost} onOpenUser={onOpenUser} onOpenTonightStatus={onOpenTonightStatus} onOpenEvent={onOpenEvent}
+              placing={placing}
+              onPickPoint={(c) => { setPlacing(false); onCreateEventAt && onCreateEventAt(c); }}
+              onCancelPlacing={() => setPlacing(false)} />
           </Suspense>
         </ErrorBoundary>
       </div>
@@ -128,12 +132,26 @@ export function MapScreen({ tonightStatus, ghost = false, pins = [], nearby = []
         </div>
       )}
 
-      <button onClick={onOpenTonightStatus}
-        className="absolute bottom-4 right-4 w-12 h-12 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] flex items-center justify-center shadow-xl z-30"
-        style={{ boxShadow: '0 0 20px rgba(139,0,0,0.5)' }}
-        title="drop your tonight pin">
-        <Plus size={20} />
-      </button>
+      {/* FAB stack: gold ◈ = host a rite at a tapped point; red + = drop your tonight pin
+          (the opt-in, privacy-fuzzed location share). Hidden while placing — the banner cancels. */}
+      {!placing && (
+        <div className="absolute bottom-4 right-4 z-30 flex flex-col items-end gap-2.5">
+          {onCreateEventAt && (
+            <button onClick={() => { setView('real'); setPlacing(true); }}
+              className="w-12 h-12 bg-[#0A0A0A] border-2 border-[#C9A961] text-[#C9A961] flex items-center justify-center shadow-xl text-lg"
+              style={{ boxShadow: '0 0 14px rgba(201,169,97,0.4)', ...F.ui }}
+              title="host a rite on the map">
+              ◈
+            </button>
+          )}
+          <button onClick={onOpenTonightStatus}
+            className="w-12 h-12 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] flex items-center justify-center shadow-xl"
+            style={{ boxShadow: '0 0 20px rgba(139,0,0,0.5)' }}
+            title="drop your tonight pin — share where you are">
+            <Plus size={20} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

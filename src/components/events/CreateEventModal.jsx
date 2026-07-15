@@ -15,7 +15,7 @@ const COVERS = [
 const field = 'field';
 const label = 'text-[10px] uppercase tracking-[0.2em] text-[#C9A961] mb-1.5 block';
 
-export function CreateEventModal({ onCreate, onClose }) {
+export function CreateEventModal({ onCreate, onClose, initialCoords = null }) {
   const [name, setName] = useState('');
   const [venue, setVenue] = useState('');
   const [neighborhood, setNeighborhood] = useState('');
@@ -30,7 +30,8 @@ export function CreateEventModal({ onCreate, onClose }) {
   const [ageRestriction, setAgeRestriction] = useState('all'); // 'all' | '18' | '21'
   const [attested, setAttested] = useState(false); // Stripe-safe: not paid metaphysical services
   const [saving, setSaving] = useState(false);
-  const [coords, setCoords] = useState(null); // {lat,lng} — the map pin (device location)
+  const [coords, setCoords] = useState(initialCoords); // {lat,lng} — the map pin
+  const [fromMap, setFromMap] = useState(!!initialCoords); // true = picked on the map, false = device location
   const [locating, setLocating] = useState(false);
   const [savedVenues] = useState(() => getVenues());
 
@@ -44,8 +45,10 @@ export function CreateEventModal({ onCreate, onClose }) {
     try {
       const pos = await getPosition();
       setCoords({ lat: pos.latitude, lng: pos.longitude });
+      setFromMap(false);
     } catch {
       setCoords(null);
+      setFromMap(false);
     } finally {
       setLocating(false);
     }
@@ -124,11 +127,12 @@ export function CreateEventModal({ onCreate, onClose }) {
               className={`tap w-full flex items-center justify-center gap-2 py-2.5 text-[11px] uppercase tracking-wider border transition-colors ${coords ? 'border-[#C9A961]/70 text-[#C9A961]' : 'border-[#2A2A2A] text-[#A8A29E] hover:border-[#C9A961]/50'}`}
               style={coords ? { ...F.ui, boxShadow: '0 0 12px rgba(201,169,97,0.18)' } : F.ui}>
               {locating ? <><Loader2 size={13} className="animate-spin" /> pinning…</>
-                : coords ? <><Check size={13} /> pinned to your location</>
+                : coords ? <><Check size={13} /> {fromMap ? 'pinned where you tapped' : 'pinned to your location'}</>
                 : <><MapPin size={13} /> pin this rite on the map</>}
             </button>
             <p className="text-[10px] text-[#6B6B6B] italic mt-1.5" style={F.serif}>
-              {coords ? 'tap again to re-pin. remove nothing — this only sets the map marker.'
+              {coords ? (fromMap ? 'the rite sits where you tapped on the map. tap the button to re-pin it to where you are now.'
+                : 'tap again to re-pin. remove nothing — this only sets the map marker.')
                 : 'drops a map pin at where you are now. skip it and we’ll place it from the venue text.'}
             </p>
           </div>

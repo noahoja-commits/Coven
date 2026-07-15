@@ -60,7 +60,7 @@ function eventMarkerEl({ name }) {
 // never blocks on geolocation — your location is requested in parallel and the map flies to it
 // when (if) it arrives. You can always SEE the map; sharing only decides whether you appear ON it
 // (your own pin + privacy circle). A load failsafe guarantees it never sits on "summoning…".
-export default function RealMap({ nearby = [], events = [], tonightStatus, ghost = false, onOpenUser, onOpenTonightStatus, onOpenEvent }) {
+export default function RealMap({ nearby = [], events = [], tonightStatus, ghost = false, onOpenUser, onOpenTonightStatus, onOpenEvent, placing = false, onPickPoint, onCancelPlacing }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef([]);
@@ -170,6 +170,22 @@ export default function RealMap({ nearby = [], events = [], tonightStatus, ghost
     });
   }, [state, nearby, events, sharing, fuzzM, onOpenUser, onOpenEvent, located]);
 
+  // Placement mode: one tap on the map picks the point for a new rite. Crosshair cursor while
+  // active; the click handler is registered only for the duration so normal map taps are untouched.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!placing || state !== 'ready' || !map) return undefined;
+    const canvas = map.getCanvas();
+    const prevCursor = canvas.style.cursor;
+    canvas.style.cursor = 'crosshair';
+    const pick = (e) => { onPickPoint && onPickPoint({ lat: e.lngLat.lat, lng: e.lngLat.lng }); };
+    map.on('click', pick);
+    return () => {
+      map.off('click', pick);
+      try { canvas.style.cursor = prevCursor; } catch { /* noop */ }
+    };
+  }, [placing, state, onPickPoint]);
+
   // When sharing turns on and we don't yet have a fix (permission was granted just now via the
   // share flow, after the map already mounted), locate silently so the user's own pin + privacy
   // circle appear this session without needing to reopen the map. Never prompts on its own.
@@ -201,8 +217,15 @@ export default function RealMap({ nearby = [], events = [], tonightStatus, ghost
           <p className="text-[#6B6B6B] text-xs mt-1" style={F.serif}>check your connection, then reopen the map.</p>
         </div>
       )}
+      {/* Placement banner — tap the map to place a new rite, or cancel. */}
+      {placing && (
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-3 py-1.5 bg-black/80 backdrop-blur-sm border border-[#C9A961]/70" style={F.ui}>
+          <span className="text-[#C9A961] text-[10px] uppercase tracking-[0.18em]">tap the map to place your rite</span>
+          <button onClick={onCancelPlacing} className="text-[#A8A29E] hover:text-[#F5F1E8] text-xs leading-none px-1" title="cancel">✕</button>
+        </div>
+      )}
       {/* Non-blocking nudge — never a dead-end. Tap to drop your pin / share. */}
-      {state === 'ready' && !sharing && !ghost && (
+      {state === 'ready' && !sharing && !ghost && !placing && (
         <button onClick={onOpenTonightStatus}
           className="absolute top-3 left-1/2 -translate-x-1/2 z-10 px-3 py-1.5 bg-black/75 backdrop-blur-sm border border-[#8B0000]/50 text-[#C9A961] text-[10px] uppercase tracking-[0.18em] hover:border-[#C9A961] transition-colors" style={F.ui}>
           {located ? 'go live · drop your pin →' : 'share location to appear →'}

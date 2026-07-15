@@ -273,6 +273,7 @@ export default function App() {
   const [events, setEvents] = useState([]);
   const [eventsOnMap, setEventsOnMap] = useState([]); // events with coords that pass the map anti-spam gate
   const [showCreateEvent, setShowCreateEvent] = useState(false);
+  const [eventDraftCoords, setEventDraftCoords] = useState(null); // {lat,lng} picked on the map → pre-pins CreateEventModal
   const [activeEventAttendees, setActiveEventAttendees] = useState([]);
   const [eventWaitlist, setEventWaitlist] = useState({ count: 0, mine: false });
   const [ticketManagerEvent, setTicketManagerEvent] = useState(null);
@@ -2346,6 +2347,7 @@ export default function App() {
                 onOpenUser={(h) => setActiveUserHandle(h)}
                 onOpenTonightStatus={() => setShowTonightModal(true)}
                 onOpenEvent={(id) => setActiveEvent(id)}
+                onCreateEventAt={(c) => { setEventDraftCoords(c); setShowCreateEvent(true); }}
                 festivalEvent={festivalEvent && exitedFestivalId === festivalEvent.id ? festivalEvent : null}
                 onEnterFestival={() => setExitedFestivalId(null)}
               />
@@ -2565,7 +2567,8 @@ export default function App() {
         );
       })()}
       {showCreateEvent && (
-        <CreateEventModal onCreate={addEvent} onClose={() => setShowCreateEvent(false)} />
+        <CreateEventModal onCreate={addEvent} initialCoords={eventDraftCoords}
+          onClose={() => { setShowCreateEvent(false); setEventDraftCoords(null); }} />
       )}
       {ticketManagerEvent && (
         <TicketManager
