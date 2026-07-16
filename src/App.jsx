@@ -2227,6 +2227,9 @@ export default function App() {
         onOpenTonightStatus={() => setShowTonightModal(true)}
         onOpenSettings={() => setShowSettings(true)}
         onEditProfile={() => setShowEditProfile(true)}
+        myspace={myspaceCfg}
+        onEditMyspace={() => setShowMyspaceEditor(true)}
+        onOpenUser={(h) => { if (h && h !== meHandle) setActiveUserHandle(h); }}
         onOpenMood={() => setShowMood(true)}
         onShowFollowers={openFollowers}
         onShowFollowing={openFollowing}

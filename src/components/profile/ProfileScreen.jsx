@@ -14,6 +14,7 @@ import { CRYSTAL_OPTIONS } from '../../data/crystals';
 import { SHRINE_OBJECTS, earnedShrine } from '../../data/shrine';
 import { PostGrid } from './PostGrid';
 import { TarotFrame, arcanaFor, Grain } from '../shared/Sigils';
+import { MySpaceProfileCard } from './MySpaceProfileCard';
 import { ArcanaCard } from './ArcanaCard';
 import { DarkRecapModal } from './DarkRecapModal';
 import { SectionLabel } from '../shared/SectionLabel';
@@ -26,7 +27,7 @@ const SHRINE_THEMES = {
   cathedral: 'linear-gradient(180deg, #1F0810 0%, transparent 100%)',
 };
 
-export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpdateTracker, onOpenTonightStatus, onOpenSettings, mementoMoriOn, settings, onEditProfile, onLightCandle, crews = [], onOpenCrew, onBrowseCrews, onAddGrave, onAddAnniversary, onOpenNowPlaying, onOpenReflections, onOpenDreams, dreamsCount = 0, onOpenTickets, reflectionsCount = 0, nowPlaying, activityLog = [], sigils = [], bookmarks = [], onOpenComments, onOpenPost, ritual, ritualDoneToday, onPerformRitual, crystals = [], onToggleCrystal, pinnedPost, shrineTheme = 'oxblood', onSetShrineTheme, storyHighlights = [], onRemoveHighlight, achievementState = {}, onShowFollowers, onShowFollowing, joinedScenes = [], onOpenScene, onOpenMood,
+export function ProfileScreen({ profile, graves, anniversaries, trackers, onUpdateTracker, onOpenTonightStatus, onOpenSettings, mementoMoriOn, settings, onEditProfile, onEditMyspace, myspace = null, onOpenUser, onLightCandle, crews = [], onOpenCrew, onBrowseCrews, onAddGrave, onAddAnniversary, onOpenNowPlaying, onOpenReflections, onOpenDreams, dreamsCount = 0, onOpenTickets, reflectionsCount = 0, nowPlaying, activityLog = [], sigils = [], bookmarks = [], onOpenComments, onOpenPost, ritual, ritualDoneToday, onPerformRitual, crystals = [], onToggleCrystal, pinnedPost, shrineTheme = 'oxblood', onSetShrineTheme, storyHighlights = [], onRemoveHighlight, achievementState = {}, onShowFollowers, onShowFollowing, joinedScenes = [], onOpenScene, onOpenMood,
 shrine = [], onSetShrine, flameLitAt = 0, onTendFlame, onUnravel }) {
   // Hidden ritual — stare into your own face (tap your avatar 6×) and the I comes apart.
   const selfTaps = useRef(0);
@@ -89,8 +90,23 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame, onUnravel }) {
   const candleActive = candleAge < candleBurnMs;
   const candlePct = candleActive ? Math.max(0, 1 - candleAge / candleBurnMs) : 0;
 
+  const myspaceOn = !!settings?.myspaceProfile;
   return (
     <div className="pb-24">
+      {/* Old-web (MySpace) header for your OWN profile — reuses the same card as others' profiles,
+          in self mode (edit buttons instead of follow). Opt-in via settings.myspaceProfile. */}
+      {myspaceOn && (
+        <MySpaceProfileCard self
+          user={{ handle: profile.name, avatar: profile.avatar, avatar_url: profile.avatarUrl, bio: profile.bio, tags: profile.tags || [], pronouns: profile.pronouns, mood: profile.mood, archetype: profile.archetype, decor: profile.decor, city: profile.city, birthday: profile.birthday }}
+          stats={{ posts: profile.posts, followers: profile.followers, following: profile.following }}
+          arche={arche} mood={mood}
+          memberSince={profile.created_at ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : null}
+          sunSign={sign?.name}
+          myspace={myspace}
+          onEditProfile={onEditProfile} onEditMyspace={onEditMyspace}
+          onOpenUser={onOpenUser}
+        />
+      )}
       {/* Header card — framed as a tarot arcana */}
       <div className="relative px-4 pt-4 pb-5 border-b border-[#1C1A1A] overflow-hidden">
         <div className="absolute inset-0 opacity-25" style={{ background: SHRINE_THEMES[shrineTheme] || SHRINE_THEMES.oxblood }} />
@@ -132,6 +148,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame, onUnravel }) {
           </div>
         </div>
 
+        {!myspaceOn && (<>
         <div className="relative flex items-start gap-4">
           {/* Avatar with candle */}
           <div className="relative shrink-0">
@@ -193,6 +210,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame, onUnravel }) {
           className="btn btn-ghost relative w-full mt-3">
           ✦ your dark recap
         </button>
+        </>)}
         {showRecap && <DarkRecapModal stats={recapStats} onClose={() => setShowRecap(false)} />}
         {showArcana && (
           <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center animate-fade-in p-6"
