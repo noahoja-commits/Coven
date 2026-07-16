@@ -21,6 +21,7 @@ const KIND_ICON = {
   tonight: { icon: Bell, color: '#8B0000' },
   vespers: { icon: Bell, color: '#C9A961' },
   ticket_sale: { icon: Ticket, color: '#C9A961' },
+  oddity_sold: { icon: ShoppingBag, color: '#C9A961' },
   event_change: { icon: Calendar, color: '#A89968' },
   event_cancelled: { icon: Calendar, color: '#8B0000' },
   report: { icon: Bell, color: '#9E2A33' },

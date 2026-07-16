@@ -20,6 +20,7 @@ function bodyFor(n, actor) {
     case 'ticket_sale':     return n.body ? `${actor} bought a ticket to ${trunc(n.body)}` : `${actor} bought a ticket to your rite`;
     case 'event_change':    return n.body ? `${trunc(n.body)} changed — check the details` : 'a rite you’re going to changed';
     case 'event_cancelled': return n.body ? `${trunc(n.body)} was cancelled` : 'a rite you were going to was cancelled';
+    case 'oddity_sold':     return n.body ? `${actor} bought your "${trunc(n.body)}"` : `${actor} bought one of your oddities`;
     default:            return `${actor} did something`;
   }
 }

@@ -75,6 +75,43 @@ async function enforceCapacity(ticket, paymentIntentId) {
   }
 }
 
+// One-of-a-kind inventory guard for oddity orders, mirroring enforceCapacity (capacity = 1).
+// The FIRST paid order for a listing wins: it marks the listing sold and notifies the seller.
+// Any later/concurrent paid order is refunded (reversing the transfer + fee for Connect charges);
+// the charge.refunded handler then flips it to 'refunded'. Best-effort — a refund failure must
+// never block recording the sale.
+async function settleOddityOrder(order, paymentIntentId) {
+  try {
+    if (!order?.listing_id) return;
+    const { data: paid } = await supa.from('oddity_orders')
+      .select('id, created_at').eq('listing_id', order.listing_id).eq('status', 'paid')
+      .order('created_at', { ascending: true }).order('id', { ascending: true });
+    const rank = (paid || []).findIndex(o => o.id === order.id);
+    if (rank > 0) {
+      // Not the winner — refund this second payment.
+      if (!paymentIntentId) return;
+      const pi = await stripe.paymentIntents.retrieve(paymentIntentId);
+      const isConnect = !!pi.transfer_data?.destination;
+      await stripe.refunds.create(isConnect
+        ? { payment_intent: paymentIntentId, reverse_transfer: true, refund_application_fee: true }
+        : { payment_intent: paymentIntentId });
+      console.error('stripe-webhook: refunded double-bought oddity', { order: order.id, listing: order.listing_id, rank });
+      return;
+    }
+    // Winner (rank 0, or already gone): mark the listing sold + tell the seller to ship.
+    await supa.from('listings').update({ status: 'sold' }).eq('id', order.listing_id);
+    if (order.seller_id) {
+      const { data: l } = await supa.from('listings').select('title').eq('id', order.listing_id).maybeSingle();
+      await supa.from('notifications').insert({
+        user_id: order.seller_id, actor_id: order.buyer_id || null,
+        kind: 'oddity_sold', body: (l?.title || 'your oddity').slice(0, 160),
+      });
+    }
+  } catch (e) {
+    console.error('stripe-webhook: oddity settlement failed', e.message);
+  }
+}
+
 function readRawBody(req) {
   return new Promise((resolve, reject) => {
     const chunks = [];
@@ -129,6 +166,23 @@ export default async function handler(req, res) {
       }, { onConflict: 'stripe_session_id' }).select('id, event_id, created_at').maybeSingle();
       if (error) { res.status(500).json({ error: error.message }); return; }
       await enforceCapacity(ticket, piId); // refund + flag anything that oversold past capacity
+    } else if (s.metadata?.listing_id) {
+      // An oddity was bought. Mint the order (idempotent on session id), then settle inventory:
+      // first paid order wins + marks the listing sold + notifies the seller; a second refunds.
+      const piId = typeof s.payment_intent === 'string' ? s.payment_intent : null;
+      const { data: order, error } = await supa.from('oddity_orders').upsert({
+        listing_id: s.metadata.listing_id,
+        buyer_id: s.metadata.buyer_id || null,
+        seller_id: s.metadata.seller_id || null,
+        buyer_email: s.customer_details?.email || null,
+        amount_cents: s.amount_total || 0,
+        currency: s.currency || 'usd',
+        status: 'paid',
+        stripe_session_id: s.id,
+        stripe_payment_intent: piId,
+      }, { onConflict: 'stripe_session_id' }).select('id, listing_id, buyer_id, seller_id, created_at').maybeSingle();
+      if (error) { res.status(500).json({ error: error.message }); return; }
+      await settleOddityOrder(order, piId);
     } else if (s.metadata?.kind === 'boost' && s.subscription) {
       // A store-boost subscription was purchased — fetch the sub for its period end, then pin the shop.
       try {
@@ -161,6 +215,15 @@ export default async function handler(req, res) {
         .update({ status: 'refunded' })
         .eq('stripe_payment_intent', pi);
       if (error) { res.status(500).json({ error: error.message }); return; }
+      // Oddity refund: flip the order, and if it was the winning sale, return the item to the
+      // marketplace (only when no OTHER paid order still holds it).
+      const { data: refundedOrders } = await supa.from('oddity_orders')
+        .update({ status: 'refunded' }).eq('stripe_payment_intent', pi).select('listing_id');
+      for (const o of refundedOrders || []) {
+        const { count } = await supa.from('oddity_orders')
+          .select('id', { count: 'exact', head: true }).eq('listing_id', o.listing_id).eq('status', 'paid');
+        if ((count || 0) === 0) await supa.from('listings').update({ status: 'active' }).eq('id', o.listing_id);
+      }
     }
   }
 

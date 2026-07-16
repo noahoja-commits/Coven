@@ -10,7 +10,7 @@ import { FollowListOverlay } from './components/profile/FollowListOverlay';
 import { joinCommunity, leaveCommunity, fetchCommunityMemberCounts } from './lib/db/communities';
 import { fetchConversations, getOrCreateDM, createGroup, fetchMessages as fetchDMMessages, sendDM, markRead as dmMarkRead, setBuried as dmSetBuried, subscribeDMs, toggleDMReaction, subscribeDMReactions, sendPostToDM } from './lib/db/dm';
 import { fetchActiveStories, postStory as dbPostStory, deleteStory, reactToStory } from './lib/db/stories';
-import { fetchListings, createListing, deleteListing, markListingSold } from './lib/db/listings';
+import { fetchListings, createListing, deleteListing, markListingSold, startListingCheckout } from './lib/db/listings';
 import { fetchShops, createShop, deleteShop as dbDeleteShop, startBoostCheckout } from './lib/db/shops';
 import { fetchPayoutStatus, startPayoutSetup, refreshPayoutStatus } from './lib/db/payouts';
 import { listCrews, createCrew as dbCreateCrew, joinCrew as dbJoinCrew, leaveCrew } from './lib/db/crews';
@@ -680,6 +680,7 @@ export default function App() {
   const [pendingTicketRefresh, setPendingTicketRefresh] = useState(false);
   const [pendingConnectRefresh, setPendingConnectRefresh] = useState(false);
   const [pendingBoostRefresh, setPendingBoostRefresh] = useState(false);
+  const [pendingOddityRefresh, setPendingOddityRefresh] = useState(false);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const t = params.get('ticket');
@@ -690,16 +691,20 @@ export default function App() {
     const od = params.get('oddity');
     const po = params.get('post');
     const boost = params.get('boost');
+    const listing = params.get('listing');
     const haunt = params.get('haunt'); // a cursed link: ?haunt=paralysis|egodeath plays the reveal
-    if (!t && !connect && !u && !ev && !od && !po && !boost && !haunt) return;
+    if (!t && !connect && !u && !ev && !od && !po && !boost && !listing && !haunt) return;
     history.replaceState(null, '', window.location.pathname);
     if (u) setActiveUserHandle(u.toLowerCase().replace(/[^a-z0-9_.]/g, ''));
     if (ev) { setActiveEvent(ev); setTab('events'); }
-    if (od) { setActiveOddity(od); setTab('oddities'); }
+    // A listing=success return closes the (now-sold) item; otherwise deep-link opens it.
+    if (od && listing !== 'success') { setActiveOddity(od); setTab('oddities'); }
     if (po) setActivePostComments(po);
     if (t === 'success') { setTicketSuccess(true); setPendingTicketRefresh(true); }
     if (connect === 'done') setPendingConnectRefresh(true);
     if (boost === 'success') { setTab('oddities'); setPendingBoostRefresh(true); }
+    if (listing === 'success') { setTab('oddities'); setActiveOddity(null); setPendingOddityRefresh(true); }
+    if (listing === 'cancel') showToast('checkout cancelled — the oddity is still yours to claim.');
     if (haunt === 'paralysis' || haunt === 'egodeath') setTimeout(() => setRevealTarget(haunt), 700);
   }, []);
 
@@ -732,7 +737,13 @@ export default function App() {
       // Give the webhook a moment to set boosted_until, then pull the pinned ordering.
       setTimeout(() => { fetchShops(meId).then(setShops).catch(() => {}); }, 2500);
     }
-  }, [meId, pendingTicketRefresh, pendingConnectRefresh, pendingBoostRefresh]);
+    if (pendingOddityRefresh) {
+      setPendingOddityRefresh(false);
+      showToast('★ bought — the seller will be in touch to arrange the handoff.');
+      // The webhook marks the listing sold asynchronously; refetch so it drops out of the market.
+      setTimeout(() => { fetchListings(meId).then(setListings).catch(() => {}); }, 2500);
+    }
+  }, [meId, pendingTicketRefresh, pendingConnectRefresh, pendingBoostRefresh, pendingOddityRefresh]);
 
   const setupPayouts = () => {
     if (!meId || payoutBusy) return;
@@ -1337,6 +1348,16 @@ export default function App() {
       console.error('[checkout] failed:', e);
       addNotification({ kind: 'event', avatar: '✖', text: `checkout unavailable — ${e.message}` });
     });
+  };
+
+  const buyOddity = async (listingId) => {
+    if (!meId) return;
+    try {
+      await startListingCheckout(listingId); // redirects to Stripe on success
+    } catch (e) {
+      console.error('[listing-checkout] failed:', e);
+      showToast(e.message || "couldn't start checkout — try again.", 'error');
+    }
   };
 
   const removeEvent = (eventId) => {
@@ -2869,6 +2890,7 @@ export default function App() {
             setActiveOddity(null); setActivePortal(null); openDMWithUser(h, prefill);
           }}
           onOpenUser={(h) => { setActiveOddity(null); setActivePortal(null); if (h && h !== meHandle) setActiveUserHandle(h); }}
+          onBuy={(id) => buyOddity(id)}
           onMarkSold={(id) => {
             setListings(prev => prev.filter(l => l.id !== id));
             markListingSold(id).then(() => showToast('marked sold.')).catch(() => { showToast("couldn't mark it sold — try again.", 'error'); fetchListings(meId).then(setListings).catch(() => {}); });

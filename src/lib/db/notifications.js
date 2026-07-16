@@ -22,6 +22,8 @@ function text(n) {
     case 'ticket_sale':     return n.body ? `bought a ticket to ${n.body}` : 'bought a ticket to your rite';
     case 'event_change':    return n.body ? `changed the details of ${n.body}` : 'changed a rite you’re going to';
     case 'event_cancelled': return n.body ? `cancelled ${n.body}` : 'cancelled a rite you were going to';
+    // Oddity sold → the seller (fired by the Stripe webhook, migration 0070). body = item title.
+    case 'oddity_sold':     return n.body ? `bought your "${n.body}" — arrange the handoff` : 'bought one of your oddities';
     default:        return 'did something';
   }
 }
