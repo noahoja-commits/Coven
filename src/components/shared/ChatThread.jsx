@@ -79,58 +79,62 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
   // ── Audio recording ──
   const canRecord = typeof MediaRecorder !== 'undefined' && navigator.mediaDevices?.getUserMedia;
 
-  const startRecording = () => {
-    // Guard: prevent re-entrancy (rapid taps)
+  // TAP to start, TAP again (or the stop button) to end. The old press-and-hold model was the
+  // bug: on touch devices a ghost-click guard killed the real start, and on desktop the async
+  // getUserMedia raced the release. A single tap-toggle sidesteps both. Errors are SURFACED.
+  const startRecording = async () => {
     if (recording || recorderRef.current) return;
-    // Ignore if this is a synthesized mouse event from a prior touch
-    if (isTouchRef.current) { isTouchRef.current = false; return; }
-
+    setSendErr(null);
+    let stream;
     try {
-      const constraints = { audio: true };
-      navigator.mediaDevices.getUserMedia(constraints).then(stream => {
-        if (!mountedRef.current) {
-          stream.getTracks().forEach(t => t.stop());
-          return;
-        }
-        // Pick best supported audio mime type; fall back to browser default
-        let mime = 'audio/webm;codecs=opus';
-        if (!MediaRecorder.isTypeSupported(mime)) mime = 'audio/webm';
-        if (!MediaRecorder.isTypeSupported(mime)) mime = '';
-        const recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
-        recorder.stream = stream; // attach stream for cleanup
-        recorderRef.current = recorder;
-        const chunks = [];
-        recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
-        recorder.onstop = () => {
-          stream.getTracks().forEach(t => t.stop());
-          recorderRef.current = null; // release the ref so the next mic press can record again
-          if (!mountedRef.current) return;
-          if (chunks.length === 0) {
-            // No audio data captured (instant tap-release)
-            discardAudio();
-            return;
-          }
-          // Use the recorder's ACTUAL negotiated type — on Safari/iOS the requested webm is
-          // unsupported and it records audio/mp4, so forcing 'audio/webm' here mislabels the blob
-          // and the uploaded file's extension, breaking playback. recorder.mimeType is truthful.
-          const actualType = recorder.mimeType || mime || 'audio/webm';
-          const blob = new Blob(chunks, { type: actualType });
-          setAudioBlob(blob);
-          setAudioPreview(URL.createObjectURL(blob));
-        };
-        recorder.start();
-        setRecording(true);
-        setRecDuration(0);
-        const startedAt = Date.now();
-        recTimerRef.current = setInterval(() => {
-          if (!mountedRef.current) { clearInterval(recTimerRef.current); return; }
-          const elapsed = (Date.now() - startedAt) / 1000;
-          setRecDuration(elapsed);
-          if (elapsed >= 60) stopRecording(); // cap at 60s
-        }, 200);
-      }).catch(() => { /* mic denied or unavailable */ });
-    } catch { /* getUserMedia unavailable */ }
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (e) {
+      setSendErr(e?.name === 'NotAllowedError' || e?.name === 'SecurityError'
+        ? 'allow microphone access to record a voice note.'
+        : "couldn't reach the microphone — try again.");
+      return;
+    }
+    if (!mountedRef.current) { stream.getTracks().forEach(t => t.stop()); return; }
+    // Pick best supported audio mime type; fall back to browser default.
+    let mime = 'audio/webm;codecs=opus';
+    if (!MediaRecorder.isTypeSupported(mime)) mime = 'audio/webm';
+    if (!MediaRecorder.isTypeSupported(mime)) mime = '';
+    let recorder;
+    try {
+      recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+    } catch {
+      stream.getTracks().forEach(t => t.stop());
+      setSendErr("this device can't record audio here.");
+      return;
+    }
+    recorder.stream = stream; // attach stream for cleanup
+    recorderRef.current = recorder;
+    const chunks = [];
+    recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+    recorder.onstop = () => {
+      stream.getTracks().forEach(t => t.stop());
+      recorderRef.current = null; // release the ref so the next tap can record again
+      if (!mountedRef.current) return;
+      if (chunks.length === 0) { discardAudio(); return; }
+      // recorder.mimeType is truthful (Safari records audio/mp4 despite the webm request).
+      const actualType = recorder.mimeType || mime || 'audio/webm';
+      const blob = new Blob(chunks, { type: actualType });
+      setAudioBlob(blob);
+      setAudioPreview(URL.createObjectURL(blob));
+    };
+    recorder.start();
+    setRecording(true);
+    setRecDuration(0);
+    const startedAt = Date.now();
+    recTimerRef.current = setInterval(() => {
+      if (!mountedRef.current) { clearInterval(recTimerRef.current); return; }
+      const elapsed = (Date.now() - startedAt) / 1000;
+      setRecDuration(elapsed);
+      if (elapsed >= 60) stopRecording(); // cap at 60s
+    }, 200);
   };
+
+  const toggleRecording = () => { if (recording) stopRecording(); else startRecording(); };
 
   const stopRecording = () => {
     if (recorderRef.current?.state === 'recording') {
@@ -167,13 +171,6 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
   };
 
   const isAudioMessage = (m) => !!m.audioUrl;
-
-  // Touch event handlers: set flag to suppress synthesized mouse events
-  const onMicTouchStart = (e) => { e.preventDefault(); isTouchRef.current = true; startRecording(); };
-  const onMicTouchEnd = (e) => { e.preventDefault(); isTouchRef.current = true; stopRecording(); };
-  const onMicMouseDown = () => { if (!isTouchRef.current) startRecording(); };
-  const onMicMouseUp = () => { if (!isTouchRef.current) stopRecording(); };
-  const onMicMouseLeave = () => { if (!isTouchRef.current) stopRecording(); };
 
   return (
     <div className="absolute inset-0 flex flex-col bg-[#0A0A0A] z-40 animate-slide-in-right">
@@ -357,11 +354,8 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
           <div className="flex items-end gap-2">
             {canRecord && (
               <button
-                onMouseDown={onMicMouseDown}
-                onMouseUp={onMicMouseUp}
-                onMouseLeave={onMicMouseLeave}
-                onTouchStart={onMicTouchStart}
-                onTouchEnd={onMicTouchEnd}
+                onClick={toggleRecording}
+                title={recording ? 'tap to stop' : 'tap to record a voice note'}
                 className={`tap w-9 h-9 shrink-0 rounded-full flex items-center justify-center transition-colors select-none ${
                   recording
                     ? 'bg-[#8B0000] text-[#F5F1E8] animate-pulse'

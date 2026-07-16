@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react';
-import { X, Loader2, Check, ImagePlus, Link2 } from 'lucide-react';
+import { X, Loader2, Check, ImagePlus, Link2, Music, Plus } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { Button } from '../shared/Button';
-import { uploadImage, uploadVideo } from '../../lib/db/storage';
+import { uploadImage, uploadVideo, uploadAudio } from '../../lib/db/storage';
 
 const GALLERY_MAX = 12;
 
@@ -47,6 +47,29 @@ export function MySpaceEditor({ initial = {}, following = [], meId, onSave, onCl
     : []));
   const [saving, setSaving] = useState(false);
   const [query, setQuery] = useState('');
+  // Details / interests, blog, song, theme.
+  const [details, setDetails] = useState(() => ({ ...(initial.details || {}) }));
+  const [blog, setBlog] = useState(() => (Array.isArray(initial.blog) ? initial.blog.slice(0, 20) : []));
+  const [song, setSong] = useState(() => (initial.song && initial.song.url ? { ...initial.song } : { url: '', artist: '', track: '' }));
+  const [theme, setTheme] = useState(() => ({ accent: initial.theme?.accent || '', bg: initial.theme?.bg || '' }));
+  const [songUploading, setSongUploading] = useState(false);
+  const songRef = useRef(null);
+
+  const setDetail = (k, v) => setDetails(d => ({ ...d, [k]: v.slice(0, 600) }));
+  const addBlog = () => setBlog(b => b.length >= 20 ? b : [{ title: '', body: '', at: new Date().toISOString().slice(0, 10) }, ...b]);
+  const setBlogField = (i, k, v) => setBlog(b => b.map((e, j) => j === i ? { ...e, [k]: v } : e));
+  const removeBlog = (i) => setBlog(b => b.filter((_, j) => j !== i));
+  const uploadSong = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setSongUploading(true);
+    try {
+      const url = await uploadAudio('voice', `song/${meId || 'anon'}`, file);
+      setSong(s => ({ ...s, url }));
+    } catch (err) { setSong(s => ({ ...s })); setGalErr(err?.message || 'song upload failed (max 5MB audio)'); }
+    finally { setSongUploading(false); }
+  };
 
   const toggleFriend = (handle) => {
     setTop((cur) => cur.includes(handle) ? cur.filter(h => h !== handle) : (cur.length >= 8 ? cur : [...cur, handle]));
@@ -59,7 +82,16 @@ export function MySpaceEditor({ initial = {}, following = [], meId, onSave, onCl
     if (saving) return;
     setSaving(true);
     try {
-      await onSave({ about: about.trim().slice(0, 1500), want: want.trim().slice(0, 1500), top, gallery });
+      const cleanDetails = {};
+      for (const k of ['music', 'movies', 'books', 'heroes', 'general']) if ((details[k] || '').trim()) cleanDetails[k] = details[k].trim().slice(0, 600);
+      const cleanBlog = blog.map(b => ({ title: (b.title || '').slice(0, 120), body: (b.body || '').slice(0, 4000), at: b.at || '' })).filter(b => b.title || b.body).slice(0, 20);
+      const hex = (v) => (/^#[0-9a-f]{6}$/i.test(v) ? v : '');
+      await onSave({
+        about: about.trim().slice(0, 1500), want: want.trim().slice(0, 1500), top, gallery,
+        details: cleanDetails, blog: cleanBlog,
+        song: song.url ? { url: song.url, artist: (song.artist || '').slice(0, 120), track: (song.track || '').slice(0, 120) } : null,
+        theme: { accent: hex(theme.accent), bg: hex(theme.bg) },
+      });
       onClose();
     } catch {
       setSaving(false);
@@ -80,6 +112,72 @@ export function MySpaceEditor({ initial = {}, following = [], meId, onSave, onCl
             <textarea value={about} onChange={e => setAbout(e.target.value.slice(0, 1500))} rows={4}
               placeholder="the long version. what you're about, what you're into…" className="field w-full resize-none" />
           </div>
+
+          {/* Details / interests */}
+          <div>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C9A961] mb-1.5 block" style={F.scriptureSC}>· details ·</label>
+            <div className="space-y-1.5">
+              {[['music', 'music'], ['movies', 'films'], ['books', 'books'], ['heroes', 'heroes'], ['general', 'general']].map(([k, ph]) => (
+                <input key={k} value={details[k] || ''} onChange={e => setDetail(k, e.target.value)} placeholder={ph} className="field w-full text-[12px]" />
+              ))}
+            </div>
+          </div>
+
+          {/* Profile song */}
+          <div>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C9A961] mb-1.5 block" style={F.scriptureSC}>· your song ·</label>
+            <input ref={songRef} type="file" accept="audio/*" onChange={uploadSong} className="hidden" />
+            <div className="flex gap-1.5 mb-1.5">
+              <button onClick={() => songRef.current?.click()} disabled={songUploading}
+                className="tap flex-1 flex items-center justify-center gap-1.5 py-2 border border-[#2A2A2A] text-[#A8A29E] hover:border-[#C9A961]/50 text-[10px] uppercase tracking-wider disabled:opacity-50" style={F.ui}>
+                {songUploading ? <><Loader2 size={12} className="animate-spin" /> uploading</> : <><Music size={12} /> {song.url ? 'replace song' : 'upload a song (≤5MB)'}</>}
+              </button>
+              {song.url && <button onClick={() => setSong({ url: '', artist: '', track: '' })} className="tap px-3 border border-[#2A2A2A] text-[#6B6B6B] hover:text-[#8B0000]"><X size={13} /></button>}
+            </div>
+            {song.url && (
+              <>
+                <audio controls src={song.url} className="w-full h-8 mb-1.5" preload="none" />
+                <div className="grid grid-cols-2 gap-1.5">
+                  <input value={song.track || ''} onChange={e => setSong(s => ({ ...s, track: e.target.value }))} placeholder="track" className="field text-[12px]" />
+                  <input value={song.artist || ''} onChange={e => setSong(s => ({ ...s, artist: e.target.value }))} placeholder="artist" className="field text-[12px]" />
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Blog */}
+          <div>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C9A961] mb-1.5 flex items-center justify-between" style={F.scriptureSC}>
+              <span>· blog ·</span>
+              <button onClick={addBlog} className="tap flex items-center gap-1 text-[#A8A29E] hover:text-[#C9A961] normal-case tracking-normal"><Plus size={12} /> entry</button>
+            </label>
+            {blog.length === 0 ? (
+              <p className="text-[11px] text-[#6B6B6B] italic" style={F.serif}>no entries yet — add one.</p>
+            ) : blog.map((b, i) => (
+              <div key={i} className="border border-[#1A1A1A] p-2 mb-1.5">
+                <div className="flex gap-1.5 mb-1">
+                  <input value={b.title || ''} onChange={e => setBlogField(i, 'title', e.target.value.slice(0, 120))} placeholder="title" className="field flex-1 text-[12px]" />
+                  <button onClick={() => removeBlog(i)} className="tap px-2 text-[#6B6B6B] hover:text-[#8B0000]"><X size={13} /></button>
+                </div>
+                <textarea value={b.body || ''} onChange={e => setBlogField(i, 'body', e.target.value.slice(0, 4000))} rows={2} placeholder="write…" className="field w-full resize-none text-[12px]" />
+              </div>
+            ))}
+          </div>
+
+          {/* Theme colors */}
+          <div>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C9A961] mb-1.5 block" style={F.scriptureSC}>· colors ·</label>
+            <div className="flex items-center gap-4">
+              <label className="flex items-center gap-2 text-[11px] text-[#A8A29E]" style={F.ui}>
+                accent <input type="color" value={/^#[0-9a-f]{6}$/i.test(theme.accent) ? theme.accent : '#c9a961'} onChange={e => setTheme(t => ({ ...t, accent: e.target.value }))} className="w-8 h-8 bg-transparent border border-[#2A2A2A]" />
+              </label>
+              <label className="flex items-center gap-2 text-[11px] text-[#A8A29E]" style={F.ui}>
+                background <input type="color" value={/^#[0-9a-f]{6}$/i.test(theme.bg) ? theme.bg : '#0f0f0f'} onChange={e => setTheme(t => ({ ...t, bg: e.target.value }))} className="w-8 h-8 bg-transparent border border-[#2A2A2A]" />
+              </label>
+              {(theme.accent || theme.bg) && <button onClick={() => setTheme({ accent: '', bg: '' })} className="tap text-[10px] text-[#6B6B6B] hover:text-[#8B0000] uppercase" style={F.ui}>reset</button>}
+            </div>
+          </div>
+
           <div>
             <label className="text-[10px] uppercase tracking-[0.2em] text-[#C9A961] mb-1.5 flex items-center justify-between" style={F.scriptureSC}>
               <span>· your gallery ·</span>
