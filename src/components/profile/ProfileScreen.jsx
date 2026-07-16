@@ -90,7 +90,7 @@ shrine = [], onSetShrine, flameLitAt = 0, onTendFlame, onUnravel }) {
   const candleActive = candleAge < candleBurnMs;
   const candlePct = candleActive ? Math.max(0, 1 - candleAge / candleBurnMs) : 0;
 
-  const myspaceOn = !!settings?.myspaceProfile;
+  const myspaceOn = settings?.myspaceProfile !== false; // default ON, opt-out
   return (
     <div className="pb-24">
       {/* Old-web (MySpace) header for your OWN profile — reuses the same card as others' profiles,
