@@ -2659,6 +2659,7 @@ export default function App() {
         <MySpaceEditor
           initial={myspaceCfg || {}}
           following={followingPeople}
+          meId={meId}
           onSave={async (cfg) => {
             setMyspaceCfg(cfg);
             if (meId) await saveMyspace(meId, cfg);

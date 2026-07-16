@@ -1,14 +1,45 @@
-import { useState } from 'react';
-import { X, Loader2, Check } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { X, Loader2, Check, ImagePlus, Link2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { Button } from '../shared/Button';
+import { uploadImage, uploadVideo } from '../../lib/db/storage';
 
-// Edit your old-web ("MySpace") profile: About-me + Who-I'd-like-to-meet blurbs and a curated
-// Top-Friends list (up to 8), picked from the people you follow. Saves the blob to profile_state
-// via onSave; other users see it (sanitized) through the public_shrine rpc (migration 0069).
-export function MySpaceEditor({ initial = {}, following = [], onSave, onClose }) {
+const GALLERY_MAX = 12;
+
+// Edit your old-web ("MySpace") profile: About-me + Who-I'd-like-to-meet blurbs, a curated
+// Top-Friends list (up to 8), and a photo/video gallery. Saves the blob to profile_state via
+// onSave; other users see it (sanitized) through the public_shrine rpc (migrations 0069/0072).
+export function MySpaceEditor({ initial = {}, following = [], meId, onSave, onClose }) {
   const [about, setAbout] = useState(initial.about || '');
   const [want, setWant] = useState(initial.want || '');
+  const [gallery, setGallery] = useState(() => (Array.isArray(initial.gallery)
+    ? initial.gallery.filter(g => g && g.url).slice(0, GALLERY_MAX) : []));
+  const [uploading, setUploading] = useState(false);
+  const [linkUrl, setLinkUrl] = useState('');
+  const [galErr, setGalErr] = useState(null);
+  const fileRef = useRef(null);
+
+  const addUpload = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || gallery.length >= GALLERY_MAX) return;
+    setUploading(true); setGalErr(null);
+    try {
+      const isVideo = file.type?.startsWith('video/');
+      const url = isVideo ? await uploadVideo('post-images', meId, file) : await uploadImage('post-images', meId, file);
+      setGallery(g => [...g, { url, type: isVideo ? 'video' : 'image' }].slice(0, GALLERY_MAX));
+    } catch (err) { setGalErr(err?.message || 'upload failed'); }
+    finally { setUploading(false); }
+  };
+  const addLink = () => {
+    const u = linkUrl.trim();
+    if (!u || gallery.length >= GALLERY_MAX) return;
+    if (!/^https:\/\/\S+/i.test(u)) { setGalErr('paste a full https:// image or video link'); return; }
+    const type = /\.(mp4|webm|mov|m4v)(\?|$)/i.test(u) ? 'video' : 'image';
+    setGallery(g => [...g, { url: u, type }].slice(0, GALLERY_MAX));
+    setLinkUrl(''); setGalErr(null);
+  };
+  const removeMedia = (i) => setGallery(g => g.filter((_, j) => j !== i));
   // top is stored as handle strings; tolerate the resolved {handle,...} object shape too so a
   // value coming from public_shrine can never crash the editor.
   const [top, setTop] = useState(() => (Array.isArray(initial.top)
@@ -28,7 +59,7 @@ export function MySpaceEditor({ initial = {}, following = [], onSave, onClose })
     if (saving) return;
     setSaving(true);
     try {
-      await onSave({ about: about.trim().slice(0, 1500), want: want.trim().slice(0, 1500), top });
+      await onSave({ about: about.trim().slice(0, 1500), want: want.trim().slice(0, 1500), top, gallery });
       onClose();
     } catch {
       setSaving(false);
@@ -48,6 +79,41 @@ export function MySpaceEditor({ initial = {}, following = [], onSave, onClose })
             <label className="text-[10px] uppercase tracking-[0.2em] text-[#C9A961] mb-1.5 block" style={F.scriptureSC}>· about me ·</label>
             <textarea value={about} onChange={e => setAbout(e.target.value.slice(0, 1500))} rows={4}
               placeholder="the long version. what you're about, what you're into…" className="field w-full resize-none" />
+          </div>
+          <div>
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[#C9A961] mb-1.5 flex items-center justify-between" style={F.scriptureSC}>
+              <span>· your gallery ·</span>
+              <span className="text-[#6B6B6B]" style={F.mono}>{gallery.length}/{GALLERY_MAX}</span>
+            </label>
+            {gallery.length > 0 && (
+              <div className="grid grid-cols-3 gap-1.5 mb-2">
+                {gallery.map((m, i) => (
+                  <div key={i} className="relative aspect-square border border-[#2A2A2A] overflow-hidden bg-[#0A0A0A]">
+                    {m.type === 'video'
+                      ? <video src={m.url} className="w-full h-full object-cover" muted playsInline />
+                      : <img src={m.url} alt="" className="w-full h-full object-cover" />}
+                    <button onClick={() => removeMedia(i)} className="tap absolute top-0.5 right-0.5 w-5 h-5 bg-black/80 border border-[#3F3F3F] text-[#F5F1E8] hover:text-[#8B0000] flex items-center justify-center"><X size={11} /></button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {gallery.length < GALLERY_MAX && (
+              <>
+                <input ref={fileRef} type="file" accept="image/*,video/*" onChange={addUpload} className="hidden" />
+                <div className="flex gap-1.5">
+                  <button onClick={() => fileRef.current?.click()} disabled={uploading}
+                    className="tap flex-1 flex items-center justify-center gap-1.5 py-2 border border-[#2A2A2A] text-[#A8A29E] hover:border-[#C9A961]/50 text-[10px] uppercase tracking-wider disabled:opacity-50" style={F.ui}>
+                    {uploading ? <><Loader2 size={12} className="animate-spin" /> uploading</> : <><ImagePlus size={12} /> upload</>}
+                  </button>
+                </div>
+                <div className="flex gap-1.5 mt-1.5">
+                  <input value={linkUrl} onChange={e => setLinkUrl(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') addLink(); }}
+                    placeholder="…or paste an image link (incl. Pinterest)" className="field flex-1 text-[12px]" />
+                  <button onClick={addLink} className="tap px-3 border border-[#2A2A2A] text-[#C9A961] hover:border-[#C9A961]/50" title="add link"><Link2 size={14} /></button>
+                </div>
+              </>
+            )}
+            {galErr && <p className="text-[10px] text-[#9E2A33] mt-1 italic" style={F.serif}>{galErr}</p>}
           </div>
           <div>
             <label className="text-[10px] uppercase tracking-[0.2em] text-[#C9A961] mb-1.5 block" style={F.scriptureSC}>· who i'd like to meet ·</label>
