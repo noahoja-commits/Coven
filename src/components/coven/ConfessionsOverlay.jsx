@@ -13,6 +13,7 @@ import { OrnamentRule, Grain, OrnateFrame } from '../shared/Sigils';
 export function ConfessionsOverlay({ onClose, userConfessions = [], onConfess, onReact, onReport }) {
   const [draft, setDraft] = useState('');
   const [posting, setPosting] = useState(false);
+  const [burning, setBurning] = useState(false); // true while the just-posted draft is animating away in flame
   const [hidden, setHidden] = useState({}); // id -> true once reported/hidden locally
 
   const report = (id) => {
@@ -22,11 +23,15 @@ export function ConfessionsOverlay({ onClose, userConfessions = [], onConfess, o
 
   const submit = async () => {
     const body = draft.trim();
-    if (!body || posting) return;
+    if (!body || posting || burning) return;
     setPosting(true);
     try {
       await (onConfess && onConfess(body));
-      setDraft('');
+      setBurning(true);
+      setTimeout(() => {
+        setDraft('');
+        setBurning(false);
+      }, 900);
     } finally {
       setPosting(false);
     }
@@ -55,18 +60,30 @@ export function ConfessionsOverlay({ onClose, userConfessions = [], onConfess, o
         </div>
 
         <div className="mb-6 max-w-md mx-auto">
-          <textarea value={draft} onChange={e => setDraft(e.target.value.slice(0, 280))}
-            placeholder="what couldn't you say with your name attached..."
-            rows={3}
-            disabled={posting}
-            className="w-full bg-[#0A0204]/80 border border-[#5E3B73]/30 focus:border-[#5E3B73] outline-none p-3 text-[#F5F1E8] text-base italic resize-none placeholder:text-[#9E2A33]/30 disabled:opacity-60"
-            style={F.scripture} />
+          <div className="relative">
+            <textarea value={draft} onChange={e => setDraft(e.target.value.slice(0, 280))}
+              placeholder="what couldn't you say with your name attached..."
+              rows={3}
+              disabled={posting || burning}
+              className={`w-full bg-[#0A0204]/80 border border-[#5E3B73]/30 focus:border-[#5E3B73] outline-none p-3 text-[#F5F1E8] text-base italic resize-none placeholder:text-[#9E2A33]/30 disabled:opacity-60 ${burning ? 'animate-confession-burn' : ''}`}
+              style={F.scripture} />
+            {burning && (
+              <div className="absolute inset-0 overflow-visible pointer-events-none">
+                {[...Array(6)].map((_, i) => (
+                  <span key={i} className="absolute bottom-2 text-sm animate-confession-ember"
+                    style={{ left: `${8 + i * 16}%`, '--ex': `${(i % 2 ? 1 : -1) * (6 + i * 3)}px`, animationDelay: `${i * 60}ms` }}>
+                    🔥
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
           <div className="flex items-center justify-between mt-2">
             <span className="text-[10px] text-[#9E2A33]/40" style={F.mono}>{draft.length}/280</span>
-            <button onClick={submit} disabled={!draft.trim() || posting}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-wider ${draft.trim() && !posting ? 'bg-[#5E3B73] text-[#F5F1E8]' : 'bg-[#1A1A1A] text-[#6B6B6B]'}`}
+            <button onClick={submit} disabled={!draft.trim() || posting || burning}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-wider ${draft.trim() && !posting && !burning ? 'bg-[#5E3B73] text-[#F5F1E8]' : 'bg-[#1A1A1A] text-[#6B6B6B]'}`}
               style={F.ui}>
-              <Send size={11} /> {posting ? 'sealing…' : 'confess'}
+              <Send size={11} /> {posting ? 'sealing…' : burning ? 'burning…' : 'confess'}
             </button>
           </div>
         </div>
