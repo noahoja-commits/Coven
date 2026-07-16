@@ -36,6 +36,7 @@ export function MySpaceProfileCard({ user, stats, arche, mood, memberSince, sunS
   const about = myspace?.about || user.bio || '';
   const want = myspace?.want || '';
   const top = Array.isArray(myspace?.top) ? myspace.top.slice(0, 8) : [];
+  const gallery = Array.isArray(myspace?.gallery) ? myspace.gallery.filter(m => m && m.url).slice(0, 12) : [];
   // On your OWN profile the contact box becomes an edit box; on others' it's follow/whisper/mute.
   const contactActions = self
     ? [
@@ -144,6 +145,21 @@ export function MySpaceProfileCard({ user, stats, arche, mood, memberSince, sunS
             <div className="border border-[#2A2A2A]">
               <SectionHeader>who {user.handle} would like to meet</SectionHeader>
               <p className="px-2 py-2 text-[#F5F1E8] text-[13px] leading-relaxed whitespace-pre-wrap" style={F.serif}>{want}</p>
+            </div>
+          )}
+
+          {gallery.length > 0 && (
+            <div className="border border-[#2A2A2A]">
+              <SectionHeader>{user.handle}'s gallery</SectionHeader>
+              <div className="grid grid-cols-3 gap-1 p-1">
+                {gallery.map((m, i) => (
+                  <a key={i} href={m.url} target="_blank" rel="noreferrer" className="block aspect-square overflow-hidden bg-[#0A0A0A] border border-[#1A1A1A]">
+                    {m.type === 'video'
+                      ? <video src={m.url} className="w-full h-full object-cover" muted playsInline />
+                      : <img src={m.url} alt="" loading="lazy" className="w-full h-full object-cover" />}
+                  </a>
+                ))}
+              </div>
             </div>
           )}
 
