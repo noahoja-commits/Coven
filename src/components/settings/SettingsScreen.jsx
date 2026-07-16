@@ -57,7 +57,7 @@ function Row({ label, desc, children }) {
   );
 }
 
-export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLogout, onRerunOnboarding, mutedKeywords = [], onSetMutedKeywords, payoutStatus, payoutBusy = false, onSetupPayouts, pushState = 'off', onEnablePush, onDisablePush, onEditProfile, onOpenBlocked, onOpenLegal, onDeleteAccount, onOpenShockPicker, onOpenAnalytics, onOpenAdmin }) {
+export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLogout, onRerunOnboarding, mutedKeywords = [], onSetMutedKeywords, payoutStatus, payoutBusy = false, onSetupPayouts, pushState = 'off', onEnablePush, onDisablePush, onEditProfile, onEditMyspace, onOpenBlocked, onOpenLegal, onDeleteAccount, onOpenShockPicker, onOpenAnalytics, onOpenAdmin }) {
   const set = (key, value) => onChange({ ...settings, [key]: value });
   const addKeyword = (e) => {
     e.preventDefault();
@@ -120,6 +120,18 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
           <Row label="Reactive taps" desc="every tap leaves a mark — blood, embers, glitch, a sigil — themed to the mode.">
             <Toggle on={settings.reactiveTaps !== false} onChange={v => set('reactiveTaps', v)} />
           </Row>
+          <Row label="Old-web profiles" desc="a retro two-column profile — contact box, general info, blurbs — in oxblood & gold. (beta)">
+            <Toggle on={!!settings.myspaceProfile} onChange={v => set('myspaceProfile', v)} />
+          </Row>
+          {settings.myspaceProfile && onEditMyspace && (
+            <button onClick={onEditMyspace} className="tap w-full px-4 py-3 flex items-center justify-between text-left hover:bg-[#0F0F0F] transition-colors">
+              <div className="flex-1 min-w-0">
+                <div className="text-[#F5F1E8] text-sm" style={F.serif}>Edit your old-web profile</div>
+                <div className="text-[10px] text-[#6B6B6B] mt-0.5" style={F.serif}>about me · who i'd like to meet · top of the coven</div>
+              </div>
+              <ChevronRight size={16} className="text-[#3F3F3F]" />
+            </button>
+          )}
         </Section>
 
         <Section title="atmosphere">

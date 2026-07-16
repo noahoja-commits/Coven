@@ -3,7 +3,13 @@ import { supabase } from '../supabase';
 // Per-user profile depth blobs (graves / trackers / sigils / reflections).
 // Each is stored whole under one key; the client owns the merge.
 
-const KEYS = ['graves', 'trackers', 'sigils', 'reflections', 'clientSync', 'dreamJournal', 'intention'];
+const KEYS = ['graves', 'trackers', 'sigils', 'reflections', 'clientSync', 'dreamJournal', 'intention', 'myspace'];
+
+// Save the old-web ("MySpace") profile config blob: { about, want, top: [handle,...] }.
+// Owner-locked by RLS; other users read it (sanitized) through the public_shrine rpc (0069).
+export async function saveMyspace(userId, value) {
+  return saveProfileState(userId, 'myspace', value);
+}
 
 export async function fetchProfileState() {
   const { data, error } = await supabase
