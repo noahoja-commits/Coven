@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, Mic, MicOff, Play, Square, X, Users, LogOut, Smile } from 'lucide-react';
+import { Send, Mic, MicOff, Play, Square, X, Users, LogOut, Phone, Video, Smile } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { uploadAudio } from '../../lib/db/storage';
 import { isStickerMessage } from '../../data/stickers';
@@ -16,7 +16,7 @@ function formatDuration(seconds) {
 const REACT_KINDS = ['bat', 'fire', 'skull', 'smoke'];
 const REACT_EMOJI = { bat: '🦇', fire: '🔥', skull: '💀', smoke: '💨' };
 
-export function ChatThread({ conversation, messages, onSend, onBack, onRetry, onReact, onOpenPost, onOpenUser, onLeaveGroup, initialDraft = '', meHandle = '' }) {
+export function ChatThread({ conversation, messages, onSend, onBack, onRetry, onReact, onOpenPost, onOpenUser, onLeaveGroup, onStartCall, initialDraft = '', meHandle = '' }) {
   const [draft, setDraft] = useState(initialDraft);
   const { typingUser, onInput } = useTypingIndicator(conversation?.id, meHandle);
   const [trayMsg, setTrayMsg] = useState(null);
@@ -195,6 +195,12 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
             {conversation?.group ? 'coven · group' : 'whisper'}
           </div>
         </div>
+        {!conversation?.group && onStartCall && (
+          <div className="flex items-center gap-0.5 shrink-0">
+            <button onClick={() => onStartCall('audio')} className="tap p-2 text-[#A8A29E] hover:text-[#C9A961]" title="voice call"><Phone size={16} /></button>
+            <button onClick={() => onStartCall('video')} className="tap p-2 text-[#A8A29E] hover:text-[#C9A961]" title="video call"><Video size={16} /></button>
+          </div>
+        )}
         {conversation?.group && (
           <div className="flex items-center gap-1 shrink-0">
             <button onClick={() => { setMembers([]); fetchConversationMembers(conversation.id).then(setMembers).catch(() => setMembers(null)); }}
