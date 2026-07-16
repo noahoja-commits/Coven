@@ -37,42 +37,36 @@ export default async function handler(req, res) {
     const since = new Date(Date.now() - days * 86400000).toISOString();
 
     // This user's post ids, fetched once and reused across the queries below.
-    const postIds = await getUserPostIds(supa, userId);
+    const postIds = await getUserPostIds(supa, userId).catch(() => []);
 
-    // Run all queries in parallel
+    // Run all queries in parallel. EVERY one is individually guarded so a single failing
+    // query (a missing table/rpc, a transient error, an empty-array edge case) degrades that
+    // one stat to a safe default instead of rejecting Promise.all and 500-ing the whole tab —
+    // the whole dashboard used to die if any one of these threw.
+    const safe = (p, fallback) => Promise.resolve(p).then(r => r).catch((e) => {
+      console.error('analytics query', e?.message || e);
+      return fallback;
+    });
     const [
       postViewsRes, profileViewsRes, followersRes,
       postsRes, reactionsRes, commentsRes,
     ] = await Promise.all([
-      // Total post views (unique)
-      supa.rpc('view_counts', { p_kind: 'post', p_ids: postIds }).catch(() => ({ data: [] })),
-
-      // Profile views (unique) in the period
-      supa.from('profile_views').select('created_at', { count: 'exact', head: true })
-        .eq('profile_id', userId).gte('created_at', since),
-
-      // Follower count
-      supa.from('follows').select('created_at', { count: 'exact', head: true })
-        .eq('followee_id', userId),
-
-      // Total posts
-      supa.from('posts').select('id', { count: 'exact', head: true })
-        .eq('author_id', userId),
-
-      // Total reactions received on posts (table is `reactions`, keyed by post_id)
-      supa.from('reactions').select('post_id', { count: 'exact', head: true })
-        .in('post_id', postIds),
-
-      // Total comments received
-      supa.from('comments').select('id', { count: 'exact', head: true })
-        .in('post_id', postIds),
+      safe(supa.rpc('view_counts', { p_kind: 'post', p_ids: postIds }), { data: [] }),
+      safe(supa.from('profile_views').select('created_at', { count: 'exact', head: true })
+        .eq('profile_id', userId).gte('created_at', since), { count: 0 }),
+      safe(supa.from('follows').select('created_at', { count: 'exact', head: true })
+        .eq('followee_id', userId), { count: 0 }),
+      safe(supa.from('posts').select('id', { count: 'exact', head: true })
+        .eq('author_id', userId), { count: 0 }),
+      safe(supa.from('reactions').select('post_id', { count: 'exact', head: true })
+        .in('post_id', postIds), { count: 0 }),
+      safe(supa.from('comments').select('id', { count: 'exact', head: true })
+        .in('post_id', postIds), { count: 0 }),
     ]);
 
-    // Compute daily view counts for the chart (sample every 5 days for performance)
-    const viewHistory = await getDailyViewCounts(supa, userId, days);
-
-    // Top posts by views
-    const topPosts = await getTopPosts(supa, userId);
+    // Chart + top posts are best-effort too — a failure here shows an empty chart, not a dead tab.
+    const viewHistory = await safe(getDailyViewCounts(supa, userId, days), []);
+    const topPosts = await safe(getTopPosts(supa, userId), []);
 
     const payload = {
       overview: {

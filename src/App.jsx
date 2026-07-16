@@ -14,7 +14,8 @@ import { fetchListings, createListing, deleteListing, markListingSold } from './
 import { fetchShops, createShop, deleteShop as dbDeleteShop, startBoostCheckout } from './lib/db/shops';
 import { fetchPayoutStatus, startPayoutSetup, refreshPayoutStatus } from './lib/db/payouts';
 import { listCrews, createCrew as dbCreateCrew, joinCrew as dbJoinCrew, leaveCrew } from './lib/db/crews';
-import { fetchProfileState, saveProfileState } from './lib/db/profileState';
+import { fetchProfileState, saveProfileState, saveMyspace } from './lib/db/profileState';
+import { MySpaceEditor } from './components/profile/MySpaceEditor';
 import { fetchNotifications, markNotificationRead, markAllNotificationsRead, clearNotifications, subscribeNotifications, hydrateRealtime } from './lib/db/notifications';
 import { fetchBlockedIds, blockUser as dbBlockUser, unblockUser as dbUnblockUser, reportContent } from './lib/db/moderation';
 import { BlockedOverlay } from './components/settings/BlockedOverlay';
@@ -180,6 +181,8 @@ export default function App() {
   const [weatherTint, setWeatherTint] = useState(null); // {color,opacity} when Weather mood is on
   const [showTonightModal, setShowTonightModal] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showMyspaceEditor, setShowMyspaceEditor] = useState(false);
+  const [myspaceCfg, setMyspaceCfg] = useState(null); // own old-web profile blob {about,want,top}
   const [showMood, setShowMood] = useState(false);
   const [sharePostTarget, setSharePostTarget] = useState(null); // postId being forwarded to a DM
   const [showBlocked, setShowBlocked] = useState(false);
@@ -561,6 +564,7 @@ export default function App() {
       if (s.reflections) setReflections(s.reflections);
       if (s.dreamJournal) setDreams(s.dreamJournal);
       if (s.intention) setActiveIntention(s.intention);
+      if (s.myspace) setMyspaceCfg(s.myspace);
       // Cross-device personal layer: hydrate from the cloud blob (cloud wins on login).
       const cs = s.clientSync;
       if (cs) {
@@ -1217,16 +1221,16 @@ export default function App() {
     });
   };
 
-  const sendMessage = (conversationId, body, audioUrl = null) => {
+  const sendMessage = (conversationId, body, audioUrl = null, imageUrl = null) => {
     if (!meId || !conversationId || String(conversationId).startsWith('temp-')) return;
     const tempId = `tempm-${Date.now()}`;
-    const preview = audioUrl ? '🎙️ voice note' : (body.length > 60 ? body.slice(0, 60) + '…' : body);
-    const optimistic = { id: tempId, from: 'me', body, audioUrl, time: 'just now', pending: true };
+    const preview = audioUrl ? '🎙️ voice note' : imageUrl ? '🖼️ gif' : (body.length > 60 ? body.slice(0, 60) + '…' : body);
+    const optimistic = { id: tempId, from: 'me', body, audioUrl, imageUrl, time: 'just now', pending: true };
     setMessages(prev => ({ ...prev, [conversationId]: [...(prev[conversationId] || []), optimistic] }));
     setConversations(prev => prev.map(c =>
       c.id === conversationId ? { ...c, last: preview, time: 'just now' } : c
     ));
-    sendDM(conversationId, meId, body, audioUrl)
+    sendDM(conversationId, meId, body, audioUrl, imageUrl)
       .then(saved => setMessages(prev => ({ ...prev, [conversationId]: (prev[conversationId] || []).map(m => m.id === tempId ? saved : m) })))
       // Keep the message (marked failed) so it isn't silently lost, and tell the user.
       .catch(() => {
@@ -1260,14 +1264,14 @@ export default function App() {
 
   // Retry a failed message: drop the failed copy and resend.
   const retryMessage = (conversationId, messageId) => {
-    let body = null, audioUrl = null;
+    let body = null, audioUrl = null, imageUrl = null;
     setMessages(prev => {
       const list = prev[conversationId] || [];
       const failed = list.find(m => m.id === messageId);
-      if (failed) { body = failed.body; audioUrl = failed.audioUrl || null; }
+      if (failed) { body = failed.body; audioUrl = failed.audioUrl || null; imageUrl = failed.imageUrl || null; }
       return { ...prev, [conversationId]: list.filter(m => m.id !== messageId) };
     });
-    if (body || audioUrl) sendMessage(conversationId, body, audioUrl);
+    if (body || audioUrl || imageUrl) sendMessage(conversationId, body, audioUrl, imageUrl);
   };
 
   const openConversation = (id, meta) => {
@@ -1892,7 +1896,7 @@ export default function App() {
   const anyOverlayOpen = !!(
     showSigilDraw ||
     ticketSuccess || activeStoryIndex !== null || showStoryComposer || venueEditorEvent ||
-    ticketManagerEvent || showCreateEvent || showAdminPanel || showEditProfile || showMood || sharePostTarget || showSettings || showBlocked || showLegal || showDeleteConfirm || reportSheet || legalEscalation ||
+    ticketManagerEvent || showCreateEvent || showAdminPanel || showMyspaceEditor || showEditProfile || showMood || sharePostTarget || showSettings || showBlocked || showLegal || showDeleteConfirm || reportSheet || legalEscalation ||
     showMyTickets || showReflections || showDreams || showNowPlaying || showAddGrave || showAddAnniv ||
     showVespersArchive || showNewGroup || showTonightModal || quoteTarget || showOddityCompose ||
     activeOddity || activePostComments || followList || activeConversation || activeUserHandle ||
@@ -1912,6 +1916,7 @@ export default function App() {
     if (venueEditorEvent) { setVenueEditorEvent(null); return true; }
     if (ticketManagerEvent) { setTicketManagerEvent(null); return true; }
     if (showAdminPanel) { setShowAdminPanel(false); return true; }
+    if (showMyspaceEditor) { setShowMyspaceEditor(false); return true; }
     if (showCreateEvent) { setShowCreateEvent(false); setEventDraftCoords(null); return true; }
     if (showEditProfile) { setShowEditProfile(false); return true; }
     if (showMood) { setShowMood(false); return true; }
@@ -2454,7 +2459,7 @@ export default function App() {
           messages={messages[activeConversation] || []}
           initialDraft={dmPrefill}
           meHandle={meHandle}
-          onSend={(body, audioUrl) => sendMessage(activeConversation, body, audioUrl)}
+          onSend={(body, audioUrl, imageUrl) => sendMessage(activeConversation, body, audioUrl, imageUrl)}
           onRetry={(messageId) => retryMessage(activeConversation, messageId)}
           onReact={(messageId, kind) => reactToMessage(activeConversation, messageId, kind)}
           onOpenPost={(id) => { setActiveConversation(null); setActiveConvMeta(null); setActivePostComments(id); }}
@@ -2513,6 +2518,8 @@ export default function App() {
           onBlock={(profileId) => blockUserById(profileId, activeUserHandle)}
           onReport={(profileId) => setReportSheet({ kind: 'user', id: profileId })}
           onClose={() => setActiveUserHandle(null)}
+          myspace={settings.myspaceProfile}
+          onOpenUser={(h) => setActiveUserHandle(h)}
         />
       )}
       {showNotifs && (
@@ -2645,6 +2652,18 @@ export default function App() {
           onEnd={() => { setCall(null); setCallSignal(null); }}
         />
       )}
+      {showMyspaceEditor && (
+        <MySpaceEditor
+          initial={myspaceCfg || {}}
+          following={followingPeople}
+          onSave={async (cfg) => {
+            setMyspaceCfg(cfg);
+            if (meId) await saveMyspace(meId, cfg);
+            showToast('your old-web profile is saved.');
+          }}
+          onClose={() => setShowMyspaceEditor(false)}
+        />
+      )}
       {ticketManagerEvent && (
         <TicketManager
           event={ticketManagerEvent}
@@ -2740,6 +2759,7 @@ export default function App() {
           onEnablePush={turnPushOn}
           onDisablePush={turnPushOff}
           onEditProfile={() => setShowEditProfile(true)}
+          onEditMyspace={() => { setShowSettings(false); setShowMyspaceEditor(true); }}
           onOpenBlocked={() => setShowBlocked(true)}
           onOpenLegal={() => setShowLegal(true)}
           onDeleteAccount={() => setShowDeleteConfirm(true)}

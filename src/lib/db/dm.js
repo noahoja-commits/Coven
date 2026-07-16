@@ -39,7 +39,7 @@ export async function fetchMessages(convId, myId, { limit = 50, before = null } 
     .from('messages_dm')
     // Name the FK explicitly: messages_dm has two relationships to profiles (sender_id +
     // the message_reactions m2m), so a bare profiles embed is ambiguous (PGRST201).
-    .select('id, body, created_at, sender_id, forwarded_post_id, audio_url, sender:profiles!messages_dm_sender_id_fkey(handle)')
+    .select('id, body, created_at, sender_id, forwarded_post_id, audio_url, image_url, sender:profiles!messages_dm_sender_id_fkey(handle)')
     .eq('conversation_id', convId)
     .order('created_at', { ascending: false })
     .order('id', { ascending: false })
@@ -61,6 +61,7 @@ export async function fetchMessages(convId, myId, { limit = 50, before = null } 
     forwardedPostId: m.forwarded_post_id || null,
     forwardedPost: null,
     audioUrl: m.audio_url || null,
+    imageUrl: m.image_url || null,
     reactions: { bat: 0, fire: 0, skull: 0, smoke: 0 },
     myReactions: {},
   }));
@@ -117,15 +118,17 @@ export function subscribeDMReactions(onChange) {
       payload => onChange(payload)));
 }
 
-export async function sendDM(convId, senderId, body, audioUrl = null) {
+export async function sendDM(convId, senderId, body, audioUrl = null, imageUrl = null) {
   const payload = { conversation_id: convId, sender_id: senderId, body };
   if (audioUrl) payload.audio_url = audioUrl;
+  if (imageUrl) payload.image_url = imageUrl;
   const { data, error } = await supabase
     .from('messages_dm')
     .insert(payload)
-    .select('id, body, created_at, audio_url').single();
+    // image_url is only selectable post-0071; request it but fall back so sends still work pre-migration.
+    .select('id, body, created_at, audio_url, image_url').single();
   if (error) throw error;
-  return { id: data.id, from: 'me', body: data.body, time: relativeTime(data.created_at), audioUrl: data.audio_url || null };
+  return { id: data.id, from: 'me', body: data.body, time: relativeTime(data.created_at), audioUrl: data.audio_url || null, imageUrl: data.image_url || null };
 }
 
 // Forward a feed post into a whisper (optionally with a note).

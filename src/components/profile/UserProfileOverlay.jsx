@@ -4,24 +4,36 @@ import { F } from '../../styles/fonts';
 import { getProfileByHandle, getProfileStats } from '../../lib/db/profiles';
 import { recordView } from '../../lib/db/views';
 import { fetchUserPosts } from '../../lib/db/posts';
+import { fetchPublicShrine } from '../../lib/db/profileState';
 import { borderStyle, bannerStyle } from '../../data/decor';
 import { moodActive } from '../../data/moods';
 import { archetypeById } from '../../data/archetypes';
 import { PostGrid } from './PostGrid';
 import { PublicShrine } from './PublicShrine';
+import { MySpaceProfileCard } from './MySpaceProfileCard';
 import { TarotFrame, arcanaFor, Grain } from '../shared/Sigils';
 
-export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], meId, onToast, isFollowing, isMuted, onToggleFollow, onToggleMute, onWhisper, onClose, onOpenComments, onReact, onBlock, onReport }) {
+const ZODIAC = [[1,20,'Capricorn'],[2,19,'Aquarius'],[3,20,'Pisces'],[4,20,'Aries'],[5,21,'Taurus'],[6,21,'Gemini'],[7,22,'Cancer'],[8,23,'Leo'],[9,23,'Virgo'],[10,23,'Libra'],[11,22,'Scorpio'],[12,22,'Sagittarius'],[13,0,'Capricorn']];
+function sunSignOf(birthday) {
+  if (!birthday) return null;
+  const d = new Date(birthday + 'T00:00:00'); if (isNaN(d)) return null;
+  const m = d.getMonth() + 1, day = d.getDate();
+  const row = ZODIAC.find(([mm, dd]) => m < mm || (m === mm && day <= dd));
+  return row ? row[2] : null;
+}
+
+export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], meId, onToast, isFollowing, isMuted, onToggleFollow, onToggleMute, onWhisper, onClose, onOpenComments, onReact, onBlock, onReport, myspace = false, onOpenUser }) {
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState({ followers: 0, following: 0, posts: 0 });
   const [loading, setLoading] = useState(true);
   const [gridPosts, setGridPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(true);
+  const [myspaceData, setMyspaceData] = useState(null); // their public old-web config (blurbs + top friends)
   const theirPosts = posts.filter(p => p.user === handle);
 
   useEffect(() => {
     let on = true;
-    setLoading(true); setPostsLoading(true);
+    setLoading(true); setPostsLoading(true); setMyspaceData(null);
     getProfileByHandle(handle).then(p => {
       if (!on) return;
       setProfile(p);
@@ -30,10 +42,13 @@ export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], meI
         recordView('profile', p.id); // server ignores viewing your own profile
         getProfileStats(p.id).then(s => { if (on) setStats(s); }).catch(() => {});
         fetchUserPosts(p.id).then(gp => { if (on) { setGridPosts(gp); setPostsLoading(false); } }).catch(() => { if (on) setPostsLoading(false); });
+        // Old-web profile blurbs + top friends (sanitized via public_shrine, 0069). Only when the
+        // retro layout is on; degrades to null pre-migration so the card just omits those sections.
+        if (myspace) fetchPublicShrine(p.id).then(s => { if (on) setMyspaceData(s?.myspace || null); }).catch(() => {});
       } else { setPostsLoading(false); }
     }).catch(() => { if (on) { setLoading(false); setPostsLoading(false); } });
     return () => { on = false; };
-  }, [handle]);
+  }, [handle, myspace]);
 
   // Real profile, or a minimal stand-in so the overlay still renders by handle.
   const user = profile || { handle, avatar: '✦', bio: '', tags: [], pronouns: '' };
@@ -67,7 +82,20 @@ export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], meI
         </div>
       </div>
 
-      {/* Card — framed as a tarot arcana */}
+      {/* MySpace-style card (opt-in) — reuses the same fetched data, no extra queries. */}
+      {myspace ? (
+        <MySpaceProfileCard
+          user={user} stats={stats} arche={arche} mood={mood}
+          memberSince={profile?.created_at ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : null}
+          sunSign={sunSignOf(user.birthday)}
+          isFollowing={isFollowing} isMuted={isMuted}
+          onToggleFollow={onToggleFollow} onWhisper={onWhisper} onToggleMute={onToggleMute}
+          onBlock={() => { if (profile?.id && confirm(`Block @${user.handle}? You won't see each other.`)) onBlock && onBlock(profile.id); }}
+          onReport={() => { if (profile?.id) onReport && onReport(profile.id); }}
+          myspace={myspaceData} onOpenUser={onOpenUser}
+        />
+      ) : (
+      /* Classic card — framed as a tarot arcana */
       <div className="relative px-4 pt-5 pb-5 border-b border-[#1A1A1A] overflow-hidden">
         <div className="absolute inset-0 opacity-15" style={{ background: 'radial-gradient(ellipse at 50% 0%, #5B0F1A 0%, transparent 60%)' }} />
         {user.decor?.banner && user.decor.banner !== 'none' && (
@@ -142,6 +170,7 @@ export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], meI
             className="tap text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#9E2A33]" style={F.ui}>⚑ report</button>
         </div>
       </div>
+      )}
 
       {/* Their public shrine — memorials (leave a candle/flower), the log, anniversaries,
           now playing, kept stories. Renders nothing if they have nothing public. */}
