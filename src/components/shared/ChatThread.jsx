@@ -25,6 +25,7 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
   const [audioBlob, setAudioBlob] = useState(null);
   const [audioPreview, setAudioPreview] = useState(null);
   const [sendingAudio, setSendingAudio] = useState(false);
+  const [sendErr, setSendErr] = useState(null); // surfaced voice-note failure (was silently swallowed)
   const recorderRef = useRef(null);
   const recTimerRef = useRef(null);
   const isTouchRef = useRef(false);
@@ -106,7 +107,11 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
             discardAudio();
             return;
           }
-          const blob = new Blob(chunks, { type: mime || 'audio/webm' });
+          // Use the recorder's ACTUAL negotiated type — on Safari/iOS the requested webm is
+          // unsupported and it records audio/mp4, so forcing 'audio/webm' here mislabels the blob
+          // and the uploaded file's extension, breaking playback. recorder.mimeType is truthful.
+          const actualType = recorder.mimeType || mime || 'audio/webm';
+          const blob = new Blob(chunks, { type: actualType });
           setAudioBlob(blob);
           setAudioPreview(URL.createObjectURL(blob));
         };
@@ -143,14 +148,17 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
   const sendAudio = async () => {
     if (!audioBlob || audioBlob.size === 0 || !audioPreview) return;
     setSendingAudio(true);
+    setSendErr(null);
     try {
       const fd = new Date();
       const key = `${conversation?.id || 'dm'}/${fd.getFullYear()}${String(fd.getMonth()+1).padStart(2,'0')}`;
       const url = await uploadAudio('voice', key, audioBlob);
       await onSend('🎙️ voice note', url);
       discardAudio();
-    } catch {
-      // upload or send failed — keep the audio preview so user can retry
+    } catch (e) {
+      // Surface the failure instead of swallowing it — a silent catch is exactly why voice notes
+      // "just don't work" with no feedback. Keep the preview so the user can retry.
+      if (mountedRef.current) setSendErr(e?.message || "couldn't send that voice note — try again.");
     }
     if (mountedRef.current) setSendingAudio(false);
   };
@@ -313,6 +321,9 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
 
       {/* Composer */}
       <div className="border-t border-[#1A1A1A] bg-[#0A0A0A] px-3 py-2 pb-3 safe-pb">
+        {sendErr && (
+          <div className="mb-2 px-3 py-1.5 bg-[#5B0F1A]/20 border border-[#5B0F1A]/50 text-[#9E2A33] text-[11px]" style={F.ui}>{sendErr}</div>
+        )}
         {audioPreview ? (
           <div className="flex items-center gap-2 bg-[#141414] border border-[#2A2A2A] rounded-2xl px-3 py-2">
             <audio controls src={audioPreview} className="flex-1 h-9" preload="metadata" />
