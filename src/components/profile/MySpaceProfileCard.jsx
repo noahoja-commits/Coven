@@ -32,15 +32,21 @@ function InfoRow({ k, v }) {
 
 export function MySpaceProfileCard({ user, stats, arche, mood, memberSince, sunSign,
   isFollowing, isMuted, onToggleFollow, onWhisper, onToggleMute, onBlock, onReport,
-  myspace = null, onOpenUser }) {
+  myspace = null, onOpenUser, self = false, onEditProfile, onEditMyspace, onShowFollowers, onShowFollowing }) {
   const about = myspace?.about || user.bio || '';
   const want = myspace?.want || '';
   const top = Array.isArray(myspace?.top) ? myspace.top.slice(0, 8) : [];
-  const contactActions = [
-    { label: isFollowing ? 'following' : 'add to coven', icon: isFollowing ? UserCheck : UserPlus, onClick: onToggleFollow, on: isFollowing },
-    { label: 'send a whisper', icon: MessageCircle, onClick: onWhisper },
-    { label: isMuted ? 'unmute' : 'mute', icon: isMuted ? VolumeX : Volume2, onClick: onToggleMute, on: isMuted },
-  ];
+  // On your OWN profile the contact box becomes an edit box; on others' it's follow/whisper/mute.
+  const contactActions = self
+    ? [
+        { label: 'edit profile', icon: UserCheck, onClick: onEditProfile },
+        { label: 'edit old-web profile', icon: MessageCircle, onClick: onEditMyspace },
+      ]
+    : [
+        { label: isFollowing ? 'following' : 'add to coven', icon: isFollowing ? UserCheck : UserPlus, onClick: onToggleFollow, on: isFollowing },
+        { label: 'send a whisper', icon: MessageCircle, onClick: onWhisper },
+        { label: isMuted ? 'unmute' : 'mute', icon: isMuted ? VolumeX : Volume2, onClick: onToggleMute, on: isMuted },
+      ];
 
   return (
     <div className="relative px-3 pt-4 pb-4 border-b border-[#1A1A1A] overflow-hidden">
@@ -81,7 +87,7 @@ export function MySpaceProfileCard({ user, stats, arche, mood, memberSince, sunS
 
           {/* Contacting {handle} — the classic MySpace contact table */}
           <div className="border border-[#2A2A2A]">
-            <SectionHeader>contacting {user.handle}</SectionHeader>
+            <SectionHeader>{self ? 'your shrine' : `contacting ${user.handle}`}</SectionHeader>
             <div className="divide-y divide-[#1A1A1A]">
               {contactActions.map((a) => (
                 <button key={a.label} onClick={a.onClick}
@@ -90,10 +96,12 @@ export function MySpaceProfileCard({ user, stats, arche, mood, memberSince, sunS
                   <a.icon size={12} /> {a.label}
                 </button>
               ))}
+              {!self && (
               <div className="flex">
                 <button onClick={() => { if (onBlock) onBlock(); }} className="tap flex-1 px-2 py-1.5 text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#8B0000]" style={F.ui}>⛒ block</button>
                 <button onClick={() => { if (onReport) onReport(); }} className="tap flex-1 px-2 py-1.5 text-[10px] uppercase tracking-wider text-[#6B6B6B] hover:text-[#9E2A33] border-l border-[#1A1A1A]" style={F.ui}>⚑ report</button>
               </div>
+              )}
             </div>
           </div>
 
