@@ -4,6 +4,7 @@ import { F } from '../../styles/fonts';
 import { getProfileByHandle, getProfileStats } from '../../lib/db/profiles';
 import { recordView } from '../../lib/db/views';
 import { fetchUserPosts } from '../../lib/db/posts';
+import { fetchPublicShrine } from '../../lib/db/profileState';
 import { borderStyle, bannerStyle } from '../../data/decor';
 import { moodActive } from '../../data/moods';
 import { archetypeById } from '../../data/archetypes';
@@ -21,17 +22,18 @@ function sunSignOf(birthday) {
   return row ? row[2] : null;
 }
 
-export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], meId, onToast, isFollowing, isMuted, onToggleFollow, onToggleMute, onWhisper, onClose, onOpenComments, onReact, onBlock, onReport, myspace = false }) {
+export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], meId, onToast, isFollowing, isMuted, onToggleFollow, onToggleMute, onWhisper, onClose, onOpenComments, onReact, onBlock, onReport, myspace = false, onOpenUser }) {
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState({ followers: 0, following: 0, posts: 0 });
   const [loading, setLoading] = useState(true);
   const [gridPosts, setGridPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(true);
+  const [myspaceData, setMyspaceData] = useState(null); // their public old-web config (blurbs + top friends)
   const theirPosts = posts.filter(p => p.user === handle);
 
   useEffect(() => {
     let on = true;
-    setLoading(true); setPostsLoading(true);
+    setLoading(true); setPostsLoading(true); setMyspaceData(null);
     getProfileByHandle(handle).then(p => {
       if (!on) return;
       setProfile(p);
@@ -40,10 +42,13 @@ export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], meI
         recordView('profile', p.id); // server ignores viewing your own profile
         getProfileStats(p.id).then(s => { if (on) setStats(s); }).catch(() => {});
         fetchUserPosts(p.id).then(gp => { if (on) { setGridPosts(gp); setPostsLoading(false); } }).catch(() => { if (on) setPostsLoading(false); });
+        // Old-web profile blurbs + top friends (sanitized via public_shrine, 0069). Only when the
+        // retro layout is on; degrades to null pre-migration so the card just omits those sections.
+        if (myspace) fetchPublicShrine(p.id).then(s => { if (on) setMyspaceData(s?.myspace || null); }).catch(() => {});
       } else { setPostsLoading(false); }
     }).catch(() => { if (on) { setLoading(false); setPostsLoading(false); } });
     return () => { on = false; };
-  }, [handle]);
+  }, [handle, myspace]);
 
   // Real profile, or a minimal stand-in so the overlay still renders by handle.
   const user = profile || { handle, avatar: '✦', bio: '', tags: [], pronouns: '' };
@@ -87,6 +92,7 @@ export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], meI
           onToggleFollow={onToggleFollow} onWhisper={onWhisper} onToggleMute={onToggleMute}
           onBlock={() => { if (profile?.id && confirm(`Block @${user.handle}? You won't see each other.`)) onBlock && onBlock(profile.id); }}
           onReport={() => { if (profile?.id) onReport && onReport(profile.id); }}
+          myspace={myspaceData} onOpenUser={onOpenUser}
         />
       ) : (
       /* Classic card — framed as a tarot arcana */

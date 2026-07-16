@@ -31,7 +31,11 @@ function InfoRow({ k, v }) {
 }
 
 export function MySpaceProfileCard({ user, stats, arche, mood, memberSince, sunSign,
-  isFollowing, isMuted, onToggleFollow, onWhisper, onToggleMute, onBlock, onReport }) {
+  isFollowing, isMuted, onToggleFollow, onWhisper, onToggleMute, onBlock, onReport,
+  myspace = null, onOpenUser }) {
+  const about = myspace?.about || user.bio || '';
+  const want = myspace?.want || '';
+  const top = Array.isArray(myspace?.top) ? myspace.top.slice(0, 8) : [];
   const contactActions = [
     { label: isFollowing ? 'following' : 'add to coven', icon: isFollowing ? UserCheck : UserPlus, onClick: onToggleFollow, on: isFollowing },
     { label: 'send a whisper', icon: MessageCircle, onClick: onWhisper },
@@ -123,10 +127,33 @@ export function MySpaceProfileCard({ user, stats, arche, mood, memberSince, sunS
 
           <div className="border border-[#2A2A2A]">
             <SectionHeader>about {user.handle}</SectionHeader>
-            <p className="px-2 py-2 text-[#F5F1E8] text-[13px] leading-relaxed" style={F.serif}>
-              {user.bio ? user.bio : <span className="text-[#6B6B6B] italic">this soul keeps their story in shadow.</span>}
+            <p className="px-2 py-2 text-[#F5F1E8] text-[13px] leading-relaxed whitespace-pre-wrap" style={F.serif}>
+              {about ? about : <span className="text-[#6B6B6B] italic">this soul keeps their story in shadow.</span>}
             </p>
           </div>
+
+          {want && (
+            <div className="border border-[#2A2A2A]">
+              <SectionHeader>who {user.handle} would like to meet</SectionHeader>
+              <p className="px-2 py-2 text-[#F5F1E8] text-[13px] leading-relaxed whitespace-pre-wrap" style={F.serif}>{want}</p>
+            </div>
+          )}
+
+          {top.length > 0 && (
+            <div className="border border-[#2A2A2A]">
+              <SectionHeader>{user.handle}'s coven · top {top.length}</SectionHeader>
+              <div className="grid grid-cols-4 gap-2 p-2">
+                {top.map((f) => (
+                  <button key={f.handle} onClick={() => onOpenUser && onOpenUser(f.handle)} className="tap flex flex-col items-center gap-1 group">
+                    <div className="w-full aspect-square overflow-hidden border border-[#3F3F3F] bg-[#1A1A1A] flex items-center justify-center text-xl group-hover:border-[#C9A961]/60 transition-colors">
+                      {f.avatarUrl ? <img src={f.avatarUrl} alt="" className="w-full h-full object-cover" /> : (f.avatar || '✦')}
+                    </div>
+                    <span className="text-[9px] text-[#A8A29E] truncate max-w-full group-hover:text-[#C9A961]" style={F.ui}>{f.handle}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
