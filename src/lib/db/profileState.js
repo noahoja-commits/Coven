@@ -40,6 +40,33 @@ export async function fetchPublicShrine(userId) {
   return data || null;
 }
 
+// ── Profile comments wall (migration 0073) ──────────────────────────────────
+// Read someone's wall (author handle/avatar resolved server-side). Empty pre-migration.
+export async function fetchProfileWall(ownerId) {
+  const { data, error } = await supabase.rpc('profile_wall', { p_owner: ownerId });
+  if (error) return [];
+  return (data || []).map(r => ({
+    id: r.id, body: r.body, createdAt: r.created_at,
+    authorId: r.author_id, handle: r.author_handle || 'someone',
+    avatar: r.author_avatar || '✦', avatarUrl: r.author_avatar_url || null,
+  }));
+}
+
+export async function addProfileComment(ownerId, meId, body) {
+  const text = (body || '').trim().slice(0, 1000);
+  if (!text) return null;
+  const { data, error } = await supabase.from('profile_comments')
+    .insert({ owner_id: ownerId, author_id: meId, body: text })
+    .select('id, body, created_at').single();
+  if (error) throw error;
+  return { id: data.id, body: data.body, createdAt: data.created_at, authorId: meId, mine: true };
+}
+
+export async function deleteProfileComment(id) {
+  const { error } = await supabase.from('profile_comments').delete().eq('id', id);
+  if (error) throw error;
+}
+
 // Which tributes *I* have already left on this shrine → { [graveId]: { candle, flower } }
 export async function fetchMyTributes(myId, ownerId) {
   const { data, error } = await supabase

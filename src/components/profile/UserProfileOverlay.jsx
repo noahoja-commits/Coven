@@ -93,6 +93,7 @@ export function UserProfileOverlay({ handle, posts = [], mutedKeywords = [], meI
           onBlock={() => { if (profile?.id && confirm(`Block @${user.handle}? You won't see each other.`)) onBlock && onBlock(profile.id); }}
           onReport={() => { if (profile?.id) onReport && onReport(profile.id); }}
           myspace={myspaceData} onOpenUser={onOpenUser}
+          ownerId={profile?.id} meId={meId}
         />
       ) : (
       /* Classic card — framed as a tarot arcana */

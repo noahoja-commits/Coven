@@ -1,7 +1,64 @@
-import { MessageCircle, UserPlus, UserCheck, VolumeX, Volume2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { MessageCircle, UserPlus, UserCheck, VolumeX, Volume2, Send, Trash2, Loader2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { borderStyle, bannerStyle } from '../../data/decor';
 import { TarotFrame, arcanaFor, Grain } from '../shared/Sigils';
+import { relativeTime } from '../../lib/time';
+import { fetchProfileWall, addProfileComment, deleteProfileComment } from '../../lib/db/profileState';
+
+const DETAIL_ROWS = [['music', 'music'], ['movies', 'films'], ['books', 'books'], ['heroes', 'heroes'], ['general', 'general']];
+
+// Cross-user comments / testimonials wall (migration 0073). Fetches its own data.
+function ProfileWall({ ownerId, meId, self, accent, onOpenUser }) {
+  const [comments, setComments] = useState(null); // null = loading
+  const [draft, setDraft] = useState('');
+  const [posting, setPosting] = useState(false);
+  const load = () => { if (ownerId) fetchProfileWall(ownerId).then(setComments).catch(() => setComments([])); };
+  useEffect(load, [ownerId]);
+  const post = async () => {
+    const b = draft.trim(); if (!b || posting) return;
+    setPosting(true);
+    try { await addProfileComment(ownerId, meId, b); setDraft(''); load(); }
+    finally { setPosting(false); }
+  };
+  const remove = async (id) => { try { await deleteProfileComment(id); load(); } catch { /* noop */ } };
+  if (comments === null) return null;
+  return (
+    <div className="border border-[#2A2A2A] mt-3">
+      <div className="px-2 py-1 border text-[#F5F1E8] text-[11px] uppercase tracking-[0.18em]" style={{ ...F.display, background: `linear-gradient(to right, ${accent}22, transparent)`, borderColor: `${accent}44` }}>
+        the wall {comments.length > 0 && <span className="text-[#6B6B6B]">· {comments.length}</span>}
+      </div>
+      {!self && (
+        <div className="flex gap-1.5 p-2 border-b border-[#1A1A1A]">
+          <input value={draft} onChange={e => setDraft(e.target.value.slice(0, 1000))} onKeyDown={e => { if (e.key === 'Enter') post(); }}
+            placeholder="leave a mark on their wall…" className="field flex-1 text-[12px]" />
+          <button onClick={post} disabled={posting || !draft.trim()} className="tap px-3 border border-[#2A2A2A] text-[#C9A961] disabled:opacity-40" title="post">
+            {posting ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
+          </button>
+        </div>
+      )}
+      {comments.length === 0 ? (
+        <p className="px-2 py-3 text-[11px] text-[#6B6B6B] italic" style={F.serif}>no marks yet.</p>
+      ) : comments.map(c => (
+        <div key={c.id} className="flex items-start gap-2 px-2 py-2 border-b border-[#141414] last:border-b-0">
+          <button onClick={() => onOpenUser && onOpenUser(c.handle)} className="tap w-7 h-7 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-sm overflow-hidden shrink-0">
+            {c.avatarUrl ? <img src={c.avatarUrl} alt="" className="w-full h-full object-cover" /> : c.avatar}
+          </button>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-baseline gap-2">
+              <button onClick={() => onOpenUser && onOpenUser(c.handle)} className="tap text-[11px] text-[#C9A961] truncate" style={F.ui}>{c.handle}</button>
+              <span className="text-[9px] text-[#6B6B6B]" style={F.mono}>{relativeTime(c.createdAt)}</span>
+            </div>
+            <p className="text-[12px] text-[#F5F1E8] break-words whitespace-pre-wrap" style={F.serif}>{c.body}</p>
+          </div>
+          {(self || c.authorId === meId) && (
+            <button onClick={() => remove(c.id)} className="tap text-[#6B6B6B] hover:text-[#8B0000] shrink-0" title="remove"><Trash2 size={12} /></button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 // A MySpace-era profile CARD — two-column contact-table layout, retro section headers —
 // rendered in Coven's muted goth palette (oxblood / gold / bone), NOT literal MySpace blue,
@@ -32,11 +89,22 @@ function InfoRow({ k, v }) {
 
 export function MySpaceProfileCard({ user, stats, arche, mood, memberSince, sunSign,
   isFollowing, isMuted, onToggleFollow, onWhisper, onToggleMute, onBlock, onReport,
-  myspace = null, onOpenUser, self = false, onEditProfile, onEditMyspace, onShowFollowers, onShowFollowing }) {
+  myspace = null, onOpenUser, self = false, onEditProfile, onEditMyspace, onShowFollowers, onShowFollowing,
+  ownerId, meId }) {
   const about = myspace?.about || user.bio || '';
   const want = myspace?.want || '';
   const top = Array.isArray(myspace?.top) ? myspace.top.slice(0, 8) : [];
   const gallery = Array.isArray(myspace?.gallery) ? myspace.gallery.filter(m => m && m.url).slice(0, 12) : [];
+  const details = myspace?.details || {};
+  const blog = Array.isArray(myspace?.blog) ? myspace.blog.filter(b => b && (b.title || b.body)) : [];
+  const song = myspace?.song && myspace.song.url ? myspace.song : null;
+  // Custom goth accent (validated hex from public_shrine, or a raw hex on self); defaults to gold.
+  const accent = /^#[0-9a-f]{6}$/i.test(myspace?.theme?.accent || '') ? myspace.theme.accent : '#C9A961';
+  const cardBg = /^#[0-9a-f]{6}$/i.test(myspace?.theme?.bg || '') ? myspace.theme.bg : null;
+  const hdr = (children) => (
+    <div className="px-2 py-1 border text-[#F5F1E8] text-[11px] uppercase tracking-[0.18em]"
+      style={{ ...F.display, background: `linear-gradient(to right, ${accent}2E, transparent)`, borderColor: `${accent}55` }}>{children}</div>
+  );
   // On your OWN profile the contact box becomes an edit box; on others' it's follow/whisper/mute.
   const contactActions = self
     ? [
@@ -50,8 +118,8 @@ export function MySpaceProfileCard({ user, stats, arche, mood, memberSince, sunS
       ];
 
   return (
-    <div className="relative px-3 pt-4 pb-4 border-b border-[#1A1A1A] overflow-hidden">
-      <div className="absolute inset-0 opacity-15" style={{ background: 'radial-gradient(ellipse at 50% 0%, #5B0F1A 0%, transparent 60%)' }} />
+    <div className="relative px-3 pt-4 pb-4 border-b border-[#1A1A1A] overflow-hidden" style={cardBg ? { background: cardBg } : undefined}>
+      <div className="absolute inset-0 opacity-15" style={{ background: `radial-gradient(ellipse at 50% 0%, ${accent} 0%, transparent 60%)` }} />
       {user.decor?.banner && user.decor.banner !== 'none' && (
         <div className={`absolute top-0 inset-x-0 h-20 pointer-events-none ${user.decor?.animated ? 'banner-animated' : ''}`} style={bannerStyle(user.decor.banner) || undefined} />
       )}
@@ -148,6 +216,45 @@ export function MySpaceProfileCard({ user, stats, arche, mood, memberSince, sunS
             </div>
           )}
 
+          {song && (
+            <div className="border border-[#2A2A2A]">
+              {hdr(`${user.handle}'s song`)}
+              <div className="px-2 py-2">
+                {(song.track || song.artist) && (
+                  <div className="text-[11px] mb-1.5" style={F.ui}>
+                    <span className="text-[#F5F1E8]">{song.track || 'untitled'}</span>
+                    {song.artist && <span className="text-[#6B6B6B]"> · {song.artist}</span>}
+                  </div>
+                )}
+                <audio controls src={song.url} preload="none" className="w-full h-9" />
+              </div>
+            </div>
+          )}
+
+          {DETAIL_ROWS.some(([k]) => details[k]) && (
+            <div className="border border-[#2A2A2A]">
+              {hdr(`${user.handle}: details`)}
+              <div>
+                {DETAIL_ROWS.map(([k, label]) => details[k] ? <InfoRow key={k} k={label} v={details[k]} /> : null)}
+              </div>
+            </div>
+          )}
+
+          {blog.length > 0 && (
+            <div className="border border-[#2A2A2A]">
+              {hdr(`${user.handle}'s blog`)}
+              <div className="divide-y divide-[#1A1A1A]">
+                {blog.map((b, i) => (
+                  <div key={i} className="px-2 py-2">
+                    {b.title && <div className="text-[#F5F1E8] text-[12px] mb-0.5" style={F.ui}>{b.title}</div>}
+                    {b.at && <div className="text-[9px] text-[#6B6B6B] mb-1" style={F.mono}>{b.at}</div>}
+                    {b.body && <p className="text-[#A8A29E] text-[12px] leading-relaxed whitespace-pre-wrap" style={F.serif}>{b.body}</p>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {gallery.length > 0 && (
             <div className="border border-[#2A2A2A]">
               <SectionHeader>{user.handle}'s gallery</SectionHeader>
@@ -180,6 +287,9 @@ export function MySpaceProfileCard({ user, stats, arche, mood, memberSince, sunS
           )}
         </div>
       </div>
+
+      {/* The wall — cross-user comments/testimonials (migration 0073). Spans full width. */}
+      {ownerId && <ProfileWall ownerId={ownerId} meId={meId} self={self} accent={accent} onOpenUser={onOpenUser} />}
     </div>
   );
 }

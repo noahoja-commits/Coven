@@ -21,8 +21,22 @@ export function CallOverlay({ call, meId, meHandle, meAvatar, signal, onEnd }) {
   const localStreamRef = useRef(null);
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
+  const remoteAudioRef = useRef(null); // ALWAYS mounted — plays remote audio for voice AND video calls
+  const remoteStreamRef = useRef(null); // the remote MediaStream, re-attached whenever a sink mounts
   const endedRef = useRef(false);
   const ringTimerRef = useRef(null);
+
+  // Attach the remote stream to whatever sink elements currently exist. Called from ontrack (audio
+  // sink is always mounted → audio plays immediately) AND from an effect on status change (the video
+  // sink only mounts once connected, so it needs a re-attach). This is the fix for "connected but
+  // no audio/video": before, ontrack fired while the only sink was unmounted and nothing re-attached.
+  const attachRemote = () => {
+    const s = remoteStreamRef.current;
+    if (!s) return;
+    if (remoteAudioRef.current && remoteAudioRef.current.srcObject !== s) remoteAudioRef.current.srcObject = s;
+    if (remoteVideoRef.current && remoteVideoRef.current.srcObject !== s) remoteVideoRef.current.srcObject = s;
+  };
+  useEffect(attachRemote, [status]);
 
   const cleanup = () => {
     clearTimeout(ringTimerRef.current);
@@ -61,7 +75,7 @@ export function CallOverlay({ call, meId, meHandle, meAvatar, signal, onEnd }) {
     const pc = new RTCPeerConnection({ iceServers: iceServers() });
     pcRef.current = pc;
     stream.getTracks().forEach(t => pc.addTrack(t, stream));
-    pc.ontrack = (e) => { if (remoteVideoRef.current) remoteVideoRef.current.srcObject = e.streams[0]; };
+    pc.ontrack = (e) => { remoteStreamRef.current = e.streams[0]; attachRemote(); };
     pc.onconnectionstatechange = () => {
       const st = pc.connectionState;
       if (st === 'connected') { setStatus('connected'); setStatusText(''); }
@@ -152,11 +166,17 @@ export function CallOverlay({ call, meId, meHandle, meAvatar, signal, onEnd }) {
 
   return (
     <div className="fixed inset-0 z-[80] bg-[#050204] flex flex-col animate-fade-in">
-      {/* Remote video / avatar backdrop */}
+      {/* Remote AUDIO sink — ALWAYS mounted so voice calls (and video audio) actually play. */}
+      <audio ref={remoteAudioRef} autoPlay playsInline className="hidden" />
+
+      {/* Remote video / avatar backdrop. The <video> stays mounted whenever this is a video call
+          (just hidden until connected) so ontrack always has a sink to attach to. */}
       <div className="absolute inset-0 flex items-center justify-center">
-        {isVideo && status === 'connected' ? (
-          <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover" />
-        ) : (
+        {isVideo && (
+          <video ref={remoteVideoRef} autoPlay playsInline
+            className={`w-full h-full object-cover ${status === 'connected' ? '' : 'hidden'}`} />
+        )}
+        {(!isVideo || status !== 'connected') && (
           <div className="flex flex-col items-center gap-4">
             <div className="w-28 h-28 rounded-full bg-gradient-to-br from-[#3B0A12] to-[#0A0A0A] border border-[#5B0F1A] flex items-center justify-center text-5xl overflow-hidden" style={{ boxShadow: '0 0 40px rgba(139,0,0,0.4)' }}>
               {call.peerAvatar && String(call.peerAvatar).startsWith('http')

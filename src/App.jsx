@@ -2230,6 +2230,7 @@ export default function App() {
         myspace={myspaceCfg}
         onEditMyspace={() => setShowMyspaceEditor(true)}
         onOpenUser={(h) => { if (h && h !== meHandle) setActiveUserHandle(h); }}
+        meId={meId}
         onOpenMood={() => setShowMood(true)}
         onShowFollowers={openFollowers}
         onShowFollowing={openFollowing}

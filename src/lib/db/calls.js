@@ -29,15 +29,25 @@ export function callSender(toUserId) {
   };
 }
 
-// STUN (free, Google) always; TURN only if configured (needed on symmetric/mobile NATs —
-// without it, some networks can't connect). Set VITE_TURN_URL/USER/CRED to add a relay.
+// STUN alone only works when at least one peer has a routable path; on symmetric / mobile-carrier
+// NAT (very common on phones) media can't traverse without a TURN relay. We ship a free public
+// TURN by default (Metered's OpenRelay — no signup) so 1:1 calls actually connect out of the box.
+// A private relay can override it via VITE_TURN_URL/USER/CRED (more reliable at scale).
 export function iceServers() {
-  const servers = [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }];
-  const turnUrl = import.meta.env.VITE_TURN_URL;
-  if (turnUrl) {
-    servers.push({ urls: turnUrl, username: import.meta.env.VITE_TURN_USER || '', credential: import.meta.env.VITE_TURN_CRED || '' });
+  const custom = import.meta.env.VITE_TURN_URL;
+  if (custom) {
+    return [
+      { urls: ['stun:stun.l.google.com:19302'] },
+      { urls: custom, username: import.meta.env.VITE_TURN_USER || '', credential: import.meta.env.VITE_TURN_CRED || '' },
+    ];
   }
-  return servers;
+  return [
+    { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] },
+    // Free public TURN (OpenRelay). UDP + TCP + TLS fallbacks for restrictive networks.
+    { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turns:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+  ];
 }
 
 // Resolve once ICE gathering is done (or after a timeout, so a stalled gatherer still connects).
