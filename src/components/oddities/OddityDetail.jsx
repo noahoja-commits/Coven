@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, MessageCircle, Share2, MapPin, Eye } from 'lucide-react';
+import { ChevronLeft, MessageCircle, Share2, MapPin, Eye, ShoppingBag, Loader2 } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { CONDITION_LABELS } from '../../data/oddities';
 import { OddityImage } from './OdditiesOverlay';
@@ -8,8 +8,9 @@ import { recordView, fetchViewCounts } from '../../lib/db/views';
 
 const PRICE_MODE = { firm: 'firm', obo: 'or best offer', trade: 'open to trades' };
 
-export function OddityDetail({ item, onBack, onWhisper, onOpenUser, onMarkSold, onDelete }) {
+export function OddityDetail({ item, onBack, onWhisper, onOpenUser, onMarkSold, onDelete, onBuy }) {
   const [views, setViews] = useState(0);
+  const [buying, setBuying] = useState(false);
   // Record a unique view when a listing is opened (not your own), and load the count.
   useEffect(() => {
     if (!item?.id) return undefined;
@@ -69,10 +70,16 @@ export function OddityDetail({ item, onBack, onWhisper, onOpenUser, onMarkSold, 
         </div>
       </div>
       {!item.mine ? (
-        <div className="absolute bottom-0 inset-x-0 z-20 bg-[#0A0608]/95 backdrop-blur-md border-t border-[#2A2A2A] p-3 safe-pb">
+        <div className="absolute bottom-0 inset-x-0 z-20 bg-[#0A0608]/95 backdrop-blur-md border-t border-[#2A2A2A] p-3 safe-pb space-y-2">
+          {onBuy && item.price > 0 && (
+            <button onClick={async () => { if (buying) return; setBuying(true); try { await onBuy(item.id); } finally { setBuying(false); } }} disabled={buying}
+              className="w-full py-3 bg-[#C9A961] hover:bg-[#b8974e] disabled:opacity-70 text-[#0A0608] text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-colors" style={F.ui}>
+              {buying ? <><Loader2 size={14} className="animate-spin" /> to the checkout…</> : <><ShoppingBag size={14} /> buy · ${item.price}</>}
+            </button>
+          )}
           <button onClick={() => onWhisper && onWhisper(seller.user)}
             className="w-full py-3 bg-[#8B0000] hover:bg-[#5B0F1A] text-[#F5F1E8] text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-colors" style={F.ui}>
-            <MessageCircle size={14} /> whisper the seller
+            <MessageCircle size={14} /> {onBuy && item.price > 0 ? 'or whisper the seller' : 'whisper the seller'}
           </button>
         </div>
       ) : (

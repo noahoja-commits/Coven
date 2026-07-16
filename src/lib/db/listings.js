@@ -69,3 +69,20 @@ export async function markListingSold(id) {
   const { error } = await supabase.from('listings').update({ status: 'sold' }).eq('id', id);
   if (error) throw error;
 }
+
+// Buy an oddity — kicks off Stripe Checkout (redirects to the hosted page). The buyer is taken
+// from the verified session server-side; the seller is paid via Connect (or platform-collect).
+export async function startListingCheckout(listingId) {
+  const { data: sess } = await supabase.auth.getSession();
+  const token = sess?.session?.access_token;
+  const res = await fetch('/api/listing-checkout', {
+    method: 'POST',
+    headers: token
+      ? { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
+      : { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ listingId }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.url) throw new Error(data.error || 'could not start checkout');
+  window.location.href = data.url;
+}
