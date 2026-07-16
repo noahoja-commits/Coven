@@ -121,9 +121,9 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
             <Toggle on={settings.reactiveTaps !== false} onChange={v => set('reactiveTaps', v)} />
           </Row>
           <Row label="Old-web profiles" desc="a retro two-column profile — contact box, general info, blurbs — in oxblood & gold. (beta)">
-            <Toggle on={!!settings.myspaceProfile} onChange={v => set('myspaceProfile', v)} />
+            <Toggle on={settings.myspaceProfile !== false} onChange={v => set('myspaceProfile', v)} />
           </Row>
-          {settings.myspaceProfile && onEditMyspace && (
+          {settings.myspaceProfile !== false && onEditMyspace && (
             <button onClick={onEditMyspace} className="tap w-full px-4 py-3 flex items-center justify-between text-left hover:bg-[#0F0F0F] transition-colors">
               <div className="flex-1 min-w-0">
                 <div className="text-[#F5F1E8] text-sm" style={F.serif}>Edit your old-web profile</div>

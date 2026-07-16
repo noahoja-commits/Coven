@@ -23,6 +23,6 @@ export const DEFAULT_SETTINGS = {
   ambientGlow: true,
   livingTheme: true,
   familiar: true,
-  myspaceProfile: false, // opt-in retro two-column profile layout (goth-styled MySpace)
+  myspaceProfile: true, // retro two-column profile layout (goth-styled MySpace) — default ON, opt-out
   quietHours: { enabled: false, start: '22:00', end: '08:00' },
 };

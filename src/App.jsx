@@ -2521,7 +2521,7 @@ export default function App() {
           onBlock={(profileId) => blockUserById(profileId, activeUserHandle)}
           onReport={(profileId) => setReportSheet({ kind: 'user', id: profileId })}
           onClose={() => setActiveUserHandle(null)}
-          myspace={settings.myspaceProfile}
+          myspace={settings.myspaceProfile !== false}
           onOpenUser={(h) => setActiveUserHandle(h)}
         />
       )}
