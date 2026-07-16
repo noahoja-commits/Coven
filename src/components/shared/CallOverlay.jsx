@@ -33,8 +33,15 @@ export function CallOverlay({ call, meId, meHandle, meAvatar, signal, onEnd }) {
   const attachRemote = () => {
     const s = remoteStreamRef.current;
     if (!s) return;
-    if (remoteAudioRef.current && remoteAudioRef.current.srcObject !== s) remoteAudioRef.current.srcObject = s;
-    if (remoteVideoRef.current && remoteVideoRef.current.srcObject !== s) remoteVideoRef.current.srcObject = s;
+    // Assigning srcObject to an already-mounted element does NOT reliably fire autoPlay
+    // (that only triggers on the initial load), so we must call play() ourselves. This is the
+    // real "connected but no audio" fix: the remote track arrives after the sink is mounted.
+    for (const el of [remoteAudioRef.current, remoteVideoRef.current]) {
+      if (el && el.srcObject !== s) {
+        el.srcObject = s;
+        el.play?.().catch(() => { /* autoplay policy may defer; a control tap will resume */ });
+      }
+    }
   };
   useEffect(attachRemote, [status]);
 

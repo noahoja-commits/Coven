@@ -43,15 +43,20 @@ export function iceServers() {
   }
   return [
     { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] },
-    // Free public TURN (OpenRelay). UDP + TCP + TLS fallbacks for restrictive networks.
-    { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
-    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
-    { urls: 'turns:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+    // Free public TURN (OpenRelay). Metered deprecated the bare `openrelay.metered.ca` shared
+    // creds; `staticauth.openrelay.metered.ca` is the current documented no-signup host.
+    // UDP + TCP + TLS fallbacks so restrictive/mobile networks still get a relay path.
+    { urls: 'turn:staticauth.openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:staticauth.openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turns:staticauth.openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
   ];
 }
 
 // Resolve once ICE gathering is done (or after a timeout, so a stalled gatherer still connects).
-export function waitForIce(pc, timeoutMs = 2500) {
+// The ceiling is generous because this is NON-TRICKLE: a TURN relay candidate not gathered by the
+// cutoff is lost for the whole call (we never send candidates later). Relay allocation over TCP/TLS
+// can take >2.5s; resolve-on-complete keeps fast networks snappy, so the higher cap only bites stalls.
+export function waitForIce(pc, timeoutMs = 4500) {
   return new Promise((resolve) => {
     if (pc.iceGatheringState === 'complete') { resolve(); return; }
     const done = () => { pc.removeEventListener('icegatheringstatechange', check); clearTimeout(t); resolve(); };
