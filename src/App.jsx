@@ -8,7 +8,7 @@ import { insertProfile, updateProfile, getProfileStats, getProfileByHandle, fetc
 import { fetchFollowing, fetchFollowers, followUser, unfollowUser } from './lib/db/social';
 import { FollowListOverlay } from './components/profile/FollowListOverlay';
 import { joinCommunity, leaveCommunity, fetchCommunityMemberCounts } from './lib/db/communities';
-import { fetchConversations, getOrCreateDM, createGroup, fetchMessages as fetchDMMessages, sendDM, markRead as dmMarkRead, setBuried as dmSetBuried, subscribeDMs, toggleDMReaction, subscribeDMReactions, sendPostToDM } from './lib/db/dm';
+import { fetchConversations, getOrCreateDM, createGroup, fetchMessages as fetchDMMessages, sendDM, markRead as dmMarkRead, setBuried as dmSetBuried, subscribeDMs, toggleDMReaction, subscribeDMReactions, sendPostToDM, fetchConversationMembers } from './lib/db/dm';
 import { fetchActiveStories, postStory as dbPostStory, deleteStory, reactToStory } from './lib/db/stories';
 import { fetchListings, createListing, deleteListing, markListingSold } from './lib/db/listings';
 import { fetchShops, createShop, deleteShop as dbDeleteShop, startBoostCheckout } from './lib/db/shops';
@@ -107,6 +107,8 @@ const SettingsScreen = lazy(() => import('./components/settings/SettingsScreen')
 import { COMMUNITIES } from './data/communities';
 import { fetchEvents, fetchEventMap, createEvent, toggleEventRsvp as dbToggleRsvp, fetchEventAttendees, deleteEvent as dbDeleteEvent, joinWaitlist, leaveWaitlist, fetchWaitlist } from './lib/db/events';
 import { fetchIsAdmin, heartbeat } from './lib/db/admin';
+import { subscribeMyCalls, callSender, callSupported } from './lib/db/calls';
+import { CallOverlay } from './components/shared/CallOverlay';
 import { CommentsOverlay } from './components/feed/CommentsOverlay';
 import { QuoteModal } from './components/feed/QuoteModal';
 // VespersArchiveModal statically imports the ~49 kB TEXTS library — lazy so that data
@@ -170,6 +172,9 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false); // UX gate only — every admin surface re-checks server-side
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [call, setCall] = useState(null); // active 1:1 call: {role,peerId,peerHandle,peerAvatar,convId,media,offer?}
+  const [callSignal, setCallSignal] = useState(null); // latest answer/decline/hangup routed to CallOverlay
+  const callRef = useRef(null); callRef.current = call;
   const [toast, setToast] = useState(null);
   const [pushState, setPushState] = useState('off');
   const [weatherTint, setWeatherTint] = useState(null); // {color,opacity} when Weather mood is on
@@ -270,6 +275,43 @@ export default function App() {
     document.addEventListener('visibilitychange', onVisible);
     return () => { clearInterval(beat); document.removeEventListener('visibilitychange', onVisible); };
   }, [meId]);
+
+  // Global incoming-call listener — every user subscribes to their own call channel so a ring
+  // reaches them anywhere in the app. A ring while already in a call auto-replies 'busy'.
+  useEffect(() => {
+    if (!meId) return undefined;
+    const off = subscribeMyCalls(meId, (sig) => {
+      if (!sig || !sig.from) return;
+      if (sig.t === 'ring') {
+        if (callRef.current) { const s = callSender(sig.from); s.send({ t: 'busy', from: meId }).finally(() => setTimeout(() => s.close(), 800)); return; }
+        setCallSignal(null);
+        setCall({ role: 'incoming', peerId: sig.from, peerHandle: sig.fromHandle || 'someone', peerAvatar: sig.fromAvatar, convId: sig.convId, media: sig.media || 'audio', offer: sig.sdp });
+      } else if (callRef.current && sig.from === callRef.current.peerId) {
+        setCallSignal({ ...sig, _n: Date.now() }); // answer/decline/hangup/busy → CallOverlay
+      }
+    });
+    return off;
+  }, [meId]);
+
+  const startCall = async (peerId, peerHandle, peerAvatar, convId, media) => {
+    if (!callSupported) { showToast('calls need a newer browser (add Coven to your home screen on iOS).', 'error'); return; }
+    if (callRef.current) return;
+    if (!peerId) { showToast("couldn't reach them for a call.", 'error'); return; }
+    setCallSignal(null);
+    setCall({ role: 'outgoing', peerId, peerHandle, peerAvatar, convId, media });
+  };
+
+  // Start a call from a DM thread: resolve the other member, then ring them.
+  const startCallInConversation = async (media) => {
+    const conv = conversations.find(c => c.id === activeConversation);
+    if (!conv || conv.group) { showToast('calls are 1-to-1 only for now.', 'error'); return; }
+    try {
+      const members = await fetchConversationMembers(activeConversation);
+      const peer = (members || []).find(m => m.userId !== meId);
+      if (!peer) { showToast("couldn't find who to call.", 'error'); return; }
+      startCall(peer.userId, peer.handle || conv.user, peer.avatarUrl || conv.avatarUrl || conv.avatar, activeConversation, media);
+    } catch { showToast("couldn't start the call — try again.", 'error'); }
+  };
 
   // Live content state (Supabase-backed)
   const [posts, setPosts] = useState([]);
@@ -2428,6 +2470,7 @@ export default function App() {
               .catch(() => showToast("couldn't leave the circle — try again.", 'error'));
           }}
           onBack={() => { setActiveConversation(null); setActiveConvMeta(null); }}
+          onStartCall={callSupported ? (media) => startCallInConversation(media) : undefined}
         />
         </FeatureBoundary>
       )}
@@ -2594,6 +2637,13 @@ export default function App() {
       {showAdminPanel && (
         <AdminPanel meId={meId} onClose={() => setShowAdminPanel(false)} onToast={showToast}
           onOpenUser={(h) => { setShowAdminPanel(false); setActiveUserHandle(h); }} />
+      )}
+      {call && (
+        <CallOverlay
+          call={call} meId={meId} meHandle={meHandle} meAvatar={meAvatarUrl || meAvatar}
+          signal={callSignal}
+          onEnd={() => { setCall(null); setCallSignal(null); }}
+        />
       )}
       {ticketManagerEvent && (
         <TicketManager
