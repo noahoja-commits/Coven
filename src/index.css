@@ -165,7 +165,7 @@ button:active, [role="button"]:active {
    normal browser, so these are no-ops until installed/standalone. */
 .top-\[60px\]    { top: calc(60px + env(safe-area-inset-top)); }
 .bottom-\[68px\] { bottom: calc(68px + env(safe-area-inset-bottom)); }
-.safe-pt { padding-top: env(safe-area-inset-top); }
+.safe-pt { padding-top: calc(env(safe-area-inset-top) + var(--pill-offset, 0px)); }
 .safe-pb { padding-bottom: env(safe-area-inset-bottom); }
 
 /* Animations */

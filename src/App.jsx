@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo, lazy, Suspense } from 'react';
 import { useLocalStorage } from './hooks/useLocalStorage';
+import { useInCallPill } from './hooks/useInCallPill';
 import { useAuth } from './auth/AuthProvider';
 import { isSupabaseConfigured } from './lib/supabase';
 import { SignInScreen } from './components/auth/SignInScreen';
@@ -146,6 +147,7 @@ export default function App() {
   const { loading: authLoading, session, userId, dbProfile, recovery, signOut, refreshProfile } = useAuth();
   const meId = userId;
   const followIdByHandle = useRef({});
+  useInCallPill(); // keeps the header clear of iOS's green in-call/screen-recording pill
 
   // === STATE ===
   const [tab, setTab] = useState('home');
