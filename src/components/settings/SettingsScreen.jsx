@@ -120,6 +120,9 @@ export function SettingsScreen({ settings, onChange, onToggleSound, onBack, onLo
           <Row label="Reactive taps" desc="every tap leaves a mark — blood, embers, glitch, a sigil — themed to the mode.">
             <Toggle on={settings.reactiveTaps !== false} onChange={v => set('reactiveTaps', v)} />
           </Row>
+          <Row label="Old-web profiles" desc="a retro two-column profile — contact box, general info, blurbs — in oxblood & gold. (beta)">
+            <Toggle on={!!settings.myspaceProfile} onChange={v => set('myspaceProfile', v)} />
+          </Row>
         </Section>
 
         <Section title="atmosphere">
