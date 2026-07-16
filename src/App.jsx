@@ -1179,16 +1179,16 @@ export default function App() {
     });
   };
 
-  const sendMessage = (conversationId, body, audioUrl = null) => {
+  const sendMessage = (conversationId, body, audioUrl = null, imageUrl = null) => {
     if (!meId || !conversationId || String(conversationId).startsWith('temp-')) return;
     const tempId = `tempm-${Date.now()}`;
-    const preview = audioUrl ? '🎙️ voice note' : (body.length > 60 ? body.slice(0, 60) + '…' : body);
-    const optimistic = { id: tempId, from: 'me', body, audioUrl, time: 'just now', pending: true };
+    const preview = audioUrl ? '🎙️ voice note' : imageUrl ? '🖼️ gif' : (body.length > 60 ? body.slice(0, 60) + '…' : body);
+    const optimistic = { id: tempId, from: 'me', body, audioUrl, imageUrl, time: 'just now', pending: true };
     setMessages(prev => ({ ...prev, [conversationId]: [...(prev[conversationId] || []), optimistic] }));
     setConversations(prev => prev.map(c =>
       c.id === conversationId ? { ...c, last: preview, time: 'just now' } : c
     ));
-    sendDM(conversationId, meId, body, audioUrl)
+    sendDM(conversationId, meId, body, audioUrl, imageUrl)
       .then(saved => setMessages(prev => ({ ...prev, [conversationId]: (prev[conversationId] || []).map(m => m.id === tempId ? saved : m) })))
       // Keep the message (marked failed) so it isn't silently lost, and tell the user.
       .catch(() => {
@@ -1222,14 +1222,14 @@ export default function App() {
 
   // Retry a failed message: drop the failed copy and resend.
   const retryMessage = (conversationId, messageId) => {
-    let body = null, audioUrl = null;
+    let body = null, audioUrl = null, imageUrl = null;
     setMessages(prev => {
       const list = prev[conversationId] || [];
       const failed = list.find(m => m.id === messageId);
-      if (failed) { body = failed.body; audioUrl = failed.audioUrl || null; }
+      if (failed) { body = failed.body; audioUrl = failed.audioUrl || null; imageUrl = failed.imageUrl || null; }
       return { ...prev, [conversationId]: list.filter(m => m.id !== messageId) };
     });
-    if (body || audioUrl) sendMessage(conversationId, body, audioUrl);
+    if (body || audioUrl || imageUrl) sendMessage(conversationId, body, audioUrl, imageUrl);
   };
 
   const openConversation = (id, meta) => {
@@ -2417,7 +2417,7 @@ export default function App() {
           messages={messages[activeConversation] || []}
           initialDraft={dmPrefill}
           meHandle={meHandle}
-          onSend={(body, audioUrl) => sendMessage(activeConversation, body, audioUrl)}
+          onSend={(body, audioUrl, imageUrl) => sendMessage(activeConversation, body, audioUrl, imageUrl)}
           onRetry={(messageId) => retryMessage(activeConversation, messageId)}
           onReact={(messageId, kind) => reactToMessage(activeConversation, messageId, kind)}
           onOpenPost={(id) => { setActiveConversation(null); setActiveConvMeta(null); setActivePostComments(id); }}

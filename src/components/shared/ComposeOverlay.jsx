@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { X, Image as ImageIcon, Hash, EyeOff, Eye, BarChart2, Plus, Minus, Loader2, Clock } from 'lucide-react';
+import { X, Image as ImageIcon, Hash, EyeOff, Eye, BarChart2, Plus, Minus, Loader2, Clock, Smile } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { COMMUNITIES } from '../../data/communities';
 import { uploadImage, uploadVideo } from '../../lib/db/storage';
+import { GifStickerPicker } from './GifStickerPicker';
 import { searchProfiles } from '../../lib/db/profiles';
 import { saveDraft, loadDraft, clearDraft } from '../../lib/drafts';
 
@@ -18,6 +19,8 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
   const [mediaFile, setMediaFile] = useState(null);
   const [mediaPreview, setMediaPreview] = useState(null);
   const [mediaKind, setMediaKind] = useState(null); // 'image' | 'video'
+  const [gifUrl, setGifUrl] = useState(null); // a picked Tenor GIF (mutually exclusive with an upload)
+  const [showPicker, setShowPicker] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [scheduledAt, setScheduledAt] = useState(''); // datetime-local value ('' = post now)
@@ -86,7 +89,7 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
   };
 
   const pollOk = !poll || poll.options.filter(o => o.trim()).length >= 2;
-  const canPost = (text.trim().length > 0 || mediaFile) && pollOk && !busy;
+  const canPost = (text.trim().length > 0 || mediaFile || gifUrl) && pollOk && !busy;
   // A scheduled time only counts if it's at least a minute in the future.
   const scheduledIso = scheduledAt && new Date(scheduledAt).getTime() > Date.now() + 60000
     ? new Date(scheduledAt).toISOString() : null;
@@ -145,10 +148,14 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
           payload.img = await uploadImage('post-images', meId, mediaFile);
           payload.kind = 'photo';
         }
+      } else if (gifUrl) {
+        // A GIF is a hosted (Tenor) URL — used directly, rendered as an animating image.
+        payload.img = gifUrl;
+        payload.kind = 'photo';
       }
       if (scheduledIso) payload.scheduled = scheduledIso;
       onPost && onPost(payload);
-      setText(''); clearMedia(); clearDraft(); setPendingDraft(null); setCoauthor(null); setScheduledAt(''); setScheduleOpen(false);
+      setText(''); clearMedia(); setGifUrl(null); clearDraft(); setPendingDraft(null); setCoauthor(null); setScheduledAt(''); setScheduleOpen(false);
     } catch (err) {
       setError(err?.message || 'could not post — try again');
       setBusy(false);
@@ -201,6 +208,12 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
                 <img src={mediaPreview} alt="" className="max-h-72 w-auto border border-[#2A2A2A]" />
               )}
               <button onClick={clearMedia} className="tap absolute top-1 right-1 w-7 h-7 bg-black/80 border border-[#3F3F3F] text-[#F5F1E8] hover:text-[#C9A961] flex items-center justify-center" title="remove"><X size={14} /></button>
+            </div>
+          )}
+          {gifUrl && !mediaPreview && (
+            <div className="mt-3 relative inline-block">
+              <img src={gifUrl} alt="gif" className="max-h-72 w-auto border border-[#2A2A2A]" />
+              <button onClick={() => setGifUrl(null)} className="tap absolute top-1 right-1 w-7 h-7 bg-black/80 border border-[#3F3F3F] text-[#F5F1E8] hover:text-[#C9A961] flex items-center justify-center" title="remove"><X size={14} /></button>
             </div>
           )}
           {mediaKind === 'video' && (
@@ -257,8 +270,10 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
         )}
         <div className="border-t border-[#1A1A1A] px-4 py-3 flex items-center gap-4">
           <input ref={fileRef} type="file" accept="image/*,video/*" onChange={onPickMedia} className="hidden" />
-          <button onClick={() => fileRef.current?.click()} disabled={!!poll}
+          <button onClick={() => fileRef.current?.click()} disabled={!!poll || !!gifUrl}
             className={`tap ${mediaPreview ? 'text-[#C9A961]' : 'text-[#A8A29E] hover:text-[#C9A961]'} disabled:opacity-30`} title="add a photo or video"><ImageIcon size={18} /></button>
+          <button onClick={() => setShowPicker(true)} disabled={!!poll || !!mediaFile}
+            className={`tap ${gifUrl ? 'text-[#C9A961]' : 'text-[#A8A29E] hover:text-[#C9A961]'} disabled:opacity-30`} title="gifs & stickers"><Smile size={18} /></button>
           <button onClick={togglePoll} disabled={!!mediaFile} className={`tap ${poll ? 'text-[#5E3B73]' : 'text-[#A8A29E] hover:text-[#C9A961]'} disabled:opacity-30`} title="poll"><BarChart2 size={18} /></button>
           <button onClick={() => setScheduleOpen(o => !o)} className={`tap ${scheduledIso ? 'text-[#C9A961]' : 'text-[#A8A29E] hover:text-[#C9A961]'}`} title="schedule for later"><Clock size={18} /></button>
           <button onClick={() => setAnonymous(!anonymous)}
@@ -298,6 +313,13 @@ export function ComposeOverlay({ meId, onClose, onPost, initialCommunity }) {
           </div>
         )}
       </div>
+      {showPicker && (
+        <GifStickerPicker
+          onPickGif={(url) => { setShowPicker(false); setGifUrl(url); }}
+          onPickSticker={(glyph) => { setShowPicker(false); setText(t => (t || '') + glyph); }}
+          onClose={() => setShowPicker(false)}
+        />
+      )}
     </div>
   );
 }

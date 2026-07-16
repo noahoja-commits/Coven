@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, Mic, MicOff, Play, Square, X, Users, LogOut } from 'lucide-react';
+import { Send, Mic, MicOff, Play, Square, X, Users, LogOut, Smile } from 'lucide-react';
 import { F } from '../../styles/fonts';
 import { uploadAudio } from '../../lib/db/storage';
+import { isStickerMessage } from '../../data/stickers';
+import { GifStickerPicker } from './GifStickerPicker';
 import { fetchConversationMembers } from '../../lib/db/dm';
 import { useTypingIndicator } from '../../hooks/useTypingIndicator';
 
@@ -25,6 +27,7 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
   const [audioBlob, setAudioBlob] = useState(null);
   const [audioPreview, setAudioPreview] = useState(null);
   const [sendingAudio, setSendingAudio] = useState(false);
+  const [showPicker, setShowPicker] = useState(false); // GIF/sticker picker
   const [sendErr, setSendErr] = useState(null); // surfaced voice-note failure (was silently swallowed)
   const recorderRef = useRef(null);
   const recTimerRef = useRef(null);
@@ -238,6 +241,8 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
         {(messages || []).map((m, i) => {
           const mine = m.from === 'me';
           const audioMsg = isAudioMessage(m);
+          const imageMsg = !!m.imageUrl;
+          const stickerMsg = !audioMsg && !imageMsg && !m.forwardedPost && isStickerMessage(m.body);
           return (
             <div key={m.id} className={`flex flex-col ${mine ? 'items-end' : 'items-start'}`}>
               {conversation?.group && !mine && (
@@ -260,14 +265,18 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
                   </div>
                 )}
                 <div
-                  className={`px-3 py-2 text-sm leading-relaxed ${
-                    mine
-                      ? m.failed ? 'bg-[#8B0000]/20 border border-[#8B0000]/60' : m.pending ? 'bg-[#8B0000]/60' : 'bg-[#8B0000]'
-                      : 'bg-[#141414]'
-                  } text-[#F5F1E8] ${
-                    mine ? 'rounded-l-2xl rounded-tr-2xl rounded-br-md' : 'rounded-r-2xl rounded-tl-2xl rounded-bl-md'
+                  className={`text-sm leading-relaxed text-[#F5F1E8] ${
+                    imageMsg || stickerMsg
+                      ? '' // GIFs/stickers render bare — no bubble bg/padding
+                      : `px-3 py-2 ${mine
+                          ? m.failed ? 'bg-[#8B0000]/20 border border-[#8B0000]/60' : m.pending ? 'bg-[#8B0000]/60' : 'bg-[#8B0000]'
+                          : 'bg-[#141414]'} ${mine ? 'rounded-l-2xl rounded-tr-2xl rounded-br-md' : 'rounded-r-2xl rounded-tl-2xl rounded-bl-md'}`
                   }`}>
-                  {audioMsg ? (
+                  {imageMsg ? (
+                    <img src={m.imageUrl} alt="gif" className="rounded-lg max-w-[200px] max-h-[240px] w-auto" style={m.pending ? { opacity: 0.6 } : undefined} onClick={e => e.stopPropagation()} />
+                  ) : stickerMsg ? (
+                    <div className="text-5xl leading-none py-1">{m.body}</div>
+                  ) : audioMsg ? (
                     // Stop the tap from bubbling to the bubble's reaction-tray toggle, so hitting
                     // play/scrub on the voice note doesn't also pop the emoji tray (mirror forwardedPost).
                     <div className="flex items-center gap-2 min-w-[180px]" onClick={e => e.stopPropagation()}>
@@ -360,6 +369,10 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
                 )}
               </button>
             )}
+            <button onClick={() => setShowPicker(true)} title="gifs & stickers"
+              className="tap w-9 h-9 shrink-0 rounded-full flex items-center justify-center bg-[#141414] border border-[#2A2A2A] text-[#6B6B6B] hover:text-[#C9A961] transition-colors">
+              <Smile size={15} />
+            </button>
             <div className="flex-1 bg-[#141414] border border-[#2A2A2A] focus-within:border-[#C9A961]/50 rounded-2xl px-3 py-2 transition-colors">
               <textarea
                 value={draft}
@@ -391,6 +404,14 @@ export function ChatThread({ conversation, messages, onSend, onBack, onRetry, on
           </div>
         )}
       </div>
+
+      {showPicker && (
+        <GifStickerPicker
+          onPickGif={(url) => { setShowPicker(false); onSend('🖼️ gif', null, url); }}
+          onPickSticker={(glyph) => { setShowPicker(false); setDraft(d => (d ? d + glyph : glyph)); }}
+          onClose={() => setShowPicker(false)}
+        />
+      )}
     </div>
   );
 }
